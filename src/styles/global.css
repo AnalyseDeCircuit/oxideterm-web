@@ -101,6 +101,13 @@
   font-family: var(--font-serif);
 }
 
+/* CJK Serif weight correction — 宋体在 weight 400 时笔画视觉偏细。
+   Source Serif 4（可变字体）在 450 时变化极微；CJK 系统字体会取整到
+   Medium (500)，使中英文正文字重达到视觉均衡。 */
+.sl-markdown-content {
+  font-weight: 450;
+}
+
 /* Splash hero title: use sans-serif for better Latin + CJK harmony */
 .hero h1,
 .hero .hero-html h1 {
