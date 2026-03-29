@@ -85,11 +85,11 @@
 /* Font: load Source Serif 4 + JetBrains Mono into Starlight */
 /* Dark mode defaults (Starlight default = dark = :root without data-theme)
    ───────────────────────────────────────────────────────────────────────
-   Astigmatism‑friendly: backgrounds are warm dark-gray (L≈8–10 %)
+   Astigmatism‑friendly: backgrounds are warm dark-gray (L≈10 %)
    rather than near-pure-black (L≈3 %). Developers have a HIGH rate
    of astigmatism; pure-black backgrounds cause halation — bright text
    smears / blooms, making extended reading physically painful.
-   Contrast ratio remains > 10 : 1 WCAG AAA.
+   Body text contrast ≈ 7.5 : 1 (WCAG AAA = 7 : 1 minimum).
    ─────────────────────────────────────────────────────────────────── */
 :root {
   --sl-font: var(--font-serif);
@@ -99,25 +99,25 @@
   --sl-color-accent: #d4632a;
   --sl-color-accent-low: #2a1a0e;
 
-  --sl-color-bg: #1a1612;
-  --sl-color-bg-nav: #141210;
-  --sl-color-bg-sidebar: #141210;
-  --sl-color-bg-inline-code: #241e1a;
-  --sl-color-text: #ddd7cf;
+  --sl-color-bg: #221e1a;
+  --sl-color-bg-nav: #1c1814;
+  --sl-color-bg-sidebar: #1c1814;
+  --sl-color-bg-inline-code: #2c2620;
+  --sl-color-text: #b8ae9e;
   --sl-color-text-accent: #d4632a;
 
-  --sl-color-white: #e8e2d8;
-  --sl-color-gray-1: #d0cac0;
-  --sl-color-gray-2: #a89e90;
-  --sl-color-gray-3: #847a6c;
-  --sl-color-gray-4: #5c5448;
-  --sl-color-gray-5: #342e26;
-  --sl-color-gray-6: #221e18;
-  --sl-color-black: #121010;
+  --sl-color-white: #d0c8ba;
+  --sl-color-gray-1: #c0b6a8;
+  --sl-color-gray-2: #988e80;
+  --sl-color-gray-3: #787064;
+  --sl-color-gray-4: #544c42;
+  --sl-color-gray-5: #38322c;
+  --sl-color-gray-6: #2a241e;
+  --sl-color-black: #161410;
 
-  --sl-color-hairline-light: #342e26;
-  --sl-color-hairline: #241e18;
-  --sl-color-hairline-shade: #161310;
+  --sl-color-hairline-light: #38322c;
+  --sl-color-hairline: #2c261e;
+  --sl-color-hairline-shade: #1c1814;
 }
 
 /* Starlight headings: use serif for consistency */
@@ -200,13 +200,13 @@ h1, h2, h3 {
   font-family: var(--font-serif);
 }
 
-/* Cards */
-.card {
+/* Cards — scoped to landing pages; :not(.sl-flex) excludes Starlight Cards */
+.card:not(.sl-flex) {
   background: var(--ot-bg-surface);
   border: 1px solid var(--ot-border);
   transition: all 0.2s ease;
 }
-.card:hover {
+.card:not(.sl-flex):hover {
   border-color: var(--ot-accent);
   box-shadow: 0 4px 20px var(--ot-accent-glow);
 }
