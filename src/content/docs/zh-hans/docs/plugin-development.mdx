@@ -1,0 +1,448 @@
+---
+title: 插件开发
+description: 使用 OxideTerm 运行时插件系统构建插件 — ESM 模块、PluginContext API、终端钩子、UI 视图等。
+---
+
+OxideTerm 提供运行时插件系统，允许第三方开发者在不重新编译的情况下扩展应用。插件是从 `~/.oxideterm/plugins/` 动态加载的 ESM 模块。
+
+## 架构
+
+插件运行在与宿主应用**相同的 JavaScript 上下文**中（非 iframe 或 Web Worker）。隔离通过**膜式模式 (Membrane Pattern)** 实现：传递给插件的所有 API 对象均通过 `Object.freeze()` 深度冻结。
+
+```
+┌─────────────────────────────────────────┐
+│            OxideTerm 宿主应用            │
+│                                         │
+│  Rust 后端 ←→ Tauri IPC ←→ React 前端   │
+│                      ↓                  │
+│              pluginLoader               │
+│                      ↓                  │
+│             Context Factory             │
+│          (buildPluginCtx → freeze)      │
+│                      ↓                  │
+│  ┌───────────────────────────────────┐  │
+│  │         插件 (ESM Module)         │  │
+│  │                                   │  │
+│  │  activate(ctx) ← 冻结的上下文      │  │
+│  │  window.__OXIDE__ ← 共享 React    │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+**关键点：**
+
+- 通过 `window.__OXIDE__` 共享 React 实例，确保 hooks 兼容
+- Rust 后端负责文件 I/O，附带路径遍历保护
+- 所有事件处理器通过 `queueMicrotask()` 异步执行
+- 断路器在 60 秒内出现 10 次错误后自动禁用插件
+- 终端钩子有 **5ms 时间预算**
+
+## 快速入门
+
+### 通过 Plugin Manager 创建（推荐）
+
+1. 打开 **Plugin Manager**（侧边栏 🧩 图标）
+2. 点击右上角 **新建插件** 按钮（+ 图标）
+3. 输入插件 ID（小写字母、连字符，如 `my-first-plugin`）
+4. 点击 **创建** — 完整的插件骨架自动生成到 `~/.oxideterm/plugins/`
+5. 点击 **Reload** 加载插件
+
+### 手动创建
+
+```bash
+mkdir -p ~/.oxideterm/plugins/my-first-plugin
+cd ~/.oxideterm/plugins/my-first-plugin
+```
+
+创建 `plugin.json`：
+
+```json
+{
+  "id": "my-first-plugin",
+  "name": "My First Plugin",
+  "version": "0.1.0",
+  "description": "一个最小的 OxideTerm 插件",
+  "author": "Your Name",
+  "main": "./main.js",
+  "engines": { "oxideterm": ">=1.6.0" },
+  "contributes": {
+    "tabs": [
+      { "id": "hello", "title": "Hello World", "icon": "Smile" }
+    ]
+  }
+}
+```
+
+创建 `main.js`：
+
+```javascript
+const { React } = window.__OXIDE__;
+const { createElement: h, useState } = React;
+
+function HelloTab({ tabId, pluginId }) {
+  const [count, setCount] = useState(0);
+  return h('div', { className: 'p-6' },
+    h('h1', { className: 'text-xl font-bold text-foreground mb-4' },
+      'Hello from Plugin! 🧩'),
+    h('button', {
+      onClick: () => setCount(c => c + 1),
+      className: 'px-4 py-2 rounded bg-primary text-primary-foreground',
+    }, `点击了 ${count} 次`)
+  );
+}
+
+export function activate(ctx) {
+  ctx.ui.registerTabView('hello', HelloTab);
+  ctx.ui.showToast({ title: '插件已激活！', variant: 'success' });
+}
+
+export function deactivate() {}
+```
+
+打开 Plugin Manager → **Refresh** → 插件自动出现并加载。
+
+## 插件结构
+
+### v1 — 单文件 Bundle（默认）
+
+```
+~/.oxideterm/plugins/my-plugin/
+├── plugin.json        # 清单文件（必需）
+├── main.js            # ESM 入口（必需）
+├── icon.svg           # 图标（可选）
+└── locales/           # i18n 翻译（可选）
+    ├── en.json
+    └── zh-CN.json
+```
+
+### v2 — 多文件 Package
+
+```
+~/.oxideterm/plugins/my-plugin/
+├── plugin.json        # manifestVersion: 2, format: "package"
+├── src/
+│   ├── main.js        # 支持文件间相对 import
+│   └── components/
+│       └── Dashboard.js
+├── styles/
+│   └── main.css       # 通过 manifest.styles 自动注入
+├── assets/
+│   └── logo.png       # 通过 ctx.assets.getAssetUrl() 访问
+└── locales/
+```
+
+v2 包通过本地 HTTP 服务器（`127.0.0.1`）提供服务，支持标准的 ES Module `import`。
+
+## 清单文件参考
+
+### 顶层字段
+
+| 字段 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| `id` | `string` | ✅ | 唯一标识符（字母、数字、连字符） |
+| `name` | `string` | ✅ | 人类可读的显示名称 |
+| `version` | `string` | ✅ | 语义化版本号（如 `"1.0.0"`） |
+| `main` | `string` | ✅ | ESM 入口文件的相对路径 |
+| `engines.oxideterm` | `string` | — | 最低版本要求（如 `">=1.6.0"`） |
+| `contributes` | `object` | — | 能力声明 |
+| `locales` | `string` | — | i18n 翻译文件目录路径 |
+
+### v2 Package 扩展字段
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `manifestVersion` | `2` | 启用 v2 特性 |
+| `format` | `"package"` | 使用本地 HTTP 服务器加载模块 |
+| `styles` | `string[]` | 自动注入的 CSS 文件列表 |
+| `assets` | `string` | 资源目录路径 |
+| `sharedDependencies` | `object` | 声明共享的宿主依赖 |
+| `checksum` | `string` | SHA-256 完整性校验和 |
+
+### contributes.tabs
+
+```json
+"tabs": [{ "id": "dashboard", "title": "Dashboard", "icon": "LayoutDashboard" }]
+```
+
+图标使用 [Lucide React](https://lucide.dev/icons/) 名称（PascalCase）。无效名称回退为 `Puzzle`。
+
+### contributes.sidebarPanels
+
+```json
+"sidebarPanels": [{
+  "id": "info", "title": "Info", "icon": "Info", "position": "bottom"
+}]
+```
+
+### contributes.settings
+
+```json
+"settings": [
+  { "id": "greeting", "type": "string", "default": "Hello!", "title": "问候语" },
+  { "id": "enabled", "type": "boolean", "default": false, "title": "启用" },
+  {
+    "id": "theme", "type": "select", "default": "dark", "title": "主题",
+    "options": [{ "label": "深色", "value": "dark" }, { "label": "浅色", "value": "light" }]
+  }
+]
+```
+
+### contributes.terminalHooks
+
+```json
+"terminalHooks": {
+  "inputInterceptor": true,
+  "outputProcessor": true,
+  "shortcuts": [{ "key": "ctrl+shift+d", "command": "openDashboard" }]
+}
+```
+
+### contributes.connectionHooks
+
+```json
+"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
+```
+
+### contributes.apiCommands
+
+```json
+"apiCommands": ["list_connections", "get_connection_health"]
+```
+
+仅声明在此列表中的命令才能通过 `ctx.api.invoke()` 调用。
+
+## 生命周期
+
+插件遵循严格的状态机：
+
+```
+inactive → loading → active ←→ error
+                  ↘ disabled ↗
+```
+
+| 状态 | 含义 |
+|------|------|
+| `inactive` | 未加载或已卸载 |
+| `loading` | 正在加载和验证 |
+| `active` | 正常运行中 |
+| `error` | 加载失败或运行时错误 |
+| `disabled` | 被用户或断路器禁用 |
+
+`activate()` 和 `deactivate()` 均支持异步（返回 `Promise`），但有**5 秒超时限制**。通过 `Disposable` 注册的资源在卸载时自动清理。
+
+## PluginContext API
+
+传递给 `activate(ctx)` 的 `PluginContext` 提供 **19 个命名空间**（全部深度冻结）：
+
+### ctx.connections — 只读连接状态
+
+```javascript
+ctx.connections.getAll()                  // 所有连接
+ctx.connections.get(connectionId)         // 按 ID 查询
+ctx.connections.getState(connectionId)    // 快速获取状态
+ctx.connections.getByNode(nodeId)         // 按会话树节点查询
+```
+
+### ctx.events — 生命周期事件
+
+```javascript
+ctx.events.onConnect(handler)      // 连接变为活跃
+ctx.events.onDisconnect(handler)   // 连接断开
+ctx.events.onLinkDown(handler)     // 链路检测到中断
+ctx.events.onReconnect(handler)    // 重连完成
+ctx.events.onIdle(handler)         // 连接进入空闲
+ctx.events.onNodeReady(handler)    // 会话节点就绪
+ctx.events.on(name, handler)       // 自定义插件间事件
+ctx.events.emit(name, data)        // 发射自定义事件
+```
+
+所有 `on*` 方法返回 `Disposable`。
+
+### ctx.ui — 视图与交互
+
+```javascript
+ctx.ui.registerTabView(tabId, Component)        // Tab 视图
+ctx.ui.registerSidebarPanel(panelId, Component)  // 侧边栏面板
+ctx.ui.registerCommand(id, opts, handler)         // 命令面板
+ctx.ui.registerContextMenu(target, items)         // 右键菜单
+ctx.ui.registerStatusBarItem(options)              // 状态栏
+ctx.ui.registerKeybinding(key, handler)            // 全局快捷键
+ctx.ui.openTab(tabId)                              // 打开 Tab
+ctx.ui.showToast({ title, variant })               // Toast 通知
+ctx.ui.showConfirm({ title, description })         // 确认对话框
+ctx.ui.showNotification({ title, severity })       // 系统通知
+ctx.ui.showProgress(title)                         // 进度报告器
+```
+
+### ctx.terminal — 终端钩子
+
+```javascript
+ctx.terminal.registerInputInterceptor(fn)   // 拦截用户输入
+ctx.terminal.registerOutputProcessor(fn)    // 处理终端输出
+ctx.terminal.registerShortcut(cmd, handler) // 终端快捷键
+ctx.terminal.writeToNode(nodeId, text)      // 写入终端
+ctx.terminal.getNodeBuffer(nodeId)          // 读取终端缓冲区
+ctx.terminal.getNodeSelection(nodeId)       // 获取选中文本
+ctx.terminal.search(nodeId, query, opts)    // 搜索缓冲区
+```
+
+**输入拦截器**接收用户按键，可修改或屏蔽：
+
+```javascript
+ctx.terminal.registerInputInterceptor((data, context) => {
+  if (data === 'rm -rf /') return null;  // 阻止危险命令
+  return data;  // 透传
+});
+```
+
+**输出处理器**接收原始终端输出字节：
+
+```javascript
+ctx.terminal.registerOutputProcessor((data, context) => {
+  // data 是 Uint8Array，返回修改后的 Uint8Array
+  return data;
+});
+```
+
+:::caution[性能预算]
+终端钩子在每次 I/O 事件上**同步**运行，有 **5ms 时间预算**。超出预算会计入断路器（60 秒内 10 次错误 → 自动禁用）。
+:::
+
+### ctx.settings 与 ctx.storage — 持久化
+
+```javascript
+// 插件级设置（在 manifest 中声明）
+ctx.settings.get('myKey')
+ctx.settings.set('myKey', value)
+ctx.settings.onChange('myKey', handler)
+
+// 插件级键值存储
+ctx.storage.get('data')
+ctx.storage.set('data', { count: 42 })
+ctx.storage.remove('data')
+```
+
+### ctx.i18n — 国际化
+
+```javascript
+ctx.i18n.t('greeting', { name: 'World' })  // 带参数翻译
+ctx.i18n.getLanguage()                      // 当前语言代码
+ctx.i18n.onLanguageChange(handler)          // 语言切换事件
+```
+
+翻译文件放在 `locales/` 目录中：
+
+```json
+// locales/en.json
+{ "greeting": "Hello, {{name}}!" }
+
+// locales/zh-CN.json
+{ "greeting": "你好，{{name}}！" }
+```
+
+### ctx.api — 后端调用
+
+```javascript
+const sessions = await ctx.api.invoke('list_connections');
+```
+
+仅允许 `contributes.apiCommands` 中声明的命令。
+
+### ctx.sftp 与 ctx.forward
+
+```javascript
+// 远程文件操作
+await ctx.sftp.listDir(nodeId, '/home')
+await ctx.sftp.readFile(nodeId, '/etc/hostname')
+await ctx.sftp.writeFile(nodeId, '/tmp/test', 'content')
+
+// 端口转发
+await ctx.forward.create({ sessionId, forwardType: 'local', ... })
+await ctx.forward.list(sessionId)
+```
+
+### v3 只读命名空间
+
+| 命名空间 | 用途 |
+|----------|------|
+| `ctx.sessions` | 会话树状态、节点状态变化 |
+| `ctx.transfers` | SFTP 传输监控和进度 |
+| `ctx.profiler` | 每连接的 CPU、内存、网络指标 |
+| `ctx.eventLog` | 连接事件日志条目 |
+| `ctx.ide` | IDE 模式状态（打开的文件、活跃项目） |
+| `ctx.ai` | AI 对话和消息 |
+| `ctx.app` | 主题、设置、版本、平台信息 |
+
+## 共享模块
+
+插件通过 `window.__OXIDE__` 访问宿主库：
+
+```javascript
+const {
+  React,         // React 19
+  ReactDOM,      // ReactDOM (createRoot)
+  zustand,       // 状态管理
+  lucideIcons,   // 图标库
+  ui,            // OxideTerm UI Kit 组件
+  cn,            // className 合并器（clsx + twMerge）
+  clsx,          // clsx 工具
+  useTranslation // i18n hook
+} = window.__OXIDE__;
+```
+
+:::note[重要]
+始终使用 `window.__OXIDE__.React` 而不是打包自己的 React — 这确保了与宿主应用的 hooks 兼容性。
+:::
+
+### UI Kit 组件
+
+`ui` 命名空间暴露了 OxideTerm 的设计系统：
+
+```javascript
+const { ui: { Button, Input, Select, Card, ScrollArea, Badge, ... } } = window.__OXIDE__;
+```
+
+这些组件与宿主应用保持一致的视觉样式。
+
+## 安全模型
+
+| 层级 | 机制 | 保护 |
+|------|------|------|
+| 膜式隔离 | `Object.freeze()` | 所有 API 对象不可变 |
+| 清单声明 | 运行时校验 | 未声明的能力被拒绝 |
+| 路径保护 | Rust `canonicalize()` | 防止路径遍历 |
+| API 白名单 | `apiCommands` | 限制后端调用 |
+| 断路器 | 10 次错误 / 60 秒 | 自动禁用故障插件 |
+| 时间预算 | 5ms / 钩子调用 | 防止终端 I/O 阻塞 |
+
+:::caution[安全提示]
+插件与宿主共享同一 JS 上下文 — 恶意插件理论上可以绕过 API 白名单。白名单是**纵深防御**措施，而非沙箱。**请仅安装来源可信的插件。**
+:::
+
+## 调试
+
+- 打开 DevTools（`Cmd+Shift+I`）查看插件 `console.log` 输出
+- Plugin Manager 显示错误状态及**可操作的错误提示**
+- 每个插件有**日志查看器**（📜 图标）用于查看生命周期事件
+- 使用 **Reload** 按钮在修改代码后热重载
+
+## 最佳实践
+
+1. **使用 Disposable 模式** — 所有 `register*` 和 `on*` 调用返回 `Disposable`。让系统处理清理。
+2. **保持钩子高效** — 终端钩子必须在 5ms 内完成。将耗时操作移到 `setTimeout`。
+3. **使用共享 React** — 不要打包自己的 React。始终使用 `window.__OXIDE__.React`。
+4. **声明能力** — 只有注册的 tab/panel/hook 才会生效。添加功能时更新 `plugin.json`。
+5. **优雅处理错误** — 未捕获的错误会计入断路器。在事件处理器中使用 try/catch。
+6. **使用 Plugin Manager 测试** — 开发期间使用内置日志查看器和 Reload 按钮。
+
+## TypeScript 支持
+
+将 [`plugin-api.d.ts`](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/plugin-api.d.ts) 复制到项目根目录，并在 `tsconfig.json` 中引用：
+
+```json
+{
+  "include": ["plugin-api.d.ts", "src/**/*.ts"]
+}
+```
+
+这将为 `PluginContext` API 和所有快照类型提供完整的 IntelliSense 支持。

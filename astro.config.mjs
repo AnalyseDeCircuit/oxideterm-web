@@ -169,6 +169,11 @@ export default defineConfig({
           translations: { "zh-CN": "参考" },
           items: [
             {
+              slug: "docs/plugin-development",
+              label: "Plugin Development",
+              translations: { "zh-CN": "插件开发" },
+            },
+            {
               slug: "docs/security",
               label: "Security",
               translations: { "zh-CN": "安全" },

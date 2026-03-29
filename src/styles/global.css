@@ -102,6 +102,11 @@
   font-family: var(--font-serif);
 }
 
+/* Splash hero title: use sans-serif for better Latin + CJK harmony */
+.hero h1 {
+  font-family: var(--font-sans);
+}
+
 /* Light mode – warm cream palette */
 :root[data-theme="light"] {
   --sl-color-white: #2a2118;           /* primary text */

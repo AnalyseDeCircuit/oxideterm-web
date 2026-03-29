@@ -1,0 +1,448 @@
+---
+title: Plugin Development
+description: Build plugins for OxideTerm with the runtime plugin system — ESM bundles, PluginContext API, terminal hooks, UI views, and more.
+---
+
+OxideTerm provides a runtime plugin system that allows third-party developers to extend the application without recompiling. Plugins are ESM bundles loaded dynamically from `~/.oxideterm/plugins/`.
+
+## Architecture
+
+Plugins run in the **same JavaScript context** as the host app (not iframe or Web Worker). Isolation is achieved through a **membrane pattern**: every API object passed to plugins is deeply frozen with `Object.freeze()`.
+
+```
+┌─────────────────────────────────────────┐
+│           OxideTerm Host App            │
+│                                         │
+│  Rust Backend ←→ Tauri IPC ←→ React UI  │
+│                      ↓                  │
+│              pluginLoader               │
+│                      ↓                  │
+│             Context Factory             │
+│          (buildPluginCtx → freeze)      │
+│                      ↓                  │
+│  ┌───────────────────────────────────┐  │
+│  │        Plugin (ESM Module)        │  │
+│  │                                   │  │
+│  │  activate(ctx) ← frozen context   │  │
+│  │  window.__OXIDE__ ← shared React  │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+**Key points:**
+
+- Shared `React` instance via `window.__OXIDE__` ensures hook compatibility
+- Rust backend handles file I/O with path traversal protection
+- All event handlers execute asynchronously via `queueMicrotask()`
+- Circuit breaker auto-disables plugins after 10 errors in 60 seconds
+- Terminal hooks have a **5ms time budget** per invocation
+
+## Quick Start
+
+### Using Plugin Manager (Recommended)
+
+1. Open **Plugin Manager** (sidebar 🧩 icon)
+2. Click the **New Plugin** button (+ icon)
+3. Enter a plugin ID (lowercase, hyphens, e.g. `my-first-plugin`)
+4. Click **Create** — a full scaffold is generated at `~/.oxideterm/plugins/`
+5. Click **Reload** to load the plugin
+
+### Manual Setup
+
+```bash
+mkdir -p ~/.oxideterm/plugins/my-first-plugin
+cd ~/.oxideterm/plugins/my-first-plugin
+```
+
+Create `plugin.json`:
+
+```json
+{
+  "id": "my-first-plugin",
+  "name": "My First Plugin",
+  "version": "0.1.0",
+  "description": "A minimal OxideTerm plugin",
+  "author": "Your Name",
+  "main": "./main.js",
+  "engines": { "oxideterm": ">=1.6.0" },
+  "contributes": {
+    "tabs": [
+      { "id": "hello", "title": "Hello World", "icon": "Smile" }
+    ]
+  }
+}
+```
+
+Create `main.js`:
+
+```javascript
+const { React } = window.__OXIDE__;
+const { createElement: h, useState } = React;
+
+function HelloTab({ tabId, pluginId }) {
+  const [count, setCount] = useState(0);
+  return h('div', { className: 'p-6' },
+    h('h1', { className: 'text-xl font-bold text-foreground mb-4' },
+      'Hello from Plugin! 🧩'),
+    h('button', {
+      onClick: () => setCount(c => c + 1),
+      className: 'px-4 py-2 rounded bg-primary text-primary-foreground',
+    }, `Clicked ${count} times`)
+  );
+}
+
+export function activate(ctx) {
+  ctx.ui.registerTabView('hello', HelloTab);
+  ctx.ui.showToast({ title: 'Plugin Activated!', variant: 'success' });
+}
+
+export function deactivate() {}
+```
+
+Open Plugin Manager → **Refresh** → your plugin appears and loads automatically.
+
+## Plugin Structure
+
+### v1 — Single Bundle (Default)
+
+```
+~/.oxideterm/plugins/my-plugin/
+├── plugin.json        # Manifest (required)
+├── main.js            # ESM entry (required)
+├── icon.svg           # Icon (optional)
+└── locales/           # i18n (optional)
+    ├── en.json
+    └── zh-CN.json
+```
+
+### v2 — Multi-File Package
+
+```
+~/.oxideterm/plugins/my-plugin/
+├── plugin.json        # manifestVersion: 2, format: "package"
+├── src/
+│   ├── main.js        # Supports relative imports
+│   └── components/
+│       └── Dashboard.js
+├── styles/
+│   └── main.css       # Auto-injected via manifest.styles
+├── assets/
+│   └── logo.png       # Access via ctx.assets.getAssetUrl()
+└── locales/
+```
+
+v2 packages are served by a local HTTP server (`127.0.0.1`), enabling standard ES Module `import` between files.
+
+## Manifest Reference
+
+### Top-Level Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | `string` | ✅ | Unique identifier (letters, numbers, hyphens) |
+| `name` | `string` | ✅ | Human-readable display name |
+| `version` | `string` | ✅ | Semver version (e.g. `"1.0.0"`) |
+| `main` | `string` | ✅ | Relative path to ESM entry (e.g. `"./main.js"`) |
+| `engines.oxideterm` | `string` | — | Minimum version (e.g. `">=1.6.0"`) |
+| `contributes` | `object` | — | Capability declarations |
+| `locales` | `string` | — | i18n directory path |
+
+### v2 Package Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `manifestVersion` | `2` | Enable v2 features |
+| `format` | `"package"` | Use local HTTP server for module loading |
+| `styles` | `string[]` | CSS files to auto-inject |
+| `assets` | `string` | Assets directory path |
+| `sharedDependencies` | `object` | Declare shared host dependencies |
+| `checksum` | `string` | SHA-256 integrity checksum |
+
+### contributes.tabs
+
+```json
+"tabs": [{ "id": "dashboard", "title": "Dashboard", "icon": "LayoutDashboard" }]
+```
+
+Icons use [Lucide React](https://lucide.dev/icons/) names (PascalCase). Invalid names fall back to `Puzzle`.
+
+### contributes.sidebarPanels
+
+```json
+"sidebarPanels": [{
+  "id": "info", "title": "Info", "icon": "Info", "position": "bottom"
+}]
+```
+
+### contributes.settings
+
+```json
+"settings": [
+  { "id": "greeting", "type": "string", "default": "Hello!", "title": "Greeting" },
+  { "id": "enabled", "type": "boolean", "default": false, "title": "Enable" },
+  {
+    "id": "theme", "type": "select", "default": "dark", "title": "Theme",
+    "options": [{ "label": "Dark", "value": "dark" }, { "label": "Light", "value": "light" }]
+  }
+]
+```
+
+### contributes.terminalHooks
+
+```json
+"terminalHooks": {
+  "inputInterceptor": true,
+  "outputProcessor": true,
+  "shortcuts": [{ "key": "ctrl+shift+d", "command": "openDashboard" }]
+}
+```
+
+### contributes.connectionHooks
+
+```json
+"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
+```
+
+### contributes.apiCommands
+
+```json
+"apiCommands": ["list_connections", "get_connection_health"]
+```
+
+Only commands declared here can be called via `ctx.api.invoke()`.
+
+## Lifecycle
+
+Plugins follow a strict state machine:
+
+```
+inactive → loading → active ←→ error
+                  ↘ disabled ↗
+```
+
+| State | Meaning |
+|-------|---------|
+| `inactive` | Not loaded or unloaded |
+| `loading` | Being loaded and validated |
+| `active` | Running normally |
+| `error` | Failed to load or runtime error |
+| `disabled` | Disabled by user or circuit breaker |
+
+Both `activate()` and `deactivate()` support async (returning `Promise`) with a **5-second timeout**. Resources registered via `Disposable` are cleaned up automatically on unload.
+
+## PluginContext API
+
+The `PluginContext` passed to `activate(ctx)` provides **19 namespaces** (all deeply frozen):
+
+### ctx.connections — Read-only Connection State
+
+```javascript
+ctx.connections.getAll()                  // All connections
+ctx.connections.get(connectionId)         // By ID
+ctx.connections.getState(connectionId)    // Quick state check
+ctx.connections.getByNode(nodeId)         // By session tree node
+```
+
+### ctx.events — Lifecycle Events
+
+```javascript
+ctx.events.onConnect(handler)      // Connection becomes active
+ctx.events.onDisconnect(handler)   // Connection disconnected
+ctx.events.onLinkDown(handler)     // Link detected down
+ctx.events.onReconnect(handler)    // Reconnect completed
+ctx.events.onIdle(handler)         // Connection went idle
+ctx.events.onNodeReady(handler)    // Session node ready
+ctx.events.on(name, handler)       // Custom inter-plugin events
+ctx.events.emit(name, data)        // Emit custom events
+```
+
+All `on*` methods return a `Disposable`.
+
+### ctx.ui — Views & Interaction
+
+```javascript
+ctx.ui.registerTabView(tabId, Component)        // Tab view
+ctx.ui.registerSidebarPanel(panelId, Component)  // Sidebar panel
+ctx.ui.registerCommand(id, opts, handler)         // Command palette
+ctx.ui.registerContextMenu(target, items)         // Context menu
+ctx.ui.registerStatusBarItem(options)              // Status bar
+ctx.ui.registerKeybinding(key, handler)            // Global shortcut
+ctx.ui.openTab(tabId)                              // Open a tab
+ctx.ui.showToast({ title, variant })               // Toast notification
+ctx.ui.showConfirm({ title, description })         // Confirmation dialog
+ctx.ui.showNotification({ title, severity })       // System notification
+ctx.ui.showProgress(title)                         // Progress reporter
+```
+
+### ctx.terminal — Terminal Hooks
+
+```javascript
+ctx.terminal.registerInputInterceptor(fn)   // Intercept user input
+ctx.terminal.registerOutputProcessor(fn)    // Process terminal output
+ctx.terminal.registerShortcut(cmd, handler) // Terminal shortcut
+ctx.terminal.writeToNode(nodeId, text)      // Write to terminal
+ctx.terminal.getNodeBuffer(nodeId)          // Read terminal buffer
+ctx.terminal.getNodeSelection(nodeId)       // Get selected text
+ctx.terminal.search(nodeId, query, opts)    // Search buffer
+```
+
+**Input interceptor** receives user keystrokes and can modify or suppress them:
+
+```javascript
+ctx.terminal.registerInputInterceptor((data, context) => {
+  if (data === 'rm -rf /') return null;  // Block dangerous commands
+  return data;  // Pass through
+});
+```
+
+**Output processor** receives raw terminal output bytes:
+
+```javascript
+ctx.terminal.registerOutputProcessor((data, context) => {
+  // data is Uint8Array, return modified Uint8Array
+  return data;
+});
+```
+
+:::caution
+Terminal hooks run **synchronously** on every I/O event with a **5ms budget**. Exceeding this budget counts toward the circuit breaker (10 errors in 60s → auto-disable).
+:::
+
+### ctx.settings & ctx.storage — Persistence
+
+```javascript
+// Plugin-scoped settings (declared in manifest)
+ctx.settings.get('myKey')
+ctx.settings.set('myKey', value)
+ctx.settings.onChange('myKey', handler)
+
+// Plugin-scoped key-value storage
+ctx.storage.get('data')
+ctx.storage.set('data', { count: 42 })
+ctx.storage.remove('data')
+```
+
+### ctx.i18n — Internationalization
+
+```javascript
+ctx.i18n.t('greeting', { name: 'World' })  // Translate with params
+ctx.i18n.getLanguage()                      // Current language code
+ctx.i18n.onLanguageChange(handler)          // Language switch event
+```
+
+Translation files live in the `locales/` directory:
+
+```json
+// locales/en.json
+{ "greeting": "Hello, {{name}}!" }
+
+// locales/zh-CN.json
+{ "greeting": "你好，{{name}}！" }
+```
+
+### ctx.api — Backend Invocation
+
+```javascript
+const sessions = await ctx.api.invoke('list_connections');
+```
+
+Only commands declared in `contributes.apiCommands` are allowed.
+
+### ctx.sftp & ctx.forward
+
+```javascript
+// Remote file operations
+await ctx.sftp.listDir(nodeId, '/home')
+await ctx.sftp.readFile(nodeId, '/etc/hostname')
+await ctx.sftp.writeFile(nodeId, '/tmp/test', 'content')
+
+// Port forwarding
+await ctx.forward.create({ sessionId, forwardType: 'local', ... })
+await ctx.forward.list(sessionId)
+```
+
+### v3 Read-Only Namespaces
+
+| Namespace | Purpose |
+|-----------|---------|
+| `ctx.sessions` | Session tree state, node state changes |
+| `ctx.transfers` | SFTP transfer monitoring and progress |
+| `ctx.profiler` | CPU, memory, network metrics per connection |
+| `ctx.eventLog` | Connection event log entries |
+| `ctx.ide` | IDE mode state (open files, active project) |
+| `ctx.ai` | AI conversations and messages |
+| `ctx.app` | Theme, settings, version, platform info |
+
+## Shared Modules
+
+Plugins access host libraries via `window.__OXIDE__`:
+
+```javascript
+const {
+  React,         // React 19
+  ReactDOM,      // ReactDOM (createRoot)
+  zustand,       // State management
+  lucideIcons,   // Icon library
+  ui,            // OxideTerm UI Kit components
+  cn,            // className merger (clsx + twMerge)
+  clsx,          // clsx utility
+  useTranslation // i18n hook
+} = window.__OXIDE__;
+```
+
+:::note
+Always use `window.__OXIDE__.React` instead of bundling your own React — this ensures hook compatibility with the host app.
+:::
+
+### UI Kit Components
+
+The `ui` namespace exposes OxideTerm's design system:
+
+```javascript
+const { ui: { Button, Input, Select, Card, ScrollArea, Badge, ... } } = window.__OXIDE__;
+```
+
+These components follow the same styling as the host app, keeping your plugin visually consistent.
+
+## Security Model
+
+| Layer | Mechanism | Protection |
+|-------|-----------|------------|
+| Membrane | `Object.freeze()` | All API objects immutable |
+| Manifest | Runtime validation | Undeclared capabilities rejected |
+| Path Guard | Rust `canonicalize()` | Prevents path traversal |
+| API Whitelist | `apiCommands` | Restricts backend calls |
+| Circuit Breaker | 10 errors / 60s | Auto-disables faulty plugins |
+| Time Budget | 5ms per hook | Prevents terminal I/O blocking |
+
+:::caution
+Plugins share the same JS context as the host — a malicious plugin could theoretically bypass the API whitelist. The whitelist is **defense-in-depth**, not a sandbox. **Only install plugins from trusted sources.**
+:::
+
+## Debugging
+
+- Open DevTools (`Cmd+Shift+I`) to see plugin `console.log` output
+- Plugin Manager shows error states with **actionable messages**
+- Each plugin has a **log viewer** (📜 icon) for lifecycle events
+- Use the **Reload** button to hot-reload after code changes
+
+## Best Practices
+
+1. **Use Disposable pattern** — All `register*` and `on*` calls return `Disposable`. Let the system handle cleanup.
+2. **Keep hooks fast** — Terminal hooks must complete within 5ms. Offload heavy work to `setTimeout`.
+3. **Use shared React** — Never bundle your own React. Always use `window.__OXIDE__.React`.
+4. **Declare capabilities** — Only registered tabs/panels/hooks will work. Update `plugin.json` when adding features.
+5. **Handle errors gracefully** — Uncaught errors count toward the circuit breaker. Use try/catch in event handlers.
+6. **Test with Plugin Manager** — Use the built-in log viewer and reload button during development.
+
+## TypeScript Support
+
+Copy [`plugin-api.d.ts`](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/plugin-api.d.ts) to your project root and reference it in `tsconfig.json`:
+
+```json
+{
+  "include": ["plugin-api.d.ts", "src/**/*.ts"]
+}
+```
+
+This provides full IntelliSense for the `PluginContext` API and all snapshot types.
