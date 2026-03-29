@@ -186,6 +186,24 @@
     "license_desc": "Este software é distribuído sob a licença Source Available (PolyForm Noncommercial 1.0.0). Os usuários podem visualizar o código-fonte e usá-lo para fins não comerciais. O uso comercial requer autorização explícita do desenvolvedor.",
     "disclaimer": "Esta página é fornecida apenas para fins informativos e não constitui aconselhamento jurídico. Os usuários são responsáveis por garantir que seu uso do OxideTerm esteja em conformidade com todas as leis locais e internacionais aplicáveis."
   },
+  "faq": {
+    "title": "Perguntas frequentes",
+    "q1": "O OxideTerm é gratuito?",
+    "a1": "O OxideTerm é disponibilizado com código-fonte sob a licença PolyForm Noncommercial 1.0.0. Gratuito para uso pessoal, educacional e não comercial. Uso comercial requer licença separada.",
+    "q2": "Quais métodos de autenticação SSH são suportados?",
+    "a2": "Senha, chave privada (Ed25519, RSA, ECDSA), autenticação interativa por teclado, encaminhamento de agente e chaves de segurança de hardware FIDO2/U2F.",
+    "q3": "Onde meus dados são armazenados?",
+    "a3": "Tudo fica no seu dispositivo. As credenciais são armazenadas no chaveiro do sistema operacional (Chaves do macOS, Gerenciador de Credenciais do Windows, Linux Secret Service). Configurações exportadas são criptografadas com ChaCha20-Poly1305. Nada é enviado para nenhum servidor.",
+    "q4": "Posso usar o OxideTerm offline?",
+    "a4": "Sim. O OxideTerm é um aplicativo local-first sem dependência de nuvem. Todas as funcionalidades estão disponíveis offline, exceto o chat de IA, que requer conexão com a internet para acessar seu provedor de API configurado.",
+    "q5": "O que preciso para os recursos de IA?",
+    "a5": "Traga sua própria chave de API (BYOK). O OxideTerm suporta OpenAI, Anthropic, Google e qualquer endpoint compatível com OpenAI. As chaves são armazenadas com segurança no chaveiro do sistema."
+  },
+  "testimonial": {
+    "quote": "Criei o OxideTerm porque estava cansado de ficar alternando entre cinco ferramentas diferentes só para gerenciar alguns servidores. Uma janela, tudo integrado, sem o peso do Electron. É só isso.",
+    "name": "Dominical",
+    "role": "Criador do OxideTerm"
+  },
   "footer": {
     "license": "Licença PolyForm Noncommercial 1.0.0",
     "source": "Código fonte",

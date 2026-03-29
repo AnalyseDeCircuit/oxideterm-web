@@ -186,6 +186,24 @@
     "license_desc": "This software is distributed under the Source Available (PolyForm Noncommercial 1.0.0) license. Users may view the source code and use it for non-commercial purposes. Commercial use requires explicit authorization from the developer.",
     "disclaimer": "This page is provided for informational purposes only and does not constitute legal advice. Users are responsible for ensuring their use of OxideTerm complies with all applicable local and international laws."
   },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": "Is OxideTerm free?",
+    "a1": "OxideTerm is source-available under the PolyForm Noncommercial 1.0.0 license. Free for personal, educational, and non-commercial use. Commercial use requires a separate license.",
+    "q2": "Which SSH authentication methods are supported?",
+    "a2": "Password, private key (Ed25519, RSA, ECDSA), keyboard-interactive, agent forwarding, and FIDO2/U2F hardware security keys.",
+    "q3": "Where is my data stored?",
+    "a3": "Everything stays on your device. Credentials are stored in your OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service). Exported configs use ChaCha20-Poly1305 encryption. Nothing is uploaded to any server.",
+    "q4": "Can I use OxideTerm offline?",
+    "a4": "Yes. OxideTerm is a local-first application with zero cloud dependency. All features work offline except AI chat, which requires an internet connection to reach your configured API provider.",
+    "q5": "What do I need for AI features?",
+    "a5": "Bring your own API key (BYOK). OxideTerm supports OpenAI, Anthropic, Google, and any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain."
+  },
+  "testimonial": {
+    "quote": "I built OxideTerm because I was tired of juggling five different tools just to manage a few servers. One window, everything integrated, no Electron tax. That's the whole idea.",
+    "name": "Dominical",
+    "role": "Creator of OxideTerm"
+  },
   "footer": {
     "license": "Licensed under PolyForm Noncommercial 1.0.0",
     "source": "Source Code",

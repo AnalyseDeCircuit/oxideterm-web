@@ -186,6 +186,24 @@
     "license_desc": "Diese Software wird unter der Source Available (PolyForm Noncommercial 1.0.0) Lizenz vertrieben. Benutzer können den Quellcode einsehen und für nicht-kommerzielle Zwecke nutzen. Kommerzielle Nutzung erfordert eine ausdrückliche Genehmigung des Entwicklers.",
     "disclaimer": "Diese Seite dient nur zu Informationszwecken und stellt keine Rechtsberatung dar. Die Benutzer sind dafür verantwortlich sicherzustellen, dass ihre Nutzung von OxideTerm allen geltenden lokalen und internationalen Gesetzen entspricht."
   },
+  "faq": {
+    "title": "Häufig gestellte Fragen",
+    "q1": "Ist OxideTerm kostenlos?",
+    "a1": "OxideTerm ist unter der PolyForm Noncommercial 1.0.0 Lizenz quelloffen verfügbar. Kostenlos für persönliche, bildungsbezogene und nicht-kommerzielle Nutzung. Kommerzielle Nutzung erfordert eine separate Lizenz.",
+    "q2": "Welche SSH-Authentifizierungsmethoden werden unterstützt?",
+    "a2": "Passwort, privater Schlüssel (Ed25519, RSA, ECDSA), Keyboard-Interactive-Authentifizierung, Agent-Forwarding und FIDO2/U2F-Hardware-Sicherheitsschlüssel.",
+    "q3": "Wo werden meine Daten gespeichert?",
+    "a3": "Alles bleibt auf Ihrem Gerät. Anmeldedaten werden im Schlüsselbund des Betriebssystems gespeichert (macOS Schlüsselbund, Windows Anmeldeinformationsverwaltung, Linux Secret Service). Exportierte Konfigurationen sind mit ChaCha20-Poly1305 verschlüsselt. Nichts wird auf einen Server hochgeladen.",
+    "q4": "Kann ich OxideTerm offline nutzen?",
+    "a4": "Ja. OxideTerm ist eine Local-First-Anwendung ohne Cloud-Abhängigkeit. Alle Funktionen sind offline verfügbar, außer dem AI-Chat, der eine Internetverbindung zu Ihrem konfigurierten API-Anbieter benötigt.",
+    "q5": "Was brauche ich für die KI-Funktionen?",
+    "a5": "Bringen Sie Ihren eigenen API-Schlüssel mit (BYOK). OxideTerm unterstützt OpenAI, Anthropic, Google und jeden OpenAI-kompatiblen Endpunkt. Schlüssel werden sicher im Schlüsselbund des Betriebssystems gespeichert."
+  },
+  "testimonial": {
+    "quote": "Ich habe OxideTerm entwickelt, weil ich es satt hatte, für ein paar Server fünf verschiedene Tools zu jonglieren. Ein Fenster, alles integriert, kein Electron-Ballast. Das ist die ganze Idee.",
+    "name": "Dominical",
+    "role": "Entwickler von OxideTerm"
+  },
   "footer": {
     "license": "Lizenz: PolyForm Noncommercial 1.0.0",
     "source": "Quellcode",

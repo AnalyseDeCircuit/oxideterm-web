@@ -1,0 +1,61 @@
+---
+import type { LangKey } from "@/i18n";
+import { t } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+
+const items = [
+  { q: i.faq.q1, a: i.faq.a1 },
+  { q: i.faq.q2, a: i.faq.a2 },
+  { q: i.faq.q3, a: i.faq.a3 },
+  { q: i.faq.q4, a: i.faq.a4 },
+  { q: i.faq.q5, a: i.faq.a5 },
+];
+---
+
+<section class="py-20 px-6 border-t border-[var(--ot-border)]">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-14 tracking-tight">
+      {i.faq.title}
+    </h2>
+
+    <div class="space-y-3">
+      {items.map((item) => (
+        <details class="faq-item group card rounded-xl">
+          <summary class="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer select-none list-none text-sm font-medium text-[var(--ot-text-primary)] hover:text-[var(--ot-accent)] transition-colors">
+            <span>{item.q}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="shrink-0 text-[var(--ot-text-muted)] transition-transform duration-200 group-open:rotate-180"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-[var(--ot-text-secondary)] leading-relaxed">
+            {item.a}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

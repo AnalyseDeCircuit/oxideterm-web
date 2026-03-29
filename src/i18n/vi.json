@@ -186,6 +186,24 @@
     "license_desc": "Phần mềm này được phân phối theo giấy phép Source Available (PolyForm Noncommercial 1.0.0). Người dùng có thể xem mã nguồn và sử dụng cho mục đích phi thương mại. Sử dụng thương mại cần có sự cho phép rõ ràng từ nhà phát triển.",
     "disclaimer": "Trang này chỉ được cung cấp cho mục đích thông tin và không cấu thành tư vấn pháp lý. Người dùng có trách nhiệm đảm bảo việc sử dụng OxideTerm tuân thủ tất cả luật pháp địa phương và quốc tế hiện hành."
   },
+  "faq": {
+    "title": "Câu hỏi thường gặp",
+    "q1": "OxideTerm có miễn phí không?",
+    "a1": "OxideTerm được cung cấp mã nguồn theo giấy phép PolyForm Noncommercial 1.0.0. Miễn phí cho mục đích cá nhân, giáo dục và phi thương mại. Sử dụng thương mại cần giấy phép riêng.",
+    "q2": "Hỗ trợ những phương thức xác thực SSH nào?",
+    "a2": "Mật khẩu, khóa riêng (Ed25519, RSA, ECDSA), xác thực tương tác bàn phím, chuyển tiếp agent và khóa bảo mật phần cứng FIDO2/U2F.",
+    "q3": "Dữ liệu được lưu ở đâu?",
+    "a3": "Mọi thứ đều nằm trên thiết bị của bạn. Thông tin đăng nhập được lưu trong keychain hệ điều hành (macOS Keychain, Windows Credential Manager, Linux Secret Service). Cấu hình xuất ra được mã hóa bằng ChaCha20-Poly1305. Không có gì được tải lên bất kỳ máy chủ nào.",
+    "q4": "Có thể sử dụng OxideTerm ngoại tuyến không?",
+    "a4": "Có. OxideTerm là ứng dụng ưu tiên cục bộ, không phụ thuộc đám mây. Tất cả tính năng đều hoạt động ngoại tuyến, ngoại trừ trò chuyện AI cần kết nối internet để truy cập nhà cung cấp API đã cấu hình.",
+    "q5": "Cần gì cho tính năng AI?",
+    "a5": "Tự cung cấp khóa API (BYOK). OxideTerm hỗ trợ OpenAI, Anthropic, Google và bất kỳ endpoint tương thích OpenAI nào. Khóa được lưu trữ an toàn trong keychain hệ điều hành."
+  },
+  "testimonial": {
+    "quote": "Tôi tạo OxideTerm vì chán cảnh phải mở năm công cụ khác nhau chỉ để quản lý vài máy chủ. Một cửa sổ, mọi thứ tích hợp, không gánh nặng Electron. Đơn giản vậy thôi.",
+    "name": "Dominical",
+    "role": "Nhà phát triển OxideTerm"
+  },
   "footer": {
     "license": "Giấy phép PolyForm Noncommercial 1.0.0",
     "source": "Mã nguồn",

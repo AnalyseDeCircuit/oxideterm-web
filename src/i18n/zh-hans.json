@@ -186,6 +186,24 @@
     "license_desc": "本软件采用 Source Available（PolyForm Noncommercial 1.0.0）协议分发。用户可查阅源代码并进行非商业用途的使用与分发。商业用途需获得开发者明确的授权许可。",
     "disclaimer": "本页面仅供参考，不构成法律建议。用户有责任确保其使用 OxideTerm 符合所有适用的本地及国际法律法规。"
   },
+  "faq": {
+    "title": "常见问题",
+    "q1": "OxideTerm 是免费的吗？",
+    "a1": "OxideTerm 采用 PolyForm Noncommercial 1.0.0 源码可用许可证。个人、教育及非商业用途免费。商业使用需单独授权。",
+    "q2": "支持哪些 SSH 认证方式？",
+    "a2": "密码认证、私钥（Ed25519、RSA、ECDSA）、键盘交互认证、Agent 转发，以及 FIDO2/U2F 硬件安全密钥。",
+    "q3": "数据存储在哪里？",
+    "a3": "所有数据都保存在你的设备上。凭证存储在操作系统钥匙链中（macOS 钥匙串、Windows 凭据管理器、Linux Secret Service）。导出配置使用 ChaCha20-Poly1305 加密。不向任何服务器上传数据。",
+    "q4": "可以离线使用吗？",
+    "a4": "可以。OxideTerm 是本地优先应用，不依赖云服务。所有功能均可离线使用，AI 聊天除外——它需要网络连接来访问你配置的 API 提供商。",
+    "q5": "AI 功能需要什么？",
+    "a5": "自带 API 密钥（BYOK）。OxideTerm 支持 OpenAI、Anthropic、Google 以及任何 OpenAI 兼容接口。密钥安全存储在操作系统钥匙链中。"
+  },
+  "testimonial": {
+    "quote": "我开发 OxideTerm 是因为受够了为了管理几台服务器就得同时打开五个工具。一个窗口，所有功能集成，没有 Electron 负担。就这么简单。",
+    "name": "Dominical",
+    "role": "OxideTerm 作者"
+  },
   "footer": {
     "license": "基于 PolyForm Noncommercial 1.0.0 许可",
     "source": "源代码",
