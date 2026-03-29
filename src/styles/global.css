@@ -83,34 +83,41 @@
    ======================================== */
 
 /* Font: load Source Serif 4 + JetBrains Mono into Starlight */
-/* Dark mode defaults (Starlight default = dark = :root without data-theme) */
+/* Dark mode defaults (Starlight default = dark = :root without data-theme)
+   ───────────────────────────────────────────────────────────────────────
+   Astigmatism‑friendly: backgrounds are warm dark-gray (L≈8–10 %)
+   rather than near-pure-black (L≈3 %). Developers have a HIGH rate
+   of astigmatism; pure-black backgrounds cause halation — bright text
+   smears / blooms, making extended reading physically painful.
+   Contrast ratio remains > 10 : 1 WCAG AAA.
+   ─────────────────────────────────────────────────────────────────── */
 :root {
   --sl-font: var(--font-serif);
   --sl-font-mono: 'JetBrains Mono', var(--sl-font-system-mono);
 
   --sl-color-accent-high: #f0c6a8;
   --sl-color-accent: #d4632a;
-  --sl-color-accent-low: #2a1608;
+  --sl-color-accent-low: #2a1a0e;
 
-  --sl-color-bg: #0e0c0a;
-  --sl-color-bg-nav: #0a0908;
-  --sl-color-bg-sidebar: #0a0908;
-  --sl-color-bg-inline-code: #1e1a16;
-  --sl-color-text: #e4ded6;
+  --sl-color-bg: #1a1612;
+  --sl-color-bg-nav: #141210;
+  --sl-color-bg-sidebar: #141210;
+  --sl-color-bg-inline-code: #241e1a;
+  --sl-color-text: #ddd7cf;
   --sl-color-text-accent: #d4632a;
 
-  --sl-color-white: #f0eae0;
-  --sl-color-gray-1: #dad4ca;
-  --sl-color-gray-2: #b0a898;
-  --sl-color-gray-3: #8a8070;
-  --sl-color-gray-4: #5a5248;
-  --sl-color-gray-5: #2e2822;
-  --sl-color-gray-6: #1a1612;
-  --sl-color-black: #0e0c0a;
+  --sl-color-white: #e8e2d8;
+  --sl-color-gray-1: #d0cac0;
+  --sl-color-gray-2: #a89e90;
+  --sl-color-gray-3: #847a6c;
+  --sl-color-gray-4: #5c5448;
+  --sl-color-gray-5: #342e26;
+  --sl-color-gray-6: #221e18;
+  --sl-color-black: #121010;
 
-  --sl-color-hairline-light: #2e2822;
-  --sl-color-hairline: #1a1612;
-  --sl-color-hairline-shade: #0a0908;
+  --sl-color-hairline-light: #342e26;
+  --sl-color-hairline: #241e18;
+  --sl-color-hairline-shade: #161310;
 }
 
 /* Starlight headings: use serif for consistency */
