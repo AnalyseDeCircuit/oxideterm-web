@@ -24,6 +24,7 @@
     "reconnect_desc": "Queda de rede? OxideTerm sonda a conexão antiga por 30 segundos antes de reconectar. Suas sessões vim, htop e yazi sobrevivem."
   },
   "comparison": {
+    "badge": "O DIFERENCIAL",
     "title": "Por que OxideTerm?",
     "subtitle": "Problemas reais, soluções reais.",
     "label_problem": "O problema",
@@ -57,6 +58,7 @@
     "ai_desc": "OxideSens IA. 40+ ferramentas autônomas, integração servidor MCP, base de conhecimento RAG, captura de contexto multi-fonte."
   },
   "tech": {
+    "badge": "ARQUITETURA",
     "title": "Sob o capô",
     "dual_plane": "Arquitetura de plano duplo",
     "dual_plane_desc": "Frames binários WebSocket para I/O de terminal, Tauri IPC para comandos de controle. Largura de banda dedicada por sessão.",
@@ -72,6 +74,7 @@
     "plugin_desc": "Carregamento ESM em runtime. 18 namespaces API, 24 componentes UI pré-construídos, contrato API congelado, circuit breaker auto-desativação."
   },
   "download": {
+    "badge": "COMECE AGORA",
     "title": "Baixar OxideTerm",
     "subtitle": "Disponível para macOS, Windows e Linux",
     "macos": "macOS",
@@ -100,11 +103,13 @@
     "zero_c_value": "Zero"
   },
   "demo": {
+    "badge": "DEMO AO VIVO",
     "title": "Veja em ação",
     "subtitle": "OxideSens AI abre um terminal local e executa um comando — totalmente autônomo, totalmente integrado.",
     "fallback": "Seu navegador não suporta reprodução de vídeo."
   },
   "details": {
+    "badge": "EM DETALHE",
     "title": "Tudo o que você precisa, nada que não precise",
     "terminal_title": "Terminal",
     "terminal_1": "Painéis divididos com broadcast para todas as sessões",
@@ -112,28 +117,37 @@
     "terminal_3": "Gravação e reprodução de sessões (asciicast v2)",
     "terminal_4": "31+ temas + editor de temas personalizados CSS",
     "terminal_5": "Paleta de comandos (⌘K) e modo zen",
+    "terminal_6": "Atalhos de teclado configuráveis com modo vi",
+    "terminal_7": "Autocompletar de hostnames SSH e sessões salvas",
     "sftp_title": "Gerenciador SFTP",
     "sftp_1": "Navegador de painel duplo com arrastar e soltar",
     "sftp_2": "Pré-visualização inteligente: imagens, vídeo, áudio, código, PDF, hex, fontes",
     "sftp_3": "Fila de transferência com progresso em tempo real e ETA",
     "sftp_4": "Favoritos e extração de arquivos",
+    "sftp_5": "Renomear, chmod, chown em lote",
+    "sftp_6": "Modo vigilância: upload automático ao detectar alterações locais",
     "ide_title": "IDE integrado",
     "ide_1": "CodeMirror 6 com 30+ modos de linguagem",
     "ide_2": "Árvore de arquivos com status Git",
     "ide_3": "Edição multi-aba com resolução de conflitos",
     "ide_4": "Agente remoto opcional ~1 MB (Linux, 10+ arquiteturas)",
+    "ide_5": "Buscar e substituir com regex em arquivos remotos",
+    "ide_6": "Destaque de sintaxe para 30+ linguagens: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell e mais",
     "ai_title": "OxideSens AI",
     "ai_1": "Painel inline (⌘I) + chat na barra lateral",
     "ai_2": "40+ ferramentas autônomas, protocolo MCP",
     "ai_3": "Base de conhecimento RAG (busca híbrida BM25 + vetorial)",
     "ai_4": "Captura de contexto multi-fonte: terminal, IDE, SFTP, Git",
+    "ai_5": "Traga sua própria chave API — OpenAI, Anthropic, Google ou qualquer endpoint compatível",
     "forwarding_title": "Encaminhamento de portas",
     "forwarding_1": "Local (-L), Remoto (-R), SOCKS5 dinâmico (-D)",
     "forwarding_2": "I/O por passagem de mensagens sem bloqueio",
     "forwarding_3": "Restauração automática após reconexão",
-    "forwarding_4": "Relatório de falhas e timeout de inatividade"
+    "forwarding_4": "Relatório de falhas e timeout de inatividade",
+    "forwarding_5": "Monitoramento em tempo real de largura de banda e latência"
   },
   "security": {
+    "badge": "CONFIANÇA ZERO",
     "title": "Segurança em primeiro lugar",
     "subtitle": "Proteção empresarial sem complexidade empresarial.",
     "encryption_title": "Criptografia de alta segurança",
@@ -143,9 +157,14 @@
     "ssh_title": "Criptografia pura Rust",
     "ssh_desc": "russh 0.54 + backend criptográfico ring. Chaves Ed25519, RSA, ECDSA. Suítes ChaCha20-Poly1305 e AES-GCM.",
     "biometric_title": "Biometria e TOFU",
-    "biometric_desc": "Touch ID controla o acesso ao chaveiro no macOS. Verificação de chaves de host com Trust-On-First-Use (TOFU). Memória sensível zerada instantaneamente."
+    "biometric_desc": "Touch ID controla o acesso ao chaveiro no macOS. Verificação de chaves de host com Trust-On-First-Use (TOFU). Memória sensível zerada instantaneamente.",
+    "zeroize_title": "Zeramento de memória",
+    "zeroize_desc": "Todos os dados sensíveis — senhas, chaves, cargas descriptografadas — são apagados com segurança da memória pelo crate zeroize. Os handlers Drop garantem zero resíduos.",
+    "ws_token_title": "Tokens WS de uso único",
+    "ws_token_desc": "Cada ponte WebSocket recebe um token único de uso único com limite de tempo. Previne ataques de replay e sequestro de sessão não autorizado."
   },
   "cli": {
+    "badge": "LINHA DE COMANDO",
     "title": "CLI Companion",
     "subtitle": "Conheça o oxt — seu parceiro de terminal.",
     "desc": "JSON-RPC 2.0 via Unix Socket (macOS/Linux) ou Named Pipe (Windows). Saída legível e analisável.",
@@ -159,6 +178,7 @@
     "line_8": "pong: 23ms (via jump-host → prod-server)"
   },
   "competitive": {
+    "badge": "TUDO INCLUÍDO",
     "title": "Recursos incluídos",
     "subtitle": "Cada recurso já vem integrado. Sem plugins, sem compras adicionais.",
     "local_terminal": "Terminal local",
@@ -174,6 +194,7 @@
     "source_available": "Fonte disponível"
   },
   "legal": {
+    "badge": "CONFORMIDADE",
     "title": "Conformidade e avisos legais",
     "subtitle": "O OxideTerm foi projetado para administração de sistemas legítima, desenvolvimento e pesquisa. Levamos a conformidade a sério.",
     "network_title": "Conformidade de rede",
@@ -187,6 +208,7 @@
     "disclaimer": "Esta página é fornecida apenas para fins informativos e não constitui aconselhamento jurídico. Os usuários são responsáveis por garantir que seu uso do OxideTerm esteja em conformidade com todas as leis locais e internacionais aplicáveis."
   },
   "faq": {
+    "badge": "FAQ",
     "title": "Perguntas frequentes",
     "q1": "O OxideTerm é gratuito?",
     "a1": "O OxideTerm é disponibilizado com código-fonte sob a licença PolyForm Noncommercial 1.0.0. Gratuito para uso pessoal, educacional e não comercial. Uso comercial requer licença separada.",
@@ -202,11 +224,13 @@
     "a6": "Três razões. Primeira, segurança de memória: a base de código C do OpenSSL produziu CVEs críticos como o Heartbleed — o modelo de propriedade do Rust elimina toda essa classe de bugs. Segunda, zero atrito no deploy: libssh2 exige headers de desenvolvimento C em cada plataforma alvo e uma versão do sistema OpenSSL correspondente (as ABIs de 1.0, 1.1 e 3.0 são incompatíveis); russh é fornecido como fonte Rust pura e o Cargo cuida de tudo. Terceira, desempenho assíncrono nativo: libssh2 é uma API C bloqueante que precisa de um wrapper para o Tokio; russh é async-nativo sem fronteira FFI no caminho crítico. Resultado: um único binário Rust que compila para mais de 10 arquiteturas Linux sem toolchain C, com uma pilha criptográfica realmente auditável."
   },
   "testimonial": {
+    "badge": "DO CRIADOR",
     "quote": "O OxideTerm não foi criado para preencher uma lacuna de mercado — foi criado para desafiar o limite entre desempenho e capacidade do terminal. SSH em Rust puro, zero dependências de C. Um protocolo binário proprietário sem serialização JSON no caminho crítico. Criptografia de exportação com ChaCha20-Poly1305 + Argon2id (custo de memória de 256 MB). Cada decisão arquitetural reflete uma única obsessão: nunca trocar correção por conveniência.",
     "name": "AnalyseDeCircuit",
     "role": "Criador do OxideTerm"
   },
   "footer": {
+    "badge": "LINKS",
     "license": "Licença PolyForm Noncommercial 1.0.0",
     "source": "Código fonte",
     "docs": "Documentação",

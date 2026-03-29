@@ -24,6 +24,7 @@
     "reconnect_desc": "ネットワーク断絶？OxideTermは再接続前に旧接続を30秒間プローブ。vim、htop、yaziのセッションが生き残ります。"
   },
   "comparison": {
+    "badge": "差別化",
     "title": "なぜ OxideTerm？",
     "subtitle": "リアルな課題、リアルな解決策。",
     "label_problem": "課題",
@@ -57,6 +58,7 @@
     "ai_desc": "OxideSens AI。40+自律ツール、MCPサーバー統合、RAGナレッジベース、マルチソースコンテキストキャプチャ。"
   },
   "tech": {
+    "badge": "アーキテクチャ",
     "title": "内部アーキテクチャ",
     "dual_plane": "デュアルプレーンアーキテクチャ",
     "dual_plane_desc": "ターミナルI/OにWebSocketバイナリフレーム、制御コマンドにTauri IPC。各セッションに専用帯域幅。",
@@ -72,6 +74,7 @@
     "plugin_desc": "ランタイムESMローディング。18のAPIネームスペース、24のビルトインUIコンポーネント、凍結APIコントラクト、サーキットブレーカー自動無効化。"
   },
   "download": {
+    "badge": "はじめよう",
     "title": "OxideTermをダウンロード",
     "subtitle": "macOS、Windows、Linuxに対応",
     "macos": "macOS",
@@ -100,11 +103,13 @@
     "zero_c_value": "ゼロ"
   },
   "demo": {
+    "badge": "ライブデモ",
     "title": "OxideTerm を動画で見る",
     "subtitle": "OxideSens AI がローカルターミナルを開いてコマンドを実行——完全自律、完全統合。",
     "fallback": "お使いのブラウザは動画再生に対応していません。"
   },
   "details": {
+    "badge": "詳細機能",
     "title": "必要なものすべて、余計なものなし",
     "terminal_title": "ターミナル",
     "terminal_1": "分割ペイン、全セッションへのブロードキャスト入力",
@@ -112,28 +117,37 @@
     "terminal_3": "セッション録画・再生（asciicast v2）",
     "terminal_4": "31+ テーマ + CSS 変数カスタムテーマエディタ",
     "terminal_5": "コマンドパレット（⌘K）と禅モード",
+    "terminal_6": "カスタマイズ可能なキーボードショートカット、vi モード対応",
+    "terminal_7": "SSH ホスト名と保存済みセッションの自動補完",
     "sftp_title": "SFTP ファイルマネージャー",
     "sftp_1": "デュアルペインブラウザ、ドラッグ＆ドロップ対応",
     "sftp_2": "スマートプレビュー：画像、動画、音声、コード、PDF、HEX、フォント",
     "sftp_3": "転送キュー、リアルタイム進捗と ETA",
     "sftp_4": "ブックマークとアーカイブ展開",
+    "sftp_5": "一括リネーム、chmod、chown 操作",
+    "sftp_6": "ウォッチモード：ローカルファイル変更時に自動アップロード",
     "ide_title": "内蔵 IDE",
     "ide_1": "CodeMirror 6、30+ 言語モード対応",
     "ide_2": "ファイルツリーに Git ステータス表示",
     "ide_3": "マルチタブ編集とコンフリクト解決",
     "ide_4": "オプション ~1 MB リモートエージェント（Linux、10+ アーキテクチャ）",
+    "ide_5": "正規表現によるリモートファイル横断検索・置換",
+    "ide_6": "30+ 言語のシンタックスハイライト：Rust、Python、JS/TS、Go、C/C++、Java、YAML、JSON、TOML、Markdown、Shell など",
     "ai_title": "OxideSens AI",
     "ai_1": "インラインパネル（⌘I） + サイドバーチャット",
     "ai_2": "40+ 自律ツール、MCP プロトコル対応",
     "ai_3": "RAG ナレッジベース（BM25 + ベクトルハイブリッド検索）",
     "ai_4": "マルチソースコンテキスト：ターミナル、IDE、SFTP、Git",
+    "ai_5": "API キー持ち込み — OpenAI、Anthropic、Google、または互換エンドポイント",
     "forwarding_title": "ポートフォワーディング",
     "forwarding_1": "ローカル (-L)、リモート (-R)、ダイナミック SOCKS5 (-D)",
     "forwarding_2": "ロックフリーメッセージパッシング I/O",
     "forwarding_3": "再接続後に全フォワーディングを自動復元",
-    "forwarding_4": "障害レポートとアイドルタイムアウト"
+    "forwarding_4": "障害レポートとアイドルタイムアウト",
+    "forwarding_5": "リアルタイム帯域幅・レイテンシ監視"
   },
   "security": {
+    "badge": "ゼロトラスト",
     "title": "セキュリティ最優先",
     "subtitle": "エンタープライズグレードの保護、複雑さなし。",
     "encryption_title": "高強度暗号化",
@@ -143,9 +157,14 @@
     "ssh_title": "純 Rust 暗号化",
     "ssh_desc": "russh 0.54 + ring 暗号バックエンド。Ed25519、RSA、ECDSA キー対応。ChaCha20-Poly1305 と AES-GCM スイート。",
     "biometric_title": "生体認証と TOFU",
-    "biometric_desc": "macOS では Touch ID がキーチェーンアクセスをゲート。ホストキーは Trust-On-First-Use（TOFU）で検証。機密メモリは即座にゼロクリア。"
+    "biometric_desc": "macOS では Touch ID がキーチェーンアクセスをゲート。ホストキーは Trust-On-First-Use（TOFU）で検証。機密メモリは即座にゼロクリア。",
+    "zeroize_title": "メモリゼロ化",
+    "zeroize_desc": "すべての機密データ — パスワード、鍵、復号ペイロード — は zeroize クレートにより安全に消去されます。Drop ハンドラが残留ゼロを保証します。",
+    "ws_token_title": "ワンタイム WS トークン",
+    "ws_token_desc": "各 WebSocket ブリッジは、時間制限付きのユニークなワンタイムトークンを受け取ります。リプレイ攻撃と不正セッションハイジャックを防止します。"
   },
   "cli": {
+    "badge": "コマンドライン",
     "title": "CLI コンパニオン",
     "subtitle": "oxt の紹介 —— ターミナルの相棒。",
     "desc": "JSON-RPC 2.0 を Unix Socket（macOS/Linux）または名前付きパイプ（Windows）で通信。ヒューマンフレンドリーかつマシンパーサブルな出力。",
@@ -159,6 +178,7 @@
     "line_8": "pong: 23ms (via jump-host → prod-server)"
   },
   "competitive": {
+    "badge": "オールインクルーシブ",
     "title": "標準搭載機能",
     "subtitle": "すべての機能が標準搭載。プラグイン不要、追加購入なし。",
     "local_terminal": "ローカルターミナル",
@@ -174,6 +194,7 @@
     "source_available": "ソース公開"
   },
   "legal": {
+    "badge": "コンプライアンス",
     "title": "コンプライアンスと法的事項",
     "subtitle": "OxideTerm は、適法なシステム管理、開発、研究のために設計されています。コンプライアンスを重視しています。",
     "network_title": "ネットワークコンプライアンス",
@@ -187,6 +208,7 @@
     "disclaimer": "このページは情報提供のみを目的としており、法的助言を構成するものではありません。OxideTerm の使用が適用されるすべての法令に準拠していることを確認する責任はユーザーにあります。"
   },
   "faq": {
+    "badge": "よくある質問",
     "title": "よくある質問",
     "q1": "OxideTerm は無料ですか？",
     "a1": "OxideTerm は PolyForm Noncommercial 1.0.0 ライセンスのもとソース公開されています。個人・教育・非商用目的では無料です。商用利用には別途ライセンスが必要です。",
@@ -202,11 +224,13 @@
     "a6": "理由は三つあります。第一に、メモリ安全性：OpenSSL の C コードベースは Heartbleed のような重大な CVE を生んできました。Rust の所有権モデルはそのクラスのバグを根本から排除します。第二に、ゼロデプロイ摩擦：libssh2 は各ターゲットプラットフォームに C 開発ヘッダーとバージョンが一致するシステム OpenSSL を要求します（1.0/1.1/3.0 はABI が非互換）。russh は純粋な Rust ソースとして提供され、Cargo がすべてを処理します。第三に、ネイティブ非同期パフォーマンス：libssh2 はブロッキング C API で Tokio との統合にラッパーが必要ですが、russh は非同期ネイティブで、ホットパスに FFI 境界が存在しません。結果として、C ツールチェーンなしで 10 以上の Linux アーキテクチャにコンパイルできる単一バイナリと、実際に監査可能な暗号スタックを実現しています。"
   },
   "testimonial": {
+    "badge": "クリエーターより",
     "quote": "OxideTerm は市場の隙間を埋めるためではなく、ターミナルの性能と機能の限界に挑むために作りました。純 Rust による SSH 実装、C 依存ゼロ。独自のバイナリワイヤープロトコルでホットパスに JSON シリアライゼーションなし。エクスポート暗号化は ChaCha20-Poly1305 + Argon2id（メモリコスト 256 MB）。すべてのアーキテクチャ上の判断は一つの信念に帰結します：利便性のために正しさを犠牲にしない。",
     "name": "AnalyseDeCircuit",
     "role": "OxideTerm 開発者"
   },
   "footer": {
+    "badge": "リンク",
     "license": "PolyForm Noncommercial 1.0.0 ライセンス",
     "source": "ソースコード",
     "docs": "ドキュメント",

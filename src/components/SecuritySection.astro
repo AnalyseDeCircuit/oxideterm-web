@@ -17,11 +17,16 @@ const cards = [
   { icon: icon("filePhoto", s), title: i.security.keychain_title, desc: i.security.keychain_desc },
   { icon: icon("shield", s), title: i.security.ssh_title, desc: i.security.ssh_desc },
   { icon: icon("biometric", s), title: i.security.biometric_title, desc: i.security.biometric_desc },
+  { icon: icon("shieldCheck", s), title: i.security.zeroize_title, desc: i.security.zeroize_desc },
+  { icon: icon("key", s), title: i.security.ws_token_title, desc: i.security.ws_token_desc },
 ];
 ---
 
 <section class="py-20 px-6 bg-[var(--ot-bg-deep)] border-t border-[var(--ot-border)]">
   <div class="max-w-6xl mx-auto">
+    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] text-center mb-3">
+      {i.security.badge}
+    </p>
     <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 tracking-tight">
       {i.security.title}
     </h2>
@@ -29,7 +34,7 @@ const cards = [
       {i.security.subtitle}
     </p>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {cards.map((card) => (
         <div class="card rounded-xl p-8">
           <div class="mb-4" aria-hidden="true" set:html={card.icon} />

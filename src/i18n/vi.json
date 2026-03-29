@@ -24,6 +24,7 @@
     "reconnect_desc": "Mất mạng? OxideTerm thăm dò kết nối cũ trong 30 giây trước khi kết nối lại. Phiên vim, htop và yazi của bạn vẫn còn."
   },
   "comparison": {
+    "badge": "SỰ KHÁC BIỆT",
     "title": "Tại sao chọn OxideTerm?",
     "subtitle": "Vấn đề thực, giải pháp thực.",
     "label_problem": "Vấn đề",
@@ -57,6 +58,7 @@
     "ai_desc": "OxideSens AI. 40+ công cụ tự động, tích hợp máy chủ MCP, cơ sở tri thức RAG, thu thập ngữ cảnh đa nguồn."
   },
   "tech": {
+    "badge": "KIẾN TRÚC",
     "title": "Bên trong cỗ máy",
     "dual_plane": "Kiến trúc hai mặt phẳng",
     "dual_plane_desc": "Khung nhị phân WebSocket cho I/O terminal, Tauri IPC cho lệnh điều khiển. Băng thông chuyên dụng cho mỗi phiên.",
@@ -72,6 +74,7 @@
     "plugin_desc": "Tải ESM runtime. 18 namespace API, 24 thành phần UI sẵn có, hợp đồng API đóng băng, circuit breaker tự vô hiệu hóa."
   },
   "download": {
+    "badge": "BẮT ĐẦU",
     "title": "Tải xuống OxideTerm",
     "subtitle": "Có sẵn cho macOS, Windows và Linux",
     "macos": "macOS",
@@ -100,11 +103,13 @@
     "zero_c_value": "Không có"
   },
   "demo": {
+    "badge": "DEMO TRỰC TIẾP",
     "title": "Xem thực tế",
     "subtitle": "OxideSens AI mở terminal cục bộ và chạy lệnh — hoàn toàn tự chủ, hoàn toàn tích hợp.",
     "fallback": "Trình duyệt của bạn không hỗ trợ phát video."
   },
   "details": {
+    "badge": "CHI TIẾT",
     "title": "Mọi thứ bạn cần, không gì thừa",
     "terminal_title": "Terminal",
     "terminal_1": "Chia panel, phát sóng đầu vào đến tất cả phiên",
@@ -112,28 +117,37 @@
     "terminal_3": "Ghi và phát lại phiên (asciicast v2)",
     "terminal_4": "31+ giao diện + trình chỉnh sửa giao diện CSS tùy chỉnh",
     "terminal_5": "Bảng lệnh (⌘K) và chế độ zen",
+    "terminal_6": "Phím tắt tùy chỉnh, hỗ trợ chế độ vi",
+    "terminal_7": "Tự động hoàn thành hostname SSH và phiên đã lưu",
     "sftp_title": "Quản lý SFTP",
     "sftp_1": "Trình duyệt hai panel, kéo thả",
     "sftp_2": "Xem trước thông minh: hình ảnh, video, âm thanh, mã, PDF, hex, font",
     "sftp_3": "Hàng đợi truyền với tiến độ thực tế và ETA",
     "sftp_4": "Bookmark và giải nén file",
+    "sftp_5": "Đổi tên, chmod, chown hàng loạt",
+    "sftp_6": "Chế độ giám sát: tự động tải lên khi thay đổi file cục bộ",
     "ide_title": "IDE tích hợp",
     "ide_1": "CodeMirror 6 với 30+ chế độ ngôn ngữ",
     "ide_2": "Cây thư mục với trạng thái Git",
     "ide_3": "Sửa đa tab với giải quyết xung đột",
     "ide_4": "Agent tùy chọn ~1 MB (Linux, 10+ kiến trúc)",
+    "ide_5": "Tìm và thay thế bằng regex trên file từ xa",
+    "ide_6": "Tô sáng cú pháp cho 30+ ngôn ngữ: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell và hơn thế",
     "ai_title": "OxideSens AI",
     "ai_1": "Panel inline (⌘I) + chat thanh bên",
     "ai_2": "40+ công cụ tự chủ, giao thức MCP",
     "ai_3": "Cơ sở tri thức RAG (tìm kiếm hỗn hợp BM25 + vector)",
     "ai_4": "Bắt ngữ cảnh đa nguồn: terminal, IDE, SFTP, Git",
+    "ai_5": "Tự cung cấp API key — OpenAI, Anthropic, Google hoặc bất kỳ endpoint tương thích",
     "forwarding_title": "Chuyển tiếp cổng",
     "forwarding_1": "Cục bộ (-L), Từ xa (-R), SOCKS5 động (-D)",
     "forwarding_2": "I/O truyền tin không khóa",
     "forwarding_3": "Tự động khôi phục sau kết nối lại",
-    "forwarding_4": "Báo cáo lỗi và hết thời gian rảnh"
+    "forwarding_4": "Báo cáo lỗi và hết thời gian rảnh",
+    "forwarding_5": "Giám sát băng thông và độ trễ theo thời gian thực"
   },
   "security": {
+    "badge": "KHÔNG TIN AI",
     "title": "Bảo mật là ưu tiên",
     "subtitle": "Bảo vệ cấp doanh nghiệp, không cần phức tạp.",
     "encryption_title": "Mã hóa bảo mật cao",
@@ -143,9 +157,14 @@
     "ssh_title": "Mã hóa thuần Rust",
     "ssh_desc": "russh 0.54 + backend mã hóa ring. Khóa Ed25519, RSA, ECDSA. Bộ mã ChaCha20-Poly1305 và AES-GCM.",
     "biometric_title": "Sinh trắc học và TOFU",
-    "biometric_desc": "Touch ID kiểm soát truy cập keychain trên macOS. Xác minh khóa máy chủ bằng Trust-On-First-Use (TOFU). Bộ nhớ nhạy cảm được xóa ngay."
+    "biometric_desc": "Touch ID kiểm soát truy cập keychain trên macOS. Xác minh khóa máy chủ bằng Trust-On-First-Use (TOFU). Bộ nhớ nhạy cảm được xóa ngay.",
+    "zeroize_title": "Xóa sạch bộ nhớ",
+    "zeroize_desc": "Tất cả dữ liệu nhạy cảm — mật khẩu, khóa, payload giải mã — được xóa an toàn khỏi bộ nhớ qua crate zeroize. Drop handler đảm bảo không còn dữ liệu tồn dư.",
+    "ws_token_title": "Token WS dùng một lần",
+    "ws_token_desc": "Mỗi cầu nối WebSocket nhận một token duy nhất dùng một lần có giới hạn thời gian. Ngăn chặn tấn công replay và chiếm đoạt phiên trái phép."
   },
   "cli": {
+    "badge": "DÒNG LỆNH",
     "title": "CLI Companion",
     "subtitle": "Gặp oxt — đồng hành terminal của bạn.",
     "desc": "JSON-RPC 2.0 qua Unix Socket (macOS/Linux) hoặc Named Pipe (Windows). Đầu ra dễ đọc và phân tích được.",
@@ -159,6 +178,7 @@
     "line_8": "pong: 23ms (via jump-host → prod-server)"
   },
   "competitive": {
+    "badge": "TẤT CẢ TRONG MỘT",
     "title": "Tính năng tích hợp",
     "subtitle": "Mọi tính năng đều được tích hợp sẵn. Không cần plugin, không cần mua thêm.",
     "local_terminal": "Terminal cục bộ",
@@ -174,6 +194,7 @@
     "source_available": "Nguồn có sẵn"
   },
   "legal": {
+    "badge": "TUÂN THỦ",
     "title": "Tuân thủ và pháp lý",
     "subtitle": "OxideTerm được thiết kế cho quản trị hệ thống hợp pháp, phát triển và nghiên cứu. Chúng tôi coi trọng việc tuân thủ pháp luật.",
     "network_title": "Tuân thủ mạng",
@@ -187,6 +208,7 @@
     "disclaimer": "Trang này chỉ được cung cấp cho mục đích thông tin và không cấu thành tư vấn pháp lý. Người dùng có trách nhiệm đảm bảo việc sử dụng OxideTerm tuân thủ tất cả luật pháp địa phương và quốc tế hiện hành."
   },
   "faq": {
+    "badge": "HỎI ĐÁP",
     "title": "Câu hỏi thường gặp",
     "q1": "OxideTerm có miễn phí không?",
     "a1": "OxideTerm được cung cấp mã nguồn theo giấy phép PolyForm Noncommercial 1.0.0. Miễn phí cho mục đích cá nhân, giáo dục và phi thương mại. Sử dụng thương mại cần giấy phép riêng.",
@@ -202,11 +224,13 @@
     "a6": "Ba lý do. Thứ nhất, an toàn bộ nhớ: codebase C của OpenSSL đã tạo ra các CVE nghiêm trọng như Heartbleed — mô hình ownership của Rust loại bỏ hoàn toàn lớp lỗi đó. Thứ hai, không ma sát khi triển khai: libssh2 yêu cầu C dev headers cho từng nền tảng đích và phiên bản OpenSSL hệ thống khớp (ABI của 1.0, 1.1 và 3.0 không tương thích); russh được cung cấp dưới dạng Rust source thuần và Cargo xử lý tất cả. Thứ ba, hiệu năng async gốc: libssh2 là C API blocking cần wrapper để tích hợp Tokio; russh async-native, không có FFI boundary trên đường nóng. Kết quả: một binary Rust duy nhất biên dịch cho hơn 10 kiến trúc Linux mà không cần C toolchain — và một crypto stack có thể kiểm toán thực sự."
   },
   "testimonial": {
+    "badge": "TỪ TÁC GIẢ",
     "quote": "OxideTerm không được tạo ra để lấp một khoảng trống thị trường — mà để thách thức ranh giới giữa hiệu năng và khả năng của terminal. SSH thuần Rust, không phụ thuộc C. Giao thức nhị phân tự phát triển, không JSON serialization trên đường nóng. Mã hóa xuất dữ liệu bằng ChaCha20-Poly1305 + Argon2id (chi phí bộ nhớ 256 MB). Mỗi quyết định kiến trúc đều hướng về một nỗi ám ảnh duy nhất: không bao giờ đánh đổi tính đúng đắn lấy sự tiện lợi.",
     "name": "AnalyseDeCircuit",
     "role": "Nhà phát triển OxideTerm"
   },
   "footer": {
+    "badge": "LIÊN KẾT",
     "license": "Giấy phép PolyForm Noncommercial 1.0.0",
     "source": "Mã nguồn",
     "docs": "Tài liệu",

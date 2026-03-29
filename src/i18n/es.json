@@ -24,6 +24,7 @@
     "reconnect_desc": "¿Corte de red? OxideTerm sondea la conexión anterior durante 30 segundos antes de reconectar. Tus sesiones de vim, htop y yazi sobreviven."
   },
   "comparison": {
+    "badge": "LA DIFERENCIA",
     "title": "¿Por qué OxideTerm?",
     "subtitle": "Problemas reales, soluciones reales.",
     "label_problem": "El problema",
@@ -57,6 +58,7 @@
     "ai_desc": "OxideSens IA. 40+ herramientas autónomas, integración de servidor MCP, base de conocimientos RAG, captura de contexto multi-fuente."
   },
   "tech": {
+    "badge": "ARQUITECTURA",
     "title": "Bajo el capó",
     "dual_plane": "Arquitectura de doble plano",
     "dual_plane_desc": "Tramas binarias WebSocket para I/O de terminal, Tauri IPC para comandos de control. Ancho de banda dedicado por sesión.",
@@ -72,6 +74,7 @@
     "plugin_desc": "Carga ESM en tiempo de ejecución. 18 espacios de nombres API, 24 componentes UI prediseñados, contrato API congelado, disyuntor auto-desactivación."
   },
   "download": {
+    "badge": "EMPEZAR",
     "title": "Descargar OxideTerm",
     "subtitle": "Disponible para macOS, Windows y Linux",
     "macos": "macOS",
@@ -100,11 +103,13 @@
     "zero_c_value": "Cero"
   },
   "demo": {
+    "badge": "DEMO EN VIVO",
     "title": "Véalo en acción",
     "subtitle": "OxideSens AI abre una terminal local y ejecuta un comando — totalmente autónomo, totalmente integrado.",
     "fallback": "Su navegador no soporta reproducción de video."
   },
   "details": {
+    "badge": "EN DETALLE",
     "title": "Todo lo que necesitas, nada que no",
     "terminal_title": "Terminal",
     "terminal_1": "Paneles divididos con difusión a todas las sesiones",
@@ -112,28 +117,37 @@
     "terminal_3": "Grabación y reproducción de sesiones (asciicast v2)",
     "terminal_4": "31+ temas + editor de temas personalizados CSS",
     "terminal_5": "Paleta de comandos (⌘K) y modo zen",
+    "terminal_6": "Atajos de teclado configurables con modo vi",
+    "terminal_7": "Autocompletado de nombres de host SSH y sesiones guardadas",
     "sftp_title": "Gestor SFTP",
     "sftp_1": "Navegador de doble panel con arrastrar y soltar",
     "sftp_2": "Vista previa inteligente: imágenes, video, audio, código, PDF, hex, fuentes",
     "sftp_3": "Cola de transferencia con progreso en tiempo real y ETA",
     "sftp_4": "Marcadores y extracción de archivos",
+    "sftp_5": "Renombrado, chmod, chown por lotes",
+    "sftp_6": "Modo vigilancia: subida automática al detectar cambios locales",
     "ide_title": "IDE integrado",
     "ide_1": "CodeMirror 6 con 30+ modos de lenguaje",
     "ide_2": "Árbol de archivos con estado Git",
     "ide_3": "Edición multi-pestaña con resolución de conflictos",
     "ide_4": "Agente remoto opcional ~1 MB (Linux, 10+ arquitecturas)",
+    "ide_5": "Buscar y reemplazar con regex en archivos remotos",
+    "ide_6": "Resaltado de sintaxis para 30+ lenguajes: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell y más",
     "ai_title": "OxideSens AI",
     "ai_1": "Panel en línea (⌘I) + chat en barra lateral",
     "ai_2": "40+ herramientas autónomas, protocolo MCP",
     "ai_3": "Base de conocimiento RAG (búsqueda híbrida BM25 + vectores)",
     "ai_4": "Captura de contexto multi-fuente: terminal, IDE, SFTP, Git",
+    "ai_5": "Trae tu propia clave API — OpenAI, Anthropic, Google o cualquier endpoint compatible",
     "forwarding_title": "Reenvío de puertos",
     "forwarding_1": "Local (-L), Remoto (-R), SOCKS5 dinámico (-D)",
     "forwarding_2": "I/O por paso de mensajes sin bloqueo",
     "forwarding_3": "Restauración automática tras reconexión",
-    "forwarding_4": "Reporte de fallos y tiempo de inactividad"
+    "forwarding_4": "Reporte de fallos y tiempo de inactividad",
+    "forwarding_5": "Monitorización en tiempo real de ancho de banda y latencia"
   },
   "security": {
+    "badge": "CONFIANZA CERO",
     "title": "Seguridad primero",
     "subtitle": "Protección empresarial sin complejidad empresarial.",
     "encryption_title": "Cifrado de alta seguridad",
@@ -143,9 +157,14 @@
     "ssh_title": "Criptografía pura Rust",
     "ssh_desc": "russh 0.54 + backend criptográfico ring. Claves Ed25519, RSA, ECDSA. Suites ChaCha20-Poly1305 y AES-GCM.",
     "biometric_title": "Biometría y TOFU",
-    "biometric_desc": "Touch ID controla el acceso al llavero en macOS. Verificación de claves de host con Trust-On-First-Use (TOFU). Memoria sensible borrada instantáneamente."
+    "biometric_desc": "Touch ID controla el acceso al llavero en macOS. Verificación de claves de host con Trust-On-First-Use (TOFU). Memoria sensible borrada instantáneamente.",
+    "zeroize_title": "Borrado de memoria",
+    "zeroize_desc": "Todos los datos sensibles — contraseñas, claves, cargas descifradas — se borran de forma segura de la memoria mediante el crate zeroize. Los manejadores Drop garantizan cero residuos.",
+    "ws_token_title": "Tokens WS de un solo uso",
+    "ws_token_desc": "Cada puente WebSocket recibe un token único de un solo uso con límite de tiempo. Previene ataques de repetición y secuestro de sesión no autorizado."
   },
   "cli": {
+    "badge": "LÍNEA DE COMANDOS",
     "title": "CLI Compañero",
     "subtitle": "Conozca oxt — su aliado de terminal.",
     "desc": "JSON-RPC 2.0 vía Unix Socket (macOS/Linux) o Named Pipe (Windows). Salida legible y parseable.",
@@ -159,6 +178,7 @@
     "line_8": "pong: 23ms (via jump-host → prod-server)"
   },
   "competitive": {
+    "badge": "TODO INCLUIDO",
     "title": "Funciones incluidas",
     "subtitle": "Cada función viene integrada. Sin plugins, sin compras adicionales.",
     "local_terminal": "Terminal local",
@@ -174,6 +194,7 @@
     "source_available": "Fuente disponible"
   },
   "legal": {
+    "badge": "CUMPLIMIENTO",
     "title": "Cumplimiento y avisos legales",
     "subtitle": "OxideTerm está diseñado para la administración de sistemas legítima, el desarrollo y la investigación. Nos tomamos el cumplimiento en serio.",
     "network_title": "Cumplimiento de red",
@@ -187,6 +208,7 @@
     "disclaimer": "Esta página se proporciona solo con fines informativos y no constituye asesoramiento legal. Los usuarios son responsables de garantizar que su uso de OxideTerm cumpla con todas las leyes locales e internacionales aplicables."
   },
   "faq": {
+    "badge": "FAQ",
     "title": "Preguntas frecuentes",
     "q1": "¿OxideTerm es gratuito?",
     "a1": "OxideTerm está disponible con código fuente bajo la licencia PolyForm Noncommercial 1.0.0. Gratuito para uso personal, educativo y no comercial. El uso comercial requiere una licencia separada.",
@@ -202,11 +224,13 @@
     "a6": "Tres razones. Primera, seguridad de memoria: la base de código C de OpenSSL ha producido CVEs críticos como Heartbleed; el modelo de propiedad de Rust elimina toda esa clase de errores. Segunda, cero fricción en el despliegue: libssh2 requiere cabeceras de desarrollo C en cada plataforma objetivo y una versión de OpenSSL del sistema que coincida (las ABI de 1.0, 1.1 y 3.0 son incompatibles); russh se entrega como fuente Rust pura y Cargo lo gestiona todo. Tercera, rendimiento asíncrono nativo: libssh2 es una API C bloqueante que necesita un envoltorio para Tokio; russh es async-nativo sin frontera FFI en el camino crítico. Resultado: un único binario Rust que compila para más de 10 arquitecturas Linux sin cadena de herramientas C, con una pila criptográfica realmente auditable."
   },
   "testimonial": {
+    "badge": "DEL CREADOR",
     "quote": "OxideTerm no se construyó para llenar un vacío en el mercado, sino para desafiar el límite entre rendimiento y capacidad del terminal. SSH en Rust puro, cero dependencias de C. Un protocolo binario propio sin serialización JSON en la ruta crítica. Cifrado de exportación con ChaCha20-Poly1305 + Argon2id (coste de memoria de 256 MB). Cada decisión arquitectónica refleja una sola obsesión: nunca sacrificar la corrección por la comodidad.",
     "name": "AnalyseDeCircuit",
     "role": "Creador de OxideTerm"
   },
   "footer": {
+    "badge": "ENLACES",
     "license": "Licencia PolyForm Noncommercial 1.0.0",
     "source": "Código fuente",
     "docs": "Documentación",

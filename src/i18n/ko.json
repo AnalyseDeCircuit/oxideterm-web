@@ -24,6 +24,7 @@
     "reconnect_desc": "네트워크 끊김? OxideTerm은 재접속 전 기존 연결을 30초간 탐지합니다. vim, htop, yazi 세션이 살아남습니다."
   },
   "comparison": {
+    "badge": "차별점",
     "title": "왜 OxideTerm인가?",
     "subtitle": "실제 문제, 실제 솔루션.",
     "label_problem": "문제점",
@@ -57,6 +58,7 @@
     "ai_desc": "OxideSens AI. 40+ 자율 도구, MCP 서버 통합, RAG 지식 베이스, 멀티 소스 컨텍스트 캡처."
   },
   "tech": {
+    "badge": "아키텍처",
     "title": "내부 아키텍처",
     "dual_plane": "듀얼 플레인 아키텍처",
     "dual_plane_desc": "터미널 I/O에 WebSocket 바이너리 프레임, 제어 명령에 Tauri IPC. 각 세션에 전용 대역폭.",
@@ -72,6 +74,7 @@
     "plugin_desc": "런타임 ESM 로딩. 18개 API 네임스페이스, 24개 사전 구축 UI 컴포넌트, 동결 API 계약, 서킷 브레이커 자동 비활성화."
   },
   "download": {
+    "badge": "시작하기",
     "title": "OxideTerm 다운로드",
     "subtitle": "macOS, Windows, Linux 지원",
     "macos": "macOS",
@@ -100,11 +103,13 @@
     "zero_c_value": "제로"
   },
   "demo": {
+    "badge": "라이브 데모",
     "title": "OxideTerm 실행 영상",
     "subtitle": "OxideSens AI가 로컬 터미널을 열고 명령을 실행합니다 — 완전 자율, 완전 통합.",
     "fallback": "브라우저가 동영상 재생을 지원하지 않습니다."
   },
   "details": {
+    "badge": "상세 기능",
     "title": "필요한 모든 것, 불필요한 것은 없이",
     "terminal_title": "터미널",
     "terminal_1": "분할 패널, 모든 세션에 브로드캐스트 입력",
@@ -112,28 +117,37 @@
     "terminal_3": "세션 녹화 및 재생 (asciicast v2)",
     "terminal_4": "31+ 테마 + CSS 변수 커스텀 테마 편집기",
     "terminal_5": "커맨드 팔레트 (⌘K) 및 젠 모드",
+    "terminal_6": "사용자 정의 키보드 단축키, vi 모드 지원",
+    "terminal_7": "SSH 호스트명 및 저장된 세션 자동 완성",
     "sftp_title": "SFTP 파일 관리자",
     "sftp_1": "듀얼 패널 브라우저, 드래그 앤 드롭 지원",
     "sftp_2": "스마트 미리보기: 이미지, 동영상, 오디오, 코드, PDF, HEX, 폰트",
     "sftp_3": "전송 큐, 실시간 진행률 및 ETA",
     "sftp_4": "북마크 및 압축 파일 추출",
+    "sftp_5": "일괄 이름 변경, chmod, chown 작업",
+    "sftp_6": "감시 모드: 로컬 파일 변경 시 자동 업로드",
     "ide_title": "내장 IDE",
     "ide_1": "CodeMirror 6, 30+ 언어 모드 지원",
     "ide_2": "파일 트리에 Git 상태 표시",
     "ide_3": "멀티 탭 편집 및 충돌 해결",
     "ide_4": "선택적 ~1 MB 원격 에이전트 (Linux, 10+ 아키텍처)",
+    "ide_5": "정규식을 사용한 원격 파일 전체 검색 및 치환",
+    "ide_6": "30+ 언어 구문 강조: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell 등",
     "ai_title": "OxideSens AI",
     "ai_1": "인라인 패널 (⌘I) + 사이드바 채팅",
     "ai_2": "40+ 자율 도구, MCP 프로토콜 지원",
     "ai_3": "RAG 지식 베이스 (BM25 + 벡터 하이브리드 검색)",
     "ai_4": "멀티 소스 컨텍스트 캐처: 터미널, IDE, SFTP, Git",
+    "ai_5": "API 키 직접 제공 — OpenAI, Anthropic, Google 또는 호환 엔드포인트",
     "forwarding_title": "포트 포워딩",
     "forwarding_1": "로컬 (-L), 원격 (-R), 다이나믹 SOCKS5 (-D)",
     "forwarding_2": "락프리 메시지 패싱 I/O",
     "forwarding_3": "재접속 시 모든 포워딩 자동 복원",
-    "forwarding_4": "장애 보고 및 유휴 타임아웃"
+    "forwarding_4": "장애 보고 및 유휴 타임아웃",
+    "forwarding_5": "실시간 대역폭 및 지연 시간 모니터링"
   },
   "security": {
+    "badge": "제로 트러스트",
     "title": "보안 최우선",
     "subtitle": "엔터프라이즈급 보호, 복잡함 없이.",
     "encryption_title": "고강도 암호화",
@@ -143,9 +157,14 @@
     "ssh_title": "순수 Rust 암호화",
     "ssh_desc": "russh 0.54 + ring 암호 백엔드. Ed25519, RSA, ECDSA 키 지원. ChaCha20-Poly1305 및 AES-GCM 스위트.",
     "biometric_title": "생체 인증 및 TOFU",
-    "biometric_desc": "macOS에서 Touch ID로 키체인 액세스 게이트. 호스트 키 Trust-On-First-Use (TOFU) 검증. 민감 메모리 즉시 제로 클리어."
+    "biometric_desc": "macOS에서 Touch ID로 키체인 액세스 게이트. 호스트 키 Trust-On-First-Use (TOFU) 검증. 민감 메모리 즉시 제로 클리어.",
+    "zeroize_title": "메모리 제로화",
+    "zeroize_desc": "모든 민감한 데이터 — 비밀번호, 키, 복호화된 페이로드 — 는 zeroize 크레이트를 통해 안전하게 삭제됩니다. Drop 핸들러가 잔여 데이터 제로를 보장합니다.",
+    "ws_token_title": "일회용 WS 토큰",
+    "ws_token_desc": "각 WebSocket 브리지는 시간 제한이 있는 고유한 일회용 토큰을 받습니다. 재생 공격과 무단 세션 하이재킹을 방지합니다."
   },
   "cli": {
+    "badge": "커맨드 라인",
     "title": "CLI 동반 도구",
     "subtitle": "oxt를 소개합니다 — 터미널의 좋은 동료.",
     "desc": "JSON-RPC 2.0을 Unix Socket (macOS/Linux) 또는 명명된 파이프 (Windows)로 통신. 사람 친화적이고 기계 파싱 가능한 출력.",
@@ -159,6 +178,7 @@
     "line_8": "pong: 23ms (via jump-host → prod-server)"
   },
   "competitive": {
+    "badge": "올인원",
     "title": "기본 내장 기능",
     "subtitle": "모든 기능이 기본 내장. 플러그인 불필요, 추가 구매 없음.",
     "local_terminal": "로컬 터미널",
@@ -174,6 +194,7 @@
     "source_available": "소스 공개"
   },
   "legal": {
+    "badge": "컴플라이언스",
     "title": "규정 준수 및 법적 고지",
     "subtitle": "OxideTerm은 합법적인 시스템 관리, 개발 및 연구를 위해 설계되었습니다. 규정 준수를 중요하게 생각합니다.",
     "network_title": "네트워크 규정 준수",
@@ -187,6 +208,7 @@
     "disclaimer": "이 페이지는 정보 제공 목적으로만 제공되며 법률 자문을 구성하지 않습니다. OxideTerm 사용이 적용 가능한 모든 법률을 준수하는지 확인할 책임은 사용자에게 있습니다."
   },
   "faq": {
+    "badge": "자주 묻는 질문",
     "title": "자주 묻는 질문",
     "q1": "OxideTerm은 무료인가요?",
     "a1": "OxideTerm은 PolyForm Noncommercial 1.0.0 라이선스로 소스가 공개되어 있습니다. 개인, 교육 및 비상업적 용도는 무료입니다. 상업적 사용은 별도의 라이선스가 필요합니다.",
@@ -202,11 +224,13 @@
     "a6": "세 가지 이유가 있습니다. 첫째, 메모리 안전성: OpenSSL의 C 코드베이스는 Heartbleed 같은 심각한 CVE를 낳아 왔습니다. Rust의 소유권 모델은 그 범주의 버그를 근본적으로 제거합니다. 둘째, 제로 배포 마찰: libssh2는 각 대상 플랫폼에 C 개발 헤더와 버전이 일치하는 시스템 OpenSSL을 요구합니다(1.0/1.1/3.0은 ABI 비호환). russh는 순수 Rust 소스로 제공되며 Cargo가 모든 것을 처리합니다. 셋째, 네이티브 비동기 성능: libssh2는 Tokio 통합에 래퍼가 필요한 블로킹 C API인 반면, russh는 비동기 네이티브로 핫 패스에 FFI 경계가 없습니다. 결과적으로, C 툴체인 없이 10개 이상의 Linux 아키텍처로 컴파일되는 단일 바이너리와 실제로 감사 가능한 암호화 스택을 실현했습니다."
   },
   "testimonial": {
+    "badge": "제작자의 말",
     "quote": "OxideTerm은 시장의 빈틈을 메우기 위해서가 아니라 터미널 성능과 기능의 경계에 도전하기 위해 만들었습니다. 순수 Rust SSH 구현, C 의존성 제로. 자체 바이너리 와이어 프로토콜로 핫 패스에 JSON 직렬화 없음. 내보내기 암호화는 ChaCha20-Poly1305 + Argon2id(256 MB 메모리 비용). 모든 아키텍처 결정은 하나의 집념을 향합니다: 편의를 위해 정확성을 타협하지 않는다.",
     "name": "AnalyseDeCircuit",
     "role": "OxideTerm 개발자"
   },
   "footer": {
+    "badge": "링크",
     "license": "PolyForm Noncommercial 1.0.0 라이선스",
     "source": "소스 코드",
     "docs": "문서",

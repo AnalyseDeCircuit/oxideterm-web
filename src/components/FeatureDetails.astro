@@ -15,35 +15,35 @@ const features = [
   {
     id: "terminal",
     title: i.details.terminal_title,
-    items: [i.details.terminal_1, i.details.terminal_2, i.details.terminal_3, i.details.terminal_4, i.details.terminal_5],
+    items: [i.details.terminal_1, i.details.terminal_2, i.details.terminal_3, i.details.terminal_4, i.details.terminal_5, i.details.terminal_6, i.details.terminal_7],
     img: "/images/screenshots/terminal.png",
     icon: icon("terminal", { size: 28, stroke: accent }),
   },
   {
     id: "sftp",
     title: i.details.sftp_title,
-    items: [i.details.sftp_1, i.details.sftp_2, i.details.sftp_3, i.details.sftp_4],
+    items: [i.details.sftp_1, i.details.sftp_2, i.details.sftp_3, i.details.sftp_4, i.details.sftp_5, i.details.sftp_6],
     img: "/images/screenshots/sftp.png",
     icon: icon("fileChart", { size: 28, stroke: accent }),
   },
   {
     id: "ide",
     title: i.details.ide_title,
-    items: [i.details.ide_1, i.details.ide_2, i.details.ide_3, i.details.ide_4],
+    items: [i.details.ide_1, i.details.ide_2, i.details.ide_3, i.details.ide_4, i.details.ide_5, i.details.ide_6],
     img: "/images/screenshots/ide.png",
     icon: icon("code", { size: 28, stroke: accent }),
   },
   {
     id: "ai",
     title: i.details.ai_title,
-    items: [i.details.ai_1, i.details.ai_2, i.details.ai_3, i.details.ai_4],
+    items: [i.details.ai_1, i.details.ai_2, i.details.ai_3, i.details.ai_4, i.details.ai_5],
     img: "/images/screenshots/ai.gif",
     icon: icon("bot", { size: 28, stroke: accent }),
   },
   {
     id: "forwarding",
     title: i.details.forwarding_title,
-    items: [i.details.forwarding_1, i.details.forwarding_2, i.details.forwarding_3, i.details.forwarding_4],
+    items: [i.details.forwarding_1, i.details.forwarding_2, i.details.forwarding_3, i.details.forwarding_4, i.details.forwarding_5],
     img: "/images/screenshots/forwarding.png",
     icon: icon("link", { size: 28, stroke: accent }),
   },
@@ -52,6 +52,9 @@ const features = [
 
 <section class="py-20 px-6 border-t border-[var(--ot-border)]">
   <div class="max-w-6xl mx-auto">
+    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] text-center mb-3">
+      {i.details.badge}
+    </p>
     <h2 class="text-3xl md:text-4xl font-bold text-center mb-16 tracking-tight">
       {i.details.title}
     </h2>

@@ -24,6 +24,7 @@
     "reconnect_desc": "Coupure réseau ? OxideTerm sonde l'ancienne connexion pendant 30 secondes avant de reconnecter. Vos sessions vim, htop et yazi survivent."
   },
   "comparison": {
+    "badge": "LA DIFFÉRENCE",
     "title": "Pourquoi OxideTerm ?",
     "subtitle": "Des vrais problèmes, des vraies solutions.",
     "label_problem": "Le problème",
@@ -57,6 +58,7 @@
     "ai_desc": "OxideSens IA. 40+ outils autonomes, intégration serveur MCP, base de connaissances RAG, capture de contexte multi-sources."
   },
   "tech": {
+    "badge": "ARCHITECTURE",
     "title": "Sous le capot",
     "dual_plane": "Architecture double-plan",
     "dual_plane_desc": "Trames binaires WebSocket pour les I/O terminal, Tauri IPC pour les commandes de contrôle. Bande passante dédiée par session.",
@@ -72,6 +74,7 @@
     "plugin_desc": "Chargement ESM à l'exécution. 18 espaces de noms API, 24 composants UI pré-construits, contrat API gelé, disjoncteur auto-désactivation."
   },
   "download": {
+    "badge": "COMMENCER",
     "title": "Télécharger OxideTerm",
     "subtitle": "Disponible pour macOS, Windows et Linux",
     "macos": "macOS",
@@ -100,11 +103,13 @@
     "zero_c_value": "Zéro"
   },
   "demo": {
+    "badge": "DÉMO EN DIRECT",
     "title": "Voir en action",
     "subtitle": "OxideSens AI ouvre un terminal local et exécute une commande — entièrement autonome, entièrement intégré.",
     "fallback": "Votre navigateur ne prend pas en charge la lecture vidéo."
   },
   "details": {
+    "badge": "EN DÉTAIL",
     "title": "Tout ce dont vous avez besoin, rien de plus",
     "terminal_title": "Terminal",
     "terminal_1": "Panneaux divisés avec diffusion vers toutes les sessions",
@@ -112,28 +117,37 @@
     "terminal_3": "Enregistrement et relecture de session (asciicast v2)",
     "terminal_4": "31+ thèmes + éditeur de thème personnalisé CSS",
     "terminal_5": "Palette de commandes (⌘K) et mode zen",
+    "terminal_6": "Raccourcis clavier personnalisables avec mode vi",
+    "terminal_7": "Autocomplétion des noms d'hôtes SSH et sessions enregistrées",
     "sftp_title": "Gestionnaire SFTP",
     "sftp_1": "Navigateur double panneau, glisser-déposer",
     "sftp_2": "Aperçu intelligent : images, vidéo, audio, code, PDF, hex, polices",
     "sftp_3": "File de transfert avec progression en temps réel et ETA",
     "sftp_4": "Favoris et extraction d'archives",
+    "sftp_5": "Renommage, chmod, chown par lot",
+    "sftp_6": "Mode surveillance : téléversement automatique lors de modifications locales",
     "ide_title": "IDE intégré",
     "ide_1": "CodeMirror 6 avec 30+ modes de langage",
     "ide_2": "Arborescence avec statut Git",
     "ide_3": "Édition multi-onglets avec résolution de conflits",
     "ide_4": "Agent distant optionnel ~1 Mo (Linux, 10+ architectures)",
+    "ide_5": "Rechercher et remplacer avec regex sur fichiers distants",
+    "ide_6": "Coloration syntaxique pour 30+ langages : Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell, et plus",
     "ai_title": "OxideSens AI",
     "ai_1": "Panneau en ligne (⌘I) + chat en barre latérale",
     "ai_2": "40+ outils autonomes, protocole MCP",
     "ai_3": "Base de connaissances RAG (recherche hybride BM25 + vecteurs)",
     "ai_4": "Capture de contexte multi-source : terminal, IDE, SFTP, Git",
+    "ai_5": "Apportez votre clé API — OpenAI, Anthropic, Google ou tout endpoint compatible",
     "forwarding_title": "Transfert de ports",
     "forwarding_1": "Local (-L), Distant (-R), SOCKS5 dynamique (-D)",
     "forwarding_2": "I/O par passage de messages sans verrou",
     "forwarding_3": "Restauration automatique après reconnexion",
-    "forwarding_4": "Rapport d'erreur et délai d'inactivité"
+    "forwarding_4": "Rapport d'erreur et délai d'inactivité",
+    "forwarding_5": "Surveillance en temps réel de la bande passante et de la latence"
   },
   "security": {
+    "badge": "CONFIANCE ZÉRO",
     "title": "La sécurité d'abord",
     "subtitle": "Protection de niveau entreprise sans la complexité.",
     "encryption_title": "Chiffrement haute sécurité",
@@ -143,9 +157,14 @@
     "ssh_title": "Cryptographie pure Rust",
     "ssh_desc": "russh 0.54 + backend crypto ring. Clés Ed25519, RSA, ECDSA. Suites ChaCha20-Poly1305 et AES-GCM.",
     "biometric_title": "Biométrie et TOFU",
-    "biometric_desc": "Touch ID contrôle l'accès au trousseau sur macOS. Vérification des clés d'hôte par Trust-On-First-Use (TOFU). Mémoire sensible effacée instantanément."
+    "biometric_desc": "Touch ID contrôle l'accès au trousseau sur macOS. Vérification des clés d'hôte par Trust-On-First-Use (TOFU). Mémoire sensible effacée instantanément.",
+    "zeroize_title": "Effacement mémoire",
+    "zeroize_desc": "Toutes les données sensibles — mots de passe, clés, charges déchiffrées — sont effacées de la mémoire via le crate zeroize. Les gestionnaires Drop garantissent zéro résidu.",
+    "ws_token_title": "Jetons WS à usage unique",
+    "ws_token_desc": "Chaque pont WebSocket reçoit un jeton unique à usage unique avec une limite de temps. Empêche les attaques par rejeu et le détournement de session non autorisé."
   },
   "cli": {
+    "badge": "LIGNE DE COMMANDE",
     "title": "CLI Compagnon",
     "subtitle": "Découvrez oxt — votre allié terminal.",
     "desc": "JSON-RPC 2.0 via Unix Socket (macOS/Linux) ou Named Pipe (Windows). Sortie lisible et analysable.",
@@ -159,6 +178,7 @@
     "line_8": "pong: 23ms (via jump-host → prod-server)"
   },
   "competitive": {
+    "badge": "TOUT INCLUS",
     "title": "Fonctionnalités incluses",
     "subtitle": "Chaque fonctionnalité est intégrée. Aucun plugin requis, rien à acheter.",
     "local_terminal": "Terminal local",
@@ -174,6 +194,7 @@
     "source_available": "Source disponible"
   },
   "legal": {
+    "badge": "CONFORMITÉ",
     "title": "Conformité et mentions légales",
     "subtitle": "OxideTerm est conçu pour l'administration système légitime, le développement et la recherche. Nous prenons la conformité au sérieux.",
     "network_title": "Conformité réseau",
@@ -187,6 +208,7 @@
     "disclaimer": "Cette page est fournie à titre informatif uniquement et ne constitue pas un avis juridique. Il incombe aux utilisateurs de s'assurer que leur utilisation d'OxideTerm est conforme à toutes les lois locales et internationales applicables."
   },
   "faq": {
+    "badge": "FAQ",
     "title": "Questions fréquentes",
     "q1": "OxideTerm est-il gratuit ?",
     "a1": "OxideTerm est disponible en source ouverte sous la licence PolyForm Noncommercial 1.0.0. Gratuit pour un usage personnel, éducatif et non commercial. L'usage commercial nécessite une licence séparée.",
@@ -202,11 +224,13 @@
     "a6": "Trois raisons. Premièrement, la sécurité mémoire : la base de code C d'OpenSSL a produit des CVE critiques comme Heartbleed — le modèle de propriété de Rust élimine entièrement cette classe de bugs. Deuxièmement, zéro friction au déploiement : libssh2 nécessite les en-têtes de développement C de chaque plateforme cible et une version de système OpenSSL correspondante (les ABI de 1.0, 1.1 et 3.0 sont incompatibles) ; russh est fourni comme source Rust pure et Cargo gère tout. Troisièmement, performances asynchrones natives : libssh2 est une API C bloquante nécessitant un wrapper pour Tokio ; russh est async-natif, sans frontière FFI dans le chemin critique. Résultat : un binaire Rust unique qui compile pour plus de 10 architectures Linux sans chaîne de compilation C, avec une pile cryptographique réellement auditable."
   },
   "testimonial": {
+    "badge": "MOT DU CRÉATEUR",
     "quote": "OxideTerm n'a pas été conçu pour combler un vide — il a été conçu pour repousser les limites entre performance et capacité du terminal. SSH en Rust pur, zéro dépendance C. Un protocole binaire propriétaire sans sérialisation JSON dans le chemin critique. Chiffrement d'export en ChaCha20-Poly1305 + Argon2id (coût mémoire de 256 Mo). Chaque décision architecturale traduit une seule obsession : ne jamais sacrifier la justesse pour la commodité.",
     "name": "AnalyseDeCircuit",
     "role": "Créateur d'OxideTerm"
   },
   "footer": {
+    "badge": "LIENS",
     "license": "Licence PolyForm Noncommercial 1.0.0",
     "source": "Code source",
     "docs": "Documentation",

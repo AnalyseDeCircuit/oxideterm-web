@@ -24,6 +24,7 @@
     "reconnect_desc": "网络中断？OxideTerm 会先探测旧连接 30 秒再重连。你的 vim、htop、yazi 会话得以保留。"
   },
   "comparison": {
+    "badge": "与众不同",
     "title": "为什么选择 OxideTerm？",
     "subtitle": "真实的痛点，真实的方案。",
     "label_problem": "痛点",
@@ -57,6 +58,7 @@
     "ai_desc": "OxideSens AI，40+ 自主工具、MCP 服务器集成、RAG 知识库、多源上下文捕获。"
   },
   "tech": {
+    "badge": "技术架构",
     "title": "底层架构",
     "dual_plane": "双平面架构",
     "dual_plane_desc": "终端 I/O 使用 WebSocket 二进制帧，管理命令使用 Tauri IPC。每个会话独享带宽。",
@@ -72,6 +74,7 @@
     "plugin_desc": "运行时 ESM 加载，18 个 API 命名空间、24 个预置 UI 组件、冻结 API 契约、熔断器自动禁用。"
   },
   "download": {
+    "badge": "立即开始",
     "title": "下载 OxideTerm",
     "subtitle": "支持 macOS、Windows 和 Linux",
     "macos": "macOS",
@@ -100,11 +103,13 @@
     "zero_c_value": "零"
   },
   "demo": {
+    "badge": "实机演示",
     "title": "一分钟了解 OxideTerm",
     "subtitle": "OxideSens AI 打开本地终端并执行命令——全自主，全集成。",
     "fallback": "您的浏览器不支持视频播放。"
   },
   "details": {
+    "badge": "深入了解",
     "title": "你需要的一切，仅此而已",
     "terminal_title": "终端",
     "terminal_1": "分屏面板，支持广播输入到所有会话",
@@ -112,28 +117,37 @@
     "terminal_3": "会话录制与回放（asciicast v2）",
     "terminal_4": "31+ 内置主题 + CSS 变量自定义主题编辑器",
     "terminal_5": "命令面板（⌘K）与禅模式",
+    "terminal_6": "可配置键盘快捷键，支持 vi 模式",
+    "terminal_7": "SSH 主机名与已保存会话自动补全",
     "sftp_title": "SFTP 文件管理器",
     "sftp_1": "双栏浏览器，支持拖拽传输",
     "sftp_2": "智能预览：图片、视频、音频、代码、PDF、十六进制、字体",
     "sftp_3": "传输队列，实时进度与 ETA",
     "sftp_4": "书签与压缩包提取",
+    "sftp_5": "批量重命名、chmod、chown 操作",
+    "sftp_6": "监视模式：本地文件变更自动上传",
     "ide_title": "内置 IDE",
     "ide_1": "CodeMirror 6，支持 30+ 语言模式",
     "ide_2": "文件树显示 Git 状态",
     "ide_3": "多标签编辑与冲突解决",
     "ide_4": "可选 ~1 MB 远程 Agent（Linux，10+ 架构）",
+    "ide_5": "正则搜索替换，跨远程文件",
+    "ide_6": "30+ 语言语法高亮：Rust、Python、JS/TS、Go、C/C++、Java、YAML、JSON、TOML、Markdown、Shell 等",
     "ai_title": "OxideSens AI",
     "ai_1": "内联面板（⌘I） + 侧边栏对话",
     "ai_2": "40+ 自主工具，MCP 协议支持",
     "ai_3": "RAG 知识库（BM25 + 向量混合搜索）",
     "ai_4": "多源上下文捕获：终端、IDE、SFTP、Git",
+    "ai_5": "自带 API 密钥——支持 OpenAI、Anthropic、Google 及任何兼容接口",
     "forwarding_title": "端口转发",
     "forwarding_1": "本地 (-L)、远程 (-R)、动态 SOCKS5 (-D)",
     "forwarding_2": "无锁消息传递 I/O",
     "forwarding_3": "重连后自动恢复所有转发",
-    "forwarding_4": "故障报告与空闲超时"
+    "forwarding_4": "故障报告与空闲超时",
+    "forwarding_5": "实时带宽与延迟监控"
   },
   "security": {
+    "badge": "零信任",
     "title": "安全为先",
     "subtitle": "企业级安全防护，无需企业级复杂度。",
     "encryption_title": "高强度加密",
@@ -143,9 +157,14 @@
     "ssh_title": "纯 Rust 加密",
     "ssh_desc": "russh 0.54 + ring 加密后端。支持 Ed25519、RSA、ECDSA 密钥。ChaCha20-Poly1305 和 AES-GCM 套件。",
     "biometric_title": "生物识别与 TOFU",
-    "biometric_desc": "macOS 通过 Touch ID 门控钥匙串访问。主机密钥信任首次使用（TOFU）验证。敏感内存即时清零。"
+    "biometric_desc": "macOS 通过 Touch ID 门控钥匙串访问。主机密钥信任首次使用（TOFU）验证。敏感内存即时清零。",
+    "zeroize_title": "内存清零",
+    "zeroize_desc": "所有敏感数据——密码、密钥、解密载荷——通过 zeroize crate 安全擦除。Drop 处理程序确保零残留。",
+    "ws_token_title": "一次性 WS 令牌",
+    "ws_token_desc": "每个 WebSocket 桥接获得唯一的一次性令牌，带有时间限制。防止重放攻击与未授权会话劫持。"
   },
   "cli": {
+    "badge": "命令行",
     "title": "CLI 伴侣工具",
     "subtitle": "认识 oxt —— 你的终端好搭档。",
     "desc": "JSON-RPC 2.0 基于 Unix Socket（macOS/Linux）或命名管道（Windows）。人类友好且机器可解析的输出。",
@@ -159,6 +178,7 @@
     "line_8": "pong: 23ms (via jump-host → prod-server)"
   },
   "competitive": {
+    "badge": "开箱即用",
     "title": "内置功能一览",
     "subtitle": "所有功能开箱即用，无需插件、无需付费扩展。",
     "local_terminal": "本地终端",
@@ -174,6 +194,7 @@
     "source_available": "源码可见"
   },
   "legal": {
+    "badge": "合规",
     "title": "合规与法律声明",
     "subtitle": "OxideTerm 专为合规的系统运维、开发和研究而设计。我们认真对待合规事务。",
     "network_title": "网络合规",
@@ -187,6 +208,7 @@
     "disclaimer": "本页面仅供参考，不构成法律建议。用户有责任确保其使用 OxideTerm 符合所有适用的本地及国际法律法规。"
   },
   "faq": {
+    "badge": "常见问题",
     "title": "常见问题",
     "q1": "OxideTerm 是免费的吗？",
     "a1": "OxideTerm 采用 PolyForm Noncommercial 1.0.0 源码可用许可证。个人、教育及非商业用途免费。商业使用需单独授权。",
@@ -202,11 +224,13 @@
     "a6": "三个原因。其一，内存安全：OpenSSL 的 C 代码库已产生 Heartbleed 等严重 CVE，Rust 的所有权模型从根本上消除了这整类漏洞。其二，零部署摩擦：libssh2 要求每个目标平台都有 C 开发头文件，且系统 OpenSSL 版本必须匹配（1.0/1.1/3.0 ABI 不兼容）；russh 是纯 Rust 源码，Cargo 全权处理。其三，原生异步性能：libssh2 是阻塞式 C API，需要胶水代码才能接入 Tokio；russh 天生异步，热路径无 FFI 开销。结果是：一个 Rust 二进制文件无需 C 工具链即可编译到 10 余种 Linux 架构——加密栈也是可以真正审计的。"
   },
   "testimonial": {
+    "badge": "创作者寄语",
     "quote": "OxideTerm 不是为了填补市场空白，而是为了挑战终端性能与功能的边界。纯 Rust SSH 实现，零 C 依赖。自研二进制线协议，热路径无 JSON 序列化。导出加密采用 ChaCha20-Poly1305 + Argon2id（256 MB 内存开销）。每一个架构决策都指向同一个执念：绝不以便利换正确。",
     "name": "AnalyseDeCircuit",
     "role": "OxideTerm 作者"
   },
   "footer": {
+    "badge": "链接",
     "license": "基于 PolyForm Noncommercial 1.0.0 许可",
     "source": "源代码",
     "docs": "文档",
