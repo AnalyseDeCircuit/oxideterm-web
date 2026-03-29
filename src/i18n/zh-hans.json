@@ -201,7 +201,7 @@
   },
   "testimonial": {
     "quote": "OxideTerm 不是为了填补市场空白，而是为了挑战终端性能与功能的边界。纯 Rust SSH 实现，零 C 依赖。自研二进制线协议，热路径无 JSON 序列化。导出加密采用 ChaCha20-Poly1305 + Argon2id（256 MB 内存开销）。每一个架构决策都指向同一个执念：绝不以便利换正确。",
-    "name": "Dominical",
+    "name": "AnalyseDeCircuit",
     "role": "OxideTerm 作者"
   },
   "footer": {

@@ -201,7 +201,7 @@
   },
   "testimonial": {
     "quote": "OxideTerm no se construyó para llenar un vacío en el mercado, sino para desafiar el límite entre rendimiento y capacidad del terminal. SSH en Rust puro, cero dependencias de C. Un protocolo binario propio sin serialización JSON en la ruta crítica. Cifrado de exportación con ChaCha20-Poly1305 + Argon2id (coste de memoria de 256 MB). Cada decisión arquitectónica refleja una sola obsesión: nunca sacrificar la corrección por la comodidad.",
-    "name": "Dominical",
+    "name": "AnalyseDeCircuit",
     "role": "Creador de OxideTerm"
   },
   "footer": {

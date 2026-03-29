@@ -201,7 +201,7 @@
   },
   "testimonial": {
     "quote": "OxideTerm は市場の隙間を埋めるためではなく、ターミナルの性能と機能の限界に挑むために作りました。純 Rust による SSH 実装、C 依存ゼロ。独自のバイナリワイヤープロトコルでホットパスに JSON シリアライゼーションなし。エクスポート暗号化は ChaCha20-Poly1305 + Argon2id（メモリコスト 256 MB）。すべてのアーキテクチャ上の判断は一つの信念に帰結します：利便性のために正しさを犠牲にしない。",
-    "name": "Dominical",
+    "name": "AnalyseDeCircuit",
     "role": "OxideTerm 開発者"
   },
   "footer": {
