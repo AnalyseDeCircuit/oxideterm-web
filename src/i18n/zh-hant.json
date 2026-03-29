@@ -197,7 +197,9 @@
     "q4": "可以離線使用嗎？",
     "a4": "可以。OxideTerm 是本地優先應用程式，不依賴雲端服務。所有功能均可離線使用，AI 聊天除外——它需要網路連線來存取您設定的 API 提供商。",
     "q5": "AI 功能需要什麼？",
-    "a5": "自帶 API 金鑰（BYOK）。OxideTerm 支援 OpenAI、Anthropic、Google 以及任何 OpenAI 相容端點。金鑰安全儲存在作業系統鑰匙圈中。"
+    "a5": "自帶 API 金鑰（BYOK）。OxideTerm 支援 OpenAI、Anthropic、Google 以及任何 OpenAI 相容端點。金鑰安全儲存在作業系統鑰匙圈中。",
+    "q6": "為什麼 OxideTerm 不使用 libssh2 或 OpenSSL？",
+    "a6": "三個原因。其一，記憶體安全：OpenSSL 的 C 程式碼已產生 Heartbleed 等嚴重 CVE，Rust 的所有權模型從根本上消除了這整類漏洞。其二，零部署摩擦：libssh2 要求每個目標平台都有 C 開發標頭檔，且系統 OpenSSL 版本必須匹配（1.0/1.1/3.0 ABI 不相容）；russh 是純 Rust 原始碼，Cargo 全權處理。其三，原生非同步效能：libssh2 是阻塞式 C API，需要膠水程式碼才能接入 Tokio；russh 天生非同步，熱路徑無 FFI 開銷。結果是：一個 Rust 二進位檔無需 C 工具鏈即可編譯到 10 餘種 Linux 架構——加密堆疊也是可以真正稽核的。"
   },
   "testimonial": {
     "quote": "OxideTerm 不是為了填補市場空白，而是為了挑戰終端效能與功能的邊界。純 Rust SSH 實作，零 C 依賴。自研二進位線協議，熱路徑無 JSON 序列化。匯出加密採用 ChaCha20-Poly1305 + Argon2id（256 MB 記憶體開銷）。每一個架構決策都指向同一個執念：絕不以便利換正確。",

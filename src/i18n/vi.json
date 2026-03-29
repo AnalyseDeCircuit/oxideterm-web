@@ -197,7 +197,9 @@
     "q4": "Có thể sử dụng OxideTerm ngoại tuyến không?",
     "a4": "Có. OxideTerm là ứng dụng ưu tiên cục bộ, không phụ thuộc đám mây. Tất cả tính năng đều hoạt động ngoại tuyến, ngoại trừ trò chuyện AI cần kết nối internet để truy cập nhà cung cấp API đã cấu hình.",
     "q5": "Cần gì cho tính năng AI?",
-    "a5": "Tự cung cấp khóa API (BYOK). OxideTerm hỗ trợ OpenAI, Anthropic, Google và bất kỳ endpoint tương thích OpenAI nào. Khóa được lưu trữ an toàn trong keychain hệ điều hành."
+    "a5": "Tự cung cấp khóa API (BYOK). OxideTerm hỗ trợ OpenAI, Anthropic, Google và bất kỳ endpoint tương thích OpenAI nào. Khóa được lưu trữ an toàn trong keychain hệ điều hành.",
+    "q6": "Tại sao OxideTerm không dùng libssh2 hay OpenSSL?",
+    "a6": "Ba lý do. Thứ nhất, an toàn bộ nhớ: codebase C của OpenSSL đã tạo ra các CVE nghiêm trọng như Heartbleed — mô hình ownership của Rust loại bỏ hoàn toàn lớp lỗi đó. Thứ hai, không ma sát khi triển khai: libssh2 yêu cầu C dev headers cho từng nền tảng đích và phiên bản OpenSSL hệ thống khớp (ABI của 1.0, 1.1 và 3.0 không tương thích); russh được cung cấp dưới dạng Rust source thuần và Cargo xử lý tất cả. Thứ ba, hiệu năng async gốc: libssh2 là C API blocking cần wrapper để tích hợp Tokio; russh async-native, không có FFI boundary trên đường nóng. Kết quả: một binary Rust duy nhất biên dịch cho hơn 10 kiến trúc Linux mà không cần C toolchain — và một crypto stack có thể kiểm toán thực sự."
   },
   "testimonial": {
     "quote": "OxideTerm không được tạo ra để lấp một khoảng trống thị trường — mà để thách thức ranh giới giữa hiệu năng và khả năng của terminal. SSH thuần Rust, không phụ thuộc C. Giao thức nhị phân tự phát triển, không JSON serialization trên đường nóng. Mã hóa xuất dữ liệu bằng ChaCha20-Poly1305 + Argon2id (chi phí bộ nhớ 256 MB). Mỗi quyết định kiến trúc đều hướng về một nỗi ám ảnh duy nhất: không bao giờ đánh đổi tính đúng đắn lấy sự tiện lợi.",

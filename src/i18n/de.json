@@ -197,7 +197,9 @@
     "q4": "Kann ich OxideTerm offline nutzen?",
     "a4": "Ja. OxideTerm ist eine Local-First-Anwendung ohne Cloud-Abhängigkeit. Alle Funktionen sind offline verfügbar, außer dem AI-Chat, der eine Internetverbindung zu Ihrem konfigurierten API-Anbieter benötigt.",
     "q5": "Was brauche ich für die KI-Funktionen?",
-    "a5": "Bringen Sie Ihren eigenen API-Schlüssel mit (BYOK). OxideTerm unterstützt OpenAI, Anthropic, Google und jeden OpenAI-kompatiblen Endpunkt. Schlüssel werden sicher im Schlüsselbund des Betriebssystems gespeichert."
+    "a5": "Bringen Sie Ihren eigenen API-Schlüssel mit (BYOK). OxideTerm unterstützt OpenAI, Anthropic, Google und jeden OpenAI-kompatiblen Endpunkt. Schlüssel werden sicher im Schlüsselbund des Betriebssystems gespeichert.",
+    "q6": "Warum verwendet OxideTerm kein libssh2 oder OpenSSL?",
+    "a6": "Drei Gründe. Erstens, Speichersicherheit: Die C-Codebasis von OpenSSL hat kritische CVEs wie Heartbleed hervorgebracht — Rusts Eigentümerschaftsmodell eliminiert diese ganze Fehlerklasse. Zweitens, null Deployment-Reibung: libssh2 erfordert C-Entwicklungsheader für jede Zielplattform und eine passende System-OpenSSL-Version (1.0, 1.1 und 3.0 haben inkompatible ABIs); russh wird als reiner Rust-Quellcode geliefert und Cargo erledigt alles. Drittens, native Async-Performance: libssh2 ist eine blockierende C-API, die für Tokio einen Wrapper benötigt; russh ist async-nativ ohne FFI-Grenze im Hot-Path. Das Ergebnis: ein einziges Rust-Binary, das ohne C-Toolchain für über 10 Linux-Architekturen kompiliert — mit einem Crypto-Stack, den man tatsächlich prüfen kann."
   },
   "testimonial": {
     "quote": "OxideTerm wurde nicht gebaut, um eine Marktlücke zu füllen — sondern um die Grenze zwischen Terminal-Performance und Funktionalität herauszufordern. Reines Rust-SSH ohne C-Abhängigkeiten. Ein eigenes binäres Drahtprotokoll ohne JSON-Serialisierung im Hot Path. Export-Verschlüsselung mit ChaCha20-Poly1305 + Argon2id (256 MB Speicherkosten). Jede architektonische Entscheidung folgt einer einzigen Obsession: niemals Korrektheit gegen Bequemlichkeit eintauschen.",

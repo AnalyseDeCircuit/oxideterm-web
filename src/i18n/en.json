@@ -197,7 +197,9 @@
     "q4": "Can I use OxideTerm offline?",
     "a4": "Yes. OxideTerm is a local-first application with zero cloud dependency. All features work offline except AI chat, which requires an internet connection to reach your configured API provider.",
     "q5": "What do I need for AI features?",
-    "a5": "Bring your own API key (BYOK). OxideTerm supports OpenAI, Anthropic, Google, and any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain."
+    "a5": "Bring your own API key (BYOK). OxideTerm supports OpenAI, Anthropic, Google, and any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain.",
+    "q6": "Why doesn't OxideTerm use libssh2 or OpenSSL?",
+    "a6": "Three reasons. First, memory safety: OpenSSL's C codebase has produced critical CVEs like Heartbleed — Rust's ownership model eliminates that entire class of bug. Second, zero deployment friction: libssh2 requires each target platform to have C dev headers and the system OpenSSL matching in version (1.0 vs 1.1 vs 3.0 have incompatible ABIs); russh ships as pure Rust source and Cargo handles everything. Third, async-native performance: libssh2 is a blocking C API that needs wrapper glue for Tokio; russh is async-first with zero FFI boundary in the hot path. The result: a single Rust binary that compiles to 10+ Linux architectures without a C toolchain — and a crypto stack you can actually audit."
   },
   "testimonial": {
     "quote": "OxideTerm wasn't built to fill a market gap — it was built to challenge the boundary between terminal performance and capability. Pure-Rust SSH with zero C dependencies. A custom binary wire protocol with no JSON serialization in the hot path. ChaCha20-Poly1305 encryption backed by Argon2id at 256 MB memory cost. Every architectural decision reflects one obsession: never trade correctness for convenience.",

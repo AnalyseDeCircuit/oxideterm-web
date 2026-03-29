@@ -197,7 +197,9 @@
     "q4": "Posso usar o OxideTerm offline?",
     "a4": "Sim. O OxideTerm é um aplicativo local-first sem dependência de nuvem. Todas as funcionalidades estão disponíveis offline, exceto o chat de IA, que requer conexão com a internet para acessar seu provedor de API configurado.",
     "q5": "O que preciso para os recursos de IA?",
-    "a5": "Traga sua própria chave de API (BYOK). O OxideTerm suporta OpenAI, Anthropic, Google e qualquer endpoint compatível com OpenAI. As chaves são armazenadas com segurança no chaveiro do sistema."
+    "a5": "Traga sua própria chave de API (BYOK). O OxideTerm suporta OpenAI, Anthropic, Google e qualquer endpoint compatível com OpenAI. As chaves são armazenadas com segurança no chaveiro do sistema.",
+    "q6": "Por que o OxideTerm não usa libssh2 ou OpenSSL?",
+    "a6": "Três razões. Primeira, segurança de memória: a base de código C do OpenSSL produziu CVEs críticos como o Heartbleed — o modelo de propriedade do Rust elimina toda essa classe de bugs. Segunda, zero atrito no deploy: libssh2 exige headers de desenvolvimento C em cada plataforma alvo e uma versão do sistema OpenSSL correspondente (as ABIs de 1.0, 1.1 e 3.0 são incompatíveis); russh é fornecido como fonte Rust pura e o Cargo cuida de tudo. Terceira, desempenho assíncrono nativo: libssh2 é uma API C bloqueante que precisa de um wrapper para o Tokio; russh é async-nativo sem fronteira FFI no caminho crítico. Resultado: um único binário Rust que compila para mais de 10 arquiteturas Linux sem toolchain C, com uma pilha criptográfica realmente auditável."
   },
   "testimonial": {
     "quote": "O OxideTerm não foi criado para preencher uma lacuna de mercado — foi criado para desafiar o limite entre desempenho e capacidade do terminal. SSH em Rust puro, zero dependências de C. Um protocolo binário proprietário sem serialização JSON no caminho crítico. Criptografia de exportação com ChaCha20-Poly1305 + Argon2id (custo de memória de 256 MB). Cada decisão arquitetural reflete uma única obsessão: nunca trocar correção por conveniência.",

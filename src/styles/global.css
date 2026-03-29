@@ -285,6 +285,7 @@ h1, h2, h3 {
   font-size: 13.5px;
   line-height: 1.7;
   color: var(--ot-terminal-text);
+  box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.28), inset 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 .terminal-prompt { color: var(--ot-terminal-green); }
 .terminal-dim { color: #8c8ca0; }

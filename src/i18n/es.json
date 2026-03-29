@@ -197,7 +197,9 @@
     "q4": "¿Puedo usar OxideTerm sin conexión?",
     "a4": "Sí. OxideTerm es una aplicación local-first sin dependencia de la nube. Todas las funciones están disponibles sin conexión, excepto el chat de IA, que requiere conexión a internet para acceder a tu proveedor de API configurado.",
     "q5": "¿Qué necesito para las funciones de IA?",
-    "a5": "Trae tu propia clave de API (BYOK). OxideTerm soporta OpenAI, Anthropic, Google y cualquier endpoint compatible con OpenAI. Las claves se almacenan de forma segura en el llavero del sistema."
+    "a5": "Trae tu propia clave de API (BYOK). OxideTerm soporta OpenAI, Anthropic, Google y cualquier endpoint compatible con OpenAI. Las claves se almacenan de forma segura en el llavero del sistema.",
+    "q6": "¿Por qué OxideTerm no usa libssh2 ni OpenSSL?",
+    "a6": "Tres razones. Primera, seguridad de memoria: la base de código C de OpenSSL ha producido CVEs críticos como Heartbleed; el modelo de propiedad de Rust elimina toda esa clase de errores. Segunda, cero fricción en el despliegue: libssh2 requiere cabeceras de desarrollo C en cada plataforma objetivo y una versión de OpenSSL del sistema que coincida (las ABI de 1.0, 1.1 y 3.0 son incompatibles); russh se entrega como fuente Rust pura y Cargo lo gestiona todo. Tercera, rendimiento asíncrono nativo: libssh2 es una API C bloqueante que necesita un envoltorio para Tokio; russh es async-nativo sin frontera FFI en el camino crítico. Resultado: un único binario Rust que compila para más de 10 arquitecturas Linux sin cadena de herramientas C, con una pila criptográfica realmente auditable."
   },
   "testimonial": {
     "quote": "OxideTerm no se construyó para llenar un vacío en el mercado, sino para desafiar el límite entre rendimiento y capacidad del terminal. SSH en Rust puro, cero dependencias de C. Un protocolo binario propio sin serialización JSON en la ruta crítica. Cifrado de exportación con ChaCha20-Poly1305 + Argon2id (coste de memoria de 256 MB). Cada decisión arquitectónica refleja una sola obsesión: nunca sacrificar la corrección por la comodidad.",

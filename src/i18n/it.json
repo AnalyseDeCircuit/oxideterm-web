@@ -197,7 +197,9 @@
     "q4": "Posso usare OxideTerm offline?",
     "a4": "Sì. OxideTerm è un'applicazione local-first senza dipendenze cloud. Tutte le funzionalità sono disponibili offline, tranne la chat IA che richiede una connessione internet per raggiungere il provider API configurato.",
     "q5": "Cosa serve per le funzionalità IA?",
-    "a5": "Porta la tua chiave API (BYOK). OxideTerm supporta OpenAI, Anthropic, Google e qualsiasi endpoint compatibile con OpenAI. Le chiavi sono conservate in modo sicuro nel portachiavi del sistema."
+    "a5": "Porta la tua chiave API (BYOK). OxideTerm supporta OpenAI, Anthropic, Google e qualsiasi endpoint compatibile con OpenAI. Le chiavi sono conservate in modo sicuro nel portachiavi del sistema.",
+    "q6": "Perché OxideTerm non usa libssh2 o OpenSSL?",
+    "a6": "Tre motivi. Primo, sicurezza della memoria: la base di codice C di OpenSSL ha prodotto CVE critici come Heartbleed — il modello di ownership di Rust elimina completamente questa classe di bug. Secondo, zero attrito nel deployment: libssh2 richiede gli header di sviluppo C per ogni piattaforma target e una versione di sistema OpenSSL corrispondente (le ABI di 1.0, 1.1 e 3.0 sono incompatibili); russh è fornito come sorgente Rust puro e Cargo gestisce tutto. Terzo, prestazioni asincrone native: libssh2 è una API C bloccante che richiede un wrapper per Tokio; russh è async-nativo senza frontiera FFI nel percorso critico. Il risultato: un singolo binario Rust che compila per oltre 10 architetture Linux senza toolchain C, con uno stack crittografico realmente verificabile."
   },
   "testimonial": {
     "quote": "OxideTerm non è nato per colmare un vuoto di mercato, ma per sfidare il confine tra prestazioni e funzionalità del terminale. SSH in Rust puro, zero dipendenze C. Un protocollo binario proprietario senza serializzazione JSON nel percorso critico. Crittografia di esportazione con ChaCha20-Poly1305 + Argon2id (costo di memoria 256 MB). Ogni decisione architetturale riflette un'unica ossessione: non sacrificare mai la correttezza per la comodità.",

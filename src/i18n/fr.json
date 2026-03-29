@@ -197,7 +197,9 @@
     "q4": "Puis-je utiliser OxideTerm hors ligne ?",
     "a4": "Oui. OxideTerm est une application locale sans dépendance cloud. Toutes les fonctionnalités sont disponibles hors ligne, sauf le chat IA qui nécessite une connexion internet pour accéder à votre fournisseur d'API configuré.",
     "q5": "Que faut-il pour les fonctionnalités IA ?",
-    "a5": "Apportez votre propre clé API (BYOK). OxideTerm supporte OpenAI, Anthropic, Google et tout endpoint compatible OpenAI. Les clés sont stockées de manière sécurisée dans le trousseau du système."
+    "a5": "Apportez votre propre clé API (BYOK). OxideTerm supporte OpenAI, Anthropic, Google et tout endpoint compatible OpenAI. Les clés sont stockées de manière sécurisée dans le trousseau du système.",
+    "q6": "Pourquoi OxideTerm n'utilise-t-il pas libssh2 ou OpenSSL ?",
+    "a6": "Trois raisons. Premièrement, la sécurité mémoire : la base de code C d'OpenSSL a produit des CVE critiques comme Heartbleed — le modèle de propriété de Rust élimine entièrement cette classe de bugs. Deuxièmement, zéro friction au déploiement : libssh2 nécessite les en-têtes de développement C de chaque plateforme cible et une version de système OpenSSL correspondante (les ABI de 1.0, 1.1 et 3.0 sont incompatibles) ; russh est fourni comme source Rust pure et Cargo gère tout. Troisièmement, performances asynchrones natives : libssh2 est une API C bloquante nécessitant un wrapper pour Tokio ; russh est async-natif, sans frontière FFI dans le chemin critique. Résultat : un binaire Rust unique qui compile pour plus de 10 architectures Linux sans chaîne de compilation C, avec une pile cryptographique réellement auditable."
   },
   "testimonial": {
     "quote": "OxideTerm n'a pas été conçu pour combler un vide — il a été conçu pour repousser les limites entre performance et capacité du terminal. SSH en Rust pur, zéro dépendance C. Un protocole binaire propriétaire sans sérialisation JSON dans le chemin critique. Chiffrement d'export en ChaCha20-Poly1305 + Argon2id (coût mémoire de 256 Mo). Chaque décision architecturale traduit une seule obsession : ne jamais sacrifier la justesse pour la commodité.",
