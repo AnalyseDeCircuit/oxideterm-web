@@ -1,82 +1,737 @@
 ---
 title: CLI Companion
-description: oxt — a lightweight CLI companion for controlling OxideTerm from the command line.
+description: "oxt — Complete reference for OxideTerm's CLI companion tool, covering architecture, protocol, all 18 methods, and security."
 ---
 
-**`oxt`** is OxideTerm's CLI companion — a **~1 MB binary** that communicates with the running OxideTerm app via **JSON-RPC 2.0** over Unix Socket (macOS/Linux) or Named Pipe (Windows).
+`oxt` CLI is a standalone command-line binary that communicates with the running OxideTerm GUI via IPC (Inter-Process Communication). From any terminal or shell script, you can:
 
-## What It Does
+- Query OxideTerm status and health information
+- List connections, sessions, local terminals, and port forwards
+- Perform session operations: connect, disconnect, focus, attach (mirror)
+- Create/delete port forwarding rules
+- Read configuration (groups, connection details)
+- Use AI (`ask` / `exec`) with streaming output, conversation continuation, and terminal Markdown rendering
 
-`oxt` lets you interact with OxideTerm from any terminal or script — check status, list sessions, and control connections without switching to the OxideTerm window.
+**Key design decisions:**
+
+- **Standalone binary**: `oxt` is a separate Rust crate (`cli/`), not compiled into the Tauri backend, keeping the CLI lightweight (~1 MB) and decoupled from the GUI lifecycle.
+- **Bundled, not auto-installed**: The CLI binary ships as a Tauri resource inside the app bundle. Users install it via Settings → General → CLI Companion, which creates a symlink on Unix or copies the binary to `~/.local/bin/oxt` on Windows.
+- **IPC, not HTTP**: Communication uses Unix Domain Socket (macOS/Linux) or Named Pipe (Windows) — no network exposure, no port conflicts, no TLS overhead.
+
+## Architecture
+
+```
+┌─────────────┐        JSON-RPC 2.0         ┌─────────────────┐
+│  oxt CLI    │◄── (newline-delimited) ────►│  OxideTerm GUI  │
+│  (Rust bin) │                              │   cli_server    │
+└──────┬──────┘                              └────────┬────────┘
+       │                                              │
+  Unix Socket                                    Tokio async
+  ~/.oxideterm/oxt.sock                          accept loop
+       │                                              │
+  Named Pipe (Windows)                           methods.rs
+  \\.\pipe\OxideTerm-CLI-{user}                  ├─ status/list/health methods
+                                                 ├─ session & tab operations
+                                                 ├─ forwarding & config methods
+                                                 └─ ask (streaming AI)
+```
+
+### Module Structure
+
+**Server** (`src-tauri/src/cli_server/`):
+
+| Module | Responsibility |
+|---|---|
+| `mod.rs` | `CliServer` — lifecycle management (start, accept loop, shutdown) |
+| `transport.rs` | `IpcListener` / `IpcStream` — abstraction over Unix Socket and Named Pipe |
+| `handler.rs` | Per-connection request loop with read limits and idle timeout |
+| `protocol.rs` | JSON-RPC 2.0 `Request`, `Response`, `RpcError`, `Notification` types |
+| `methods.rs` | RPC method dispatch and implementation |
+
+**Client** (`cli/src/`):
+
+| Module | Responsibility |
+|---|---|
+| `main.rs` | Clap CLI entry point, command definitions |
+| `connect.rs` | `IpcConnection` — synchronous IPC client (Unix Socket / Named Pipe) |
+| `protocol.rs` | Client-side JSON-RPC request/response types |
+| `output.rs` | `OutputMode` — human-readable or JSON output formatting |
+
+**GUI integration** (`src-tauri/src/commands/cli.rs`):
+
+| Command | Responsibility |
+|---|---|
+| `cli_get_status` | Returns bundled/installed status for the settings UI |
+| `cli_install` | Creates symlink on Unix, copies binary on Windows to install path |
+| `cli_uninstall` | Removes the installed CLI binary |
+
+## Communication Protocol
+
+### Transport Format
+
+- **Transport layer**: Unix Domain Socket or Named Pipe
+- **Frame format**: Newline-delimited JSON (one JSON object per line, terminated by `\n`)
+- **Encoding**: UTF-8
+
+### JSON-RPC 2.0
+
+Request example:
+
+```json
+{"id": 1, "method": "status", "params": {}}
+```
+
+Success response:
+
+```json
+{"id": 1, "result": {"version": "0.21.0", "sessions": 5, "connections": {"ssh": 3, "local": 2}, "pid": 12345}}
+```
+
+Error response:
+
+```json
+{"id": 1, "error": {"code": -32601, "message": "Method not found: foo"}}
+```
+
+### Error Codes
+
+| Code | Constant | Meaning |
+|---|---|---|
+| `-32600` | `ERR_INVALID_REQUEST` | Malformed JSON-RPC request |
+| `-32601` | `ERR_METHOD_NOT_FOUND` | Unknown method name |
+| `-32602` | `ERR_INVALID_PARAMS` | Invalid method parameters |
+| `-32603` | `ERR_INTERNAL` | Internal server error |
+| `1001` | `ERR_NOT_CONNECTED` | No active connection (reserved) |
+| `1003` | `ERR_TIMEOUT` | Operation timed out (reserved) |
+
+## Available Methods (17 + 1 Streaming)
+
+> Note: `ask` is classified as a streaming method (the server pushes incremental text via `stream_chunk` notifications). All others are standard JSON-RPC request/response.
+
+### Method Overview
+
+| Category | Methods |
+|---|---|
+| Status/Probe | `status`, `ping` |
+| List/Query | `list_saved_connections`, `list_sessions`, `list_active_connections`, `list_forwards`, `list_local_terminals`, `health` |
+| Session/Tab Ops | `disconnect`, `connect`, `open_tab`, `focus_tab`, `attach` |
+| Forwarding | `create_forward`, `delete_forward` |
+| Config | `config_list`, `config_get` |
+| AI (streaming) | `ask` |
+
+### `status`
+
+Returns a status summary of the OxideTerm instance.
+
+**Parameters**: `{}`
+
+**Response**:
+```json
+{
+  "version": "0.21.0",
+  "sessions": 5,
+  "connections": {
+    "ssh": 3,
+    "local": 2
+  },
+  "pid": 12345
+}
+```
+
+### `list_saved_connections`
+
+Returns all saved connection configurations (from `connections.json`).
+
+**Parameters**: `{}`
+
+**Response**:
+```json
+[
+  {
+    "name": "prod-server",
+    "host": "10.0.1.5",
+    "port": 22,
+    "username": "deploy",
+    "auth_type": "key"
+  }
+]
+```
+
+> Note: Passwords and private key contents are never included in responses.
+
+### `list_sessions`
+
+Returns all active sessions from the `SessionRegistry`.
+
+**Parameters**: `{}`
+
+**Response**:
+```json
+[
+  {
+    "id": "abc123...",
+    "name": "prod-server",
+    "host": "10.0.1.5",
+    "state": "active",
+    "uptime_secs": 3600
+  }
+]
+```
+
+### `list_active_connections`
+
+Returns all active SSH connections from the `SshConnectionRegistry`.
+
+**Parameters**: `{}`
+
+**Response**:
+```json
+[
+  {
+    "id": "conn-456...",
+    "host": "10.0.1.5",
+    "port": 22,
+    "username": "deploy",
+    "state": "active",
+    "ref_count": 2
+  }
+]
+```
+
+### `list_forwards`
+
+Lists port forwarding rules, optionally filtered by session.
+
+**Parameters**: `{ "session_id": "abc123" }` or `{}` (list all)
+
+**Response**:
+```json
+[
+  {
+    "session_id": "abc123...",
+    "id": "fwd-456...",
+    "forward_type": "local",
+    "bind_address": "127.0.0.1",
+    "bind_port": 8080,
+    "target_host": "localhost",
+    "target_port": 80,
+    "status": "active",
+    "description": "Web server"
+  }
+]
+```
+
+### `health`
+
+Gets connection health status.
+
+**Parameters**: `{ "session_id": "abc123" }` (single session) or `{}` (all sessions)
+
+**Single session response**:
+```json
+{
+  "session_id": "abc123...",
+  "status": "healthy",
+  "latency_ms": 42,
+  "message": "Connected • 42ms"
+}
+```
+
+**All sessions response**:
+```json
+{
+  "abc123...": {
+    "session_id": "abc123...",
+    "status": "healthy",
+    "latency_ms": 42,
+    "message": "Connected • 42ms"
+  },
+  "def456...": {
+    "session_id": "def456...",
+    "status": "degraded",
+    "latency_ms": 350,
+    "message": "High latency: 350ms"
+  }
+}
+```
+
+> Health status values: `healthy`, `degraded`, `unresponsive`, `disconnected`, `unknown`
+
+### `disconnect`
+
+Disconnects a specific session. Supports matching by session ID or name.
+
+**Parameters**: `{ "target": "abc123" }` or `{ "target": "prod-server" }`
+
+**Response**:
+```json
+{
+  "success": true,
+  "session_id": "abc123..."
+}
+```
+
+> The disconnect operation executes in sequence: persist terminal buffer → stop port forwards → close SSH session → clean up WebSocket bridge → clean up SFTP cache → clean up health checker → release connection pool.
+
+### `ping`
+
+Connectivity check, returns immediately.
+
+**Parameters**: `{}`
+
+**Response**:
+```json
+{"pong": true}
+```
+
+### `list_local_terminals`
+
+Returns the list of local terminal sessions (available when the `local-terminal` feature is enabled).
+
+**Parameters**: `{}`
+
+**Response example**:
+```json
+[
+  {
+    "id": "local-123...",
+    "shell_name": "zsh",
+    "cwd": "/Users/name/project"
+  }
+]
+```
+
+### `connect`
+
+Matches a saved connection by name/ID/host and initiates a connection (opens a session in the GUI).
+
+**Parameters**: `{ "target": "prod-server" }`
+
+### `open_tab`
+
+Opens a new local terminal tab.
+
+**Parameters**: `{ "path": "/path/to/workdir" }`
+
+### `focus_tab`
+
+Focuses an existing tab (SSH session or local terminal).
+
+**Parameters**: `{ "target": "session-id-or-name" }`
+
+### `attach`
+
+Attaches to a running session (SSH/local) for terminal mirroring.
+
+**Parameters**: `{ "session_id": "abc123" }`
+
+**Response example**:
+```json
+{
+  "ws_url": "ws://127.0.0.1:55321",
+  "ws_token": "single-use-token",
+  "terminal_type": "ssh",
+  "cols": 160,
+  "rows": 48
+}
+```
+
+### `create_forward`
+
+Creates a port forwarding rule for a session (local / remote / dynamic).
+
+### `delete_forward`
+
+Deletes a specific port forwarding rule.
+
+### `config_list`
+
+Lists connection groups and statistics.
+
+### `config_get`
+
+Queries a single connection's details (passwords and private key contents are never returned).
+
+### `ask` (Streaming)
+
+AI question interface. Supports:
+
+- `context` (stdin piped context)
+- `session_id` (attach terminal buffer context)
+- `model`, `provider` overrides
+- `stream` streaming output
+- `conversation_id` for continuation
+
+During streaming, the server sends:
+
+```json
+{"method":"stream_chunk","params":{"text":"..."}}
+```
+
+Final response example:
+
+```json
+{
+  "text": "...",
+  "model": "moonshot-v1-8k",
+  "done": true,
+  "conversation_id": "b1d0..."
+}
+```
+
+## CLI Usage
+
+### Installation
+
+The CLI tool is bundled inside the OxideTerm app package. To install:
+
+1. Open OxideTerm → Settings → General
+2. Find the **CLI Companion** section
+3. Click **Install**
+
+This creates a symlink on macOS/Linux or copies the binary on Windows.
+
+**Install paths:**
+- macOS/Linux: `~/.local/bin/oxt`
+- Windows: `%LOCALAPPDATA%\OxideTerm\bin\oxt.exe`
+
+Make sure the install directory is in your `$PATH`.
+
+### Commands
 
 ```bash
 # Check OxideTerm status
 oxt status
 
-# List active connections
-oxt list
+# List saved connections
+oxt list connections
 
-# Ping a connection
+# List active sessions
+oxt list sessions
+
+# List all port forwards
+oxt list forwards
+
+# List forwards for a specific session
+oxt list forwards <session-id>
+
+# View health status of all sessions
+oxt health
+
+# View health of a specific session
+oxt health <session-id>
+
+# Disconnect a session (by ID or name)
+oxt disconnect <session-id-or-name>
+
+# Connectivity check
 oxt ping
+
+# AI question (streaming by default)
+oxt ask "explain this log"
+
+# Pipe context from stdin
+echo "$(cat app.log)" | oxt ask "find root cause"
+
+# Force raw text output (no Markdown rendering)
+oxt ask --raw "show me command"
+
+# Continue a conversation
+oxt ask --continue <conversation-id> "give me safer variant"
+
+# Code/command generation mode (code-first output)
+oxt exec "write a bash script to rotate logs"
+
+# Connect by name and open in GUI
+oxt connect prod-server
+
+# Open a local terminal tab (optional path)
+oxt open ~/work
+
+# Focus a tab
+oxt focus <session-id-or-name>
+
+# Attach to mirror a session
+oxt attach <session-id-or-name>
+
+# Create/delete port forwards
+oxt forward add 8080:localhost:80 --session <session-id>
+oxt forward remove <forward-id> --session <session-id>
+
+# Config queries
+oxt config list
+oxt config get <connection-name-or-id>
+
+# Show version
+oxt version
+
+# Generate shell completion scripts
+oxt completions bash
+oxt completions zsh
+oxt completions fish
+oxt completions powershell
 ```
 
-## Output Formats
+### Global Options
 
-All commands support both human-readable and JSON output:
+| Option | Default | Description |
+|---|---|---|
+| `--json` | Auto-detect | Force JSON output (default: JSON when piped, human-readable in terminal) |
+| `--timeout <ms>` | `30000` | IPC timeout in milliseconds |
+| `--socket <path>` | Platform default | Custom socket/pipe path (for debugging) |
+
+### Output Modes
+
+The CLI auto-detects whether stdout is a terminal:
+
+- **Terminal** → Human-readable formatted tables
+- **Pipe/redirect** → Compact single-line JSON
+
+For AI output (`oxt ask`):
+
+- **TTY without `--raw`**: Rendered as Markdown with ANSI after completion
+- **Pipe/redirect or `--raw`**: Raw text output
+
+Use `--json` to always force JSON output.
+
+### Examples
 
 ```bash
-# Human-readable (default)
+# Human-readable status
 $ oxt status
 OxideTerm v0.21.0
-Status: Running
-Sessions: 3 active
+  Sessions:      5 active
+  Connections:   3 SSH, 2 local
 
-# Machine-readable JSON (for scripts)
+# JSON output (for scripting)
 $ oxt status --json
-{"version":"0.21.0","status":"running","sessions":3}
+{"version":"0.21.0","sessions":5,"connections":{"ssh":3,"local":2},"pid":12345}
+
+# List connections in scripts
+$ oxt list connections --json | jq '.[].host'
+"10.0.1.5"
+"192.168.1.100"
+
+# View all session health
+$ oxt health
+  SESSION        STATUS         LATENCY    MESSAGE
+  abc123de...    healthy        42ms       Connected • 42ms
+  def456gh...    degraded       350ms      High latency: 350ms
+
+# Check for unhealthy sessions in monitoring scripts
+$ oxt health --json | jq 'to_entries[] | select(.value.status != "healthy")'
+
+# List port forwards
+$ oxt list forwards
+  SESSION    TYPE     BIND                     TARGET                   STATUS     DESC
+  abc123de   local    127.0.0.1:8080           localhost:80             active     Web server
+  abc123de   dynamic  127.0.0.1:1080           SOCKS5                   active     SOCKS5 Proxy
+
+# Disconnect a session (by name)
+$ oxt disconnect prod-server
+Disconnected session: abc123...
+
+# Check if OxideTerm is running
+$ oxt ping && echo "Running" || echo "Not running"
+
+# Generate and install zsh completions
+$ oxt completions zsh > ~/.zfunc/_oxt
+
+# Custom timeout
+$ oxt status --timeout 5000
+
+# AI: streaming + Markdown terminal rendering
+$ oxt ask "explain pwd command"
+
+# AI: use raw for scripts/pipes
+$ oxt ask --raw "generate curl command" | pbcopy
+
+# AI: multi-turn conversation
+$ oxt ask "summarize this" --provider openai
+...
+Conversation: b1d0...
+$ oxt ask --continue b1d0... "give me concise version"
+
+# Attach: session mirroring, `~.` to exit
+$ oxt attach prod-server
 ```
 
-## Available Commands
+### Environment Variables
 
-| Command | Description |
-|---------|-------------|
-| `status` | Check if OxideTerm is running, get version info and active session count |
-| `list` | List all active SSH sessions with host, user, state, and uptime |
-| `ping` | Test connectivity to a specific connection |
+| Variable | Platform | Description |
+|---|---|---|
+| `OXIDETERM_SOCK` | macOS/Linux | Override default socket path |
+| `OXIDETERM_PIPE` | Windows | Override default named pipe path |
 
-## Communication Protocol
+## Security
 
-### Transport
+### IPC Transport Security
 
-| Platform | Transport | Path |
-|----------|-----------|------|
-| **macOS** | Unix Socket | `~/Library/Application Support/com.oxideterm.app/oxideterm.sock` |
-| **Linux** | Unix Socket | `~/.config/com.oxideterm.app/oxideterm.sock` |
-| **Windows** | Named Pipe | `\\.\pipe\oxideterm` |
+- **Unix Socket**: Created at `~/.oxideterm/oxt.sock` with permissions `0o600` (owner read/write only)
+- **Named Pipe**: `\\.\pipe\OxideTerm-CLI-{username}` — scoped to the current user
+- **Stale socket detection**: On startup, the server probes any existing socket. If unreachable, the stale socket is deleted; if reachable, startup fails with "another OxideTerm instance is running".
 
-### Protocol
+### Resource Limits
 
-The protocol is **JSON-RPC 2.0** — a lightweight, standardized protocol for remote procedure calls:
+| Limit | Value | Purpose |
+|---|---|---|
+| Max concurrent connections | 16 | Prevent resource exhaustion (Semaphore) |
+| Max request size | 1 MB | Bounded line reads, prevent memory abuse |
+| Max response size | 4 MB | Client `.take()` limit |
+| Idle timeout | 60 seconds | Disconnect inactive clients |
 
-```json
-// Request
-{"jsonrpc": "2.0", "method": "status", "id": 1}
+AI-specific limits:
 
-// Response
-{"jsonrpc": "2.0", "result": {"version": "0.21.0", "status": "running"}, "id": 1}
+| Limit | Value | Description |
+|---|---|---|
+| `MAX_PROMPT_SIZE` | 50 KB | Single prompt size cap |
+| `MAX_CONTEXT_SIZE` | 500 KB | stdin context size cap |
+| `MAX_TERMINAL_BUFFER_LINES` | 2,000 lines | Session buffer injection cap |
+| Streaming read timeout | 180 seconds | `oxt ask` client read timeout |
+
+### Data Exposure Principles
+
+- No RPC method **ever** returns passwords
+- `list_saved_connections` exposes private key file paths only, never key contents
+- The IPC server binds only to local IPC, never opens any network-accessible port
+
+## Build & Distribution
+
+### Local Build
+
+```bash
+# Check compilation
+cd cli && cargo check
+
+# Release build (size-optimized)
+cd cli && cargo build --release
 ```
 
-This makes it easy to integrate with scripts, CI/CD pipelines, and monitoring tools. Any language with JSON-RPC support can communicate with OxideTerm.
+The release profile uses `lto = true`, `strip = true`, `opt-level = "z"`, producing a binary of approximately 1 MB.
 
-## Installation
+### CI Integration
 
-`oxt` is included with OxideTerm — no separate installation required. The binary is available in the application bundle:
+The CLI is automatically built and packaged for all 6 platform targets in GitHub Actions:
 
-| Platform | Location |
-|----------|----------|
-| **macOS** | `/Applications/OxideTerm.app/Contents/MacOS/oxt` |
-| **Linux** | Depends on installation method; typically alongside the main binary |
-| **Windows** | Same directory as `OxideTerm.exe` |
+1. **Build step**: Runs `cargo build --release --target ${{ matrix.target }}` in the `cli/` directory
+2. **Copy**: Binary placed in `src-tauri/cli-bin/`
+3. **Packaging**: `tauri.conf.json`'s `bundle.resources` includes the `"cli-bin/*"` glob, so Tauri automatically bundles matching CLI binaries as resources
+4. **Distribution**: Tauri includes the CLI binary in the final `.app` / `.deb` / `.exe` installer
+
+During local `pnpm tauri dev`, the `cli-bin/` directory doesn't exist; the glob matches zero files, causing no errors.
+
+### Supported Targets
+
+| Platform | Build Target | Binary Name |
+|---|---|---|
+| macOS (ARM) | `aarch64-apple-darwin` | `oxt` |
+| macOS (Intel) | `x86_64-apple-darwin` | `oxt` |
+| Linux (x64) | `x86_64-unknown-linux-gnu` | `oxt` |
+| Linux (ARM) | `aarch64-unknown-linux-gnu` | `oxt` |
+| Windows (x64) | `x86_64-pc-windows-msvc` | `oxt.exe` |
+| Windows (ARM) | `aarch64-pc-windows-msvc` | `oxt.exe` |
+
+### Version Sync
+
+The CLI version stays in sync with OxideTerm via `pnpm version:bump`, which simultaneously updates `cli/Cargo.toml`, `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`.
+
+## GUI Integration
+
+### Settings UI
+
+The CLI Companion section is located in Settings → General:
+
+- **Status badge**: Shows "Installed", "Not Installed", or "Not Bundled"
+- **Install button**: Symlinks/copies the bundled CLI to `~/.local/bin/oxt`
+- **Uninstall button**: Removes the installed CLI binary
+- **Auto-detect**: Status refreshes automatically when the General tab is opened
+
+### Tauri Commands
+
+| IPC Command | Description |
+|---|---|
+| `cli_get_status` | Returns `{ bundled: bool, installed: bool, install_path: string }` |
+| `cli_install` | Installs the CLI from bundled resources to the install path |
+| `cli_uninstall` | Removes the installed CLI binary |
+
+### Resource Resolution Order
+
+`find_bundled_cli()` searches for the CLI binary in order:
+
+1. Tauri resource path: `cli-bin/{binary_name}` (from `tauri.conf.json` static config)
+2. Direct resource path: `{binary_name}` (fallback)
+3. Executable directory: `{exe_dir}/{binary_name}` (development fallback)
+
+## Server Lifecycle
+
+### Startup
+
+The CLI server starts automatically in OxideTerm's Tauri `setup` callback:
+
+```
+App startup → setup() → CliServer::start(app_handle) → spawn accept loop
+```
+
+Startup failure does not affect the main app: if the IPC server fails to bind (e.g., another instance is running), the GUI continues normally and the error is logged.
+
+### Shutdown
+
+On app exit, the CLI server shuts down gracefully:
+
+```
+App exit → server.shutdown() → oneshot signal → accept loop exits → socket cleanup
+```
+
+Shutdown uses the `Mutex<Option<oneshot::Sender>>` pattern for reliable single-signal delivery.
+
+### Connection Handling
+
+Each CLI connection runs in an independent Tokio task:
+
+```
+Accept connection → Semaphore permit → spawn task → read/dispatch/respond loop → release permit
+```
+
+The Semaphore limits concurrent connections to 16; excess connections are immediately rejected.
+
+## Shell Completions
+
+`oxt` has built-in shell completion script generation via `clap_complete`, supporting bash, zsh, fish, and PowerShell.
+
+### Installing Completions
+
+**Bash**:
+```bash
+oxt completions bash > ~/.local/share/bash-completion/completions/oxt
+```
+
+**Zsh**:
+```bash
+# Ensure ~/.zfunc is in fpath (add fpath=(~/.zfunc $fpath) to .zshrc)
+oxt completions zsh > ~/.zfunc/_oxt
+```
+
+**Fish**:
+```bash
+oxt completions fish > ~/.config/fish/completions/oxt.fish
+```
+
+**PowerShell**:
+```powershell
+oxt completions powershell >> $PROFILE
+```
+
+Reload your shell after installation to enable Tab completion.
+
+## Future Plans
+
+Features that may be added in future releases:
+
+- `oxt transfer <name> <local> <remote>` — SFTP file transfers
+- `oxt config set` — Modify connection configuration from the command line
+- `oxt chat` — Interactive multi-turn REPL (currently `ask --continue`)
+- Server-initiated push notifications (event streams)
+- Dynamic shell completions (live querying of connection names and session IDs)
 
 You can add the binary location to your `PATH` for convenient access from any terminal.
 
