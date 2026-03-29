@@ -97,13 +97,13 @@
 
 /* Starlight headings: use serif for consistency */
 .sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
-.hero .hero-html h1,
 .page-title {
   font-family: var(--font-serif);
 }
 
 /* Splash hero title: use sans-serif for better Latin + CJK harmony */
-.hero h1 {
+.hero h1,
+.hero .hero-html h1 {
   font-family: var(--font-sans);
 }
 
