@@ -1,6 +1,24 @@
 @import "tailwindcss";
 
 /* ========================================
+   CJK Serif weight correction
+   宋体 (Regular 400) 笔画视觉偏细，与拉丁衬线不匹配。
+   通过 @font-face unicode-range 将 CJK 码段映射到 Medium (500) 字重变体，
+   英文 Source Serif 4 保持 Regular (400) 不受影响。
+   ======================================== */
+@font-face {
+  font-family: 'CJK Serif';
+  src: local('Noto Serif SC Medium'),
+       local('NotoSerifSC-Medium'),
+       local('Source Han Serif SC Medium'),
+       local('SourceHanSerifSC-Medium');
+  font-weight: 400;
+  font-style: normal;
+  unicode-range: U+4E00-9FFF, U+3400-4DBF, U+F900-FAFF,
+                 U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+FF00-FFEF;
+}
+
+/* ========================================
    Restore list markers stripped by Tailwind 4 preflight
    Scoped to Starlight markdown content only
    ======================================== */
@@ -54,7 +72,7 @@
   --ot-terminal-bg: #1c1c28;
   --ot-terminal-text: #d4d4e0;
   --ot-terminal-green: #4ade80;
-  --font-serif: 'Source Serif 4', 'Noto Serif SC', 'Source Han Serif SC', STSong, 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-serif: 'Source Serif 4', 'CJK Serif', 'Noto Serif SC', 'Source Han Serif SC', STSong, 'Palatino Linotype', Palatino, Georgia, serif;
   --font-sans: 'Inter', 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace;
 }
@@ -99,13 +117,6 @@
 .sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
 .page-title {
   font-family: var(--font-serif);
-}
-
-/* CJK Serif weight correction — 宋体在 weight 400 时笔画视觉偏细。
-   Source Serif 4（可变字体）在 500 时仍保持良好可读性；CJK 系统字体
-   直接命中 Medium (500)，使中英文正文字重达到视觉均衡。 */
-.sl-markdown-content {
-  font-weight: 500;
 }
 
 /* Splash hero title: use sans-serif for better Latin + CJK harmony */
