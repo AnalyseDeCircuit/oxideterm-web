@@ -58,8 +58,8 @@ Customize the entire application UI through CSS custom properties:
 | Variable | Purpose |
 |----------|---------|
 | `--theme-border` | Standard borders |
-| `--theme-border-muted` | Subtle borders and dividers |
-| `--theme-border-active` | Focused/active element borders |
+| `--theme-border-strong` | Emphasized borders |
+| `--theme-divider` | Section divider lines |
 
 #### Accent Layer (4 variables)
 
@@ -97,12 +97,81 @@ The theme engine can automatically **generate UI colors from the terminal ANSI p
 
 This means you can start from any terminal color scheme and get a matching full-app theme with one click.
 
+### Derivation Rules
+
+The auto-derive algorithm maps terminal colors to UI colors:
+
+| Terminal Source | Generated UI Colors |
+|----------------|-------------------|
+| `background` | `bg`, `bgPanel` (+15), `bgHover` (+30), `bgActive` (+40), `bgSecondary` (+10) |
+| `foreground` | `text` |
+| `brightBlack` | `textMuted`; blended with foreground → `textSecondary` |
+| `background` | `border` (+30), `divider` (+20) |
+| `cursor` | `accent`, `accentHover` (−20); blended with background → `accentText` |
+| `brightBlack` | `accentSecondary` |
+| `green` | `success` |
+| `yellow` | `warning` |
+| `red` | `error` |
+| `blue` | `info` |
+
+The `+N` notation means a fixed delta is added to each RGB channel (clamped 0–255). Users can always manually override any derived color.
+
+## Theme Editor
+
+The visual theme editor modal provides:
+
+- **Theme name** input — free text; auto-generates a slug for the theme ID
+- **Based On** dropdown — duplicate from any built-in theme when creating new
+- **Live preview** — mini terminal simulation with colored prompt, git output, and blinking cursor; UI chrome bar showing accent button, hover state, panel, and semantic status dots
+- **Terminal Colors tab** — 4-column grid of 20 color swatches, each with a native color picker and hex input (`#RRGGBB`)
+- **UI Colors tab** — five grouped sections (Background, Text, Borders, Accent, Status) with "Auto from Terminal" button to re-derive
+- **Save** — persists to localStorage and applies immediately
+- **Delete** — removes custom theme (edit mode only)
+
 ## Applying Themes
 
 1. Open **Settings** → **Appearance**
 2. Browse built-in themes with instant preview
 3. Select a theme to apply — changes take effect immediately, no restart required
 4. Create a custom theme by clicking **New Theme** and using the visual editor
+
+### How Built-in Themes Work
+
+Built-in themes define their UI variables in CSS `[data-theme="..."]` blocks. When you select a built-in theme, the `data-theme` attribute on `<html>` is updated and xterm.js receives the corresponding color scheme.
+
+### How Custom Themes Work
+
+Custom themes bypass `data-theme` entirely. Instead, inline `style.setProperty()` calls set all 19+ CSS variables directly on the `<html>` element, taking CSS specificity precedence over any built-in theme block.
+
+## Storage Format
+
+Custom themes are stored in `localStorage` under the key `oxide-custom-themes`:
+
+```json
+{
+  "custom:my-neon": {
+    "name": "My Neon",
+    "terminalColors": {
+      "background": "#0a0a0f",
+      "foreground": "#e0e0ff",
+      "cursor": "#ff00ff",
+      "black": "#1a1a2e",
+      "red": "#ff3366"
+    },
+    "uiColors": {
+      "bg": "#0a0a0f",
+      "bgPanel": "#14142a",
+      "accent": "#ff00ff",
+      "success": "#00ff88",
+      "warning": "#ffcc00",
+      "error": "#ff3366",
+      "info": "#3388ff"
+    }
+  }
+}
+```
+
+Theme IDs follow the pattern `custom:{slug}` where the slug is derived from the display name (lowercase, non-alphanumeric replaced with hyphens, CJK characters preserved).
 
 ## Sharing Themes
 

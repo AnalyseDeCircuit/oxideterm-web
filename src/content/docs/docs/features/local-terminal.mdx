@@ -1,0 +1,230 @@
+---
+title: Local Terminal
+description: Native shell integration — run terminal sessions on your local machine without SSH, supporting multi-shell and cross-platform.
+---
+
+OxideTerm doubles as a local terminal emulator, letting you run native shell sessions alongside your SSH connections. No server or network required — just open a tab and start working.
+
+## Quick Start
+
+### Create a Local Terminal
+
+**Keyboard shortcut**: `⌘T` (macOS) or `Ctrl+T` (Windows/Linux)
+
+You can also:
+- Click the **Local Terminal** button in the sidebar
+- Use **File → New Local Terminal** from the menu
+- Open the **Shell Selector** with `⌘⇧T` / `Ctrl+Shift+T` to pick a specific shell
+
+## Shell Detection
+
+OxideTerm automatically scans your system for available shells. Here's what it finds on each platform:
+
+### macOS
+
+| Shell | Path | Notes |
+|-------|------|-------|
+| **Zsh** | `/bin/zsh` | System default |
+| **Bash** | `/bin/bash` | Built-in |
+| **Fish** | `/opt/homebrew/bin/fish` or `/usr/local/bin/fish` | If installed |
+| **Nushell** | `/opt/homebrew/bin/nu` or `/usr/local/bin/nu` | If installed |
+
+### Windows
+
+| Shell | Path | Notes |
+|-------|------|-------|
+| **PowerShell 7+** | `C:\Program Files\PowerShell\7\pwsh.exe` | Recommended |
+| **PowerShell 5.1** | `C:\...\WindowsPowerShell\v1.0\powershell.exe` | Built-in |
+| **Git Bash** | `C:\Program Files\Git\bin\bash.exe` | If installed |
+| **WSL** | `C:\Windows\System32\wsl.exe` | Recommended |
+| **Command Prompt** | `C:\Windows\System32\cmd.exe` | Legacy |
+
+### Linux
+
+| Shell | Path | Notes |
+|-------|------|-------|
+| **Bash** | `/bin/bash` | Universal default |
+| **Zsh** | `/usr/bin/zsh` | If installed |
+| **Fish** | `/usr/bin/fish` | If installed |
+| **Dash** | `/bin/dash` | Lightweight |
+
+Shell scanning reads `/etc/shells` on macOS/Linux and probes common paths on Windows.
+
+### Setting the Default Shell
+
+1. Open **Settings** (`⌘,` / `Ctrl+,`)
+2. Go to the **Local Terminal** tab
+3. Select your preferred shell from the dropdown
+4. Click **Save**
+
+### Custom Shells
+
+If your shell isn't auto-detected, add it to `~/.oxideterm/shells.json` (macOS/Linux) or `%APPDATA%\OxideTerm\shells.json` (Windows):
+
+```json
+{
+  "custom_shells": [
+    {
+      "name": "custom-shell",
+      "label": "My Custom Shell",
+      "path": "/usr/local/bin/my-shell",
+      "args": ["--login"]
+    }
+  ]
+}
+```
+
+Restart OxideTerm to pick up the changes.
+
+## Windows Enhancements
+
+### Automatic UTF-8 Encoding
+
+When Oh My Posh is enabled, PowerShell initializes UTF-8 encoding automatically:
+
+```powershell
+[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+```
+
+This ensures CJK characters, emoji, and Nerd Font icons render correctly.
+
+### Oh My Posh Auto-Init
+
+If `oh-my-posh` is detected on the system, OxideTerm automatically injects its initialization into PowerShell sessions:
+
+```powershell
+oh-my-posh init pwsh --config '<your-theme-path>' | Invoke-Expression
+```
+
+**Prerequisites**: Install Oh My Posh (`winget install JanDeDobbeleer.OhMyPosh`), a Nerd Font, and select the Nerd Font in OxideTerm settings.
+
+### WSL Environment Variables
+
+WSL sessions automatically receive these environment variables:
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `TERM` | `xterm-256color` | Terminal type |
+| `COLORTERM` | `truecolor` | True color support |
+| `TERM_PROGRAM` | `OxideTerm` | Terminal identifier |
+| `TERM_PROGRAM_VERSION` | Current version | Version info |
+| `POSH_THEME` | User-configured path | Oh My Posh theme (auto-converted from Windows path) |
+
+## Multi-Terminal Management
+
+Each local terminal tab spawns an independent shell process. You can run different shells in different working directories simultaneously:
+
+```
+Terminal 1: PowerShell  (C:\Users\alice)
+Terminal 2: Git Bash    (C:\projects\app)
+Terminal 3: WSL Ubuntu  (/home/alice)
+```
+
+Combine with **split panes** — each pane owns its own independent PTY process.
+
+:::note
+When closing a tab that contains split panes, OxideTerm recursively cleans up all PTY processes in the pane tree. No orphan processes are left behind.
+:::
+
+## Advanced Configuration
+
+### Shell Arguments
+
+Some shells need specific arguments for the best experience:
+
+```json
+{
+  "custom_shells": [
+    {
+      "name": "zsh",
+      "label": "Zsh (Login)",
+      "path": "/bin/zsh",
+      "args": ["-l"]
+    },
+    {
+      "name": "bash",
+      "label": "Bash (Interactive)",
+      "path": "/bin/bash",
+      "args": ["-i"]
+    }
+  ]
+}
+```
+
+### Shell-Specific Initialization
+
+Detect OxideTerm in your shell profile for custom configuration:
+
+**Zsh** (`~/.zshrc`):
+```bash
+if [[ "$TERM_PROGRAM" == "OxideTerm" ]]; then
+    export PS1="%F{cyan}%~ %F{white}❯ "
+fi
+```
+
+**Bash** (`~/.bashrc`):
+```bash
+if [[ "$TERM_PROGRAM" == "OxideTerm" ]]; then
+    export PS1="\[\e[36m\]\w \[\e[0m\]❯ "
+fi
+```
+
+**PowerShell** (`$PROFILE`):
+```powershell
+if ($env:TERM_PROGRAM -eq "OxideTerm") {
+    function prompt { "$PWD> " }
+}
+```
+
+## Keyboard Shortcuts
+
+| Action | macOS | Windows / Linux |
+|--------|-------|-----------------|
+| New Local Terminal | `⌘ T` | `Ctrl+T` |
+| Shell Selector | `⌘ ⇧T` | `Ctrl+Shift+T` |
+| Close Tab | `⌘ W` | `Ctrl+W` |
+| Next Tab | `⌘ }` | `Ctrl+Tab` |
+| Previous Tab | `⌘ {` | `Ctrl+Shift+Tab` |
+| Clear Screen | `⌘ K` | `Ctrl+L` |
+
+## Performance
+
+| Metric | Typical Value |
+|--------|--------------|
+| Memory per terminal | ~10 MB |
+| CPU (idle) | ~0–1% |
+| Startup time | < 100 ms |
+| I/O latency | < 1 ms |
+| Buffer read size | 8 KB |
+
+## Comparison with Traditional Terminals
+
+| Feature | OxideTerm Local | iTerm2 / Alacritty | Windows Terminal |
+|---------|----------------|-------------------|------------------|
+| **Cross-platform** | macOS, Windows, Linux | Single platform | Windows only |
+| **SSH integration** | Seamless tab switching | External tools | Limited |
+| **Topology routing** | ProxyJump pathfinding | — | — |
+| **AI assistant** | Built-in OxideSens | — | — |
+| **Connection pool** | Shared SSH channels | — | — |
+
+## Troubleshooting
+
+**Shell not detected?**
+Check that the shell binary exists and is executable. Verify with `which zsh` (Unix) or `where pwsh` (Windows). If it's in a non-standard path, add it to `shells.json` and restart OxideTerm.
+
+**Terminal won't start?**
+Check the developer console (`⌘⌥I` / `Ctrl+Shift+I`) for error logs. Make sure OxideTerm has permission to execute the shell binary. Try a different shell.
+
+**Garbled output?**
+Verify your shell's encoding with `echo $LANG` — it should include `UTF-8`. Set `TERM=xterm-256color` if needed. Install a Nerd Font if icon glyphs are broken.
+
+**Slow PowerShell startup?**
+PowerShell loads `$PROFILE` on launch. Optimize your profile or launch with `-NoProfile`. PowerShell 7 is faster than 5.1.
+
+**WSL connection issues?**
+Run `wsl --list --verbose` to check WSL status. Ensure WSL 2 is installed and a default distribution is set (`wsl --set-default Ubuntu`).
+
+:::note
+Local terminal is a feature-gated capability (`local-terminal`). It can be disabled with `cargo build --no-default-features` for mobile/lightweight builds.
+:::

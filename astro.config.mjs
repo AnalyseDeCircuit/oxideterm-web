@@ -80,6 +80,16 @@ export default defineConfig({
               translations: { "zh-CN": "终端" },
             },
             {
+              slug: "docs/features/local-terminal",
+              label: "Local Terminal",
+              translations: { "zh-CN": "本地终端" },
+            },
+            {
+              slug: "docs/features/terminal-search",
+              label: "Terminal Search",
+              translations: { "zh-CN": "终端搜索" },
+            },
+            {
               slug: "docs/features/sftp",
               label: "SFTP",
             },
@@ -161,6 +171,11 @@ export default defineConfig({
               slug: "docs/features/cli",
               label: "CLI Companion",
               translations: { "zh-CN": "CLI 伴侣工具" },
+            },
+            {
+              slug: "docs/features/keyboard-shortcuts",
+              label: "Keyboard Shortcuts",
+              translations: { "zh-CN": "快捷键" },
             },
           ],
         },

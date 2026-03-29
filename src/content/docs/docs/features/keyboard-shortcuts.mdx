@@ -1,0 +1,73 @@
+---
+title: Keyboard Shortcuts
+description: Complete keyboard shortcut reference for OxideTerm — application, terminal, split pane, and SFTP shortcuts.
+---
+
+A comprehensive reference of all keyboard shortcuts available in OxideTerm.
+
+## Application & Window
+
+| Action | macOS | Windows / Linux |
+|--------|-------|-----------------|
+| New Local Terminal | `⌘ T` | `Ctrl+T` |
+| Shell Selector | `⌘ ⇧T` | `Ctrl+Shift+T` |
+| New SSH Connection | `⌘ N` | `Ctrl+N` |
+| Close Current Tab | `⌘ W` | `Ctrl+W` |
+| Next Tab | `⌘ }` | `Ctrl+Tab` |
+| Previous Tab | `⌘ {` | `Ctrl+Shift+Tab` |
+| Jump to Tab 1–9 | `⌘ 1`–`⌘ 9` | `Ctrl+1`–`Ctrl+9` |
+| Command Palette | `⌘ K` | `Ctrl+K` |
+| Toggle Sidebar | `⌘ \` | `Ctrl+\` |
+| Open Settings | `⌘ ,` | `Ctrl+,` |
+| Zen Mode | `⌘ ⇧Z` | `Ctrl+Shift+Z` |
+| Keyboard Shortcuts Help | `⌘ /` | `Ctrl+/` |
+
+### Command Palette Extras
+
+These actions are accessible from the command palette:
+
+| Action | macOS | Windows / Linux |
+|--------|-------|-----------------|
+| Toggle Bottom Panel | `⌘ J` | `Ctrl+J` |
+| Broadcast Input | `⌘ B` | `Ctrl+B` |
+| AI Sidebar | `⌘ ⇧A` | `Ctrl+Shift+A` |
+
+## Terminal (In-Terminal)
+
+These shortcuts work when a terminal pane is focused:
+
+| Action | macOS | Windows / Linux |
+|--------|-------|-----------------|
+| Search | `⌘ F` | `Ctrl+Shift+F` (Win) / `Ctrl+F` (Lin) |
+| Inline AI Panel | `⌘ I` | `Ctrl+Shift+I` |
+| Close Panel | `Esc` | `Esc` |
+| Copy | `⌘ C` | `Ctrl+Shift+C` (or auto-copy on select) |
+| Paste | `⌘ V` | `Ctrl+Shift+V` (or right-click) |
+
+:::note
+On Linux with terminal focus, some shortcuts use `Super` (logo key) instead of `Ctrl` to avoid conflicts with shell shortcuts. Check the actual keybinding in the app if `Ctrl+Shift+F` doesn't respond.
+:::
+
+## Split Pane
+
+| Action | macOS | Windows / Linux |
+|--------|-------|-----------------|
+| Split Horizontally | `⌘ ⇧E` | `Ctrl+Shift+E` |
+| Split Vertically | `⌘ ⇧D` | `Ctrl+Shift+D` |
+| Close Current Pane | `⌘ ⇧W` | `Ctrl+Shift+W` |
+| Move Focus Between Panes | `⌘ ⌥ Arrow` | `Ctrl+Alt+Arrow` |
+
+## SFTP
+
+| Action | Shortcut |
+|--------|----------|
+| Upload / Download | `→` / `←` |
+| Select All | `⌘ A` / `Ctrl+A` |
+| Rename | `F2` |
+| Delete | `Delete` |
+
+## Tips
+
+- The **Command Palette** (`⌘K` / `Ctrl+K`) provides fuzzy search across all available actions — use it when you forget a shortcut.
+- Shortcut bindings are consistent with the app's **Settings → Help** section and the `getShortcutCategories` definition in the source.
+- Some terminal-focused shortcuts differ between platforms because OxideTerm avoids intercepting common shell keybindings (like `Ctrl+C` for SIGINT).

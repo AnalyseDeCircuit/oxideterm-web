@@ -1,0 +1,201 @@
+---
+title: Terminal Search
+description: Dual-mode search engine — search visible buffer in real-time or deep history asynchronously, with regex and advanced options.
+---
+
+OxideTerm provides two search modes for finding content in your terminal sessions — one for the current viewport, and another for the full session history.
+
+## Two Search Modes
+
+| Mode | Scope | Speed | Best For |
+|------|-------|-------|----------|
+| **Visible Buffer** | Current viewport + xterm.js scrollback | Real-time (< 5 ms) | Finding recent output quickly |
+| **Deep History** | Full session history (up to 100,000 lines) | Async (50–100 ms) | Searching through extensive command history |
+
+## Opening Search
+
+**Keyboard shortcut**:
+- macOS: `⌘F`
+- Windows: `Ctrl+Shift+F`
+- Linux: `Ctrl+F`
+
+Or right-click in the terminal → **Search**.
+
+## Search Interface
+
+```
+┌──────────────────────────────────────────────────────┐
+│  [Visible Buffer] [Deep History]                [×]  │
+├──────────────────────────────────────────────────────┤
+│  🔍 Search terminal output...       2/15  [↑] [↓]   │
+├──────────────────────────────────────────────────────┤
+│  □ Aa (Case)  □ .* (Regex)  □ Word (Whole Word)     │
+└──────────────────────────────────────────────────────┘
+```
+
+| Element | Function |
+|---------|----------|
+| **Mode tabs** | Switch between Visible Buffer and Deep History |
+| **Search input** | Type your search query |
+| **Match counter** | Shows current position / total matches (e.g. `2/15`) |
+| **Navigation** | `↑` previous, `↓` next match |
+| **Options** | Case sensitivity, regex, whole word matching |
+
+## Visible Buffer Mode
+
+Searches content **currently visible** in the terminal viewport using xterm.js's native SearchAddon.
+
+- **Real-time highlighting** — results appear as you type (150 ms debounce)
+- **Yellow highlight** — matching text highlighted in yellow
+- **Orange highlight** — currently selected match shown in orange
+- **Fast** — millisecond response, no backend round-trip
+
+### Navigation
+
+| Action | Shortcut |
+|--------|----------|
+| Next match | `Enter` or click `↓` |
+| Previous match | `Shift+Enter` or click `↑` |
+| Close search | `Esc` |
+
+### Match Limit
+
+Visible Buffer search caps at **1,000 matches** for performance. If you see `1000+ matches`, refine your search query.
+
+## Deep History Mode
+
+Searches the **full session history** stored in the backend scrollback buffer — default 30,000 lines, configurable up to 100,000 in settings.
+
+- **Asynchronous** — runs via `spawn_blocking`, keeping the UI responsive
+- **Result list** — displays all matches with line numbers and content
+- **Click to jump** — click any result to scroll the terminal to that position
+- **Powered by Rust Regex** — fast pattern matching on large buffers
+
+### Viewing Results
+
+```
+┌──────────────────────────────────────────────────────┐
+│  15 matches (45ms)                                   │
+├──────────────────────────────────────────────────────┤
+│  Line 1234                                           │
+│  npm install react-dom                               │
+├──────────────────────────────────────────────────────┤
+│  Line 2456                                           │
+│  npm install success — installed 23 packages         │
+├──────────────────────────────────────────────────────┤
+│  ...                                                 │
+└──────────────────────────────────────────────────────┘
+```
+
+Deep History shows the **first 100 matches**. If more exist, a footer shows the total count (e.g. `Showing first 100 of 456 matches`).
+
+## Search Options
+
+### Case Sensitive (Aa)
+
+| State | Behavior |
+|-------|----------|
+| **Off** (default) | `error` matches `error`, `Error`, `ERROR` |
+| **On** | `error` matches only `error` |
+
+### Regular Expression (.*)
+
+| State | Behavior |
+|-------|----------|
+| **Off** (default) | `file.txt` matches literally — the `.` is escaped |
+| **On** | `file.txt` also matches `fileXtxt` — `.` matches any character |
+
+### Whole Word (Word)
+
+| State | Behavior |
+|-------|----------|
+| **Off** (default) | `test` matches `test`, `testing`, `contest` |
+| **On** | `test` matches only the standalone word `test` |
+
+Word boundaries include spaces, punctuation, and line start/end.
+
+## Common Regex Patterns
+
+| Pattern | Description | Example |
+|---------|-------------|---------|
+| `^xxx` | Line start | `^Error:` matches lines beginning with `Error:` |
+| `xxx$` | Line end | `success$` matches lines ending with `success` |
+| `a\|b` | OR | `ERROR\|FATAL` matches either word |
+| `\d+` | Digits | `port \d+` matches `port 3000`, `port 8080` |
+| `\w+` | Word chars | `user_\w+` matches `user_admin`, `user_123` |
+| `.*` | Any chars | `start.*end` matches anything between `start` and `end` |
+
+## Use Cases
+
+### Finding Error Logs
+
+1. Switch to **Deep History**
+2. Enable **Regex**
+3. Search: `^(ERROR|FATAL):`
+4. Click results to jump to each occurrence
+
+### Recent Git Commands
+
+1. Stay in **Visible Buffer**
+2. Search: `git commit`
+3. Press `Shift+Enter` to navigate upward
+
+### Extracting IP Addresses
+
+1. Switch to **Deep History**
+2. Enable **Regex**
+3. Search: `\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b`
+4. Browse the result list
+
+### Finding Port Numbers
+
+1. Stay in **Visible Buffer**
+2. Enable **Regex**
+3. Search: `port \d+`
+
+## Performance
+
+### Visible Buffer
+
+| Metric | Value |
+|--------|-------|
+| Response time | < 5 ms |
+| Max matches | 1,000 |
+| Scope | Viewport + xterm.js scrollback |
+
+### Deep History
+
+| Metric | Value |
+|--------|-------|
+| Search speed | 50–100 ms (100K lines) |
+| Engine | Rust Regex |
+| Execution | Async (`spawn_blocking`) |
+| Default history | 30,000 lines (configurable to 100,000) |
+
+## Advanced Tips
+
+**Combine options** — Enable Regex + Case Sensitive + Whole Word together. For example, `\bError\b` matches only the standalone capitalized word "Error".
+
+**Negative lookahead** — Use `^(?!.*DEBUG).*ERROR` to find lines containing `ERROR` but not `DEBUG`.
+
+**Anchored search** — Add `^` or `$` to reduce false matches and improve performance.
+
+## Keyboard Shortcuts
+
+| Action | macOS | Windows / Linux |
+|--------|-------|-----------------|
+| Open search | `⌘ F` | `Ctrl+Shift+F` (Win) / `Ctrl+F` (Lin) |
+| Close search | `Esc` | `Esc` |
+| Next match | `Enter` | `Enter` |
+| Previous match | `Shift+Enter` | `Shift+Enter` |
+
+## Troubleshooting
+
+**No results but content exists?**
+Turn off Case Sensitive. Switch to Deep History if the content has scrolled past the viewport. Check regex syntax if enabled — look for error messages at the bottom of the search bar.
+
+**Deep History search slow?**
+Simplify regex patterns. Add more specific search terms. Very large histories (100K+ lines) with complex patterns take longer.
+
+**"1000+ matches" in Visible Buffer?**
+Refine your search. Use Whole Word matching or add anchors (`^`, `$`) to reduce matches.

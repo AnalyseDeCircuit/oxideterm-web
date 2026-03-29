@@ -1,0 +1,230 @@
+---
+title: 本地终端
+description: 原生 Shell 集成 — 无需 SSH 即可在本地机器运行终端会话，支持多 Shell 与跨平台。
+---
+
+OxideTerm 同时也是一个本地终端模拟器，让你在 SSH 连接旁边直接运行原生 Shell 会话。无需服务器或网络 — 打开标签页即可开始工作。
+
+## 快速开始
+
+### 创建本地终端
+
+**快捷键**: `⌘T` (macOS) 或 `Ctrl+T` (Windows/Linux)
+
+其他方式:
+- 点击侧边栏的 **本地终端** 按钮
+- 使用菜单 **File → New Local Terminal**
+- 使用 **Shell 选择器** `⌘⇧T` / `Ctrl+Shift+T` 选择特定 Shell
+
+## Shell 检测
+
+OxideTerm 会自动扫描系统中可用的 Shell。各平台支持情况如下：
+
+### macOS
+
+| Shell | 路径 | 说明 |
+|-------|------|------|
+| **Zsh** | `/bin/zsh` | 系统默认 |
+| **Bash** | `/bin/bash` | 内置 |
+| **Fish** | `/opt/homebrew/bin/fish` 或 `/usr/local/bin/fish` | 需安装 |
+| **Nushell** | `/opt/homebrew/bin/nu` 或 `/usr/local/bin/nu` | 需安装 |
+
+### Windows
+
+| Shell | 路径 | 说明 |
+|-------|------|------|
+| **PowerShell 7+** | `C:\Program Files\PowerShell\7\pwsh.exe` | 推荐 |
+| **PowerShell 5.1** | `C:\...\WindowsPowerShell\v1.0\powershell.exe` | 内置 |
+| **Git Bash** | `C:\Program Files\Git\bin\bash.exe` | 需安装 |
+| **WSL** | `C:\Windows\System32\wsl.exe` | 推荐 |
+| **命令提示符** | `C:\Windows\System32\cmd.exe` | 传统 |
+
+### Linux
+
+| Shell | 路径 | 说明 |
+|-------|------|------|
+| **Bash** | `/bin/bash` | 通用默认 |
+| **Zsh** | `/usr/bin/zsh` | 需安装 |
+| **Fish** | `/usr/bin/fish` | 需安装 |
+| **Dash** | `/bin/dash` | 轻量级 |
+
+Shell 扫描在 macOS/Linux 上读取 `/etc/shells`，在 Windows 上探测常见路径。
+
+### 设置默认 Shell
+
+1. 打开 **设置** (`⌘,` / `Ctrl+,`)
+2. 切换到 **本地终端** 标签
+3. 从下拉菜单中选择首选 Shell
+4. 点击 **保存**
+
+### 自定义 Shell
+
+如果你的 Shell 未被自动检测到，可以添加到 `~/.oxideterm/shells.json`（macOS/Linux）或 `%APPDATA%\OxideTerm\shells.json`（Windows）：
+
+```json
+{
+  "custom_shells": [
+    {
+      "name": "custom-shell",
+      "label": "My Custom Shell",
+      "path": "/usr/local/bin/my-shell",
+      "args": ["--login"]
+    }
+  ]
+}
+```
+
+重启 OxideTerm 使更改生效。
+
+## Windows 增强功能
+
+### 自动 UTF-8 编码
+
+启用 Oh My Posh 后，PowerShell 会自动初始化 UTF-8 编码：
+
+```powershell
+[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+```
+
+确保中日韩字符、Emoji 和 Nerd Font 图标正确渲染。
+
+### Oh My Posh 自动初始化
+
+如果系统检测到 `oh-my-posh`，OxideTerm 会自动将其初始化注入 PowerShell 会话：
+
+```powershell
+oh-my-posh init pwsh --config '<your-theme-path>' | Invoke-Expression
+```
+
+**前提条件**：安装 Oh My Posh (`winget install JanDeDobbeleer.OhMyPosh`)、Nerd Font 字体，并在 OxideTerm 设置中选择该字体。
+
+### WSL 环境变量
+
+WSL 会话自动接收以下环境变量：
+
+| 变量 | 值 | 用途 |
+|------|----|----|
+| `TERM` | `xterm-256color` | 终端类型 |
+| `COLORTERM` | `truecolor` | 真彩色支持 |
+| `TERM_PROGRAM` | `OxideTerm` | 终端程序标识 |
+| `TERM_PROGRAM_VERSION` | 当前版本 | 版本信息 |
+| `POSH_THEME` | 用户配置路径 | Oh My Posh 主题（自动转换 Windows 路径） |
+
+## 多终端管理
+
+每个本地终端标签页生成独立的 Shell 进程。你可以同时在不同工作目录运行不同 Shell：
+
+```
+终端 1: PowerShell  (C:\Users\alice)
+终端 2: Git Bash    (C:\projects\app)
+终端 3: WSL Ubuntu  (/home/alice)
+```
+
+结合 **分屏** 使用 — 每个窗格拥有独立的 PTY 进程。
+
+:::note
+关闭包含分屏的标签页时，OxideTerm 会递归清理窗格树中的所有 PTY 进程，不会留下孤儿进程。
+:::
+
+## 高级配置
+
+### Shell 参数
+
+部分 Shell 需要特定参数才能获得最佳体验：
+
+```json
+{
+  "custom_shells": [
+    {
+      "name": "zsh",
+      "label": "Zsh (Login)",
+      "path": "/bin/zsh",
+      "args": ["-l"]
+    },
+    {
+      "name": "bash",
+      "label": "Bash (Interactive)",
+      "path": "/bin/bash",
+      "args": ["-i"]
+    }
+  ]
+}
+```
+
+### Shell 初始化脚本
+
+在 Shell 配置文件中检测 OxideTerm 以进行自定义配置：
+
+**Zsh** (`~/.zshrc`):
+```bash
+if [[ "$TERM_PROGRAM" == "OxideTerm" ]]; then
+    export PS1="%F{cyan}%~ %F{white}❯ "
+fi
+```
+
+**Bash** (`~/.bashrc`):
+```bash
+if [[ "$TERM_PROGRAM" == "OxideTerm" ]]; then
+    export PS1="\[\e[36m\]\w \[\e[0m\]❯ "
+fi
+```
+
+**PowerShell** (`$PROFILE`):
+```powershell
+if ($env:TERM_PROGRAM -eq "OxideTerm") {
+    function prompt { "$PWD> " }
+}
+```
+
+## 快捷键
+
+| 操作 | macOS | Windows / Linux |
+|------|-------|-----------------|
+| 新建本地终端 | `⌘ T` | `Ctrl+T` |
+| Shell 选择器 | `⌘ ⇧T` | `Ctrl+Shift+T` |
+| 关闭标签 | `⌘ W` | `Ctrl+W` |
+| 下一标签 | `⌘ }` | `Ctrl+Tab` |
+| 上一标签 | `⌘ {` | `Ctrl+Shift+Tab` |
+| 清屏 | `⌘ K` | `Ctrl+L` |
+
+## 性能
+
+| 指标 | 典型值 |
+|------|--------|
+| 每终端内存 | ~10 MB |
+| CPU（空闲） | ~0–1% |
+| 启动时间 | < 100 ms |
+| I/O 延迟 | < 1 ms |
+| 缓冲区读取 | 8 KB |
+
+## 与传统终端对比
+
+| 功能 | OxideTerm 本地终端 | iTerm2 / Alacritty | Windows Terminal |
+|------|-------------------|-------------------|------------------|
+| **跨平台** | macOS、Windows、Linux | 单平台 | 仅 Windows |
+| **SSH 集成** | 无缝标签切换 | 需外部工具 | 有限支持 |
+| **拓扑路由** | ProxyJump 路径计算 | — | — |
+| **AI 助手** | 内置 OxideSens | — | — |
+| **连接池** | SSH 通道共享 | — | — |
+
+## 故障排查
+
+**Shell 未被检测到？**
+检查 Shell 二进制文件是否存在且可执行。使用 `which zsh`（Unix）或 `where pwsh`（Windows）验证。如果路径非标准，添加到 `shells.json` 并重启 OxideTerm。
+
+**终端无法启动？**
+打开开发者控制台（`⌘⌥I` / `Ctrl+Shift+I`）查看错误日志。确保 OxideTerm 有权限执行 Shell 二进制文件。尝试换一个 Shell。
+
+**输出乱码？**
+使用 `echo $LANG` 检查 Shell 编码 — 应包含 `UTF-8`。如有需要设置 `TERM=xterm-256color`。如果图标字形损坏，安装 Nerd Font 字体。
+
+**PowerShell 启动慢？**
+PowerShell 启动时加载 `$PROFILE`。优化你的 profile 或使用 `-NoProfile` 启动。PowerShell 7 比 5.1 更快。
+
+**WSL 连接问题？**
+运行 `wsl --list --verbose` 检查 WSL 状态。确保已安装 WSL 2 并设置默认发行版（`wsl --set-default Ubuntu`）。
+
+:::note
+本地终端是一个 feature-gated 功能（`local-terminal`）。可通过 `cargo build --no-default-features` 禁用，适用于移动端/轻量构建。
+:::

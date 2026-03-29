@@ -93,12 +93,48 @@ Buttons, Inputs, Dialogs, Select, Checkbox, Switch, Tabs, Table, Badge, Tooltip,
 
 The plugin system uses a multi-layered security approach:
 
-- **Frozen API surface** — all `PluginContext` objects are sealed with `Object.freeze()`, preventing plugins from modifying or monkey-patching the API
-- **Proxy-based ACL** — each namespace access is validated against the plugin's declared permissions
-- **IPC whitelist** — plugins can only call whitelisted Tauri commands via the `api` namespace
-- **Circuit breaker** — plugins that throw repeated runtime errors are automatically disabled after a threshold, preventing a buggy plugin from crashing the app
-- **Error boundaries** — React error boundaries isolate plugin UI failures from the main application
-- Plugins run in the renderer process with limited system access — no direct file system or network access outside the API
+### Frozen API Surface
+
+All `PluginContext` objects are recursively sealed with `Object.freeze()`. Plugins interact exclusively through this frozen membrane — they cannot modify, monkey-patch, or extend the API. Connection data is returned as deep-frozen `ConnectionSnapshot` objects; a new snapshot is generated on every call.
+
+### Proxy-Based ACL
+
+Each namespace access is validated against the plugin's declared permissions at runtime. Plugins cannot access Zustand stores directly — all state is mediated through the frozen context API.
+
+### IPC Whitelist
+
+Plugins can only call Tauri backend commands that are explicitly declared in their manifest under `contributes.apiCommands`. The default whitelist is **empty** — a plugin must opt-in to every backend command it needs:
+
+```json
+{
+  "contributes": {
+    "apiCommands": ["get_connection_info", "list_forwards"]
+  }
+}
+```
+
+Any undeclared command call is silently rejected.
+
+### Circuit Breaker (Auto-Disable)
+
+Plugins that throw repeated runtime errors are automatically disabled to prevent a buggy plugin from degrading the app:
+
+1. Each callback exception increments an error counter
+2. If the counter reaches **10 errors within 60 seconds**, the plugin is automatically unloaded
+3. A toast notification informs the user: *"Plugin X has been disabled due to frequent errors"*
+4. The plugin state is set to `disabled`
+5. The user must manually re-enable it from the Plugin Manager
+
+### Error Boundaries
+
+- **UI errors** — React `ErrorBoundary` components isolate plugin rendering failures from the host application
+- **Terminal fail-open** — if a plugin's terminal data interceptor throws, the raw data passes through unmodified, ensuring terminal I/O is never blocked
+- **Event isolation** — plugin events are prefixed with `plugin:{id}:`, preventing cross-plugin interference
+- **Path safety** — `read_plugin_file` rejects `..` traversal to prevent directory escape
+
+### Wire Protocol Protection
+
+Plugins only process terminal data frames (`0x00`). Heartbeat (`0x02`) and error (`0x03`) frames are never passed through the plugin pipeline, protecting the Wire Protocol invariants.
 
 ## Installing Plugins
 
