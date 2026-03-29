@@ -3148,7 +3148,7 @@ export function activate(ctx) {
 }
 
 export function deactivate() {
-  ctx.eventLog.append('info', 'Connection Monitor deactivated');
+  pluginCtx?.eventLog.append('info', 'Connection Monitor deactivated');
   pluginCtx = null;
 }
 ```
