@@ -1,0 +1,133 @@
+---
+title: Terminal
+description: Multi-tab, split-pane SSH terminal with WebGL rendering, search, broadcast, and session recording.
+---
+
+OxideTerm's terminal is powered by **xterm.js 6** with WebGL-accelerated rendering, delivering smooth 60 fps+ output even with heavy terminal workloads.
+
+## Adaptive Rendering
+
+A three-tier render scheduler automatically adjusts frame rate based on activity:
+
+| Tier | Trigger | Rate | Benefit |
+|------|---------|------|---------|
+| **Boost** | Frame data ≥ 4 KB | 120 Hz+ (ProMotion native) | Eliminates scroll lag on large outputs (`cat largefile.log`) |
+| **Normal** | Standard typing | 60 Hz (requestAnimationFrame) | Smooth baseline |
+| **Idle** | 3s no I/O / tab hidden | 1–15 Hz (exponential backoff) | Near-zero GPU load, battery savings |
+
+Transitions are fully automatic — driven by data volume, user input, and the Page Visibility API. Background tabs continue flushing data via an idle timer without waking requestAnimationFrame.
+
+## Wire Protocol
+
+Terminal I/O bypasses Tauri IPC entirely, using a direct WebSocket connection with a binary Type-Length-Payload protocol:
+
+```
++--------+--------+--------+--------+--------+-- ... --+
+| Type   | Length (4 bytes, big-endian)      | Payload |
+| (1B)   |                                   |         |
++--------+--------+--------+--------+--------+-- ... --+
+```
+
+| Type | Name | Payload | Direction |
+|------|------|---------|-----------|
+| `0x00` | **Data** | Raw terminal bytes | Bidirectional |
+| `0x01` | **Resize** | `cols: u16 BE, rows: u16 BE` | Client → Server |
+| `0x02` | **Heartbeat** | `seq: u32 BE` | Bidirectional |
+| `0x03` | **Error** | UTF-8 error message | Server → Client |
+
+Maximum payload size is 16 MB. The server sends a heartbeat every 30 seconds; if the client doesn't respond within 90 seconds, the connection is closed.
+
+## Multi-Tab & Split Pane
+
+- Open multiple terminal tabs, each connected to a different or same SSH session
+- Split panes **horizontally** or **vertically** for side-by-side views
+- Each pane maintains its own independent shell channel
+- Drag tabs to reorder or split into new panes
+
+## Broadcast Input
+
+Send the same keystrokes to multiple terminal panes simultaneously — useful for managing clusters or running the same command across multiple servers.
+
+Toggle broadcast mode from the toolbar. Selected panes receive identical input in real-time. You can selectively include/exclude specific panes from the broadcast group.
+
+## Terminal Search
+
+Search terminal buffer content with two modes:
+
+### Visible Buffer Search
+Search content currently visible in the terminal viewport and xterm.js scrollback buffer. Fast; no backend round-trip required.
+
+### Deep History Search
+Search the backend scrollback buffer, which can hold significantly more history than the frontend. Results are highlighted and navigated within the terminal.
+
+Both modes support:
+- Case-sensitive / case-insensitive matching
+- Regular expression support
+- Result highlighting with next/previous navigation
+
+Use `Ctrl+F` (or `⌘F` on macOS) to open the search bar.
+
+## Session Recording & Playback
+
+Record terminal sessions in **asciicast v2** format for later review:
+- Captures all terminal output with precise timestamps
+- Playback with variable speed control (0.5×–8×)
+- Export recordings for sharing or documentation
+- Compatible with [asciinema](https://asciinema.org) ecosystem
+
+## Command Palette
+
+Press `⌘K` (macOS) or `Ctrl+K` (Windows/Linux) to open the **command palette** — quick access to any action in OxideTerm, including connections, settings, search, and keyboard shortcuts.
+
+## Zen Mode
+
+Minimize distractions by entering **zen mode**, which hides the sidebar, tab bar, and status bar, giving the terminal full screen real estate.
+
+## Background Gallery
+
+Customize the terminal with per-tab background images:
+- 13 supported tab types
+- Adjustable **opacity** and **blur**
+- Multiple fit modes (cover, contain, stretch)
+
+## Connection Management
+
+- **Session tree** — organize connections in a hierarchical tree with folders and groups
+- **Quick connect** — connect by entering host/user/port directly
+- **Import/Export** — `.oxide` encrypted format (ChaCha20-Poly1305 + Argon2id)
+- **SSH Config import** — auto-parse `~/.ssh/config` to import existing connections
+- **Jump host / ProxyJump** — unlimited hops with network topology graph and Dijkstra pathfinding
+- **Authentication** — password, SSH key (RSA/Ed25519/ECDSA), SSH Agent (system agent support across macOS, Linux, Windows), certificates, keyboard-interactive 2FA
+- **Known Hosts TOFU** — host key verification compatible with `~/.ssh/known_hosts`; rejects key changes (MITM prevention)
+- **Connection pool** — terminal, SFTP, forwards, IDE share one SSH connection via reference-counted pool
+- **Idle timeout** — configurable (5m / 15m / 30m / 1h / never); connections with no consumers auto-disconnect after the timeout
+
+## Keyboard Shortcuts
+
+| Action | macOS | Windows / Linux |
+|--------|-------|-----------------|
+| New Connection | `⌘ N` | `Ctrl+N` |
+| Local Terminal | `⌘ T` | `Ctrl+T` |
+| Command Palette | `⌘ K` | `Ctrl+K` |
+| Terminal Search | `⌘ F` | `Ctrl+F` |
+| Inline AI | `⌘ I` | `Ctrl+Shift+I` |
+| Keyboard Shortcuts | `⌘ /` | `Ctrl+/` |
+| Zen Mode | `⌘ Shift+Z` | `Ctrl+Shift+Z` |
+
+## Local Terminal
+
+OxideTerm also supports local terminal sessions (PTY) on desktop platforms via `portable-pty`. Shell auto-detection finds:
+- **macOS/Linux**: `zsh`, `bash`, `fish`, `pwsh`
+- **Windows**: PowerShell 7, Git Bash, WSL2, CMD (native ConPTY — full TrueColor and ANSI support, no legacy WinPTY)
+
+:::note
+Local terminal is a feature-gated capability (`local-terminal`). It can be disabled with `cargo build --no-default-features` for mobile/lightweight builds.
+:::
+
+## Resource Profiler
+
+For active SSH connections, OxideTerm shows a live resource profiler:
+- **CPU** and **memory** usage via persistent SSH channel reading `/proc/stat`
+- Delta-based calculation for accurate CPU percentage
+- Auto-degrades to RTT-only metrics on non-Linux systems
+- **Smart port detection** — automatically discovers listening services on the remote host

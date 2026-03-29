@@ -1,0 +1,91 @@
+---
+import type { LangKey } from "@/i18n";
+import { t, languages, langPath } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+---
+
+<footer class="border-t border-[var(--ot-border)] py-12 px-6 bg-[var(--ot-bg-deep)]">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <!-- Brand -->
+      <div>
+        <div class="text-xl font-bold mb-3">
+          <span class="text-[var(--ot-text-primary)]">Oxide</span><span class="text-[var(--ot-accent)]">Term</span>
+        </div>
+        <p class="text-sm text-[var(--ot-text-muted)]">
+          {i.hero.tagline}
+        </p>
+      </div>
+
+      <!-- Links -->
+      <div>
+        <h4 class="text-sm font-semibold text-[var(--ot-text-secondary)] mb-3 uppercase tracking-wider">{i.footer.links}</h4>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
+              {i.footer.source}
+            </a>
+          </li>
+          <li>
+            <a href={["en", "zh-hans"].includes(lang) ? (lang === "en" ? "/docs/" : `/${lang}/docs/`) : "/docs/"} class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
+              {i.footer.docs}
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/AnalyseDeCircuit/oxideterm/releases" class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
+              {i.footer.releases}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Language -->
+      <div>
+        <h4 class="text-sm font-semibold text-[var(--ot-text-secondary)] mb-3 uppercase tracking-wider">{i.footer.language}</h4>
+        <ul class="space-y-1 text-sm max-h-48 overflow-y-auto">
+          {languages.map((l) => (
+            <li>
+              <a
+                href={langPath(l.key)}
+                class:list={[
+                  "transition-colors",
+                  l.key === lang
+                    ? "text-[var(--ot-accent)]"
+                    : "text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)]",
+                ]}
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Legal -->
+      <div>
+        <h4 class="text-sm font-semibold text-[var(--ot-text-secondary)] mb-3 uppercase tracking-wider">{i.footer.legal}</h4>
+        <p class="text-xs text-[var(--ot-text-muted)] leading-relaxed">
+          {i.footer.license}
+        </p>
+        <a
+          href="https://polyformproject.org/licenses/noncommercial/1.0.0/"
+          class="text-xs text-[var(--ot-text-muted)] hover:text-[var(--ot-accent)] transition-colors mt-1 inline-block"
+        >
+          {i.footer.polyform_link}
+        </a>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="pt-6 border-t border-[var(--ot-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--ot-text-muted)]">
+      <span>© {new Date().getFullYear()} OxideTerm</span>
+      <span class="font-mono">{i.footer.built_with}</span>
+    </div>
+  </div>
+</footer>

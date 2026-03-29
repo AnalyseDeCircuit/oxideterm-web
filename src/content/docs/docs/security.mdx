@@ -1,0 +1,126 @@
+---
+title: Security
+description: OxideTerm's security model — encryption, key storage, SSH security, and plugin sandboxing.
+---
+
+Security is a core priority in OxideTerm's design. The entire SSH stack is pure Rust (`russh` + `ring`), eliminating C memory safety vulnerabilities. This page describes the security measures in place.
+
+## Pure Rust Cryptography
+
+OxideTerm uses `russh 0.54` compiled against the **`ring`** crypto backend:
+
+- **Zero C/OpenSSL dependencies** — the full crypto stack is Rust. No "which OpenSSL version?" debugging.
+- Full SSH2 protocol: key exchange, channels, SFTP subsystem, port forwarding
+- ChaCha20-Poly1305 and AES-GCM cipher suites
+- This eliminates an entire class of vulnerabilities associated with C memory safety issues (buffer overflows, use-after-free, etc.)
+
+Sensitive data in memory is cleared after use via the `zeroize` crate.
+
+## Credential Storage
+
+### OS Keychain
+
+All sensitive credentials are stored in the **operating system's native keychain**:
+
+| Platform | Keychain |
+|----------|----------|
+| **macOS** | Keychain Access |
+| **Windows** | Windows Credential Manager |
+| **Linux** | Secret Service API (GNOME Keyring / KWallet) |
+
+Passwords, private key passphrases, and API keys are **never** stored in configuration files, databases, or plaintext.
+
+### AI API Keys
+
+OxideSens AI API keys are stored under the `com.oxideterm.ai` service in the OS keychain, separate from SSH credentials.
+
+On macOS, key reads are gated behind **Touch ID** via `LAContext`:
+- No entitlements or code-signing required
+- Cached after first auth per session — you only need to authenticate once
+- Provides hardware-backed access control without additional setup
+
+## Connection Export Encryption
+
+The `.oxide` export format for sharing connection configurations uses:
+
+- **ChaCha20-Poly1305** — AEAD (Authenticated Encryption with Associated Data)
+- **Argon2id** — memory-hard KDF (Key Derivation Function)
+  - 256 MB memory cost
+  - 4 iterations
+  - Resistant to GPU/ASIC brute-force attacks
+- **SHA-256** integrity checksum
+
+### Export Features
+
+- Sensitive fields are encrypted individually
+- Non-sensitive metadata (hostnames, labels) can optionally remain in plaintext for organization
+- **Optional key embedding** — private keys can be base64-encoded into the encrypted payload
+- **Pre-flight analysis** — before export, OxideTerm analyzes auth types and detects missing keys, so you know exactly what will be exported
+
+Memory containing sensitive data uses `zeroize` for secure clearing after use.
+
+## SSH Security
+
+### Host Key Verification
+
+OxideTerm implements **TOFU (Trust On First Use)**:
+- First connection: accept and store the host key
+- Subsequent connections: verify against stored key
+- **Reject host key changes** — protects against MITM attacks
+- Uses `~/.ssh/known_hosts` for compatibility with OpenSSH
+
+### Supported Key Types
+
+- **Ed25519** (recommended — fastest, smallest keys)
+- **ECDSA** (P-256, P-384)
+- **RSA** (2048-bit minimum)
+- **SSH Certificates** — full certificate-based authentication support
+
+### SSH Agent Integration
+
+OxideTerm supports system SSH Agent for key management:
+
+| Platform | Agent |
+|----------|-------|
+| **macOS/Linux** | `SSH_AUTH_SOCK` Unix socket |
+| **Windows** | `\\.\pipe\openssh-ssh-agent` Named Pipe |
+
+Features:
+- Agent auth replayed automatically on reconnect
+- Each ProxyJump hop can independently use Agent auth
+- Custom `AgentSigner` implementation wraps the system Agent and satisfies `russh`'s `Signer` trait
+
+## WebSocket Security
+
+Internal WebSocket connections (between the frontend and Rust backend) are secured with:
+- **Token-based authentication** required on the first frame
+- **Single-use tokens** with time limits — tokens cannot be reused
+- Connections are local only (localhost binding)
+- Server heartbeat every 30 seconds; 5-minute timeout tolerates macOS App Nap and browser JS throttling
+
+## Plugin Sandboxing
+
+The plugin system uses multiple security layers:
+
+| Layer | Mechanism |
+|-------|-----------|
+| **Frozen API** | `Object.freeze()` on all PluginContext objects — plugins cannot modify or monkey-patch the API |
+| **Proxy ACL** | Each namespace access validated against declared permissions |
+| **IPC Whitelist** | Plugins can only invoke whitelisted Tauri commands |
+| **Circuit Breaker** | Auto-disable after repeated runtime errors |
+| **Error Boundaries** | React error boundaries isolate plugin UI crashes |
+
+Plugins run in the renderer process with limited system access — no direct file system or network access outside the PluginContext API.
+
+## Content Security Policy
+
+The Tauri application uses a null CSP. No external web content is loaded — all UI is served from the local binary. Any new web content exposure should be carefully reviewed.
+
+## Data Privacy
+
+- **No telemetry** — OxideTerm does not collect or transmit usage data
+- **No cloud services** — all data stays on your machine
+- **Local-first** — bring your own API keys for AI features
+- **Explicit data send** — terminal buffer data is only sent to AI providers when you click the Context button and send a message
+- **Local AI** — use Ollama for fully offline AI assistance with zero network traffic
+- **redb storage** — all persistent data (sessions, settings, chat history) stored locally in an embedded key-value database

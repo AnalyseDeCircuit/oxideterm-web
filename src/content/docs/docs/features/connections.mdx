@@ -1,0 +1,97 @@
+---
+title: Connection Management
+description: SSH connection presets, encrypted .oxide export/import, connection groups, auth methods, ProxyJump, and Known Hosts management.
+---
+
+OxideTerm's **Saved Connections** panel and **Session Manager** give you a complete workspace for organizing, securing, and reusing SSH connections — from single servers to complex multi-hop proxy chains.
+
+## Creating Connections
+
+Open the **New Connection** dialog from the sidebar (`+` button) or Session Manager toolbar.
+
+### Authentication Methods
+
+| Method | Description |
+|--------|-------------|
+| **Password** | Prompted securely on connect — never stored in config files |
+| **SSH Key** | RSA, Ed25519, ECDSA — file path or OS keychain |
+| **SSH Agent** | Delegates to the running `ssh-agent` or macOS Keychain |
+| **Certificate** | SSH certificate with optional CA verification |
+| **Keyboard Interactive** | 2FA / OTP / PAM challenges |
+
+OxideTerm auto-detects the `~/.ssh/` directory and imports keys without configuration.
+
+### Connection Options
+
+- **Host / Port / Username** — standard connection parameters
+- **Color** — per-connection accent color for visual identification in the sidebar
+- **Group** — organize into folders in the sidebar and Session Manager
+- **Tags** — freeform labels for filtering and searching
+- **ProxyJump (Jump Host)** — chain through one or more bastion hosts
+
+## ProxyJump: Multi-Hop SSH
+
+OxideTerm resolves jump chains using a **Dijkstra shortest-path algorithm** across your saved connection tree. You can chain through unlimited intermediate hosts:
+
+```
+Local Machine ──► Bastion A ──► Bastion B ──► Target Server
+```
+
+- Intermediate sessions are opened automatically
+- Each hop is tracked individually in the Connection Pool
+- If any intermediate hop drops, its children are marked `link_down` and cascade-reconnected
+
+## Connection Groups
+
+Organize connections into **nested folder groups** in the Session Manager:
+
+- Drag-and-drop connections between groups
+- Rename, create, or delete groups
+- Subgroups supported for deep hierarchies
+- Filter the connection table by selected group
+
+## SSH Config Import
+
+OxideTerm reads your existing `~/.ssh/config` file and imports defined `Host` blocks as OxideTerm connections — preserving `ProxyJump`, `User`, `IdentityFile`, `Port`, and other directives.
+
+## Known Hosts & TOFU
+
+On first connection to a new host, OxideTerm uses **Trust On First Use (TOFU)**:
+
+1. The host's public key fingerprint is shown in a confirmation dialog
+2. On acceptance, the key is pinned to OxideTerm's known hosts store
+3. On subsequent connects, the stored fingerprint is verified automatically
+4. Key-mismatch warnings are shown prominently — never silently ignored
+
+## Encrypted Export / Import (.oxide)
+
+Connection presets (including credentials) can be exported to a portable `.oxide` file for backup or transfer between machines.
+
+### Encryption Spec
+
+| Property | Value |
+|----------|-------|
+| **Cipher** | ChaCha20-Poly1305 AEAD |
+| **KDF** | Argon2id — 256 MB memory, 4 iterations, 1 thread |
+| **Integrity** | SHA-256 checksum embedded in file header |
+| **Pre-flight** | Validates memory availability before starting KDF |
+| **Key length** | 256-bit derived key |
+
+The `.oxide` format uses a passphrase you provide — OxideTerm never stores the passphrase. Import the file on any OxideTerm installation with the correct passphrase.
+
+:::caution
+`.oxide` files contain credentials. Store them securely and share only over encrypted channels.
+:::
+
+## Sidebar: Active Sessions View
+
+The **Active Sessions** sidebar panel has two modes:
+
+- **Tree View** — hierarchical view showing jump host relationships, child nodes indented under parents
+- **Focus View** — flat list of only the currently active / connected sessions
+
+Right-click any node for quick actions: Connect, Disconnect, New Terminal, Open SFTP, Open IDE Mode, Port Forwarding, Drill Down (navigate into the host), Save as Preset.
+
+## Auto-Route
+
+The **Auto-Route** feature automatically selects the optimal ProxyJump path to a target host by analyzing the current active session tree.

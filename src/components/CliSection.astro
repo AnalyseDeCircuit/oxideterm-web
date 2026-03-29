@@ -1,0 +1,63 @@
+---
+import type { LangKey } from "@/i18n";
+import { t } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+
+const lines = [
+  { text: i.cli.line_1, type: "prompt" },
+  { text: i.cli.line_2, type: "output-success" },
+  { text: "", type: "blank" },
+  { text: i.cli.line_3, type: "prompt" },
+  { text: i.cli.line_4, type: "output-active" },
+  { text: i.cli.line_5, type: "output-active" },
+  { text: i.cli.line_6, type: "output-idle" },
+  { text: "", type: "blank" },
+  { text: i.cli.line_7, type: "prompt" },
+  { text: i.cli.line_8, type: "output-success" },
+];
+---
+
+<section class="py-20 px-6 border-t border-[var(--ot-border)]">
+  <div class="max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <!-- Text -->
+      <div>
+        <h2 class="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
+          {i.cli.title}
+        </h2>
+        <p class="text-lg text-[var(--ot-text-secondary)] mb-4" style={`font-family: var(--font-mono); font-size: 0.95rem;`}>
+          {i.cli.subtitle}
+        </p>
+        <p class="text-sm text-[var(--ot-text-muted)] leading-relaxed">
+          {i.cli.desc}
+        </p>
+      </div>
+
+      <!-- Terminal mockup -->
+      <div class="terminal-mockup">
+        <div class="terminal-titlebar" aria-hidden="true">
+          <span class="terminal-dot terminal-dot-red"></span>
+          <span class="terminal-dot terminal-dot-yellow"></span>
+          <span class="terminal-dot terminal-dot-green"></span>
+          <span class="terminal-titlebar-text">oxt</span>
+        </div>
+        <div class="terminal-body text-[13px]">
+          {lines.map((line) => {
+            if (line.type === "blank") return <div>&nbsp;</div>;
+            if (line.type === "prompt") return <div><span class="terminal-prompt">{line.text}</span></div>;
+            if (line.type === "output-success") return <div class="terminal-success">{line.text}</div>;
+            if (line.type === "output-active") return <div class="terminal-info">{line.text}</div>;
+            if (line.type === "output-idle") return <div class="terminal-dim">{line.text}</div>;
+            return <div>{line.text}</div>;
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

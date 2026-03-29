@@ -1,0 +1,104 @@
+---
+title: 安装
+description: 如何在 macOS、Windows 和 Linux 上下载安装 OxideTerm。
+---
+
+## 系统要求
+
+| 平台 | 最低版本 | 架构 |
+|------|---------|------|
+| **macOS** | 11.0 (Big Sur) | Apple Silicon (M1+)、Intel x64 |
+| **Windows** | 10 (1803+) | x64、ARM64 |
+| **Linux** | Ubuntu 22.04+ / Fedora 38+ | x64、ARM64 |
+
+## 下载
+
+从 [GitHub Releases](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) 下载最新版本。
+
+### macOS
+
+| 版本 | 文件 |
+|------|------|
+| Apple Silicon (M 系列) | `OxideTerm_x.x.x_aarch64.dmg` |
+| Intel | `OxideTerm_x.x.x_x64.dmg` |
+
+1. 下载对应架构的 `.dmg` 文件
+2. 打开磁盘映像，将 **OxideTerm** 拖入 **应用程序** 文件夹
+3. 首次启动时，打开终端运行 `xattr -cr /Applications/OxideTerm.app` 移除隔离标记，然后正常启动
+
+### Windows
+
+| 版本 | 文件 |
+|------|------|
+| x64 | `OxideTerm_x.x.x_x64-setup.exe` |
+| ARM64 | `OxideTerm_x.x.x_arm64-setup.exe` |
+
+1. 下载 `.exe` 安装程序
+2. 运行安装程序并按提示操作
+3. 安装完成后可在开始菜单中找到 OxideTerm
+
+### Linux
+
+| 版本 | 文件 |
+|------|------|
+| x64 (Debian/Ubuntu) | `OxideTerm_x.x.x_amd64.deb` |
+| x64 (AppImage) | `OxideTerm_x.x.x_amd64.AppImage` |
+| ARM64 (Debian/Ubuntu) | `OxideTerm_x.x.x_arm64.deb` |
+| ARM64 (AppImage) | `OxideTerm_x.x.x_arm64.AppImage` |
+
+**Debian/Ubuntu：**
+```bash
+sudo dpkg -i OxideTerm_x.x.x_amd64.deb
+```
+
+**AppImage：**
+```bash
+chmod +x OxideTerm_x.x.x_amd64.AppImage
+./OxideTerm_x.x.x_amd64.AppImage
+```
+
+## 从源码构建
+
+### 前置条件
+
+- **Rust** 1.75+（通过 [rustup](https://rustup.rs/) 安装）
+- **Node.js** 18+
+- **pnpm**（通过 `npm install -g pnpm` 安装）
+- 平台特定构建工具：
+  - macOS：Xcode Command Line Tools
+  - Windows：Visual Studio Build Tools 2019+
+  - Linux：`build-essential`、`libwebkit2gtk-4.1-dev`、`libssl-dev`
+
+### 构建步骤
+
+```bash
+# 克隆仓库
+git clone https://github.com/AnalyseDeCircuit/oxideterm.git
+cd oxideterm
+
+# 安装依赖
+pnpm install
+
+# 开发模式（热重载）
+pnpm tauri dev
+
+# 生产构建
+pnpm tauri build
+```
+
+构建产物位于 `src-tauri/target/release/bundle/`。
+
+## 更新
+
+OxideTerm 内置自动更新机制。当有新版本可用时，应用内会显示更新通知。你也可以在设置中手动检查更新。
+
+## 卸载
+
+- **macOS**：将 OxideTerm 从应用程序拖到废纸篓
+- **Windows**：在设置中使用添加/删除程序
+- **Linux**：`sudo dpkg -r oxideterm` 或删除 AppImage 文件
+
+配置数据存储在：
+- macOS：`~/Library/Application Support/com.oxideterm.app/`
+- Windows：`%APPDATA%\com.oxideterm.app\`
+- Linux：`~/.config/com.oxideterm.app/`

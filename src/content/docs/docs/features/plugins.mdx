@@ -1,0 +1,177 @@
+---
+title: Plugins
+description: Extend OxideTerm with ESM-based plugins, 18 API namespaces, and a frozen security surface.
+---
+
+OxideTerm features a runtime plugin system that allows third-party extensions to add functionality without modifying the core application.
+
+## Plugin Architecture
+
+Plugins are **ESM bundles** loaded from `~/.oxideterm/plugins/{plugin-id}/`. Each plugin consists of:
+
+```
+~/.oxideterm/plugins/my-plugin/
+├── plugin.json      # Manifest (metadata + permissions)
+└── index.js         # Main entry point (ESM)
+```
+
+### Plugin Manifest
+
+```json
+{
+  "id": "my-plugin",
+  "name": "My Plugin",
+  "version": "1.0.0",
+  "description": "A sample OxideTerm plugin",
+  "author": "Your Name",
+  "main": "index.js",
+  "permissions": ["terminal.read", "events.subscribe"]
+}
+```
+
+The manifest declares the plugin's identity and the permissions it requires. Permissions are enforced at runtime via Proxy-based ACL.
+
+### Plugin Lifecycle
+
+```typescript
+// index.ts — compiled to ESM
+export function activate(ctx: PluginContext) {
+  // Called when the plugin is loaded
+  // Register event handlers, UI components, commands
+
+  ctx.events.on('connection:active', (connectionId) => {
+    console.log('Connected:', connectionId);
+  });
+
+  // Register a sidebar panel
+  ctx.ui.registerSidebarPanel({
+    id: 'my-panel',
+    title: 'My Panel',
+    icon: 'Terminal',
+    component: MyPanelComponent,
+  });
+}
+
+export function deactivate() {
+  // Called when the plugin is disabled or OxideTerm exits
+  // Clean up resources, timers, subscriptions
+}
+```
+
+## PluginContext API
+
+Plugins receive a frozen `PluginContext` object with **18 namespaces**:
+
+| Namespace | Purpose |
+|-----------|----------|
+| `connections` | List, query, and manage SSH connections |
+| `events` | Subscribe to and emit custom events |
+| `ui` | Register sidebar panels, status bar items, context menus |
+| `terminal` | Read terminal buffer, send input, subscribe to data |
+| `settings` | Read/write plugin-specific settings with schema validation |
+| `i18n` | Internationalization and locale utilities |
+| `storage` | Key-value storage scoped to the plugin (persisted via redb) |
+| `api` | Backend IPC calls to Tauri commands |
+| `assets` | Plugin asset resolution (images, fonts, etc.) |
+| `sftp` | SFTP file operations (list, read, write, stat) |
+| `forward` | Port forwarding management (create, list, remove) |
+| `sessions` | Session tree and lifecycle management |
+| `transfers` | SFTP transfer queue control and monitoring |
+| `profiler` | Resource profiling data (CPU, memory, network) |
+| `eventLog` | Connection lifecycle event log access |
+| `ide` | IDE mode file operations and editor state |
+| `ai` | OxideSens AI chat integration and tool registration |
+| `app` | Application-level utilities, version, platform info |
+
+### 24 UI Kit Components
+
+Plugins have access to **24 pre-built React components** injected via `window.__OXIDE__`:
+
+Buttons, Inputs, Dialogs, Select, Checkbox, Switch, Tabs, Table, Badge, Tooltip, ScrollArea, Separator, and more — all matching OxideTerm's theme and design system.
+
+## Security
+
+The plugin system uses a multi-layered security approach:
+
+- **Frozen API surface** — all `PluginContext` objects are sealed with `Object.freeze()`, preventing plugins from modifying or monkey-patching the API
+- **Proxy-based ACL** — each namespace access is validated against the plugin's declared permissions
+- **IPC whitelist** — plugins can only call whitelisted Tauri commands via the `api` namespace
+- **Circuit breaker** — plugins that throw repeated runtime errors are automatically disabled after a threshold, preventing a buggy plugin from crashing the app
+- **Error boundaries** — React error boundaries isolate plugin UI failures from the main application
+- Plugins run in the renderer process with limited system access — no direct file system or network access outside the API
+
+## Installing Plugins
+
+1. Download the plugin bundle (`.zip`)
+2. Extract to `~/.oxideterm/plugins/{plugin-id}/`
+3. Restart OxideTerm or reload from the Plugin Manager
+
+The plugin directory must contain a valid `plugin.json` manifest.
+
+## Plugin Manager
+
+The built-in Plugin Manager UI provides:
+- List of installed plugins with version, description, and status
+- **Enable / disable toggle** — instantly activate or deactivate plugins
+- **Plugin settings panel** — configure plugin-specific settings
+- **Error logs** — view runtime errors and warnings for debugging
+- **Reload** — reload a plugin without restarting OxideTerm
+
+## Developing Plugins
+
+### Quick Start
+
+```typescript
+// plugin.json
+{
+  "id": "hello-world",
+  "name": "Hello World",
+  "version": "1.0.0",
+  "main": "index.js"
+}
+
+// index.ts
+import type { PluginContext } from 'oxideterm-plugin-api';
+
+export function activate(ctx: PluginContext) {
+  // Listen for new connections
+  ctx.events.on('connection:active', (data) => {
+    ctx.ui.showNotification({
+      title: 'Connected!',
+      message: `Connected to ${data.host}`,
+    });
+  });
+
+  // Register a command
+  ctx.ui.registerCommand({
+    id: 'hello.greet',
+    title: 'Say Hello',
+    handler: () => {
+      ctx.ui.showNotification({ title: 'Hello!', message: 'Hello from my plugin!' });
+    },
+  });
+}
+
+export function deactivate() {
+  console.log('Plugin deactivated');
+}
+```
+
+### Shared Modules
+
+Plugins can access shared modules via `window.__OXIDE__` without bundling them:
+
+| Module | Usage |
+|--------|-------|
+| `React` | UI components |
+| `ReactDOM` | Rendering |
+| `zustand` | State management |
+| `lucide-react` | Icons |
+
+This avoids bundling duplicate copies of common libraries and keeps plugin bundles small.
+
+### TypeScript Support
+
+Full TypeScript type definitions are available in `plugin-api.d.ts` — install it as a dev dependency for autocomplete and type checking during development.
+
+For the complete plugin development guide, see the [Plugin Development documentation](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/docs/reference/PLUGIN_DEVELOPMENT.md).

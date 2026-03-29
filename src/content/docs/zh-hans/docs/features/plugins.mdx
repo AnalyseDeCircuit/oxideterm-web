@@ -1,0 +1,177 @@
+---
+title: 插件系统
+description: 通过基于 ESM 的插件、18 个 API 命名空间和冻结安全表面扩展 OxideTerm。
+---
+
+OxideTerm 提供运行时插件系统，允许第三方扩展在不修改核心应用的情况下添加功能。
+
+## 插件架构
+
+插件是 **ESM 模块包**，从 `~/.oxideterm/plugins/{plugin-id}/` 加载。每个插件由以下文件组成：
+
+```
+~/.oxideterm/plugins/my-plugin/
+├── plugin.json      # 清单文件（元数据 + 权限）
+└── index.js         # 主入口点（ESM）
+```
+
+### 插件清单
+
+```json
+{
+  "id": "my-plugin",
+  "name": "My Plugin",
+  "version": "1.0.0",
+  "description": "一个示例 OxideTerm 插件",
+  "author": "Your Name",
+  "main": "index.js",
+  "permissions": ["terminal.read", "events.subscribe"]
+}
+```
+
+清单声明插件身份和所需权限。权限在运行时通过 Proxy ACL 强制执行。
+
+### 插件生命周期
+
+```typescript
+// index.ts — 编译为 ESM
+export function activate(ctx: PluginContext) {
+  // 插件加载时调用
+  // 注册事件处理器、UI 组件、命令
+
+  ctx.events.on('connection:active', (connectionId) => {
+    console.log('已连接:', connectionId);
+  });
+
+  // 注册侧边栏面板
+  ctx.ui.registerSidebarPanel({
+    id: 'my-panel',
+    title: 'My Panel',
+    icon: 'Terminal',
+    component: MyPanelComponent,
+  });
+}
+
+export function deactivate() {
+  // 插件禁用或 OxideTerm 退出时调用
+  // 清理资源、定时器、订阅
+}
+```
+
+## PluginContext API
+
+插件接收一个冻结的 `PluginContext` 对象，包含 **18 个命名空间**：
+
+| 命名空间 | 用途 |
+|---------|------|
+| `connections` | 列出、查询和管理 SSH 连接 |
+| `events` | 订阅和发射自定义事件 |
+| `ui` | 注册侧边栏面板、状态栏项目、右键菜单 |
+| `terminal` | 读取终端缓冲区、发送输入、订阅数据 |
+| `settings` | 读写插件特定设置（带模式验证） |
+| `i18n` | 国际化和语言环境工具 |
+| `storage` | 插件作用域的键值存储（通过 redb 持久化） |
+| `api` | 后端 IPC 调用 Tauri 命令 |
+| `assets` | 插件资产解析（图片、字体等） |
+| `sftp` | SFTP 文件操作（列表、读取、写入、stat） |
+| `forward` | 端口转发管理（创建、列出、删除） |
+| `sessions` | 会话树和生命周期管理 |
+| `transfers` | SFTP 传输队列控制与监控 |
+| `profiler` | 资源分析数据（CPU、内存、网络） |
+| `eventLog` | 连接生命周期事件日志访问 |
+| `ide` | IDE 模式文件操作和编辑器状态 |
+| `ai` | OxideSens AI 聊天集成和工具注册 |
+| `app` | 应用级工具、版本、平台信息 |
+
+### 24 UI Kit 组件
+
+插件可访问 **24 个预构建 React 组件**，通过 `window.__OXIDE__` 注入：
+
+按钮、输入框、对话框、选择器、复选框、开关、标签页、表格、徽章、提示框、滚动区域、分隔符等——全部匹配 OxideTerm 的主题和设计系统。
+
+## 安全性
+
+插件系统采用多层安全机制：
+
+- **冻结 API 表面** — 所有 `PluginContext` 对象通过 `Object.freeze()` 密封，插件无法修改或猴子补丁 API
+- **Proxy ACL** — 每个命名空间访问都根据插件声明的权限进行验证
+- **IPC 白名单** — 插件只能通过 `api` 命名空间调用白名单中的 Tauri 命令
+- **熔断器** — 多次运行时错误后自动禁用，防止有 bug 的插件崩溃整个应用
+- **错误边界** — React 错误边界将插件 UI 崩溃与主应用隔离
+- 插件在渲染进程中运行，系统访问权限有限——没有 API 之外的直接文件系统或网络访问
+
+## 安装插件
+
+1. 下载插件包（`.zip`）
+2. 解压到 `~/.oxideterm/plugins/{plugin-id}/`
+3. 重启 OxideTerm 或从插件管理器重新加载
+
+插件目录必须包含有效的 `plugin.json` 清单文件。
+
+## 插件管理器
+
+内置插件管理器 UI 提供：
+- 已安装插件列表，显示版本、描述和状态
+- **启用 / 禁用开关** — 即时激活或停用插件
+- **插件设置面板** — 配置插件特定设置
+- **错误日志** — 查看运行时错误和警告以便调试
+- **重新加载** — 无需重启 OxideTerm 即可重载插件
+
+## 开发插件
+
+### 快速开始
+
+```typescript
+// plugin.json
+{
+  "id": "hello-world",
+  "name": "Hello World",
+  "version": "1.0.0",
+  "main": "index.js"
+}
+
+// index.ts
+import type { PluginContext } from 'oxideterm-plugin-api';
+
+export function activate(ctx: PluginContext) {
+  // 监听新连接
+  ctx.events.on('connection:active', (data) => {
+    ctx.ui.showNotification({
+      title: '已连接！',
+      message: `已连接到 ${data.host}`,
+    });
+  });
+
+  // 注册命令
+  ctx.ui.registerCommand({
+    id: 'hello.greet',
+    title: 'Say Hello',
+    handler: () => {
+      ctx.ui.showNotification({ title: 'Hello!', message: 'Hello from my plugin!' });
+    },
+  });
+}
+
+export function deactivate() {
+  console.log('插件已停用');
+}
+```
+
+### 共享模块
+
+插件可通过 `window.__OXIDE__` 访问共享模块，无需打包：
+
+| 模块 | 用途 |
+|------|------|
+| `React` | UI 组件 |
+| `ReactDOM` | 渲染 |
+| `zustand` | 状态管理 |
+| `lucide-react` | 图标 |
+
+这避免了打包常用库的重复副本，保持插件包体积小巧。
+
+### TypeScript 支持
+
+完整的 TypeScript 类型定义位于 `plugin-api.d.ts`——开发时安装为开发依赖以获得自动补全和类型检查。
+
+完整的插件开发指南请参阅 [插件开发文档](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/docs/reference/PLUGIN_DEVELOPMENT.md)。

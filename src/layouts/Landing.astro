@@ -1,0 +1,72 @@
+---
+import "@/styles/global.css";
+import type { LangKey } from "@/i18n";
+import { t, languages, langPath } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+---
+
+<!doctype html>
+<html lang={i.meta.lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{i.meta.title}</title>
+    <meta name="description" content={i.meta.description} />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta property="og:title" content={i.meta.title} />
+    <meta property="og:description" content={i.meta.description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={`https://oxideterm.app${langPath(lang)}`} />
+    <meta property="og:image" content="https://oxideterm.app/images/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-[var(--ot-bg-page)] text-[var(--ot-text-primary)] antialiased" style={`font-family: var(--font-serif);`}>
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 border-b border-[var(--ot-border)]" style="background: rgba(248,244,235,0.92); backdrop-filter: blur(8px);">
+      <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        <a href={langPath(lang)} class="text-xl font-bold tracking-tight" style={`font-family: var(--font-serif);`}>
+          <span class="text-[var(--ot-text-primary)]">Oxide</span><span class="text-[var(--ot-accent)]">Term</span>
+        </a>
+        <div class="hidden sm:flex items-center gap-6">
+          <a href={["en", "zh-hans"].includes(lang) ? (lang === "en" ? "/docs/" : `/${lang}/docs/`) : "/docs/"} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors">
+            {i.footer.docs}
+          </a>
+          <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors">
+            GitHub
+          </a>
+          <a href="#download" class="text-sm px-4 py-1.5 rounded-lg cta-primary font-medium">
+            {i.hero.cta_download}
+          </a>
+        </div>
+        <button id="mobile-menu-btn" class="sm:hidden p-2 text-[var(--ot-text-secondary)]" aria-label="Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+      </div>
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="sm:hidden hidden border-t border-[var(--ot-border)] px-6 py-4" style="background: rgba(248,244,235,0.98);">
+        <div class="flex flex-col gap-3">
+          <a href={["en", "zh-hans"].includes(lang) ? (lang === "en" ? "/docs/" : `/${lang}/docs/`) : "/docs/"} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)]">{i.footer.docs}</a>
+          <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)]">GitHub</a>
+          <a href="#download" class="text-sm px-4 py-1.5 rounded-lg cta-primary font-medium text-center">{i.hero.cta_download}</a>
+        </div>
+      </div>
+    </nav>
+    <script>
+      document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+        document.getElementById('mobile-menu')?.classList.toggle('hidden');
+      });
+    </script>
+    <div class="pt-14">
+      <slot />
+    </div>
+  </body>
+</html>

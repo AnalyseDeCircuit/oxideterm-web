@@ -1,0 +1,179 @@
+---
+title: OxideSens AI
+description: AI-powered terminal assistant with sidebar chat, inline panel, 40+ tools, MCP, and RAG knowledge base.
+---
+
+**OxideSens** is OxideTerm's built-in AI assistant that helps you work more efficiently in the terminal. It features **40+ autonomous tools**, **MCP server integration**, **RAG knowledge base**, and supports both sidebar and inline chat modes.
+
+## Bring Your Own Key
+
+OxideSens follows a **BYOK (Bring Your Own Key)** model. You provide your own API key for any supported AI provider. Keys are securely stored in your OS keychain — never in config files.
+
+### Supported Providers
+
+- **OpenAI** — GPT-5.4, GPT-5.4 mini, GPT-5.4 nano, etc.
+- **Anthropic** — Claude Opus 4.6, Claude Sonnet 4.6, Claude Haiku 4.5, etc.
+- **Google** — Gemini 3 Flash, Gemini 2.5 Pro, Gemini 2.5 Flash, etc.
+- **DeepSeek** — V3.2, etc.
+- **Ollama** — any local model (Llama, Mistral, Qwen, etc.)
+- **OneAPI** — self-hosted API gateway
+- Any `/v1/chat/completions` compatible endpoint
+
+Models are **fetched dynamically** from provider APIs — new models are available automatically without app updates.
+
+### Setup
+
+1. Open **Settings** → **AI** tab
+2. Enable **AI Capabilities**
+3. Read and confirm the privacy statement
+4. Enter your API base URL (e.g., `https://api.openai.com/v1`)
+5. Enter your API key — stored in OS keychain
+
+## Sidebar Chat
+
+The sidebar chat panel provides a persistent conversational interface with full history:
+
+- Ask questions about commands, scripts, or system administration
+- Get explanations of error messages and log analysis
+- Request command suggestions for specific tasks
+- **Multi-source context** — IDE files, SFTP paths, Git status automatically available as context
+- Full chat history with session persistence
+
+### Terminal Context
+
+OxideSens captures terminal buffer from the active pane or **all split panes simultaneously**. It can analyze:
+- Recent command output
+- Error messages and stack traces
+- Log files visible in the terminal
+- Running process output
+
+Context is injected into a structured prompt with environment information (local OS, remote OS if detected via SSH).
+
+## Inline Panel
+
+Press `⌘I` (macOS) or `Ctrl+Shift+I` (Windows/Linux) to open the inline panel — a lightweight, floating command assistant:
+
+- **VS Code-style floating panel** — appears at the cursor position, 520px wide
+- **AI-suggested commands** — inserted via bracketed paste (safe, no auto-execution)
+- **Output analysis** — select error text, press `⌘I`, ask "what went wrong?"
+- **One-click actions**: Insert (paste into terminal), Execute (run immediately), Copy, Regenerate
+
+### Inline Panel Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Send question; with result: execute command |
+| `Tab` | Insert AI suggestion into terminal |
+| `Esc` | Close panel |
+
+### Smart Positioning
+
+The panel follows the terminal cursor position:
+- Prefers display below the cursor
+- Auto-switches to above when space is insufficient
+- Horizontal auto-adjustment for screen edges
+
+:::note
+The inline panel is designed for **quick, lightweight queries** without tool invocation. For **40+ autonomous tools**, **MCP server extensions**, or **RAG knowledge base** search, use the sidebar chat.
+:::
+
+## 40+ Autonomous Tools
+
+OxideSens can autonomously invoke tools without manual triggering:
+
+| Category | Examples |
+|----------|----------|
+| **File Operations** | Create, read, write, move, delete files and directories |
+| **Process Management** | List processes, kill processes, check resource usage |
+| **Network Diagnostics** | Check ports, DNS resolution, connectivity tests |
+| **TUI Interaction** | Send keys to running TUI apps (vim, htop, yazi) |
+| **Text Processing** | Search, replace, extract, transform text content |
+| **System Info** | Disk usage, memory, uptime, OS details |
+
+Tools are invoked through a structured function-calling interface with the AI model.
+
+## MCP Integration
+
+Connect external [Model Context Protocol](https://modelcontextprotocol.io) servers for third-party tool integration:
+
+- **stdio transport** — launch a local MCP server process
+- **SSE transport** — connect to a remote MCP server via Server-Sent Events
+- Configure MCP servers in OxideTerm settings
+- MCP tools appear alongside built-in tools in the sidebar chat
+
+This allows extending OxideSens with domain-specific capabilities — database queries, cloud infrastructure management, documentation search, and more.
+
+## RAG Knowledge Base
+
+Import your own documents into scoped knowledge collections:
+
+### How It Works
+
+1. **Import**: Add Markdown (`.md`) or plain text (`.txt`) files
+2. **Chunking**: Markdown-aware chunking preserves heading hierarchy — sections stay semantically coherent
+3. **Indexing**: Dual index — BM25 keyword index + vector cosine similarity
+4. **Search**: Hybrid retrieval fuses both scores via **Reciprocal Rank Fusion (RRF)**
+
+### Collection Scoping
+
+- **Global collections** — available across all connections
+- **Per-connection collections** — scoped to a specific SSH connection for project-specific documentation
+
+### CJK Support
+
+The tokenizer uses **bigram segmentation** for Chinese, Japanese, and Korean content, ensuring accurate search results without requiring a full NLP pipeline.
+
+### Use Cases
+
+- Import project documentation for context-aware code assistance
+- Add runbooks for instant operational guidance
+- Store internal API references for command generation
+
+## AI Agent Mode
+
+OxideSens includes an **Agent Mode** that enables multi-round autonomous task execution — the AI plans a sequence of tool calls, executes them, observes results, and iterates until the goal is reached.
+
+### How It Works
+
+1. You give a high-level goal: *"set up a Python virtual environment and install the requirements"*
+2. The agent decomposes it into steps, choosing tools at each step
+3. After each tool call, the agent observes the result before deciding the next action
+4. The loop continues until the goal is complete or a blocking decision requires your input
+
+### Tool Approval Modes
+
+To maintain control over autonomous execution, OxideSens provides three approval stances:
+
+| Mode | Behavior |
+|------|----------|
+| **Supervised** | Confirm every tool call before execution |
+| **Balanced** | Auto-approve low-risk tools (read-only); confirm writes and destructive actions |
+| **Autonomous** | Auto-approve all tools; agent runs until completion |
+
+Default is **Balanced**. Switch via the toolbar in the AI sidebar.
+
+### Per-Tool Auto-Approval
+
+For fine-grained control, you can whitelist specific tools for automatic approval while leaving others requiring confirmation. In Settings → AI → Tool Approvals, each tool can be individually toggled.
+
+### Tool Call Logging
+
+Every tool call the agent makes is logged in the sidebar conversation with:
+- Tool name and input parameters
+- Result or error (collapsed by default, expandable)
+- Elapsed time
+
+This gives full auditability of what the agent did during a session.
+
+:::tip
+Use **Supervised** mode when exploring a new task. Once you trust the agent's behavior for a specific workflow, switch to **Autonomous** to let it run unattended.
+:::
+
+## Privacy & Security
+
+- All API keys stored in OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service)
+- On macOS, key reads gated behind **Touch ID** via `LAContext` — cached after first auth per session; no entitlements or code-signing required
+- Terminal buffer data is sent to the AI provider **only** when you explicitly request it (click the Context button and send a message)
+- **No telemetry** or data collection — OxideTerm never phones home
+- **Local models** via Ollama keep everything on your machine — zero network traffic for AI queries
+- **Streaming SSE** for real-time responses — tokens appear as they're generated

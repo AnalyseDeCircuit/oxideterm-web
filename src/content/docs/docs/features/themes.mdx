@@ -1,0 +1,111 @@
+---
+title: Themes
+description: Customize OxideTerm's appearance with 30+ built-in themes, a visual editor, and CSS variables.
+---
+
+OxideTerm includes a comprehensive theme engine that lets you customize every aspect of the application's appearance — from terminal ANSI colors to the entire UI surface.
+
+## Built-in Themes
+
+OxideTerm ships with **30+ built-in themes** optimized for terminal readability. The default dark theme is designed for extended terminal sessions with carefully chosen contrast ratios.
+
+Themes cover a wide range of styles: classic dark/light, Dracula, Solarized, Monokai, Nord, One Dark, Gruvbox, Tokyo Night, and more.
+
+## Custom Themes
+
+Create your own themes using the **visual editor with live preview**. Changes are visible instantly — no restart required.
+
+### Terminal Colors (20 Fields)
+
+Customize all 16 ANSI colors plus 4 extra fields:
+
+| Field | Description |
+|-------|-------------|
+| **ANSI 0–7** | Standard colors (black, red, green, yellow, blue, magenta, cyan, white) |
+| **ANSI 8–15** | Bright/bold variants |
+| **Foreground** | Default text color |
+| **Background** | Terminal background |
+| **Cursor** | Cursor color |
+| **Selection** | Text selection highlight |
+
+### CSS Variables (23 Variables)
+
+Customize the entire application UI through CSS custom properties:
+
+#### Background Layer (7 variables)
+
+| Variable | Purpose |
+|----------|---------|
+| `--theme-bg` | Main background |
+| `--theme-bg-panel` | Panel/sidebar background |
+| `--theme-bg-hover` | Hover state background |
+| `--theme-bg-active` | Active/pressed state |
+| `--theme-bg-secondary` | Secondary background areas |
+| `--theme-bg-elevated` | Elevated surface (dialogs, menus) |
+| `--theme-bg-sunken` | Recessed surface (input fields, wells) |
+
+#### Text Layer (4 variables)
+
+| Variable | Purpose |
+|----------|---------|
+| `--theme-text` | Primary text color |
+| `--theme-text-muted` | Muted/secondary text |
+| `--theme-text-secondary` | Tertiary text (timestamps, hints) |
+| `--theme-text-heading` | Heading text color |
+
+#### Border Layer (3 variables)
+
+| Variable | Purpose |
+|----------|---------|
+| `--theme-border` | Standard borders |
+| `--theme-border-muted` | Subtle borders and dividers |
+| `--theme-border-active` | Focused/active element borders |
+
+#### Accent Layer (4 variables)
+
+| Variable | Purpose |
+|----------|---------|
+| `--theme-accent` | Primary accent color (buttons, links) |
+| `--theme-accent-hover` | Accent hover state |
+| `--theme-accent-text` | Text on accent background |
+| `--theme-accent-secondary` | Secondary accent elements |
+
+#### Semantic Layer (5 variables)
+
+| Variable | Purpose |
+|----------|---------|
+| `--theme-success` | Success indicators |
+| `--theme-warning` | Warning indicators |
+| `--theme-error` | Error indicators |
+| `--theme-info` | Info indicators |
+| `--theme-selection` | Non-terminal selection color |
+
+### Font Customization
+
+- **Font family** — terminal monospace font
+- **Font size** — in pixels
+- **Line height** — spacing between lines
+
+## Auto-Derive
+
+The theme engine can automatically **generate UI colors from the terminal ANSI palette**:
+
+1. Set your preferred terminal ANSI colors (the 16 standard colors)
+2. Click **Auto-Derive** in the theme editor
+3. OxideTerm analyzes the palette's hue, saturation, and lightness
+4. It generates a consistent set of background, text, border, and accent colors that harmonize with your terminal palette
+
+This means you can start from any terminal color scheme and get a matching full-app theme with one click.
+
+## Applying Themes
+
+1. Open **Settings** → **Appearance**
+2. Browse built-in themes with instant preview
+3. Select a theme to apply — changes take effect immediately, no restart required
+4. Create a custom theme by clicking **New Theme** and using the visual editor
+
+## Sharing Themes
+
+- **Export**: save your custom theme as a JSON file
+- **Import**: load a JSON theme file from the Settings panel
+- Theme JSON files contain all terminal colors, CSS variables, and font settings in a single portable format

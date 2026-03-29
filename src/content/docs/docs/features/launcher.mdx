@@ -1,0 +1,66 @@
+---
+title: Launcher
+description: Spotlight-style app launcher for macOS applications and WSL distribution quick-launch from within OxideTerm.
+---
+
+The **Launcher** is a quick-launch interface built into OxideTerm that lets you open macOS applications and WSL Linux distributions without leaving the terminal environment.
+
+## Opening the Launcher
+
+Open a new tab and select **Launcher** from the tab type picker.
+
+## macOS App Launcher
+
+On first use, OxideTerm prompts you to enable the app scanner:
+
+> **Enable App Launcher** — The launcher scans installed applications on your Mac and caches their icons locally for quick browsing. All data stays local — nothing is sent to any server.
+
+Once enabled, the launcher:
+- Scans `/Applications` and other standard app directories for `.app` bundles
+- Caches app icons as PNG files in OxideTerm's local data directory
+- Displays a searchable grid of installed apps
+
+### Using the App Launcher
+
+1. Type in the **search box** to filter by app name (real-time fuzzy search)
+2. Click any app to launch it immediately
+3. Use **Refresh** to re-scan for newly installed apps
+
+### Privacy
+
+- All scanning and icon caching is done locally
+- No application data or icons are transmitted to any external server
+- The cache is stored in OxideTerm's data directory and can be cleared by disabling the launcher
+
+To disable: click **Disable Launcher** in the Launcher header. This clears all cached icons. You can re-enable anytime.
+
+## WSL Distribution Launcher
+
+On Windows, the Launcher shows a second section: **WSL Distributions**.
+
+OxideTerm detects all installed WSL distributions and lets you launch a local terminal session into any of them directly:
+
+1. The **WSL Distributions** section loads automatically if WSL is installed
+2. Search by distribution name ("Ubuntu", "Debian", "Arch", etc.)
+3. Click a distribution to open a new local terminal session in that WSL environment
+
+If no distributions are found, the launcher shows: _"No WSL distributions available. Make sure WSL is installed."_
+
+:::note
+WSL terminal sessions use OxideTerm's local PTY integration, so they support all terminal features — themes, split panes, [broadcast input](/docs/features/broadcast), [session recording](/docs/features/recording), and the inline AI panel.
+:::
+
+## Local Shell
+
+On macOS / Linux, the Launcher also provides a **Local Shell** entry:
+
+- **Default Shell** — uses the system-configured `$SHELL` (usually zsh)
+- **Custom Shell** — specify a path in Settings (e.g., `/usr/local/bin/fish`)
+
+Click to open a local shell session in a new tab.
+
+## Use Cases
+
+- Launch GUI apps or tools without switching to Finder / Spotlight
+- Quickly switch between multiple WSL distributions in a dev workflow
+- Keep your entire workflow — app launching, SSH connections, local terminals — within one OxideTerm window

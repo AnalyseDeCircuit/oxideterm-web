@@ -1,0 +1,90 @@
+---
+title: Port Forwarding
+description: Local, remote, and dynamic port forwarding with smart remote port detection and auto-restore.
+---
+
+OxideTerm supports all three types of SSH port forwarding, plus automatic detection of remote listening ports. All forwarding operations use a **lock-free message-passing architecture** for maximum throughput.
+
+## Forwarding Types
+
+### Local Forward (-L)
+
+Forward a port on your local machine to a remote host through the SSH tunnel.
+
+```
+Local Port ──SSH Tunnel──► Remote Host:Port
+```
+
+**Use cases:**
+- Access a remote web service (e.g., Jupyter Notebook on port 8888) from your local browser
+- Connect to a remote database (MySQL, PostgreSQL) through a secure tunnel
+- Access internal web UIs behind a firewall
+
+### Remote Forward (-R)
+
+Forward a port on the remote server back to your local machine.
+
+```
+Remote Port ◄──SSH Tunnel── Local Host:Port
+```
+
+**Use cases:**
+- Expose a local development server to the remote environment
+- Share a local service with colleagues on the remote network
+- Webhook development — receive callbacks on a remote server and forward to your local app
+
+### Dynamic Forward (SOCKS5) (-D)
+
+Create a SOCKS5 proxy through the SSH tunnel for flexible traffic routing.
+
+```
+Local SOCKS5 Port ──SSH Tunnel──► (any remote destination)
+```
+
+**Use cases:**
+- Route browser traffic through the remote server
+- Access multiple internal services without individual port forwards
+- Network debugging from the remote server's perspective
+
+## Smart Remote Port Detection
+
+OxideTerm automatically detects services listening on ports on the remote server. The **Remote Listening Ports** panel shows:
+
+- **Port number** and bind address
+- **Process name** (when available via `/proc` or `ss`)
+- **One-click forwarding** — click **Forward** to create a local forward instantly, pre-populated with the correct port
+
+This eliminates the need to remember port numbers or manually configure forwards.
+
+## Quick Forwards
+
+Pin frequently-used forwards as **Quick Forwards** for instant access. They appear as colored badges at the top of the Port Forwarding tab. One click to start, one click to stop.
+
+## Management
+
+- View all active forwards with **status**, **local/remote addresses**, and **real-time traffic stats** (bytes in/out)
+- **Start / stop** individual forwards
+- **Edit** forwarding rules (port, bind address, remote host)
+- **Death reporting** — forward tasks actively report exit reason (SSH disconnect, remote port close, timeout) for clear diagnostics instead of silent failures
+- **Idle timeout** — `FORWARD_IDLE_TIMEOUT` (300s) prevents zombie connections from accumulating
+
+## Architecture
+
+Port forwarding uses a **message-passing architecture**: each SSH Channel is owned by a single `ssh_io` task. There is no `Arc<Mutex<Channel>>` — data flows through message channels, eliminating mutex contention entirely in the hot path.
+
+The `HandleController` dispatches forward requests via `channel_open_direct_tcpip()` (local forwards) or `tcpip_forward()` (remote forwards). Each forward task runs independently and communicates status back via events.
+
+## Reconnect Behavior
+
+When a connection drops and reconnects, the **reconnect orchestrator** automatically restores all active and suspended port forwards:
+
+1. **Snapshot** — before disconnect, all active forward rules are captured (user-stopped forwards are excluded)
+2. **SSH reconnect** — new connection established with new `connectionId`
+3. **Restore** — each forward rule is re-created on the new session, skipping duplicates
+4. **Status sync** — UI updates to show restored forwards with fresh traffic counters
+
+Forwards that were manually stopped by the user are **not** auto-restored — the orchestrator respects user intent.
+
+## State Gating
+
+All forwarding operations require connection state `active`. The UI disables forwarding controls during `link_down` or `reconnecting` states, preventing operations on a dead SSH channel.

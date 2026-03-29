@@ -1,0 +1,107 @@
+---
+title: CLI Companion
+description: oxt — a lightweight CLI companion for controlling OxideTerm from the command line.
+---
+
+**`oxt`** is OxideTerm's CLI companion — a **~1 MB binary** that communicates with the running OxideTerm app via **JSON-RPC 2.0** over Unix Socket (macOS/Linux) or Named Pipe (Windows).
+
+## What It Does
+
+`oxt` lets you interact with OxideTerm from any terminal or script — check status, list sessions, and control connections without switching to the OxideTerm window.
+
+```bash
+# Check OxideTerm status
+oxt status
+
+# List active connections
+oxt list
+
+# Ping a connection
+oxt ping
+```
+
+## Output Formats
+
+All commands support both human-readable and JSON output:
+
+```bash
+# Human-readable (default)
+$ oxt status
+OxideTerm v0.21.0
+Status: Running
+Sessions: 3 active
+
+# Machine-readable JSON (for scripts)
+$ oxt status --json
+{"version":"0.21.0","status":"running","sessions":3}
+```
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `status` | Check if OxideTerm is running, get version info and active session count |
+| `list` | List all active SSH sessions with host, user, state, and uptime |
+| `ping` | Test connectivity to a specific connection |
+
+## Communication Protocol
+
+### Transport
+
+| Platform | Transport | Path |
+|----------|-----------|------|
+| **macOS** | Unix Socket | `~/Library/Application Support/com.oxideterm.app/oxideterm.sock` |
+| **Linux** | Unix Socket | `~/.config/com.oxideterm.app/oxideterm.sock` |
+| **Windows** | Named Pipe | `\\.\pipe\oxideterm` |
+
+### Protocol
+
+The protocol is **JSON-RPC 2.0** — a lightweight, standardized protocol for remote procedure calls:
+
+```json
+// Request
+{"jsonrpc": "2.0", "method": "status", "id": 1}
+
+// Response
+{"jsonrpc": "2.0", "result": {"version": "0.21.0", "status": "running"}, "id": 1}
+```
+
+This makes it easy to integrate with scripts, CI/CD pipelines, and monitoring tools. Any language with JSON-RPC support can communicate with OxideTerm.
+
+## Installation
+
+`oxt` is included with OxideTerm — no separate installation required. The binary is available in the application bundle:
+
+| Platform | Location |
+|----------|----------|
+| **macOS** | `/Applications/OxideTerm.app/Contents/MacOS/oxt` |
+| **Linux** | Depends on installation method; typically alongside the main binary |
+| **Windows** | Same directory as `OxideTerm.exe` |
+
+You can add the binary location to your `PATH` for convenient access from any terminal.
+
+## Use Cases
+
+### Scripting
+
+```bash
+#!/bin/bash
+# Check if OxideTerm is running before attempting operations
+if oxt status --json | jq -e '.status == "running"' > /dev/null 2>&1; then
+  echo "OxideTerm is running"
+  oxt list --json | jq '.sessions[] | .host'
+fi
+```
+
+### Monitoring
+
+```bash
+# Watch active sessions (refresh every 5s)
+watch -n 5 oxt list
+```
+
+## Remote Agent (Separate)
+
+:::note
+`oxt` is a **local** CLI tool for controlling OxideTerm on your machine. It is completely separate from the **Remote Agent** — an optional ~1 MB Rust binary that deploys to remote servers for enhanced IDE features (file tree, symbol search, file watching). See [IDE Mode](/docs/features/ide/) for details.
+:::

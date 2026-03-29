@@ -1,0 +1,107 @@
+---
+title: CLI 伴侣工具
+description: oxt — 用于从命令行控制 OxideTerm 的轻量级 CLI 伴侣程序。
+---
+
+**`oxt`** 是 OxideTerm 的 CLI 伴侣工具——一个约 **1 MB** 的二进制文件，通过 **JSON-RPC 2.0** 协议与运行中的 OxideTerm 应用通信，在 macOS/Linux 上使用 Unix Socket，在 Windows 上使用 Named Pipe。
+
+## 功能
+
+`oxt` 让你可以从任何终端或脚本与 OxideTerm 交互——检查状态、列出会话、控制连接，无需切换到 OxideTerm 窗口。
+
+```bash
+# 检查 OxideTerm 状态
+oxt status
+
+# 列出活跃连接
+oxt list
+
+# Ping 一个连接
+oxt ping
+```
+
+## 输出格式
+
+所有命令同时支持人类可读和 JSON 输出：
+
+```bash
+# 人类可读（默认）
+$ oxt status
+OxideTerm v0.21.0
+Status: Running
+Sessions: 3 active
+
+# 机器可读 JSON（适用于脚本）
+$ oxt status --json
+{"version":"0.21.0","status":"running","sessions":3}
+```
+
+## 可用命令
+
+| 命令 | 描述 |
+|------|------|
+| `status` | 检查 OxideTerm 是否运行，获取版本信息和活跃会话数 |
+| `list` | 列出所有活跃 SSH 会话及其主机、用户、状态和运行时间 |
+| `ping` | 测试到特定连接的连通性 |
+
+## 通信协议
+
+### 传输方式
+
+| 平台 | 传输方式 | 路径 |
+|------|---------|------|
+| **macOS** | Unix Socket | `~/Library/Application Support/com.oxideterm.app/oxideterm.sock` |
+| **Linux** | Unix Socket | `~/.config/com.oxideterm.app/oxideterm.sock` |
+| **Windows** | Named Pipe | `\\.\pipe\oxideterm` |
+
+### 协议
+
+协议为 **JSON-RPC 2.0**——轻量级、标准化的远程过程调用协议：
+
+```json
+// 请求
+{"jsonrpc": "2.0", "method": "status", "id": 1}
+
+// 响应
+{"jsonrpc": "2.0", "result": {"version": "0.21.0", "status": "running"}, "id": 1}
+```
+
+这使得与脚本、CI/CD 流水线和监控工具的集成非常方便。任何支持 JSON-RPC 的语言都可以与 OxideTerm 通信。
+
+## 安装
+
+`oxt` 随 OxideTerm 一起安装——无需单独安装。二进制文件位于应用包中：
+
+| 平台 | 位置 |
+|------|------|
+| **macOS** | `/Applications/OxideTerm.app/Contents/MacOS/oxt` |
+| **Linux** | 取决于安装方式；通常与主二进制文件同目录 |
+| **Windows** | 与 `OxideTerm.exe` 同目录 |
+
+可将二进制文件位置添加到你的 `PATH` 以便在任何终端中便捷使用。
+
+## 使用场景
+
+### 脚本自动化
+
+```bash
+#!/bin/bash
+# 在尝试操作前检查 OxideTerm 是否在运行
+if oxt status --json | jq -e '.status == "running"' > /dev/null 2>&1; then
+  echo "OxideTerm 正在运行"
+  oxt list --json | jq '.sessions[] | .host'
+fi
+```
+
+### 监控
+
+```bash
+# 持续监控活跃会话（每 5 秒刷新）
+watch -n 5 oxt list
+```
+
+## 远程 Agent（独立组件）
+
+:::note
+`oxt` 是用于控制 OxideTerm 的**本地** CLI 工具。它与**远程 Agent** 完全独立——远程 Agent 是一个可选的约 1 MB Rust 二进制文件，部署到远程服务器以提供增强的 IDE 功能（文件树、符号搜索、文件监控）。详见 [IDE 模式](/zh-hans/docs/features/ide/)。
+:::

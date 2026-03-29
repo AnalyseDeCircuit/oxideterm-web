@@ -1,0 +1,88 @@
+---
+import type { LangKey } from "@/i18n";
+import { t } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+
+const tabs = [
+  { id: "terminal", label: i.showcase.tab_terminal, desc: i.showcase.terminal_desc, img: "/images/screenshots/terminal.png" },
+  { id: "sftp", label: i.showcase.tab_sftp, desc: i.showcase.sftp_desc, img: "/images/screenshots/sftp.png" },
+  { id: "ide", label: i.showcase.tab_ide, desc: i.showcase.ide_desc, img: "/images/screenshots/ide.png" },
+  { id: "forwarding", label: i.showcase.tab_forwarding, desc: i.showcase.forwarding_desc, img: "/images/screenshots/forwarding.png" },
+  { id: "ai", label: i.showcase.tab_ai, desc: i.showcase.ai_desc, img: "/images/screenshots/ai.gif" },
+];
+---
+
+<section class="py-20 px-6 border-t border-[var(--ot-border)]">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-14 tracking-tight">
+      {i.showcase.title}
+    </h2>
+
+    <!-- Tab bar -->
+    <div class="flex flex-wrap justify-center gap-2 mb-10">
+      {tabs.map((tab, idx) => (
+        <button
+          data-tab={tab.id}
+          class:list={[
+            "feature-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border",
+            idx === 0
+              ? "feature-tab-active"
+              : "border-transparent text-[var(--ot-text-muted)] hover:text-[var(--ot-text-secondary)]",
+          ]}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Tab content -->
+    {tabs.map((tab, idx) => (
+      <div
+        data-tab-content={tab.id}
+        class:list={["feature-panel", idx !== 0 && "hidden"]}
+      >
+        <div class="screenshot-frame mx-auto max-w-5xl">
+          <img
+            src={tab.img}
+            alt={tab.label}
+            class="w-full h-auto"
+            loading={idx === 0 ? "eager" : "lazy"}
+          />
+        </div>
+        <p class="text-center text-[var(--ot-text-secondary)] mt-6 max-w-2xl mx-auto leading-relaxed">
+          {tab.desc}
+        </p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll(".feature-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tabId = btn.getAttribute("data-tab");
+
+      // Update tabs
+      document.querySelectorAll(".feature-tab").forEach((t) => {
+        t.classList.remove("feature-tab-active");
+        t.classList.add("border-transparent", "text-[var(--ot-text-muted)]");
+      });
+      btn.classList.add("feature-tab-active");
+      btn.classList.remove("border-transparent", "text-[var(--ot-text-muted)]");
+
+      // Update panels
+      document.querySelectorAll(".feature-panel").forEach((p) => {
+        p.classList.add("hidden");
+      });
+      document
+        .querySelector(`[data-tab-content="${tabId}"]`)
+        ?.classList.remove("hidden");
+    });
+  });
+</script>

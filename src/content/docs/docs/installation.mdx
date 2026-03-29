@@ -1,0 +1,104 @@
+---
+title: Installation
+description: How to download and install OxideTerm on macOS, Windows, and Linux.
+---
+
+## System Requirements
+
+| Platform | Minimum Version | Architecture |
+|----------|----------------|--------------|
+| **macOS** | 11.0 (Big Sur) | Apple Silicon (M1+), Intel x64 |
+| **Windows** | 10 (1803+) | x64, ARM64 |
+| **Linux** | Ubuntu 22.04+ / Fedora 38+ | x64, ARM64 |
+
+## Download
+
+Download the latest release from [GitHub Releases](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest).
+
+### macOS
+
+| Variant | File |
+|---------|------|
+| Apple Silicon (M-series) | `OxideTerm_x.x.x_aarch64.dmg` |
+| Intel | `OxideTerm_x.x.x_x64.dmg` |
+
+1. Download the `.dmg` file for your architecture
+2. Open the disk image and drag **OxideTerm** to your **Applications** folder
+3. On first launch, open Terminal and run `xattr -cr /Applications/OxideTerm.app` to remove the quarantine flag, then launch normally
+
+### Windows
+
+| Variant | File |
+|---------|------|
+| x64 | `OxideTerm_x.x.x_x64-setup.exe` |
+| ARM64 | `OxideTerm_x.x.x_arm64-setup.exe` |
+
+1. Download the `.exe` installer
+2. Run the installer and follow the prompts
+3. OxideTerm will be available in the Start Menu
+
+### Linux
+
+| Variant | File |
+|---------|------|
+| x64 (Debian/Ubuntu) | `OxideTerm_x.x.x_amd64.deb` |
+| x64 (AppImage) | `OxideTerm_x.x.x_amd64.AppImage` |
+| ARM64 (Debian/Ubuntu) | `OxideTerm_x.x.x_arm64.deb` |
+| ARM64 (AppImage) | `OxideTerm_x.x.x_arm64.AppImage` |
+
+**Debian/Ubuntu:**
+```bash
+sudo dpkg -i OxideTerm_x.x.x_amd64.deb
+```
+
+**AppImage:**
+```bash
+chmod +x OxideTerm_x.x.x_amd64.AppImage
+./OxideTerm_x.x.x_amd64.AppImage
+```
+
+## Building from Source
+
+### Prerequisites
+
+- **Rust** 1.75+ (install via [rustup](https://rustup.rs/))
+- **Node.js** 18+
+- **pnpm** (install via `npm install -g pnpm`)
+- Platform-specific build tools:
+  - macOS: Xcode Command Line Tools
+  - Windows: Visual Studio Build Tools 2019+
+  - Linux: `build-essential`, `libwebkit2gtk-4.1-dev`, `libssl-dev`
+
+### Build Steps
+
+```bash
+# Clone the repository
+git clone https://github.com/AnalyseDeCircuit/oxideterm.git
+cd oxideterm
+
+# Install dependencies
+pnpm install
+
+# Development mode (hot reload)
+pnpm tauri dev
+
+# Production build
+pnpm tauri build
+```
+
+The built application will be in `src-tauri/target/release/bundle/`.
+
+## Updating
+
+OxideTerm includes a built-in auto-update mechanism. When a new version is available, you'll see an update notification in the app. You can also manually check for updates in Settings.
+
+## Uninstalling
+
+- **macOS**: Drag OxideTerm from Applications to Trash
+- **Windows**: Use Add/Remove Programs in Settings
+- **Linux**: `sudo dpkg -r oxideterm` or delete the AppImage file
+
+Configuration data is stored in:
+- macOS: `~/Library/Application Support/com.oxideterm.app/`
+- Windows: `%APPDATA%\com.oxideterm.app\`
+- Linux: `~/.config/com.oxideterm.app/`

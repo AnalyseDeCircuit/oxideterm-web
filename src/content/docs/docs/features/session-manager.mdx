@@ -1,0 +1,83 @@
+---
+title: Session Manager
+description: Table-based connection management with bulk operations, search, tags, groups, and drag-and-drop organization.
+---
+
+The **Session Manager** provides a full-featured, spreadsheet-style view of all your saved SSH connections. It complements the sidebar tree with powerful search, filtering, bulk actions, and tagging.
+
+## Opening Session Manager
+
+Click "Session Manager" in the sidebar (table icon), or use the command palette (`⌘K`).
+
+## Connection Table
+
+The table shows all saved connections with sortable columns:
+
+| Column | Description |
+|--------|-------------|
+| **Name** | Connection display name |
+| **Host** | Hostname or IP address |
+| **Port** | SSH port (default 22) |
+| **Username** | Login username |
+| **Auth** | Authentication type (password / key / agent) |
+| **Group** | Group folder |
+| **Tags** | Freeform tag labels |
+| **Last Used** | Relative timestamp of last connection |
+| **Actions** | Connect, Edit, Duplicate, Delete |
+
+Click any column header to sort. Hold `Shift` to multi-sort.
+
+## Search & Filter
+
+The toolbar search box performs **real-time fuzzy search** across name, host, username, and tags simultaneously. Results update as you type.
+
+Filter by group using the **folder tree** on the left side:
+- **All Connections** — show everything
+- **Ungrouped** — connections not assigned to any group
+- **Recent** — connections used in the last 7 days
+- Named groups and subgroups
+
+## Tags
+
+**Tags** are freeform labels you attach to connections for ad-hoc grouping and filtering.
+
+- Add or remove tags via the "Manage Tags" row action
+- Tags visible as colored chips in the table
+- Search includes tag content
+
+Useful tag patterns: `prod`, `staging`, `dev`, `datacenter-eu`, `team-backend`.
+
+## Batch Operations
+
+Select multiple connections using checkboxes (header checkbox = select all visible):
+
+| Batch Action | Description |
+|-------------|-------------|
+| **Delete Selected** | Remove multiple connections at once |
+| **Move to Group** | Reassign multiple connections to a group |
+| **Add Tags** | Apply tags to all selected connections |
+
+The selection count is shown in the toolbar when rows are selected. Bulk operations show a confirmation dialog before executing.
+
+## Groups Management
+
+The folder tree on the left lets you manage connection groups:
+
+- **New Subgroup** — create nested group hierarchy
+- **Rename Group** — rename in-place
+- **Delete Group** — moves contained connections to Ungrouped before deleting
+- Drag connections from the table into a group to reassign
+
+## Editing Connections
+
+Click **Edit** on any row to open the connection editor:
+- All connection properties editable inline
+- Auth method switchable between password / key / agent
+- Key file path browsable via file picker
+- Group assignment selectable from picker
+
+## Import / Export
+
+Use the toolbar **Import** / **Export** buttons to work with `.oxide` encrypted files — see [Connection Management](/docs/features/connections) for the encryption spec.
+
+The **Auto-Route** button analyzes existing sessions to automatically suggest optimal ProxyJump paths for new connections.

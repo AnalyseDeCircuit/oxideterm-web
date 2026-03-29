@@ -1,0 +1,78 @@
+---
+title: SFTP
+description: Dual-pane SFTP file browser with drag-and-drop, transfer queue, and resume support.
+---
+
+OxideTerm includes a full-featured SFTP file browser built on top of the SSH connection — no additional ports or services required. It shares the same SSH connection with the terminal via the reference-counted connection pool.
+
+## Dual-Pane Browser
+
+The SFTP interface provides a dual-pane layout:
+- **Left pane** — local file system
+- **Right pane** — remote file system
+
+Navigate both sides independently. Transfer files by dragging between panes or using the toolbar buttons.
+
+### Path Memory
+
+OxideTerm remembers the current working directory for each session. On reconnect, SFTP automatically restores the previously browsed remote path — no need to re-navigate.
+
+## File Operations
+
+- **Upload / Download** — single files, multiple selections, or entire directories
+- **Create** — new files and directories on the remote system
+- **Rename** — inline rename for files and directories
+- **Delete** — single or batch delete with confirmation
+- **Permissions** — view and modify file permissions (chmod) with a visual editor
+- **Filter** — search/filter files in the current directory by name pattern
+- **Bookmarks** — save frequently accessed directories for quick navigation
+- **Archive extraction** — extract compressed archives (tar.gz, zip, etc.) directly on the remote system
+
+## Smart Preview
+
+Preview files directly without downloading:
+- **Images** — inline preview with zoom support
+- **Video / Audio** — media playback with controls
+- **Code** — syntax-highlighted preview for source files
+- **PDF** — document rendering
+- **Hex** — binary file viewer with offset addressing
+- **Fonts** — font specimen preview with sample text
+- **Metadata** — EXIF data for images, audio tags (ID3, Vorbis, FLAC)
+
+## Transfer Queue
+
+All file transfers are managed through a persistent transfer queue:
+- View **active**, **pending**, **completed**, and **failed** transfers in separate tabs
+- Progress indicators with real-time **ETA** calculation
+- **Pause / resume** individual transfers
+- **Breakpoint resume** — interrupted transfers can resume from the last confirmed offset, not from the beginning
+- **Retry** failed transfers
+- Clear completed items
+
+The transfer queue persists across tab switches — you can switch to the terminal and come back without losing transfer progress.
+
+### Tar Accelerator
+
+For large directory uploads/downloads, OxideTerm can use a **tar-based transfer accelerator**: the remote side packs the directory into a tar stream, which is transferred and extracted locally (or vice versa), drastically reducing the number of SFTP round-trips for many small files.
+
+## Drag and Drop
+
+Drag files between the local and remote panes to initiate transfers. You can also drag files from your system's file manager (Finder, Explorer) into the local pane.
+
+## Context Menu
+
+Right-click any file or directory for a context menu with all available operations:
+- Open in IDE mode (for text files — opens in the CodeMirror editor)
+- Copy path (absolute remote or local path)
+- Download / Upload
+- Properties (size, permissions, timestamps, owner/group)
+
+## Node-Based Routing
+
+All SFTP operations are addressed by `nodeId` and resolved atomically by the backend `NodeRouter`. This means:
+- SSH reconnect (which changes the internal `connectionId`) does **not** break your SFTP session
+- SFTP, terminal, and port forwards are fully independent — closing a terminal tab doesn't disconnect SFTP
+
+## State Gating
+
+SFTP operations are gated by connection state — the UI automatically locks when the connection enters `link_down` or `reconnecting` state, preventing operations on a dead connection. Once the connection recovers, the SFTP panel unlocks automatically.

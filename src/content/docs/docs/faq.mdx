@@ -1,0 +1,190 @@
+---
+title: FAQ
+description: Frequently asked questions about OxideTerm.
+---
+
+## General
+
+### What is OxideTerm?
+
+OxideTerm is a cross-platform SSH terminal client and local terminal emulator built with Tauri 2.0 (Rust) and React 19 (TypeScript). It combines SSH terminal, local PTY, SFTP, IDE mode, port forwarding, AI assistance, plugins, 30+ themes, and 11 languages into a single native application.
+
+### Is OxideTerm free?
+
+OxideTerm is licensed under **PolyForm Noncommercial 1.0.0**:
+- **Personal and non-profit use**: free — research, experiments, personal study, homework, hobby projects, amateur pursuits
+- **Noncommercial organizations**: free — charities, educational institutions, public research organizations, government institutions
+- **Commercial use**: requires a separate license
+- Includes a patent defense clause
+
+If you're unsure whether your use qualifies, [open an issue](https://github.com/AnalyseDeCircuit/oxideterm/issues).
+
+### What platforms are supported?
+
+macOS (Apple Silicon & Intel), Windows (x64 & ARM64), and Linux (x64 & ARM64).
+
+### How is OxideTerm different from Electron-based terminals?
+
+OxideTerm uses **Tauri 2.0**, which leverages the system's native webview instead of bundling Chromium:
+
+| Comparison | Electron | Tauri (OxideTerm) |
+|------------|----------|-------------------|
+| Binary size | ~150 MB | 25–40 MB |
+| Memory usage | ~300 MB | ~50 MB |
+| Security model | Chromium | Rust memory safety + sandbox |
+| SSH implementation | Node.js binding (ssh2) | Pure Rust (russh) |
+
+### How big is the codebase?
+
+134,000+ lines of Rust & TypeScript.
+
+## Connections
+
+### How are passwords stored?
+
+Passwords are stored in your operating system's native keychain (Keychain Access on macOS, Windows Credential Manager, Secret Service on Linux). They are **never** stored in configuration files, databases, or plaintext.
+
+### Can I import connections from other SSH clients?
+
+OxideTerm supports:
+- Importing from its own `.oxide` encrypted format
+- **SSH config import** — auto-parse `~/.ssh/config` to import existing hosts, jump hosts, key paths, and other settings
+- Manual creation via the connection wizard
+
+### Does OxideTerm support jump hosts (ProxyJump)?
+
+Yes. OxideTerm supports **unlimited ProxyJump hops** with a network topology graph:
+- Configure jump chains in the connection wizard
+- Auto-parse ProxyJump from `~/.ssh/config`
+- Dijkstra pathfinding calculates optimal routes
+- Visual topology graph shows all nodes and connections
+- Each hop can use a different authentication method (password, key, agent, certificate)
+- Jump nodes are reusable as independent sessions
+
+### What SSH key types are supported?
+
+- **Ed25519** (recommended — fastest, smallest keys)
+- **ECDSA** (P-256, P-384)
+- **RSA** (2048-bit minimum)
+- **SSH Certificates** — full certificate-based authentication
+- Keys with passphrases are supported (passphrase stored in OS keychain)
+
+### Does OxideTerm support SSH Agent?
+
+Yes. OxideTerm integrates with the system SSH Agent:
+- **macOS/Linux**: via `SSH_AUTH_SOCK`
+- **Windows**: via `\\.\pipe\openssh-ssh-agent`
+- Agent auth is replayed automatically on reconnect
+- Each ProxyJump hop can independently use Agent auth
+
+### What happens when my connection drops?
+
+OxideTerm includes a **Grace Period Reconnect** system:
+1. Detects disconnect via WebSocket heartbeat (300s timeout, tuned for macOS App Nap)
+2. **Probes the old connection for 30 seconds** — if the SSH TCP stream recovers (e.g., Wi-Fi switch), your running TUI apps (vim, htop, yazi) survive completely
+3. If recovery fails → new SSH connection → automatic restore of port forwards, SFTP transfers, and IDE files
+
+The reconnect orchestrator handles this end-to-end without user intervention.
+
+### Can multiple features share one SSH connection?
+
+Yes. OxideTerm uses a **reference-counted connection pool**. Terminal, SFTP, port forwarding, and IDE mode all share a single physical SSH connection — no redundant TCP handshakes or authentication prompts.
+
+### What are the idle timeout options?
+
+Configurable: 5 minutes, 15 minutes, 30 minutes (default), 1 hour, or never. Connections with no active consumers (no terminal tabs, no SFTP panel, no port forwards) auto-disconnect after the timeout.
+
+## Features
+
+### Can I use my own AI provider?
+
+Yes. OxideSens uses a **BYOK (Bring Your Own Key)** model. You provide your own API key for OpenAI, Anthropic, Google, DeepSeek, Ollama, OneAPI, or any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain.
+
+### Does the AI feature send my terminal data to the cloud?
+
+Only when you explicitly request it. Terminal buffer data is sent to your configured AI provider only when you click the Context button and send a message. No automatic data collection occurs. For fully offline AI, use Ollama with local models.
+
+### Can I use OxideTerm without an internet connection?
+
+Yes, for local terminal sessions and connections to servers on your local network. AI features can work offline with Ollama (local models).
+
+### What is the Remote Agent?
+
+An optional ~1 MB Rust binary that deploys to remote Linux servers to enhance IDE mode:
+- Faster file tree operations and symbol search
+- Real-time file watching
+- 43 JSON-RPC methods
+- Auto-deploys on x86_64/aarch64 Linux; 10+ architectures available for manual upload
+- IDE mode works completely without it
+
+### What is the CLI companion (`oxt`)?
+
+A ~1 MB binary for controlling OxideTerm from the command line. It uses JSON-RPC 2.0 over Unix Socket (macOS/Linux) or Named Pipe (Windows). Commands include `status`, `list`, and `ping`, with human-readable or JSON output.
+
+### Can I record terminal sessions?
+
+Yes. OxideTerm records sessions in **asciicast v2** format with precise timestamps. Playback supports variable speed (0.5×–8×). Recordings can be exported for sharing.
+
+### How does broadcast input work?
+
+Toggle broadcast mode from the toolbar to send identical keystrokes to all selected split panes simultaneously. Useful for managing clusters or running the same command across multiple servers.
+
+## Plugins
+
+### Where are plugins installed?
+
+Plugins are stored in `~/.oxideterm/plugins/{plugin-id}/`. Each plugin has a `plugin.json` manifest and an ESM entry point.
+
+### Are plugins sandboxed?
+
+Yes. Plugins run with multiple security layers:
+- Frozen API surface (`Object.freeze`)
+- Proxy-based permission ACL
+- IPC command whitelist
+- Circuit breaker with auto-disable on repeated errors
+- React error boundaries for UI isolation
+
+### Can plugins access the file system?
+
+Not directly. Plugins access files through the `sftp` and `storage` namespaces of the PluginContext API. Direct file system access is not available.
+
+## Troubleshooting
+
+### The app won't start on macOS
+
+On first launch, macOS Gatekeeper may block the app. Right-click the app → **Open**, or go to **System Settings** → **Privacy & Security** → **Allow**.
+
+### Connection drops frequently
+
+- Check your network stability
+- OxideTerm's **Grace Period Reconnect** attempts automatic recovery for 30 seconds before reconnecting
+- Adjust keepalive settings in the connection configuration
+- The SSH keepalive interval is 15 seconds by default
+
+### Terminal rendering is slow
+
+- Ensure **WebGL** is enabled in your system
+- Try reducing the terminal font size
+- Check if your GPU drivers are up to date
+- OxideTerm uses adaptive rendering — heavy output triggers 120 Hz+ Boost mode automatically
+
+### Chinese/Japanese/Korean input issues on Windows
+
+Windows IME integration may have issues in some configurations. Ensure you're using the latest version of OxideTerm, which includes ConPTY improvements for CJK input.
+
+### Where are configuration files stored?
+
+| Platform | Path |
+|----------|------|
+| macOS | `~/Library/Application Support/com.oxideterm.app/` |
+| Windows | `%APPDATA%\com.oxideterm.app\` |
+| Linux | `~/.config/com.oxideterm.app/` |
+
+Data is stored in a local **redb** embedded key-value database within this directory.
+
+### How do I completely uninstall OxideTerm?
+
+1. Remove the application (drag to Trash / uninstall / delete AppImage)
+2. Delete the configuration directory (see paths above)
+3. Remove keychain entries: search for `com.oxideterm` in your OS keychain manager
+4. (Optional) Remove plugins: delete `~/.oxideterm/`

@@ -1,0 +1,87 @@
+---
+title: IDE Mode
+description: Remote file editing with CodeMirror 6, syntax highlighting, and file tree navigation.
+---
+
+IDE Mode lets you edit remote files directly within OxideTerm — no need to download, edit locally, and re-upload. All operations happen over the existing SSH connection.
+
+## CodeMirror 6 Editor
+
+The editor is powered by **CodeMirror 6** with:
+- Syntax highlighting for **30+ languages** (16 native CodeMirror + legacy modes via `@codemirror/legacy-modes`)
+- Line numbers and code folding
+- Find and replace with regex support
+- Bracket matching and auto-closing pairs
+- Indentation guides
+- Multiple cursors and selections
+- Minimap for file overview
+
+### Supported Languages
+
+Native CodeMirror 6 modes include: JavaScript, TypeScript, Python, Rust, Go, C/C++, Java, HTML, CSS, JSON, Markdown, SQL, XML, YAML, TOML, Shell/Bash. Additional languages are available via legacy modes.
+
+## File Tree
+
+A sidebar file tree provides navigation through the remote file system:
+- **Lazy-loaded directories** — only loads directory contents when expanded, for performance on large remote filesystems
+- **Git status indicators** — files show modified (M), untracked (?), added (A) status with color coding
+- **Event-driven refresh** — the file tree auto-refreshes on save, create, delete, rename, and terminal `Enter` keypress
+- Click to open files in the editor
+- Create, rename, and delete files and directories via context menu
+- File type icons for quick identification based on extension
+
+## Save & Sync
+
+- Files are saved back to the remote server over SFTP
+- **Optimistic mtime locking** — before overwriting, OxideTerm checks if the remote file's modification time has changed since it was loaded. If it has, a conflict dialog appears letting you choose to overwrite, reload the remote version, or diff the changes.
+- Unsaved changes are indicated with a dot on the tab
+- `Ctrl+S` / `⌘+S` to save
+
+## Multi-Tab Editing
+
+Open multiple files in tabs with **LRU (Least Recently Used) tab management**:
+- Switch between tabs without losing editor state (cursor position, scroll position, undo history)
+- When the maximum tab count is reached, the least recently used tab is automatically closed
+- Unsaved files are never auto-closed — they are protected from LRU eviction
+
+## Remote Agent (Optional)
+
+For enhanced IDE capabilities, OxideTerm can deploy a **~1 MB Rust binary** to the remote server. The agent communicates via JSON-RPC over the SSH channel.
+
+### What the Agent Provides
+
+- **Faster file tree operations** — directory listing, file search, and symbol resolution run natively on the remote host
+- **Real-time file watching** — external changes (from other editors or processes) are reflected immediately
+- **Symbol search** — find definitions and references across the project
+- **43 JSON-RPC methods** — comprehensive file, directory, and project operations
+
+### Deployment
+
+- **Auto-deploys** on x86_64 and aarch64 Linux when you enable the agent
+- **10+ architectures** available for manual upload: ARMv7 (musleabihf), i686, LoongArch64, PowerPC64LE, RISC-V64, s390x, x86_64-FreeBSD, aarch64-Android, and more
+- Agent binaries are stored on the remote server and survive reconnects
+- Can be removed with one click from the IDE panel
+
+### Without the Agent
+
+IDE mode works **completely without the remote agent**. Without it, file tree operations use SFTP (slightly slower) and file watching is not available. For most use cases, the agentless mode is sufficient.
+
+## Integration with Terminal
+
+IDE Mode runs alongside the terminal — switch between terminal and editor tabs seamlessly. The same SSH connection is shared via the connection pool, so there's no additional connection overhead or authentication prompt.
+
+## Reconnect Behavior
+
+IDE mode participates in the reconnect orchestrator pipeline:
+- On disconnect, the orchestrator snapshots open file tabs and project path
+- After SSH reconnect, IDE files are automatically reopened
+- File contents are re-fetched from the remote server (not from stale cache)
+- **User intent detection**: if you've manually closed the IDE or switched projects during disconnect, the orchestrator respects your decision and doesn't force-reopen
+
+## State Gating
+
+All IDE I/O operations are blocked when the connection state is not `active`. The editor becomes read-only during reconnect, and re-enables automatically once the connection is restored.
+
+:::tip
+IDE Mode is designed for quick edits on remote servers. For larger projects requiring indexing, debugging, or extensions, consider using a full-featured IDE with remote extensions.
+:::

@@ -1,0 +1,44 @@
+---
+title: 启动台
+description: 通过 OxideTerm 启动台直接在应用内启动 macOS 应用程序、WSL 发行版和本地 shell。
+---
+
+**启动台**允许你在 OxideTerm 内直接启动 macOS 原生应用或连接到 WSL（Windows Subsystem for Linux）发行版，无需切换到其他窗口。
+
+## macOS 应用启动
+
+启动台会扫描 `/Applications` 和 `~/Applications` 目录，列出已安装的 macOS 应用程序。
+
+:::note 首次使用授权
+首次打开启动台时，**macOS 会弹出权限确认**，询问 OxideTerm 是否可以查看 `/Applications` 目录。点击**允许**即可。此操作不会授予 OxideTerm 启动其他应用的系统级权限——仅用于列出目录内容。
+:::
+
+| 操作 | 说明 |
+|------|------|
+| 点击应用图标 | 启动（或激活）该应用 |
+| 搜索框 | 按名称实时筛选 |
+
+## WSL 发行版（Windows）
+
+在 Windows 上，启动台会自动检测已安装的 WSL 发行版，并在列表中显示：
+
+1. 从列表中选择 WSL 发行版（如 Ubuntu 22.04、Debian、Arch Linux）
+2. 点击**连接** — OxideTerm 在新标签页中打开该 WSL 发行版的终端会话
+3. 完整的本地终端功能均可使用：滚动、选择、复制/粘贴
+
+WSL 终端与 SSH 终端和其他本地终端标签页**共存于同一界面**，可无缝切换。
+
+## 本地 Shell
+
+在 macOS / Linux 上，启动台还显示一个**本地 Shell** 入口：
+
+- **默认 Shell** — 使用系统配置的 `$SHELL`（通常是 zsh）
+- **自定义 Shell** — 在设置中填入路径（如 `/usr/local/bin/fish`）
+
+直接点击即可在新标签页打开本地 shell 会话。
+
+## 关于隐私
+
+:::note
+macOS 路径扫描**完全在本地执行**，无任何数据上传到 OxideTerm 服务器或第三方服务。
+:::

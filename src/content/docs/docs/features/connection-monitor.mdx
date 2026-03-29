@@ -1,0 +1,92 @@
+---
+title: Connection Monitor
+description: Real-time SSH connection pool dashboard, per-connection statistics, system health monitoring, and keepalive configuration.
+---
+
+OxideTerm provides three interconnected monitoring panels that give you full visibility into active SSH connections: **Connection Pool**, **Connection Monitor**, and **System Health**.
+
+## Connection Pool Panel
+
+The Connection Pool panel (sidebar) shows every live SSH connection with quick-glance stats:
+
+```
+● prod-server-1          Active
+  3 Terminals  1 SFTP  2 Forwards
+  Created: 2m ago   Keep Alive ♾
+
+● bastion.example.com    Idle
+  1 Terminal   0 SFTP  0 Forwards
+  Disconnect in 13m
+```
+
+Each connection card shows:
+- **Connection state** — Active, Idle, Reconnecting, Link Down
+- **Consumer ref counts** — number of active terminals, SFTP sessions, and port forward rules sharing this connection
+- **Age** — when the connection was established
+- **Idle timer** — countdown to auto-disconnect (if keep-alive disabled)
+- **Keep Alive toggle** — pin the connection to never auto-disconnect
+
+### Keep Alive
+
+Toggle the keep-alive pin per-connection:
+- **Enabled (∞)** — connection stays alive indefinitely, ignoring the global idle timeout
+- **Disabled** — uses the global idle timeout setting (5m / 15m / 30m / 1h)
+
+## Connection Monitor Tab
+
+Open the Connection Monitor tab for a richer dashboard view:
+
+| Metric | Description |
+|--------|-------------|
+| **Total connections** | Count of active connections in the pool |
+| **By state** | Active / Idle / Reconnecting / Link Down breakdown |
+| **Terminals** | Total terminal channel refs across all connections |
+| **SFTP** | Total SFTP session refs |
+| **Forwards** | Total port forward rule refs |
+| **Summary** | "Total: N connections • Refs: N" aggregate line |
+
+The monitor header shows a live "●LIVE" indicator and auto-refreshes every second.
+
+## Connection State Machine
+
+Each SSH connection in the pool follows a strict state machine:
+
+```
+connecting → active → idle → link_down → reconnecting → active
+                  ↓
+             disconnected
+```
+
+| State | Meaning |
+|-------|---------|
+| `connecting` | TCP + SSH handshake in progress |
+| `active` | At least one consumer (terminal/SFTP/forward) actively using the connection |
+| `idle` | Connected but no active consumers; idle timer is counting down |
+| `link_down` | Connection lost; reconnect orchestrator triggered |
+| `reconnecting` | Grace period probing or SSH reconnect in progress |
+
+When a jump host (bastion) enters `link_down`, all downstream nodes it proxies are **automatically** marked `link_down` — cascade propagation ensures the entire topology stays consistent.
+
+## System Health
+
+The **System Health** sidebar entry shows per-connection resource metrics powered by OxideTerm's built-in profiler:
+
+- CPU usage of the SSH process
+- Memory consumption
+- Bytes sent / received (I/O throughput)
+- Active channel count
+- Latency (round-trip ping time)
+
+Metrics update live and are color-coded: green (normal) → yellow (elevated) → red (critical).
+
+## Idle Timeout Configuration
+
+Configure auto-disconnect behavior in **Settings → Connections**:
+
+| Option | Value |
+|--------|-------|
+| Idle timeout | 5 min / 15 min / 30 min / 1 hour / Never |
+| Keepalive interval | 15 seconds (SSH `ServerAliveInterval`) |
+| Keepalive attempts | 3 (SSH `ServerAliveCountMax`) |
+
+A connection that exceeds the idle timeout emits a `connection_status_changed` event, which the frontend uses to update the sidebar and notify other consumers.

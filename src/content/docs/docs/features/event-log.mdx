@@ -1,0 +1,96 @@
+---
+title: Event Log
+description: Connection lifecycle event tracking with timestamp-based logging, severity filtering, and reconnect pipeline phase tracing.
+---
+
+The **Event Log** is a persistent, real-time log of all connection lifecycle events — connections established and lost, node state changes, and every phase of the reconnect pipeline. It helps you understand what happened and when during complex multi-hop SSH sessions.
+
+## Opening the Event Log
+
+Click **Event Log** in the sidebar (at the bottom of the panel list).
+
+## Event Types
+
+Events are grouped into four categories:
+
+### Connection Events
+
+| Event | Description |
+|-------|-------------|
+| **Connected** | SSH connection successfully established |
+| **Disconnected** | Connection cleanly closed |
+| **Link Down** | Connection lost unexpectedly |
+| **Reconnecting** | Reconnect orchestrator triggered |
+| **Affected children** | N child connection(s) marked link_down due to bastion failure |
+
+### Node Events
+
+| Event | Description |
+|-------|-------------|
+| **Node Ready** | SSH channel opened and terminal ready |
+| **Node Connecting** | Node is in the connecting state |
+| **Node Error** | Node entered error state (message included) |
+| **Node Disconnected** | Node cleanly disconnected |
+| **Already connecting / connected** | Duplicate connect attempt ignored |
+
+### Reconnect Pipeline Events
+
+The reconnect orchestrator logs each phase transition:
+
+| Phase | Meaning |
+|-------|---------|
+| `Queued` | Reconnect request received and queued |
+| `Grace Period` | Probing old connection for 30s before destructive reconnect |
+| `SSH Connect` | Establishing new SSH session |
+| `Await Terminal` | Waiting for terminal channel to become ready |
+| `Restore Forwards` | Restoring port forwarding rules |
+| `Resume Transfers` | Resuming paused SFTP transfers |
+| `Restore IDE` | Reopening IDE mode file tabs |
+| `Done` | Reconnect pipeline completed successfully |
+| `Failed` | Pipeline failed at a specific phase |
+| `Cancelled` | Reconnect cancelled (e.g., manual disconnect) |
+
+### System Events
+
+| Event | Description |
+|-------|-------------|
+| **App Start / Exit** | Application lifecycle events |
+| **Config Changed** | Settings or configuration modified |
+| **Plugin Event** | Plugin loaded, unloaded, or error |
+
+## Severity Levels
+
+| Level | Color | Meaning |
+|-------|-------|---------|
+| **Info** | Blue | Normal lifecycle events |
+| **Success** | Green | Operation completed successfully |
+| **Warning** | Yellow | Degraded state (link down, retry) |
+| **Error** | Red | Failure event (connect failed, pipeline error) |
+
+## Filtering
+
+Use the filter controls to narrow the log:
+- **Search box** — full-text search in event messages
+- **Filter by Severity** — show only Info / Success / Warning / Error (or All)
+- **Filter by Category** — show only Connection / Node / Reconnect / System events (or All)
+- **Filter by Connection** — show events for a specific host only
+- **Time Range** — show last 1 hour / 24 hours / 7 days / All
+
+Filters apply in real-time to the visible log. Historical events are not discarded.
+
+## Export Logs
+
+Click **Export** in the toolbar to export the current log view (with active filters applied) as `.json` or `.csv` — useful for offline analysis or bug reports.
+
+## Log Management
+
+- **Clear All** — remove all log entries (fresh start)
+- Events scroll automatically as new entries arrive
+- Each entry shows: timestamp, connection name, event type, and optional detail message
+
+## Use Cases
+
+- **Debugging flaky connections** — see exact reconnect phase where a recovery fails
+- **Understanding cascade failures** — trace which bastion's link_down caused downstream nodes to fail
+- **Auditing connection history** — see exactly when sessions were opened and closed
+- **Monitoring reconnect health** — verify that grace period correctly preserved sessions

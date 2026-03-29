@@ -1,0 +1,102 @@
+---
+title: WSL Graphics
+description: Run Linux GUI applications and full desktop environments from WSL distributions inside OxideTerm via VNC.
+---
+
+**WSL Graphics** enables running Linux GUI applications and full desktop environments from Windows Subsystem for Linux (WSL) distributions — displayed directly inside OxideTerm via VNC.
+
+:::note
+WSL Graphics is a **Windows-only** feature and requires the `wsl-graphics` build. It is not available in standard macOS or Linux builds.
+:::
+
+## Opening WSL Graphics
+
+Open a new tab and select **WSL Graphics** from the tab type picker.
+
+## Selecting a Distribution
+
+OxideTerm auto-detects installed WSL distributions and lists them with their status:
+- **Running** — VNC server is active
+- **Stopped** — distribution is not running
+
+Select a distribution from the dropdown to proceed.
+
+## Prerequisites
+
+Before first use, install the required packages inside your WSL distribution:
+
+```bash
+# VNC server + D-Bus
+sudo apt install tigervnc-standalone-server dbus-x11 -y
+
+# Desktop environment — choose one:
+sudo apt install xfce4 -y                    # XFCE (lightweight)
+sudo apt install ubuntu-desktop -y           # GNOME (full Ubuntu)
+sudo apt install kde-plasma-desktop -y       # KDE Plasma
+```
+
+For single-app mode, also install Openbox (minimal window manager):
+
+```bash
+sudo apt install openbox -y
+```
+
+## Desktop Mode
+
+**Desktop Mode** starts a full desktop environment inside OxideTerm:
+
+1. Select your distribution
+2. Click **Desktop Mode**
+3. OxideTerm starts TigerVNC and your desktop environment
+4. The desktop renders in the tab — scroll to zoom, drag to pan
+
+Use **Fullscreen** to expand the VNC view to fill the OxideTerm window.
+
+## App Mode
+
+**App Mode** launches a single GUI application without a full desktop:
+
+1. Select your distribution
+2. Choose **App Mode**
+3. Enter the command (e.g., `gedit /home/user/notes.txt`, `gimp`, `firefox`)
+4. Click **Start App**
+
+Common app examples are listed as quick shortcuts.
+
+:::note
+App Mode uses Openbox as a minimal window manager. Some applications may require additional dependencies.
+:::
+
+## VNC Session Management
+
+| Action | Button |
+|--------|--------|
+| **Reconnect** | Click Reconnect if the VNC connection drops |
+| **Stop** | Terminate the VNC server and session |
+| **Fullscreen** | Toggle fullscreen VNC view |
+
+If the VNC server is not found, OxideTerm shows the install command. If D-Bus is missing, it shows the dbus-x11 install instruction.
+
+## Display Settings
+
+| Setting | Options |
+|---------|---------|
+| **Resolution** | 1024×768 / 1280×720 / 1920×1080 / Custom |
+| **Color Depth** | 24bpp (recommended) / 16bpp |
+| **Scaling** | Fit to window / 100% / 150% / 200% |
+| **Clipboard Sharing** | Share clipboard between Windows and WSL apps |
+
+## WSLg Compatibility
+
+If your Windows 11 system has **WSLg** (WSL built-in GUI support), OxideTerm detects it and shows "Available". WSLg provides native Wayland/X11 forwarding without requiring TigerVNC, but OxideTerm's VNC mode offers a self-contained embedded view that works without WSLg.
+
+## Use Cases
+
+- Run Linux-native GUI tools (GIMP, Inkscape, LibreOffice) on Windows
+- Develop with a full Linux desktop environment without a separate VM
+- Test Linux GUI applications in different distributions side-by-side
+- Run GUI-only apps (database GUIs, IDE plugins, X11 tools) from WSL
+
+:::caution
+**Experimental** — WSL Graphics is marked experimental and provided without warranty. Desktop mode stability depends on the installed desktop environment and WSL configuration.
+:::

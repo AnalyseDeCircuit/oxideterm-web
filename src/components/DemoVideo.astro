@@ -1,0 +1,39 @@
+---
+import type { LangKey } from "@/i18n";
+import { t } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+---
+
+<section class="py-20 px-6 border-t border-[var(--ot-border)]">
+  <div class="max-w-4xl mx-auto text-center">
+    <h2 class="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
+      {i.demo.title}
+    </h2>
+    <p class="text-[var(--ot-text-muted)] mb-10 max-w-xl mx-auto">
+      {i.demo.subtitle}
+    </p>
+
+    <div class="demo-video-container mx-auto max-w-4xl">
+      <video
+        class="w-full h-auto rounded-xl"
+        controls
+        preload="metadata"
+        playsinline
+        width="1280"
+        height="720"
+      >
+        <source
+          src="/videos/demo.mp4"
+          type="video/mp4"
+        />
+        {i.demo.fallback}
+      </video>
+    </div>
+  </div>
+</section>

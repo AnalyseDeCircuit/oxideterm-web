@@ -1,0 +1,123 @@
+---
+title: Introduction
+description: OxideTerm — a cross-platform SSH terminal client built with pure Rust and modern web technologies.
+---
+
+import { Image } from 'astro:assets';
+
+**OxideTerm** is a cross-platform SSH terminal client and local terminal emulator that combines native performance with a modern interface. Built with **Tauri 2.0** (Rust backend) and **React 19** (TypeScript frontend), it delivers a lightweight 25–40 MB native binary with zero Electron overhead.
+
+## Why OxideTerm?
+
+| Pain Point | OxideTerm's Answer |
+|---|---|
+| SSH clients that can't do local shells | **Hybrid engine**: local PTY (zsh/bash/fish/pwsh/WSL2) + remote SSH in one window |
+| Reconnect = lose everything | **Grace Period reconnect**: probes old connection 30s before killing it — your vim/htop/yazi survive |
+| Remote file editing needs VS Code Remote | **Built-in IDE**: CodeMirror 6 over SFTP with 30+ languages, optional ~1 MB remote agent on Linux |
+| No SSH connection reuse | **Multiplexing**: terminal, SFTP, forwards, IDE share one SSH connection via reference-counted pool |
+| SSH libraries depend on OpenSSL | **russh 0.54**: pure Rust SSH compiled against `ring` — zero C dependencies |
+| 100+ MB Electron apps | **Tauri 2.0**: native Rust backend, 25–40 MB binary |
+| AI locked to one provider | **OxideSens**: 40+ tools, MCP protocol, RAG knowledge base — works with OpenAI/Ollama/DeepSeek/any compatible API |
+
+## Architecture at a Glance
+
+OxideTerm uses a **dual-plane architecture** that separates latency-critical terminal I/O from management commands:
+
+```
+┌─────────────────────────────────────┐
+│        Frontend (React 19)          │
+│  xterm.js 6 (WebGL) + 18 stores    │
+└──────────┬──────────────┬───────────┘
+           │ Tauri IPC    │ WebSocket (binary)
+           │ (JSON)       │ per-session port
+┌──────────▼──────────────▼───────────┐
+│         Backend (Rust)              │
+│  NodeRouter → SshConnectionRegistry │
+│  Wire Protocol v1                   │
+│  [Type:1][Length:4][Payload:n]       │
+└─────────────────────────────────────┘
+```
+
+| Plane | Transport | Purpose |
+|-------|-----------|---------|
+| **Data Plane** | WebSocket (binary) | Terminal I/O — Type-Length-Payload framing, no JSON/Base64, zero overhead in the hot path |
+| **Control Plane** | Tauri IPC (JSON) | Management: connections, SFTP, port forwarding, config, AI chat |
+
+Each SSH session gets its own WebSocket port with single-use, time-limited token authentication on the first frame. The frontend addresses everything by `nodeId` — the backend `NodeRouter` resolves it atomically, so SSH reconnect (which changes the underlying `connectionId`) doesn't break SFTP, IDE, or port forwards.
+
+## Tech Stack
+
+| Layer | Technology | Details |
+|---|---|---|
+| **Framework** | Tauri 2.0 | Native binary, 25–40 MB |
+| **Runtime** | Tokio + DashMap 6 | Full async, lock-free concurrent maps |
+| **SSH** | russh 0.54 (`ring`) | Pure Rust, zero C deps, SSH Agent |
+| **Local PTY** | portable-pty 0.8 | Feature-gated, ConPTY on Windows |
+| **Frontend** | React 19.1 + TypeScript 5.8 | Vite 7, Tailwind CSS 4 |
+| **State** | Zustand 5 | 18 specialized stores |
+| **Terminal** | xterm.js 6 + WebGL | GPU-accelerated, 60 fps+ |
+| **Editor** | CodeMirror 6 | 30+ language modes |
+| **Encryption** | ChaCha20-Poly1305 + Argon2id | AEAD + memory-hard KDF (256 MB) |
+| **Storage** | redb 2.1 | Embedded KV store |
+| **i18n** | i18next 25 | 11 languages × 22 namespaces |
+| **Plugins** | ESM Runtime | Frozen PluginContext + 24 UI Kit |
+| **CLI** | JSON-RPC 2.0 | Unix Socket / Named Pipe |
+
+## Key Features
+
+| Category | Features |
+|---|---|
+| **Terminal** | Local PTY (zsh/bash/fish/pwsh/WSL2), SSH remote, split panes, broadcast input, session recording/playback (asciicast v2), adaptive rendering (120 Hz+ Boost / 60 Hz Normal / 1–15 Hz Idle), command palette (`⌘K`), zen mode, 30+ themes + custom editor |
+| **SSH & Auth** | Connection pooling & multiplexing, ProxyJump (unlimited hops) with topology graph, auto-reconnect with Grace Period. Auth: password, SSH key (RSA/Ed25519/ECDSA), SSH Agent, certificates, keyboard-interactive 2FA, Known Hosts TOFU |
+| **SFTP** | Dual-pane browser, drag-and-drop, smart preview (images/video/audio/code/PDF/hex/fonts), transfer queue with progress & ETA, bookmarks, archive extraction |
+| **IDE Mode** | CodeMirror 6 with 30+ languages, file tree + Git status, multi-tab with LRU management, conflict resolution (mtime locking), integrated terminal. Optional remote agent (10+ architectures) |
+| **Port Forwarding** | Local (-L), Remote (-R), Dynamic SOCKS5 (-D), lock-free message-passing I/O, auto-restore on reconnect, death reporting, smart remote port detection |
+| **AI (OxideSens)** | Inline panel (`⌘I`) + sidebar chat, terminal buffer capture (single/all panes), multi-source context (IDE/SFTP/Git), 40+ autonomous tools, MCP server integration, RAG knowledge base (BM25 + vector hybrid search), streaming SSE |
+| **Plugins** | Runtime ESM loading, 18 API namespaces, 24 UI Kit components, frozen API + Proxy ACL, circuit breaker, auto-disable on errors |
+| **CLI** | `oxt` companion: JSON-RPC 2.0 over Unix Socket / Named Pipe |
+| **Security** | .oxide encrypted export (ChaCha20-Poly1305 + Argon2id 256 MB), OS keychain, Touch ID (macOS), host key TOFU, `zeroize` memory clearing |
+| **i18n** | 11 languages: EN, 简体中文, 繁體中文, 日本語, 한국어, FR, DE, ES, IT, PT-BR, VI |
+
+## SSH Connection Pool
+
+OxideTerm uses a reference-counted `SshConnectionRegistry` backed by `DashMap` for lock-free concurrent access:
+
+- **One connection, many consumers** — terminal, SFTP, port forwards, and IDE share a single physical SSH connection — no redundant TCP handshakes
+- **State machine per connection** — `connecting → active → idle → link_down → reconnecting`
+- **Lifecycle management** — configurable idle timeout (5m / 15m / 30m / 1h / never), 15s keepalive interval, heartbeat failure detection
+- **Cascade propagation** — jump host failure → all downstream nodes automatically marked `link_down` with status sync
+
+## 18 Zustand Stores
+
+The frontend manages state through 18 specialized Zustand stores:
+
+| Store | Responsibility |
+|-------|------|
+| `sessionTreeStore` | User intent (session tree structure, connection flow) |
+| `appStore` | Connection facts (`connections` Map, backend state mirror) |
+| `localTerminalStore` | Local PTY lifecycle |
+| `ideStore` | IDE mode state |
+| `reconnectOrchestratorStore` | Auto-reconnect pipeline orchestration |
+| `transferStore` | SFTP transfer queue |
+| `pluginStore` | Plugin runtime state |
+| `profilerStore` | Resource profiler |
+| `aiChatStore` | OxideSens AI chat state |
+| `agentStore` | Remote Agent management |
+| `ragStore` | RAG knowledge search state |
+| `settingsStore` | App settings |
+| `broadcastStore` | Broadcast input to multiple terminal panes |
+| `commandPaletteStore` | Command palette state |
+| `eventLogStore` | Connection lifecycle event log |
+| `launcherStore` | Platform application launcher |
+| `recordingStore` | Session recording & playback |
+| `updateStore` | Auto-update lifecycle |
+
+## What's Next?
+
+- [Installation guide](/docs/installation/) — download and install OxideTerm
+- [Terminal](/docs/features/terminal/) — learn about terminal features
+- [SFTP](/docs/features/sftp/) — file management over SSH
+- [IDE Mode](/docs/features/ide/) — remote code editing
+- [Port Forwarding](/docs/features/forwarding/) — SSH tunnels
+- [OxideSens AI](/docs/features/ai/) — AI-powered terminal assistant
+- [Security](/docs/security/) — encryption and credential management

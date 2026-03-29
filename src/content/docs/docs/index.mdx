@@ -1,0 +1,53 @@
+---
+title: Documentation
+description: OxideTerm documentation — guides, features, and reference.
+template: splash
+hero:
+  title: OxideTerm Docs
+  tagline: Guides, features, and reference for the cross‑platform SSH terminal built with pure Rust.
+  actions:
+    - text: Getting Started
+      link: /docs/getting-started/
+      icon: right-arrow
+    - text: GitHub
+      link: https://github.com/AnalyseDeCircuit/oxideterm
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Getting Started" icon="rocket">
+    Install OxideTerm and connect to your first server in minutes.
+    [Read more →](/docs/getting-started/)
+  </Card>
+  <Card title="Terminal" icon="laptop">
+    Multi-tab, split-pane terminal with WebGL rendering, broadcast input, and session recording.
+    [Read more →](/docs/features/terminal/)
+  </Card>
+  <Card title="SFTP" icon="document">
+    Dual-pane file browser with drag-and-drop, smart preview, and transfer queue.
+    [Read more →](/docs/features/sftp/)
+  </Card>
+  <Card title="IDE Mode" icon="pencil">
+    Remote code editing with CodeMirror 6, 30+ languages, Git status, and optional remote agent.
+    [Read more →](/docs/features/ide/)
+  </Card>
+  <Card title="Port Forwarding" icon="random">
+    Local (-L), Remote (-R), Dynamic SOCKS5 (-D) forwarding with lock-free I/O.
+    [Read more →](/docs/features/forwarding/)
+  </Card>
+  <Card title="OxideSens AI" icon="star">
+    40+ autonomous tools, MCP integration, RAG knowledge base, inline + sidebar chat.
+    [Read more →](/docs/features/ai/)
+  </Card>
+  <Card title="Plugins" icon="puzzle">
+    ESM-based plugin system with 18 API namespaces and 24 UI Kit components.
+    [Read more →](/docs/features/plugins/)
+  </Card>
+  <Card title="Security" icon="approve-check-circle">
+    ChaCha20-Poly1305 encryption, OS keychain, TOFU host verification, Touch ID gate.
+    [Read more →](/docs/security/)
+  </Card>
+</CardGrid>

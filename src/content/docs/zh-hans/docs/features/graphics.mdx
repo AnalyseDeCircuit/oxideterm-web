@@ -1,0 +1,66 @@
+---
+title: WSL 图形
+description: 通过内置 VNC 客户端在 WSL 中运行 Linux GUI 应用程序和完整的桌面环境。
+---
+
+:::caution 实验性功能
+WSL 图形功能目前处于**实验性**阶段，仅适用于 **Windows（WSL 2）**。macOS 和 Linux 版本不提供此功能。API 和界面在未来版本中可能发生变化。
+:::
+
+**WSL 图形**功能通过 OxideTerm 内置的 VNC 客户端，让你直接在应用内运行 Linux GUI 应用程序或完整的 Linux 桌面环境——无需单独安装 VNC 查看器。
+
+## 前置条件
+
+在使用 WSL 图形之前，确保 WSL 发行版中已安装以下组件：
+
+```bash
+# 安装 TigerVNC 服务器和 dbus（必需）
+sudo apt install -y tigervnc-standalone-server dbus-x11
+
+# 安装桌面环境（选其一）
+# XFCE（轻量，推荐）
+sudo apt install -y xfce4 xfce4-terminal
+
+# GNOME（功能完整，资源占用较高）
+sudo apt install -y ubuntu-desktop
+
+# KDE Plasma
+sudo apt install -y kde-plasma-desktop
+```
+
+## 连接到 WSL 图形
+
+1. 在 OxideTerm 中打开目标 WSL 发行版的终端
+2. 在侧边栏点击**图形**图标（或菜单 → 图形视图）
+3. 选择**桌面模式**或**应用模式**
+4. OxideTerm 自动：
+   - 在 WSL 内启动 TigerVNC 服务器
+   - 通过 localhost 回环建立 VNC 连接
+   - 在内置查看器中渲染显示
+
+## 桌面模式 vs. 应用模式
+
+| 模式 | 说明 |
+|------|------|
+| **桌面模式** | 显示完整的 Linux 桌面环境（XFCE / GNOME / KDE） |
+| **应用模式** | 在无桌面的极简 X 会话中启动单个 GUI 应用 |
+
+应用模式下，在出现的输入框中直接输入应用命令（如 `firefox`、`gedit`），OxideTerm 仅启动该应用而不加载完整桌面。
+
+## 关于 WSLg 兼容性
+
+Windows 11 自带 **WSLg**（Linux GUI 应用的原生支持）。如果你的系统已启用 WSLg，大多数 Linux GUI 应用可直接在 Windows 桌面上运行，无需 OxideTerm 的图形功能。
+
+在以下情况下，OxideTerm WSL 图形功能仍然有用：
+- Windows 10 系统（不支持 WSLg）
+- 需要完整桌面环境而非单个应用
+- 希望在 OxideTerm 统一界面内管理 GUI 会话
+
+## 显示设置
+
+| 设置 | 说明 |
+|------|------|
+| 分辨率 | 1024×768 / 1280×720 / 1920×1080 / 自定义 |
+| 颜色深度 | 24bpp（推荐）/ 16bpp |
+| 缩放 | 适应窗口 / 100% / 150% / 200% |
+| 剪贴板共享 | 在 Windows 与 WSL 应用之间共享剪贴板 |

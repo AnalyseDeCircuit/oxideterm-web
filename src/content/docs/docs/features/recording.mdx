@@ -1,0 +1,77 @@
+---
+title: Session Recording
+description: Record terminal sessions as asciicast .cast files with a built-in player, search, and playback speed control.
+---
+
+OxideTerm can record your terminal sessions to **asciicast v2 (`.cast`)** files — the open standard used by [asciinema](https://asciinema.org). Recordings capture every character of output with accurate timestamps, letting you replay sessions frame-by-frame or share them with teammates.
+
+## Starting a Recording
+
+Click the **record button** (⏺) in the terminal toolbar, or use the command palette (`⌘K` → "Record Session").
+
+The recording starts immediately. The toolbar shows:
+- **REC** indicator (red dot) while recording
+- **Elapsed time** — running clock of the recording duration
+- **Event count** — number of captured output events
+
+## Controlling the Recording
+
+| Action | Button / Shortcut |
+|--------|------------------|
+| **Pause** | Click ⏸ in toolbar |
+| **Resume** | Click ▶ while paused (shows "PAUSED" indicator) |
+| **Stop & Save** | Click ⏹ — prompts to save or discard |
+| **Discard** | Choose "Discard" in the stop dialog — cannot be undone |
+
+When you stop, OxideTerm shows a confirmation dialog:
+- **Save** — opens a file picker to choose where to save the `.cast` file
+- **Discard** — immediately deletes the in-memory recording
+
+## Cast Player
+
+After saving, click **Open Cast File** to open it in the built-in player. You can also open any `.cast` file from the [File Manager](/docs/features/file-manager).
+
+### Player Controls
+
+| Control | Description |
+|---------|-------------|
+| **Play / Pause** | Start or pause playback |
+| **Seek bar** | Drag to jump to any point in the recording |
+| **Speed** | Adjust playback speed (0.25× / 0.5× / 1× / 2× / 5×) |
+| **Skip silence** | Auto-skip long idle periods with no output |
+| **Duration** | Total recording length |
+| **Dimensions** | Terminal grid size at time of recording (e.g., `220×55`) |
+
+### Search in Recording
+
+Type in the search box to find text in the recording:
+- Shows **match count** (e.g., "12 matches")
+- Use **Jump to match** to seek to each occurrence
+- Useful for locating specific commands or error messages in long recordings
+
+The player pre-builds snapshots for instant seeking — a "Building snapshots..." indicator shows during the indexing phase for long recordings.
+
+## asciicast v2 Format
+
+`.cast` files are plain JSON — one JSON object per line (JSON Lines format):
+
+```json
+{"version": 2, "width": 220, "height": 55, "timestamp": 1711700000, "env": {"TERM": "xterm-256color"}}
+[0.123, "o", "$ ls -la\r\n"]
+[0.456, "o", "total 48\r\ndrwxr-xr-x  5 user group ..."]
+```
+
+This format is compatible with:
+- [asciinema.org](https://asciinema.org) — upload and share online
+- [asciinema-player](https://github.com/asciinema/asciinema-player) — embed in web pages or README files
+- `asciinema play` CLI — play back in your local terminal
+
+## Privacy & Security
+
+:::caution
+Recordings may contain **sensitive data** — passwords typed (if echoed), API tokens, file contents, private keys in output. OxideTerm shows a security warning when you stop a recording.
+
+Review the `.cast` file contents before sharing.
+:::
+
+The recording is stored only on your local machine in the path you choose. OxideTerm never uploads or transmits recording data anywhere.

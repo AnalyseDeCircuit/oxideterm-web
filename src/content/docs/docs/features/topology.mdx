@@ -1,0 +1,80 @@
+---
+title: Connection Matrix
+description: Interactive visual topology of active SSH tunnels, jump host chains, and real-time connection status overlay.
+---
+
+The **Connection Matrix** (also called Topology View) is an interactive graph that visualizes your active SSH session tree — jump hosts, target servers, and the tunnel chains between them — in real time.
+
+## Opening Connection Matrix
+
+Click **Connection Matrix** in the sidebar, or open a new tab and select the topology tab type.
+
+## What It Shows
+
+Each active SSH node appears as a labeled card on the canvas. Lines between nodes represent SSH tunnels (ProxyJump hops):
+
+```
+[ Local Machine ]
+       │
+       ▼
+[ bastion.example.com ]  ←── Active (2 terminals, 1 SFTP)
+       │
+       ▼
+[ prod-db-1 ]            ←── Active (1 terminal)
+       │
+       ▼
+[ internal-cache ]       ←── Idle
+```
+
+## Node Status Colors
+
+| Color | State | Meaning |
+|-------|-------|---------|
+| **Green** ● | Active | Connected with consumers attached |
+| **Blue** ● | Idle | Connected but no active consumers |
+| **Red** ● | Link Down | Connection lost, awaiting reconnect |
+| **Orange** ● | Reconnecting | Reconnect attempt in progress |
+| **Gray** ○ | Disconnected | Not in connection pool |
+
+## Canvas Controls
+
+| Interaction | Action |
+|------------|--------|
+| **Scroll** | Zoom in/out |
+| **Drag canvas** | Pan the view |
+| **Click node** | Select and view details |
+| **Right-click node** | Open context menu |
+| **Fullscreen button** | Toggle fullscreen view |
+
+## Node Context Menu
+
+Right-clicking a node opens actions:
+- **Open Terminal** — open a new terminal tab for this node
+- **Open SFTP** — open SFTP browser for this node
+- **Port Forwarding** — add forwarding rules for this node
+- **Disconnect** — disconnect this node
+- **View Details** — show connection statistics panel
+
+## Link-Down Cascade Visualization
+
+When a jump host loses connectivity, the topology immediately reflects the cascade:
+
+1. The bastion node turns **red** (link_down)
+2. All downstream nodes (servers behind the bastion) simultaneously turn red
+3. The reconnect orchestrator starts — nodes that can recover show a pulsing reconnect indicator
+4. On recovery, nodes return to green in sequence as each reconnect phase completes
+
+This makes it immediately clear which servers are affected by a bastion outage.
+
+## Status Bar
+
+The bottom status bar shows:
+- `SYSTEM_STATUS: ONLINE`
+- Number of active connections and maximum chain depth (e.g., "3 active connections, max depth: 2")
+
+## Use Cases
+
+- **Multi-datacenter overview** — see all your bastion → server chains at a glance
+- **Incident response** — immediately identify which servers are affected by a jump-host failure
+- **Onboarding** — visually explain your infrastructure topology to new team members
+- **Debugging** — verify that connection chains are set up correctly before starting work

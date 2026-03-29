@@ -1,0 +1,84 @@
+---
+title: File Manager
+description: Local file browser with favorites, rich file previews, archives, checksums, and drag-and-drop to SFTP panels.
+---
+
+OxideTerm's **File Manager** is a full local file browser built into the app — no need to switch to Finder or Explorer. It pairs naturally with the [SFTP](/docs/features/sftp) panel for seamless local↔remote file transfers.
+
+## Opening File Manager
+
+Click **File Manager** in the sidebar (folder icon), or open a new tab and pick the file manager tab type.
+
+## Navigation
+
+- **Path bar** — type any path directly and press Go (Enter)
+- **Go Up** — navigate to parent directory
+- **Home** — jump to home directory (`~`)
+- **Drives** (Windows) — click "Show Drives" to select a drive letter
+- **Refresh** — reload the current directory listing
+
+## File Operations
+
+Right-click any file or selection for the full context menu:
+
+| Action | Description |
+|--------|-------------|
+| **Open** | Open file with default OS app |
+| **Reveal in File Manager** | Show in Finder / Explorer |
+| **Open Terminal Here** | Launch a local terminal in this directory |
+| **Preview** | In-app Quick Look preview |
+| **Rename** | Rename file/folder inline |
+| **Duplicate** | Create a copy with "Copy of" prefix |
+| **Copy / Cut / Paste** | Clipboard-based file operations within File Manager |
+| **Compress to ZIP** | Create a `.zip` archive from selection |
+| **Extract Archive** | Extract ZIP/tar archives in-place |
+| **Copy Path / Copy Name** | Copy full path or filename to clipboard |
+| **Properties** | See size, MIME type, timestamps, permissions, MD5/SHA-256 |
+| **Delete** | Move to OS trash (with confirmation) |
+
+All operations support multi-selection (Cmd/Ctrl+click, Shift+click, Cmd+A).
+
+## Favorites (Bookmarks)
+
+Star any folder to add it to **Favorites** in the sidebar:
+- Favorites appear in a collapsible panel above the main listing
+- Each favorite has a custom display name (editable)
+- One-click navigation from anywhere in the app
+
+## Rich File Previews
+
+Press **Space** to Quick Look preview the selected file without opening an external app. Supported preview formats:
+
+| Category | Formats |
+|----------|---------|
+| **Images** | PNG, JPG, GIF, WebP, SVG, HEIC |
+| **Video** | MP4, WebM, MOV |
+| **Audio** | MP3, AAC, FLAC, WAV, OGG |
+| **Code / Text** | Any text file with syntax highlighting (100+ languages) |
+| **Markdown** | Rendered markdown (with source toggle) |
+| **PDF** | Inline PDF viewer |
+| **Hex** | Binary files shown as hex dump |
+| **Fonts** | TTF, OTF, WOFF — renders alphabet, numbers, ligatures, Nerd Font icons |
+| **Archives** | ZIP, tar — tree listing with sizes |
+| **Office** | DOCX, XLSX, PPTX inline preview |
+
+In the preview panel, use `←` / `→` to navigate to the previous/next file. Press `i` to toggle the info panel (size, MIME type, timestamps, permissions, checksum).
+
+## File Properties & Checksums
+
+The **Properties** panel (right-click → Properties) shows:
+- File size in bytes and human-readable form
+- Kind (file, folder, symlink)
+- Location (full path)
+- Created / Modified / Accessed timestamps
+- Access permissions
+- For folders: recursive file + directory count and total size (async scanning)
+- **Checksum**: click "Calculate MD5 / SHA-256" for integrity verification
+
+## Drag-and-Drop to SFTP
+
+Files and folders can be dragged from File Manager directly into an open SFTP panel to start an upload. Similarly, drag files from SFTP into File Manager to download them. The [SFTP transfer queue](/docs/features/sftp) handles the transfer with progress, pause/resume, and breakpoint resume.
+
+## Filter
+
+Type in the **Filter** box above the file list to instantly filter by filename — matching is real-time, case-insensitive.

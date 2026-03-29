@@ -1,0 +1,58 @@
+---
+title: Broadcast Input
+description: Send keystrokes to multiple SSH and local terminal panes simultaneously for parallel server management.
+---
+
+**Broadcast Input** lets you type once and have your keystrokes sent to multiple terminal panes simultaneously. It is designed for tasks like deploying to a fleet of servers, running the same command across dev/staging/prod, or maintaining multiple nodes in sync.
+
+## Enabling Broadcast
+
+1. Click the **broadcast icon** in the terminal toolbar, or press `⌘⇧B` (macOS) / `Ctrl+Shift+B` (Windows/Linux)
+2. The **Select Broadcast Targets** picker opens — showing all open terminal panes
+3. Check the panes you want to receive keystrokes
+4. Click Confirm — broadcast mode activates
+
+A **"Broadcast Enabled"** banner appears at the top of each participating terminal pane.
+
+## Target Selection
+
+The target picker lists every open terminal:
+- SSH sessions (labeled with hostname)
+- Local terminal panes (labeled "Local Terminal")
+- **Select All** / **Deselect All** convenience buttons
+- Shows target count: "3 target(s)"
+- The current (sender) pane is labeled "Current" and always receives input
+
+:::note
+You can broadcast to a **mix** of SSH sessions and local terminals at the same time.
+:::
+
+## How It Works
+
+When broadcast is active:
+- Every keystroke in the sender pane is forwarded to all selected target panes via the same binary WebSocket channel
+- Paste operations (including multi-line pastes) are also broadcast
+- Each target processes input independently — if one target is slow, others are unaffected
+- Targets can be in different split pane positions or on different tab pages
+
+## Disabling Broadcast
+
+Click the broadcast icon again (now highlighted) or press `⌘⇧B` to open the picker and deselect targets, or use **Deselect All** and confirm.
+
+Closing any target pane automatically removes it from the broadcast group. Closing the sender pane disables broadcast entirely.
+
+## Use Cases
+
+- **Fleet deployments** — run `sudo systemctl restart myapp` on 10 servers at once
+- **Environment parity checks** — run `env | grep APP_` on dev, staging, and prod to compare
+- **Synchronized log tailing** — `tail -f /var/log/app.log` on multiple servers simultaneously
+- **Configuration rollouts** — edit the same config file path on multiple nodes
+- **Cluster maintenance** — run drain/cordon commands across Kubernetes nodes
+
+:::caution
+Broadcast sends keystrokes **immediately** to all targets. Be careful with destructive commands — there is no confirmation step before broadcast executes on all targets.
+:::
+
+## Split Pane Integration
+
+Broadcast works naturally with [split panes](/docs/features/terminal). You can have a 2×3 grid of SSH sessions all receiving the same input, while viewing all outputs simultaneously — ideal for visually verifying that a command succeeded on every server.

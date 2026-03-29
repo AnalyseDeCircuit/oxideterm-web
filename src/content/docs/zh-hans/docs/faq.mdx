@@ -1,0 +1,190 @@
+---
+title: 常见问题
+description: OxideTerm 常见问题解答。
+---
+
+## 通用
+
+### OxideTerm 是什么？
+
+OxideTerm 是一款基于 Tauri 2.0（Rust）和 React 19（TypeScript）构建的跨平台 SSH 终端客户端和本地终端模拟器。它将 SSH 终端、本地 PTY、SFTP、IDE 模式、端口转发、AI 辅助、插件系统、30+ 主题和 11 种语言整合在一个原生应用中。
+
+### OxideTerm 免费吗？
+
+OxideTerm 采用 **PolyForm Noncommercial 1.0.0** 许可证：
+- **个人和非营利使用**：免费——研究、实验、个人学习、作业、业余爱好项目
+- **非商业组织**：免费——慈善机构、教育机构、公共研究组织、政府机构
+- **商业使用**：需要单独许可证
+- 包含专利防御条款
+
+如果不确定你的使用是否符合条件，可以 [提交 Issue](https://github.com/AnalyseDeCircuit/oxideterm/issues) 咨询。
+
+### 支持哪些平台？
+
+macOS（Apple Silicon 和 Intel）、Windows（x64 和 ARM64）、Linux（x64 和 ARM64）。
+
+### OxideTerm 和基于 Electron 的终端有什么区别？
+
+OxideTerm 使用 **Tauri 2.0**，利用系统原生 webview 而非捆绑 Chromium：
+
+| 对比项 | Electron | Tauri (OxideTerm) |
+|--------|----------|-------------------|
+| 二进制体积 | ~150 MB | 25–40 MB |
+| 内存占用 | ~300 MB | ~50 MB |
+| 安全模型 | Chromium | Rust 内存安全 + 沙箱 |
+| SSH 实现 | Node.js 绑定（ssh2） | 纯 Rust（russh） |
+
+### 代码库有多大？
+
+134,000+ 行 Rust 和 TypeScript 代码。
+
+## 连接
+
+### 密码如何存储？
+
+密码存储在操作系统原生钥匙串中（macOS 的钥匙串访问、Windows 凭据管理器、Linux 的 Secret Service）。**绝不** 存储在配置文件、数据库或明文中。
+
+### 能从其他 SSH 客户端导入连接吗？
+
+OxideTerm 支持：
+- 从自有的 `.oxide` 加密格式导入
+- **SSH config 导入** — 自动解析 `~/.ssh/config`，导入现有主机、跳板机、密钥路径和其他设置
+- 通过连接向导手动创建
+
+### 支持跳板机（ProxyJump）吗？
+
+支持。OxideTerm 支持 **无限跳数的 ProxyJump**，并配有网络拓扑图：
+- 在连接向导中配置跳板链
+- 从 `~/.ssh/config` 自动解析 ProxyJump
+- Dijkstra 寻路计算最优路由
+- 可视化拓扑图展示所有节点和连接
+- 每一跳可使用不同的认证方式（密码、密钥、Agent、证书）
+- 跳板节点可作为独立会话复用
+
+### 支持哪些 SSH 密钥类型？
+
+- **Ed25519**（推荐——最快、最小的密钥）
+- **ECDSA**（P-256, P-384）
+- **RSA**（最低 2048 位）
+- **SSH 证书** — 完整的基于证书的认证
+- 支持带口令的密钥（口令存储在 OS 钥匙串中）
+
+### 支持 SSH Agent 吗？
+
+支持。OxideTerm 集成系统 SSH Agent：
+- **macOS/Linux**：通过 `SSH_AUTH_SOCK`
+- **Windows**：通过 `\\.\pipe\openssh-ssh-agent`
+- 重连时自动重放 Agent 认证
+- 每个 ProxyJump 跳板可独立使用 Agent 认证
+
+### 连接断开时会怎样？
+
+OxideTerm 内置 **优雅期重连** 系统：
+1. 通过 WebSocket 心跳检测断连（300 秒超时，针对 macOS App Nap 优化）
+2. **探测旧连接 30 秒** — 如果 SSH TCP 流恢复（如 Wi-Fi 切换），你正在运行的 TUI 应用（vim、htop、yazi）可以完整幸存
+3. 如果恢复失败 → 新建 SSH 连接 → 自动恢复端口转发、SFTP 传输和 IDE 文件
+
+重连协调器端到端处理，无需用户干预。
+
+### 多个功能可以共享一个 SSH 连接吗？
+
+可以。OxideTerm 使用 **引用计数连接池**。终端、SFTP、端口转发和 IDE 模式共享一个物理 SSH 连接——无冗余 TCP 握手或认证提示。
+
+### 空闲超时有哪些选项？
+
+可配置：5 分钟、15 分钟、30 分钟（默认）、1 小时或永不。没有活跃消费者（无终端标签、无 SFTP 面板、无端口转发）的连接会在超时后自动断开。
+
+## 功能
+
+### 可以使用自己的 AI 服务商吗？
+
+可以。OxideSens 采用 **BYOK（自带密钥）** 模式。你提供自己的 API 密钥，支持 OpenAI、Anthropic、Google、DeepSeek、Ollama、OneAPI 或任何 OpenAI 兼容端点。密钥安全存储在 OS 钥匙串中。
+
+### AI 功能会将终端数据发送到云端吗？
+
+仅在你主动请求时。终端缓冲区数据只在你点击 Context 按钮并发送消息时才会发送给你配置的 AI 服务商。不会自动收集任何数据。如需完全离线 AI，使用 Ollama 本地模型。
+
+### 可以在无网络连接的情况下使用 OxideTerm 吗？
+
+可以，用于本地终端会话和连接本地网络上的服务器。AI 功能可通过 Ollama（本地模型）离线使用。
+
+### 什么是远程 Agent？
+
+一个可选的约 1 MB Rust 二进制文件，部署到远程 Linux 服务器以增强 IDE 模式：
+- 更快的文件树操作和符号搜索
+- 实时文件监控
+- 43 个 JSON-RPC 方法
+- 在 x86_64/aarch64 Linux 上自动部署；10+ 架构可手动上传
+- IDE 模式在没有 Agent 的情况下也能完整工作
+
+### 什么是 CLI 伴侣工具（`oxt`）？
+
+约 1 MB 的二进制文件，用于从命令行控制 OxideTerm。使用 JSON-RPC 2.0 通过 Unix Socket（macOS/Linux）或 Named Pipe（Windows）通信。命令包括 `status`、`list` 和 `ping`，支持人类可读和 JSON 输出。
+
+### 可以录制终端会话吗？
+
+可以。OxideTerm 以 **asciicast v2** 格式录制会话，精确记录时间戳。回放支持变速（0.5×–8×）。录制文件可导出分享。
+
+### 广播输入是怎么工作的？
+
+从工具栏切换广播模式，同时向所有选中的分屏面板发送相同的按键。适用于管理集群或在多台服务器上执行相同命令。
+
+## 插件
+
+### 插件安装在哪里？
+
+插件存储在 `~/.oxideterm/plugins/{plugin-id}/`。每个插件有一个 `plugin.json` 清单文件和一个 ESM 入口点。
+
+### 插件有沙箱保护吗？
+
+有。插件运行在多层安全机制下：
+- 冻结 API 表面（`Object.freeze`）
+- 基于 Proxy 的权限 ACL
+- IPC 命令白名单
+- 熔断器——多次错误后自动禁用
+- React 错误边界隔离 UI 故障
+
+### 插件可以访问文件系统吗？
+
+不能直接访问。插件通过 PluginContext API 的 `sftp` 和 `storage` 命名空间访问文件。没有直接的文件系统访问权限。
+
+## 故障排除
+
+### macOS 上应用无法启动
+
+首次启动时 macOS Gatekeeper 可能会阻止应用。右键点击应用 → **打开**，或前往 **系统设置** → **隐私与安全性** → **允许**。
+
+### 连接频繁断开
+
+- 检查网络稳定性
+- OxideTerm 的**优雅期重连**会先尝试 30 秒自动恢复再重新连接
+- 在连接配置中调整 keepalive 设置
+- SSH keepalive 间隔默认为 15 秒
+
+### 终端渲染缓慢
+
+- 确保系统启用了 **WebGL**
+- 尝试减小终端字体大小
+- 检查 GPU 驱动是否为最新版本
+- OxideTerm 使用自适应渲染——大量输出时自动触发 120 Hz+ 加速模式
+
+### Windows 上中日韩输入法问题
+
+Windows IME 集成在某些配置下可能存在问题。请确保使用最新版本的 OxideTerm，其中包含针对 CJK 输入的 ConPTY 改进。
+
+### 配置文件存储在哪里？
+
+| 平台 | 路径 |
+|------|------|
+| macOS | `~/Library/Application Support/com.oxideterm.app/` |
+| Windows | `%APPDATA%\com.oxideterm.app\` |
+| Linux | `~/.config/com.oxideterm.app/` |
+
+数据存储在该目录中的本地 **redb** 嵌入式键值数据库中。
+
+### 如何完全卸载 OxideTerm？
+
+1. 删除应用（拖入废纸篓 / 卸载 / 删除 AppImage）
+2. 删除配置目录（见上方路径）
+3. 删除钥匙串条目：在 OS 钥匙串管理器中搜索 `com.oxideterm`
+4. （可选）删除插件：删除 `~/.oxideterm/`
