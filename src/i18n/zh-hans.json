@@ -200,7 +200,7 @@
     "a5": "自带 API 密钥（BYOK）。OxideTerm 支持 OpenAI、Anthropic、Google 以及任何 OpenAI 兼容接口。密钥安全存储在操作系统钥匙链中。"
   },
   "testimonial": {
-    "quote": "我开发 OxideTerm 是因为受够了为了管理几台服务器就得同时打开五个工具。一个窗口，所有功能集成，没有 Electron 负担。就这么简单。",
+    "quote": "OxideTerm 不是为了填补市场空白，而是为了挑战终端性能与功能的边界。纯 Rust SSH 实现，零 C 依赖。自研二进制线协议，热路径无 JSON 序列化。导出加密采用 ChaCha20-Poly1305 + Argon2id（256 MB 内存开销）。每一个架构决策都指向同一个执念：绝不以便利换正确。",
     "name": "Dominical",
     "role": "OxideTerm 作者"
   },

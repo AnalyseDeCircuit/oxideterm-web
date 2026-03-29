@@ -200,7 +200,7 @@
     "a5": "API 키를 직접 준비하세요(BYOK). OpenAI, Anthropic, Google 및 OpenAI 호환 엔드포인트를 지원합니다. 키는 OS 키체인에 안전하게 저장됩니다."
   },
   "testimonial": {
-    "quote": "서버 몇 대 관리하자고 다섯 개 도구를 왔다 갔다 하는 게 지쳐서 OxideTerm을 만들었습니다. 하나의 창에 모든 것을 통합, Electron 부담 없이. 그게 전부입니다.",
+    "quote": "OxideTerm은 시장의 빈틈을 메우기 위해서가 아니라 터미널 성능과 기능의 경계에 도전하기 위해 만들었습니다. 순수 Rust SSH 구현, C 의존성 제로. 자체 바이너리 와이어 프로토콜로 핫 패스에 JSON 직렬화 없음. 내보내기 암호화는 ChaCha20-Poly1305 + Argon2id(256 MB 메모리 비용). 모든 아키텍처 결정은 하나의 집념을 향합니다: 편의를 위해 정확성을 타협하지 않는다.",
     "name": "Dominical",
     "role": "OxideTerm 개발자"
   },

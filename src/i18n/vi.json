@@ -200,7 +200,7 @@
     "a5": "Tự cung cấp khóa API (BYOK). OxideTerm hỗ trợ OpenAI, Anthropic, Google và bất kỳ endpoint tương thích OpenAI nào. Khóa được lưu trữ an toàn trong keychain hệ điều hành."
   },
   "testimonial": {
-    "quote": "Tôi tạo OxideTerm vì chán cảnh phải mở năm công cụ khác nhau chỉ để quản lý vài máy chủ. Một cửa sổ, mọi thứ tích hợp, không gánh nặng Electron. Đơn giản vậy thôi.",
+    "quote": "OxideTerm không được tạo ra để lấp một khoảng trống thị trường — mà để thách thức ranh giới giữa hiệu năng và khả năng của terminal. SSH thuần Rust, không phụ thuộc C. Giao thức nhị phân tự phát triển, không JSON serialization trên đường nóng. Mã hóa xuất dữ liệu bằng ChaCha20-Poly1305 + Argon2id (chi phí bộ nhớ 256 MB). Mỗi quyết định kiến trúc đều hướng về một nỗi ám ảnh duy nhất: không bao giờ đánh đổi tính đúng đắn lấy sự tiện lợi.",
     "name": "Dominical",
     "role": "Nhà phát triển OxideTerm"
   },

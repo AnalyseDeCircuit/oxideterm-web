@@ -200,7 +200,7 @@
     "a5": "Traga sua própria chave de API (BYOK). O OxideTerm suporta OpenAI, Anthropic, Google e qualquer endpoint compatível com OpenAI. As chaves são armazenadas com segurança no chaveiro do sistema."
   },
   "testimonial": {
-    "quote": "Criei o OxideTerm porque estava cansado de ficar alternando entre cinco ferramentas diferentes só para gerenciar alguns servidores. Uma janela, tudo integrado, sem o peso do Electron. É só isso.",
+    "quote": "O OxideTerm não foi criado para preencher uma lacuna de mercado — foi criado para desafiar o limite entre desempenho e capacidade do terminal. SSH em Rust puro, zero dependências de C. Um protocolo binário proprietário sem serialização JSON no caminho crítico. Criptografia de exportação com ChaCha20-Poly1305 + Argon2id (custo de memória de 256 MB). Cada decisão arquitetural reflete uma única obsessão: nunca trocar correção por conveniência.",
     "name": "Dominical",
     "role": "Criador do OxideTerm"
   },

@@ -200,7 +200,7 @@
     "a5": "Bring your own API key (BYOK). OxideTerm supports OpenAI, Anthropic, Google, and any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain."
   },
   "testimonial": {
-    "quote": "I built OxideTerm because I was tired of juggling five different tools just to manage a few servers. One window, everything integrated, no Electron tax. That's the whole idea.",
+    "quote": "OxideTerm wasn't built to fill a market gap — it was built to challenge the boundary between terminal performance and capability. Pure-Rust SSH with zero C dependencies. A custom binary wire protocol with no JSON serialization in the hot path. ChaCha20-Poly1305 encryption backed by Argon2id at 256 MB memory cost. Every architectural decision reflects one obsession: never trade correctness for convenience.",
     "name": "Dominical",
     "role": "Creator of OxideTerm"
   },
