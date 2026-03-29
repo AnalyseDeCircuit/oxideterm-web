@@ -1,60 +1,126 @@
 ---
-title: Plugin Development
-description: Build plugins for OxideTerm with the runtime plugin system — ESM bundles, PluginContext API, terminal hooks, UI views, and more.
+title: Plugin Development Guide
+description: Complete reference for OxideTerm plugin development — Plugin API v3
 ---
 
-OxideTerm provides a runtime plugin system that allows third-party developers to extend the application without recompiling. Plugins are ESM bundles loaded dynamically from `~/.oxideterm/plugins/`.
+> Applies to OxideTerm v1.6.2+ (Plugin API v3 — updated 2026-03-15)
 
-## Architecture
+## 1. Plugin System Overview
 
-Plugins run in the **same JavaScript context** as the host app (not iframe or Web Worker). Isolation is achieved through a **membrane pattern**: every API object passed to plugins is deeply frozen with `Object.freeze()`.
+### 1.1 Design Philosophy
+
+The OxideTerm plugin system follows these design principles:
+
+- **Runtime dynamic loading**: Plugins are ESM bundles loaded at runtime via `Blob URL + dynamic import()`, no host app recompilation required
+- **Membrane Pattern isolation**: Plugins communicate with the host via a `PluginContext` frozen by `Object.freeze()` — all API objects are immutable
+- **Declarative Manifest**: Plugin capabilities (tabs, sidebar, terminal hooks, etc.) must be declared upfront in `plugin.json` and are enforced at runtime
+- **Fail-Open**: Exceptions in terminal hooks do not block terminal I/O — they fall back to the original data
+- **Auto-cleanup**: Automatic resource reclamation via the `Disposable` pattern — all registrations are removed when a plugin unloads
+
+### 1.2 Architecture Model
 
 ```
-┌─────────────────────────────────────────┐
-│           OxideTerm Host App            │
-│                                         │
-│  Rust Backend ←→ Tauri IPC ←→ React UI  │
-│                      ↓                  │
-│              pluginLoader               │
-│                      ↓                  │
-│             Context Factory             │
-│          (buildPluginCtx → freeze)      │
-│                      ↓                  │
-│  ┌───────────────────────────────────┐  │
-│  │        Plugin (ESM Module)        │  │
-│  │                                   │  │
-│  │  activate(ctx) ← frozen context   │  │
-│  │  window.__OXIDE__ ← shared React  │  │
-│  └───────────────────────────────────┘  │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                        OxideTerm Host App                        │
+│                                                                  │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
+│  │ Rust Backend │  │  Tauri IPC   │  │     React Frontend      │ │
+│  │             │  │  Control      │  │                         │ │
+│  │ plugin.rs   │←→│  Plane        │←→│  ┌───────────────────┐  │ │
+│  │ - list      │  │              │  │  │   pluginStore      │  │ │
+│  │ - read_file │  │              │  │  │   (Zustand)        │  │ │
+│  │ - config    │  │              │  │  └───────┬───────────┘  │ │
+│  └─────────────┘  └──────────────┘  │          │              │ │
+│                                      │  ┌───────▼───────────┐  │ │
+│                                      │  │  pluginLoader      │  │ │
+│                                      │  │  - discover        │  │ │
+│                                      │  │  - validate        │  │ │
+│                                      │  │  - load / unload   │  │ │
+│                                      │  └───────┬───────────┘  │ │
+│                                      │          │              │ │
+│                                      │  ┌───────▼───────────┐  │ │
+│                                      │  │  Context Factory   │  │ │
+│                                      │  │  (buildPluginCtx)  │  │ │
+│                                      │  │  → Object.freeze   │  │ │
+│                                      │  └───────┬───────────┘  │ │
+│                                      │          │              │ │
+│                                      └──────────┼──────────────┘ │
+│                                                 │                │
+│              ┌──────────────────────────────────▼────────────┐   │
+│              │                Plugin (ESM)                    │   │
+│              │                                                │   │
+│              │  activate(ctx) ←── PluginContext (frozen)      │   │
+│              │    ctx.connections  ctx.events  ctx.ui         │   │
+│              │    ctx.terminal    ctx.settings  ctx.i18n      │   │
+│              │    ctx.storage     ctx.api      ctx.assets     │   │
+│              │    ctx.sftp  ctx.forward                       │   │
+│              │    ctx.sessions  ctx.transfers  ctx.profiler   │   │
+│              │    ctx.eventLog  ctx.ide  ctx.ai  ctx.app      │   │
+│              │                                                │   │
+│              │  window.__OXIDE__                              │   │
+│              │    React · ReactDOM · zustand · lucideIcons    │   │
+│              └────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-**Key points:**
+**Key points**:
 
-- Shared `React` instance via `window.__OXIDE__` ensures hook compatibility
-- Rust backend handles file I/O with path traversal protection
-- All event handlers execute asynchronously via `queueMicrotask()`
-- Circuit breaker auto-disables plugins after 10 errors in 60 seconds
-- Terminal hooks have a **5ms time budget** per invocation
+1. Plugins and the host run in the **same JS context** (not iframe/WebWorker)
+2. React instances are shared via `window.__OXIDE__` to ensure hooks compatibility
+3. The Rust backend handles file I/O (with path-traversal protection); the frontend manages lifecycle
+4. An Event Bridge forwards connection state changes from `appStore` to plugin events
 
-## Quick Start
+### 1.3 Security Model
 
-### Using Plugin Manager (Recommended)
+| Layer | Mechanism | Description |
+|-------|-----------|-------------|
+| **Membrane Isolation** | `Object.freeze()` | All API objects are immutable and non-extensible |
+| **Manifest Declaration** | Runtime validation | Unregistered tabs/panels/hooks/commands throw at registration time |
+| **Path Protection** | Rust `validate_plugin_id()` + `validate_relative_path()` + canonicalize | Prevents path traversal attacks |
+| **API Whitelist** | `contributes.apiCommands` | Limits Tauri commands a plugin can call (**Advisory**) |
+| **Circuit Breaker** | 10 errors / 60 seconds → auto-disable | Prevents a broken plugin from crashing the system |
+| **Time Budget** | Terminal hooks 5ms budget | Timeouts count toward the circuit breaker |
 
-1. Open **Plugin Manager** (sidebar 🧩 icon)
-2. Click the **New Plugin** button (+ icon)
-3. Enter a plugin ID (lowercase, hyphens, e.g. `my-first-plugin`)
-4. Click **Create** — a full scaffold is generated at `~/.oxideterm/plugins/`
-5. Click **Reload** to load the plugin
+:::caution[Security Notice]
+Plugins currently run in the same JS context as the host — a malicious plugin could theoretically bypass the API whitelist by directly importing `@tauri-apps/api/core`. The whitelist is a **defense-in-depth** measure against accidental misuse; true sandbox isolation requires an iframe/WebWorker architecture (planned for the future). **Only install plugins from trusted sources.**
+:::
 
-### Manual Setup
+---
+
+## 2. Quick Start
+
+### 2.1 Development Environment
+
+- No additional build tools are required to develop OxideTerm plugins
+- Plugins are plain ESM JavaScript files, dynamically imported by OxideTerm
+- If you want TypeScript, compile it to ESM yourself; the project provides a standalone type definitions file `plugin-api.d.ts` (see [Section 20](#20-typescript-type-reference))
+- If you need bundling (multiple files → single file), use esbuild / rollup (format: `esm`)
+
+### 2.2 Creating Your First Plugin
+
+#### Method 1: Via Plugin Manager (Recommended)
+
+1. Open **Plugin Manager** in OxideTerm (sidebar 🧩 icon → Plugin Manager)
+2. Click the **New Plugin** button in the top-right corner (+ icon)
+3. Enter a plugin ID (lowercase letters, digits, and hyphens, e.g. `my-first-plugin`) and a display name
+4. Click **Create**
+5. OxideTerm automatically generates a complete plugin scaffold under `~/.oxideterm/plugins/`:
+   - `plugin.json` — pre-filled manifest file
+   - `main.js` — Hello World template with `activate()`/`deactivate()`
+6. The plugin is automatically registered in Plugin Manager after creation — click **Reload** to load it
+
+#### Method 2: Manual Creation
+
+**Step 1: Create the plugin directory**
 
 ```bash
 mkdir -p ~/.oxideterm/plugins/my-first-plugin
 cd ~/.oxideterm/plugins/my-first-plugin
 ```
 
-Create `plugin.json`:
+> The directory name does not need to match the `id` in `plugin.json`, but keeping them the same is recommended for easier management.
+
+**Step 2: Write plugin.json**
 
 ```json
 {
@@ -64,385 +130,4052 @@ Create `plugin.json`:
   "description": "A minimal OxideTerm plugin",
   "author": "Your Name",
   "main": "./main.js",
-  "engines": { "oxideterm": ">=1.6.0" },
+  "engines": {
+    "oxideterm": ">=1.6.0"
+  },
   "contributes": {
     "tabs": [
-      { "id": "hello", "title": "Hello World", "icon": "Smile" }
+      {
+        "id": "hello",
+        "title": "Hello World",
+        "icon": "Smile"
+      }
     ]
   }
 }
 ```
 
-Create `main.js`:
+**Step 3: Write main.js**
 
 ```javascript
+// Get React from the host (must use the host's React instance!)
 const { React } = window.__OXIDE__;
 const { createElement: h, useState } = React;
 
+// Tab component
 function HelloTab({ tabId, pluginId }) {
   const [count, setCount] = useState(0);
+
   return h('div', { className: 'p-6' },
     h('h1', { className: 'text-xl font-bold text-foreground mb-4' },
-      'Hello from Plugin! 🧩'),
+      'Hello from Plugin! 🧩'
+    ),
+    h('p', { className: 'text-muted-foreground mb-4' },
+      `Plugin: ${pluginId} | Tab: ${tabId}`
+    ),
     h('button', {
       onClick: () => setCount(c => c + 1),
-      className: 'px-4 py-2 rounded bg-primary text-primary-foreground',
-    }, `Clicked ${count} times`)
+      className: 'px-4 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/90',
+    }, `Clicked ${count} times`),
   );
 }
 
+// Activation entry point
 export function activate(ctx) {
+  console.log(`[MyPlugin] Activating (id: ${ctx.pluginId})`);
   ctx.ui.registerTabView('hello', HelloTab);
-  ctx.ui.showToast({ title: 'Plugin Activated!', variant: 'success' });
+  ctx.ui.showToast({ title: 'My Plugin Activated!', variant: 'success' });
 }
 
-export function deactivate() {}
+// Deactivation entry point (optional)
+export function deactivate() {
+  console.log('[MyPlugin] Deactivating');
+}
 ```
 
-Open Plugin Manager → **Refresh** → your plugin appears and loads automatically.
+### 2.3 Installation and Debugging
 
-## Plugin Structure
+**Method 1: Manual Install (Development Mode)**
 
-### v1 — Single Bundle (Default)
+1. Make sure plugin files are in `~/.oxideterm/plugins/my-first-plugin/`
+2. Open **Plugin Manager** in OxideTerm (sidebar 🧩 icon)
+3. Click **Refresh** to scan for new plugins
+4. The plugin will load automatically and appear in the list
+5. Click the plugin tab icon in the sidebar to open the Tab
+
+**Method 2: Install from Registry (Recommended)**
+
+1. Switch to the **Browse** tab in Plugin Manager
+2. Search or browse available plugins
+3. Click **Install**
+4. The plugin will be downloaded, verified, and installed automatically
+5. It activates automatically after installation
+
+**Method 3: Update an Installed Plugin**
+
+1. In the **Browse** tab, installed plugins with updates show an **Update** button
+2. Click **Update**
+3. The old version is unloaded and the new version installs and activates automatically
+
+**Uninstalling a Plugin**
+
+1. Find the plugin in the **Installed** tab
+2. Click 🗑️ on the right side of the plugin row
+3. The plugin is deactivated and deleted from disk
+
+Debugging tips:
+
+- Open DevTools (`Cmd+Shift+I` / `Ctrl+Shift+I`) to see `console.log` output
+- Load failures show a red error state in Plugin Manager with **actionable error messages** (e.g. "activate() must resolve within 5s", "ensure your main.js exports an activate() function")
+- Each plugin in Plugin Manager has a built-in **Log Viewer** (📜 icon) for real-time lifecycle logs — no DevTools needed
+- After modifying code, click the **Reload** button in Plugin Manager for hot reload
+
+---
+
+## 3. Plugin Structure
+
+### 3.1 Directory Layout
+
+**v1 Single-file Bundle (default)**:
 
 ```
-~/.oxideterm/plugins/my-plugin/
-├── plugin.json        # Manifest (required)
-├── main.js            # ESM entry (required)
-├── icon.svg           # Icon (optional)
-└── locales/           # i18n (optional)
-    ├── en.json
-    └── zh-CN.json
+~/.oxideterm/plugins/
+└── your-plugin-id/
+    ├── plugin.json          # Required: plugin manifest
+    ├── main.js              # Required: ESM entry point (specified by manifest.main)
+    ├── locales/             # Optional: i18n translation files
+    │   ├── en.json
+    │   ├── zh-CN.json
+    │   ├── ja.json
+    │   └── ...
+    └── assets/              # Optional: additional resource files
+        └── ...
 ```
 
-### v2 — Multi-File Package
+**v2 Multi-file Package** (`format: "package"`):
 
 ```
-~/.oxideterm/plugins/my-plugin/
-├── plugin.json        # manifestVersion: 2, format: "package"
-├── src/
-│   ├── main.js        # Supports relative imports
-│   └── components/
-│       └── Dashboard.js
-├── styles/
-│   └── main.css       # Auto-injected via manifest.styles
-├── assets/
-│   └── logo.png       # Access via ctx.assets.getAssetUrl()
-└── locales/
+~/.oxideterm/plugins/
+└── your-plugin-id/
+    ├── plugin.json          # Required: manifestVersion: 2, format: "package"
+    ├── src/
+    │   ├── main.js          # ESM entry point (supports relative imports between files)
+    │   ├── components/
+    │   │   ├── Dashboard.js
+    │   │   └── Charts.js
+    │   └── utils/
+    │       └── helpers.js
+    ├── styles/
+    │   ├── main.css         # Listed in manifest.styles — auto-loaded
+    │   └── charts.css
+    ├── assets/
+    │   ├── logo.png         # Accessible via ctx.assets.getAssetUrl()
+    │   └── config.json
+    └── locales/
+        ├── en.json
+        └── zh-CN.json
 ```
 
-v2 packages are served by a local HTTP server (`127.0.0.1`), enabling standard ES Module `import` between files.
+v2 multi-file packages are served through a built-in local HTTP file server (`127.0.0.1`, OS-assigned port), enabling standard ES Module `import` syntax between files.
 
-## Manifest Reference
+**Path constraints**:
 
-### Top-Level Fields
+- All file paths are relative to the plugin root directory
+- `..` path traversal is **forbidden**
+- Absolute paths are **forbidden**
+- Plugin IDs must **not** contain `/`, `\`, `..`, or control characters
+- The Rust backend performs `canonicalize()` checks on resolved paths to ensure they don't escape the plugin directory
+
+### 3.2 plugin.json Manifest
+
+This is the plugin's core descriptor file. OxideTerm discovers plugins by scanning `~/.oxideterm/plugins/*/plugin.json`.
+
+```json
+{
+  "id": "your-plugin-id",
+  "name": "Human Readable Name",
+  "version": "1.0.0",
+  "description": "What this plugin does",
+  "author": "Your Name",
+  "main": "./main.js",
+  "engines": {
+    "oxideterm": ">=1.6.0"
+  },
+  "locales": "./locales",
+  "contributes": {
+    "tabs": [],
+    "sidebarPanels": [],
+    "settings": [],
+    "terminalHooks": {},
+    "connectionHooks": [],
+    "apiCommands": []
+  }
+}
+```
+
+### 3.3 Entry File (ESM)
+
+The entry file must be a valid **ES Module** that `export`s the following functions:
+
+```javascript
+/**
+ * Required. Called when the plugin is activated.
+ * @param {PluginContext} ctx - Frozen API context object
+ */
+export function activate(ctx) {
+  // Register UI, hooks, event listeners, etc.
+}
+
+/**
+ * Optional. Called when the plugin is unloaded.
+ * Use to clean up global state (things attached to window, etc.).
+ * Note: Resources registered via Disposable are auto-cleaned — no need to manually remove them here.
+ */
+export function deactivate() {
+  // Clean up global references
+}
+```
+
+Both functions support returning a `Promise` (async activate/deactivate), but have a **5-second timeout**.
+
+**Loading mechanism (dual strategy)**:
+
+**v1 Single-file Bundle (default / `format: "bundled"`)**:
+
+```
+Rust read_plugin_file(id, "main.js")
+  → byte array passed to frontend
+    → new Blob([bytes], { type: 'application/javascript' })
+      → URL.createObjectURL(blob)
+        → import(blobUrl)
+          → module.activate(frozenContext)
+```
+
+> When loading via Blob URL, plugins **cannot** use relative path `import` statements internally. Use a bundler (esbuild/rollup) to merge into a single ESM bundle.
+
+**v2 Multi-file Package (`format: "package"`)**:
+
+```
+Frontend calls api.pluginStartServer()
+  → Rust starts local HTTP Server (127.0.0.1:0)
+    → Returns OS-assigned port number
+
+import(`http://127.0.0.1:{port}/plugins/{id}/src/main.js`)
+  → Browser standard ES Module loading
+    → Relative imports in main.js like './components/Dashboard.js' resolve automatically
+      → module.activate(frozenContext)
+```
+
+> v2 packages **support** relative path `import` between files. The browser resolves them automatically through the HTTP Server. The server starts automatically on first use and supports graceful shutdown.
+
+**v2 multi-file entry example**:
+
+```javascript
+// src/main.js — import other modules in the same package
+import { Dashboard } from './components/Dashboard.js';
+import { formatBytes } from './utils/helpers.js';
+
+export async function activate(ctx) {
+  // Dynamically load additional CSS
+  const cssDisposable = await ctx.assets.loadCSS('./styles/extra.css');
+
+  // Get asset file blob URL (for use in <img> src, etc.)
+  const logoUrl = await ctx.assets.getAssetUrl('./assets/logo.png');
+
+  ctx.ui.registerTabView('dashboard', (props) => {
+    const { React } = window.__OXIDE__;
+    return React.createElement(Dashboard, { ...props, logoUrl });
+  });
+}
+
+export function deactivate() {
+  // Disposables auto-clean CSS and blob URLs
+}
+```
+
+---
+
+## 4. Manifest Complete Reference
+
+### 4.1 Top-Level Fields
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `id` | `string` | ✅ | Unique identifier (letters, numbers, hyphens) |
-| `name` | `string` | ✅ | Human-readable display name |
-| `version` | `string` | ✅ | Semver version (e.g. `"1.0.0"`) |
-| `main` | `string` | ✅ | Relative path to ESM entry (e.g. `"./main.js"`) |
-| `engines.oxideterm` | `string` | — | Minimum version (e.g. `">=1.6.0"`) |
-| `contributes` | `object` | — | Capability declarations |
-| `locales` | `string` | — | i18n directory path |
+| `id` | `string` | ✅ | Unique plugin identifier. Only letters, digits, hyphens, dots. No `/`, `\`, `..`, or control characters. |
+| `name` | `string` | ✅ | Human-readable plugin name |
+| `version` | `string` | ✅ | Semantic version (e.g. `"1.0.0"`) |
+| `description` | `string` | ⬜ | Plugin description |
+| `author` | `string` | ⬜ | Author |
+| `main` | `string` | ✅ | Relative path to ESM entry file (e.g. `"./main.js"` or `"./src/main.js"`) |
+| `engines` | `object` | ⬜ | Version compatibility requirements |
+| `engines.oxideterm` | `string` | ⬜ | Minimum required OxideTerm version (e.g. `">=1.6.0"`). Supports `>=x.y.z` format. |
+| `contributes` | `object` | ⬜ | Plugin capability declarations |
+| `locales` | `string` | ⬜ | Relative path to i18n translation files directory (e.g. `"./locales"`) |
 
-### v2 Package Fields
+**v2 Package extended fields**:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `manifestVersion` | `2` | Enable v2 features |
-| `format` | `"package"` | Use local HTTP server for module loading |
-| `styles` | `string[]` | CSS files to auto-inject |
-| `assets` | `string` | Assets directory path |
-| `sharedDependencies` | `object` | Declare shared host dependencies |
-| `checksum` | `string` | SHA-256 integrity checksum |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `manifestVersion` | `1 \| 2` | ⬜ | Manifest version, defaults to `1` |
+| `format` | `'bundled' \| 'package'` | ⬜ | `bundled` (default) = single-file Blob URL loading; `package` = local HTTP Server loading (supports relative imports) |
+| `assets` | `string` | ⬜ | Relative path to assets directory (e.g. `"./assets"`), used with `ctx.assets` API |
+| `styles` | `string[]` | ⬜ | CSS file list (e.g. `["./styles/main.css"]`), automatically injected as `<style>` into `<head>` on load |
+| `sharedDependencies` | `Record<string, string>` | ⬜ | Declares host-shared dependency versions. Currently supports: `react`, `react-dom`, `zustand`, `lucide-react` |
+| `repository` | `string` | ⬜ | Source repository URL |
+| `checksum` | `string` | ⬜ | SHA-256 checksum (for integrity verification) |
 
-### contributes.tabs
+**v2 manifest example**:
 
 ```json
-"tabs": [{ "id": "dashboard", "title": "Dashboard", "icon": "LayoutDashboard" }]
+{
+  "id": "com.example.multi-file-plugin",
+  "name": "Multi-File Plugin",
+  "version": "2.0.0",
+  "main": "./src/main.js",
+  "engines": { "oxideterm": ">=1.6.2" },
+  "manifestVersion": 2,
+  "format": "package",
+  "styles": ["./styles/main.css"],
+  "sharedDependencies": {
+    "react": "^18.0.0",
+    "lucide-react": "^0.300.0"
+  },
+  "contributes": {
+    "tabs": [{ "id": "dashboard", "title": "Dashboard", "icon": "LayoutDashboard" }]
+  },
+  "locales": "./locales"
+}
 ```
 
-Icons use [Lucide React](https://lucide.dev/icons/) names (PascalCase). Invalid names fall back to `Puzzle`.
+### 4.2 contributes.tabs
 
-### contributes.sidebarPanels
-
-```json
-"sidebarPanels": [{
-  "id": "info", "title": "Info", "icon": "Info", "position": "bottom"
-}]
-```
-
-### contributes.settings
+Declares the Tab views provided by the plugin.
 
 ```json
-"settings": [
-  { "id": "greeting", "type": "string", "default": "Hello!", "title": "Greeting" },
-  { "id": "enabled", "type": "boolean", "default": false, "title": "Enable" },
+"tabs": [
   {
-    "id": "theme", "type": "select", "default": "dark", "title": "Theme",
-    "options": [{ "label": "Dark", "value": "dark" }, { "label": "Light", "value": "light" }]
+    "id": "dashboard",
+    "title": "Plugin Dashboard",
+    "icon": "LayoutDashboard"
   }
 ]
 ```
 
-### contributes.terminalHooks
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Tab identifier, unique within the plugin |
+| `title` | `string` | Tab title (shown in the tab bar) |
+| `icon` | `string` | [Lucide React](https://lucide.dev/icons/) icon name |
+
+> After declaring, call `ctx.ui.registerTabView(id, Component)` in `activate()` to register the component.
+>
+> The `icon` field is used to render the icon in the Tab Bar. Use PascalCase Lucide icon names such as `"LayoutDashboard"`, `"Server"`, `"Activity"`. If the name is invalid or missing, `Puzzle` is shown by default.
+>
+> Full icon list: https://lucide.dev/icons/
+
+### 4.3 contributes.sidebarPanels
+
+Declares the sidebar panels provided by the plugin.
+
+```json
+"sidebarPanels": [
+  {
+    "id": "quick-info",
+    "title": "Quick Info",
+    "icon": "Info",
+    "position": "bottom"
+  }
+]
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Panel identifier, unique within the plugin |
+| `title` | `string` | Panel title |
+| `icon` | `string` | Lucide React icon name |
+| `position` | `"top" \| "bottom"` | Position in the sidebar. Defaults to `"bottom"` |
+
+> The `icon` field is used to render the icon in the Activity Bar. Use PascalCase Lucide icon names such as `"Info"`, `"Database"`, `"BarChart"`. If invalid or missing, `Puzzle` is shown by default.
+>
+> When there are many plugin panels, the middle section of the Activity Bar automatically supports scrolling, while the pinned buttons at the bottom (local terminal, file manager, settings, plugin manager) remain always visible.
+
+### 4.4 contributes.settings
+
+Declares the plugin's configurable settings. Users can view and modify them in Plugin Manager.
+
+```json
+"settings": [
+  {
+    "id": "greeting",
+    "type": "string",
+    "default": "Hello!",
+    "title": "Greeting Message",
+    "description": "The greeting shown in the dashboard"
+  },
+  {
+    "id": "enableFeature",
+    "type": "boolean",
+    "default": false,
+    "title": "Enable Feature"
+  },
+  {
+    "id": "theme",
+    "type": "select",
+    "default": "dark",
+    "title": "Theme",
+    "options": [
+      { "label": "Dark", "value": "dark" },
+      { "label": "Light", "value": "light" },
+      { "label": "System", "value": "system" }
+    ]
+  },
+  {
+    "id": "maxItems",
+    "type": "number",
+    "default": 50,
+    "title": "Max Items"
+  }
+]
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Setting identifier |
+| `type` | `"string" \| "number" \| "boolean" \| "select"` | Value type |
+| `default` | `any` | Default value |
+| `title` | `string` | Display title |
+| `description` | `string?` | Description |
+| `options` | `Array<{ label, value }>?` | Only for `type: "select"` |
+
+### 4.5 contributes.terminalHooks
+
+Declares terminal I/O interception capabilities.
 
 ```json
 "terminalHooks": {
   "inputInterceptor": true,
   "outputProcessor": true,
-  "shortcuts": [{ "key": "ctrl+shift+d", "command": "openDashboard" }]
+  "shortcuts": [
+    { "key": "ctrl+shift+d", "command": "openDashboard" },
+    { "key": "ctrl+shift+s", "command": "saveBuffer" }
+  ]
 }
 ```
 
-### contributes.connectionHooks
+| Field | Type | Description |
+|-------|------|-------------|
+| `inputInterceptor` | `boolean?` | Whether to register an input interceptor |
+| `outputProcessor` | `boolean?` | Whether to register an output processor |
+| `shortcuts` | `Array<{ key, command }>?` | In-terminal shortcut key declarations |
+| `shortcuts[].key` | `string` | Key combination, e.g. `"ctrl+shift+d"` |
+| `shortcuts[].command` | `string` | Command name (matches `registerShortcut()` calls) |
+
+**Shortcut key format**:
+
+- Modifier keys: `ctrl` (macOS: both Ctrl and Cmd count), `shift`, `alt`
+- Letter keys: lowercase, e.g. `d`, `s`
+- Join with `+`: `ctrl+shift+d`
+- Modifier keys are sorted internally for normalization
+
+### 4.6 contributes.connectionHooks
+
+Declares connection lifecycle events the plugin is interested in.
 
 ```json
 "connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
 ```
 
-### contributes.apiCommands
+Possible values: `"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkDown"`
+
+> Note: This field currently serves as documentation only. Actual event subscription is done via `ctx.events.onConnect()` and similar methods.
+
+### 4.7 contributes.apiCommands
+
+Declares the whitelist of Tauri backend commands the plugin needs to call.
 
 ```json
-"apiCommands": ["list_connections", "get_connection_health"]
+"apiCommands": ["list_sessions", "get_session_info"]
 ```
 
-Only commands declared here can be called via `ctx.api.invoke()`.
+Only commands declared in this list can be called via `ctx.api.invoke()`. Undeclared commands throw an exception and log a console warning when called.
 
-## Lifecycle
-
-Plugins follow a strict state machine:
-
-```
-inactive → loading → active ←→ error
-                  ↘ disabled ↗
-```
-
-| State | Meaning |
-|-------|---------|
-| `inactive` | Not loaded or unloaded |
-| `loading` | Being loaded and validated |
-| `active` | Running normally |
-| `error` | Failed to load or runtime error |
-| `disabled` | Disabled by user or circuit breaker |
-
-Both `activate()` and `deactivate()` support async (returning `Promise`) with a **5-second timeout**. Resources registered via `Disposable` are cleaned up automatically on unload.
-
-## PluginContext API
-
-The `PluginContext` passed to `activate(ctx)` provides **19 namespaces** (all deeply frozen):
-
-### ctx.connections — Read-only Connection State
-
-```javascript
-ctx.connections.getAll()                  // All connections
-ctx.connections.get(connectionId)         // By ID
-ctx.connections.getState(connectionId)    // Quick state check
-ctx.connections.getByNode(nodeId)         // By session tree node
-```
-
-### ctx.events — Lifecycle Events
-
-```javascript
-ctx.events.onConnect(handler)      // Connection becomes active
-ctx.events.onDisconnect(handler)   // Connection disconnected
-ctx.events.onLinkDown(handler)     // Link detected down
-ctx.events.onReconnect(handler)    // Reconnect completed
-ctx.events.onIdle(handler)         // Connection went idle
-ctx.events.onNodeReady(handler)    // Session node ready
-ctx.events.on(name, handler)       // Custom inter-plugin events
-ctx.events.emit(name, data)        // Emit custom events
-```
-
-All `on*` methods return a `Disposable`.
-
-### ctx.ui — Views & Interaction
-
-```javascript
-ctx.ui.registerTabView(tabId, Component)        // Tab view
-ctx.ui.registerSidebarPanel(panelId, Component)  // Sidebar panel
-ctx.ui.registerCommand(id, opts, handler)         // Command palette
-ctx.ui.registerContextMenu(target, items)         // Context menu
-ctx.ui.registerStatusBarItem(options)              // Status bar
-ctx.ui.registerKeybinding(key, handler)            // Global shortcut
-ctx.ui.openTab(tabId)                              // Open a tab
-ctx.ui.showToast({ title, variant })               // Toast notification
-ctx.ui.showConfirm({ title, description })         // Confirmation dialog
-ctx.ui.showNotification({ title, severity })       // System notification
-ctx.ui.showProgress(title)                         // Progress reporter
-```
-
-### ctx.terminal — Terminal Hooks
-
-```javascript
-ctx.terminal.registerInputInterceptor(fn)   // Intercept user input
-ctx.terminal.registerOutputProcessor(fn)    // Process terminal output
-ctx.terminal.registerShortcut(cmd, handler) // Terminal shortcut
-ctx.terminal.writeToNode(nodeId, text)      // Write to terminal
-ctx.terminal.getNodeBuffer(nodeId)          // Read terminal buffer
-ctx.terminal.getNodeSelection(nodeId)       // Get selected text
-ctx.terminal.search(nodeId, query, opts)    // Search buffer
-```
-
-**Input interceptor** receives user keystrokes and can modify or suppress them:
-
-```javascript
-ctx.terminal.registerInputInterceptor((data, context) => {
-  if (data === 'rm -rf /') return null;  // Block dangerous commands
-  return data;  // Pass through
-});
-```
-
-**Output processor** receives raw terminal output bytes:
-
-```javascript
-ctx.terminal.registerOutputProcessor((data, context) => {
-  // data is Uint8Array, return modified Uint8Array
-  return data;
-});
-```
-
-:::caution
-Terminal hooks run **synchronously** on every I/O event with a **5ms budget**. Exceeding this budget counts toward the circuit breaker (10 errors in 60s → auto-disable).
+:::tip[Tip]
+Most SFTP and port forwarding operations can be called directly via `ctx.sftp` and `ctx.forward` namespaces without declaring them in `apiCommands`. Only lower-level commands not covered by these two namespaces need to be called via `ctx.api.invoke()`.
 :::
 
-### ctx.settings & ctx.storage — Persistence
+#### Available apiCommands
 
-```javascript
-// Plugin-scoped settings (declared in manifest)
-ctx.settings.get('myKey')
-ctx.settings.set('myKey', value)
-ctx.settings.onChange('myKey', handler)
+| Category | Command | Description |
+|----------|---------|-------------|
+| **Connections** | `list_connections` | List all active connections |
+| | `get_connection_health` | Get connection health metrics |
+| | `quick_health_check` | Quick connection check |
+| **SFTP** | `node_sftp_init` | Initialize SFTP channel |
+| | `node_sftp_list_dir` | List remote directory |
+| | `node_sftp_stat` | Get file/directory info |
+| | `node_sftp_preview` | Preview file content |
+| | `node_sftp_write` | Write file |
+| | `node_sftp_mkdir` | Create directory |
+| | `node_sftp_delete` | Delete file |
+| | `node_sftp_delete_recursive` | Recursively delete directory |
+| | `node_sftp_rename` | Rename/move file |
+| | `node_sftp_download` | Download file |
+| | `node_sftp_upload` | Upload file |
+| | `node_sftp_download_dir` | Recursively download directory |
+| | `node_sftp_upload_dir` | Recursively upload directory |
+| | `node_sftp_tar_probe` | Probe remote tar support |
+| | `node_sftp_tar_upload` | Streaming tar upload |
+| | `node_sftp_tar_download` | Streaming tar download |
+| **Port Forwarding** | `list_port_forwards` | List session port forwards |
+| | `create_port_forward` | Create port forward |
+| | `stop_port_forward` | Stop port forward |
+| | `delete_port_forward` | Delete forwarding rule |
+| | `restart_port_forward` | Restart port forward |
+| | `update_port_forward` | Update forwarding parameters |
+| | `get_port_forward_stats` | Get forwarding traffic stats |
+| | `stop_all_forwards` | Stop all forwards |
+| **Transfer Queue** | `sftp_cancel_transfer` | Cancel transfer |
+| | `sftp_pause_transfer` | Pause transfer |
+| | `sftp_resume_transfer` | Resume transfer |
+| | `sftp_transfer_stats` | Transfer queue stats |
+| **System** | `get_app_version` | Get OxideTerm version |
+| | `get_system_info` | Get system info |
 
-// Plugin-scoped key-value storage
-ctx.storage.get('data')
-ctx.storage.set('data', { count: 42 })
-ctx.storage.remove('data')
-```
+### 4.8 locales
 
-### ctx.i18n — Internationalization
-
-```javascript
-ctx.i18n.t('greeting', { name: 'World' })  // Translate with params
-ctx.i18n.getLanguage()                      // Current language code
-ctx.i18n.onLanguageChange(handler)          // Language switch event
-```
-
-Translation files live in the `locales/` directory:
+Relative path to the i18n translation files directory.
 
 ```json
-// locales/en.json
-{ "greeting": "Hello, {{name}}!" }
-
-// locales/zh-CN.json
-{ "greeting": "你好，{{name}}！" }
+"locales": "./locales"
 ```
 
-### ctx.api — Backend Invocation
+See [Section 11: Internationalization (i18n)](#11-internationalization-i18n) for details.
+
+---
+
+## 5. Plugin Lifecycle
+
+### 5.1 Discovery
+
+When OxideTerm starts (or the user clicks Refresh in Plugin Manager), the Rust backend scans `~/.oxideterm/plugins/`:
+
+```
+list_plugins()
+  → iterate each subdirectory under plugins/
+    → look for plugin.json
+      → serde parse into PluginManifest
+        → validate required fields (id, name, main are non-empty)
+          → return Vec<PluginManifest>
+```
+
+Directories that don't contain `plugin.json` or fail to parse are silently skipped (with a log warning).
+
+### 5.2 Validation
+
+After the frontend `loadPlugin()` receives the manifest, it performs a second validation:
+
+1. **Required field check**: `id`, `name`, `version`, `main` must be non-empty strings
+2. **Version compatibility check**: If `engines.oxideterm` is declared, do a simple semver `>=` comparison against the current OxideTerm version
+3. Validation failure → set `state: 'error'` and record error info
+
+### 5.3 Loading
+
+```
+loadPlugin(manifest)
+  1. setPluginState('loading')
+  2. api.pluginReadFile(id, mainPath)     // Rust reads file bytes
+  3. new Blob([bytes]) → blobUrl         // Create Blob URL
+  4. import(blobUrl)                     // Dynamic ESM import
+  5. URL.revokeObjectURL(blobUrl)        // Revoke Blob URL
+  6. Validate module.activate is a function
+  7. setPluginModule(id, module)
+  8. loadPluginLocales(id, ...)          // Load i18n (if declared)
+  9. buildPluginContext(manifest)        // Build frozen context
+  10. module.activate(ctx)               // Call activate (5s timeout)
+  11. setPluginState('active')
+```
+
+**Failure handling**: Any step failure during loading will:
+- Call `store.cleanupPlugin(id)` to clean up partial state
+- Call `removePluginI18n(id)` to clean up i18n resources
+- Set `state: 'error'` and record the error message
+
+### 5.4 Activation
+
+`activate(ctx)` is the plugin's main entry point. All registration should happen here:
 
 ```javascript
-const sessions = await ctx.api.invoke('list_connections');
-```
+export function activate(ctx) {
+  // 1. Register UI components
+  ctx.ui.registerTabView('myTab', MyTabComponent);
+  ctx.ui.registerSidebarPanel('myPanel', MyPanelComponent);
 
-Only commands declared in `contributes.apiCommands` are allowed.
+  // 2. Register terminal hooks
+  ctx.terminal.registerInputInterceptor(myInterceptor);
+  ctx.terminal.registerOutputProcessor(myProcessor);
+  ctx.terminal.registerShortcut('myCommand', myHandler);
 
-### ctx.sftp & ctx.forward
+  // 3. Subscribe to events
+  ctx.events.onConnect(handleConnect);
+  ctx.events.onDisconnect(handleDisconnect);
 
-```javascript
-// Remote file operations
-await ctx.sftp.listDir(nodeId, '/home')
-await ctx.sftp.readFile(nodeId, '/etc/hostname')
-await ctx.sftp.writeFile(nodeId, '/tmp/test', 'content')
+  // 4. Read settings
+  const value = ctx.settings.get('myKey');
 
-// Port forwarding
-await ctx.forward.create({ sessionId, forwardType: 'local', ... })
-await ctx.forward.list(sessionId)
-```
-
-### v3 Read-Only Namespaces
-
-| Namespace | Purpose |
-|-----------|---------|
-| `ctx.sessions` | Session tree state, node state changes |
-| `ctx.transfers` | SFTP transfer monitoring and progress |
-| `ctx.profiler` | CPU, memory, network metrics per connection |
-| `ctx.eventLog` | Connection event log entries |
-| `ctx.ide` | IDE mode state (open files, active project) |
-| `ctx.ai` | AI conversations and messages |
-| `ctx.app` | Theme, settings, version, platform info |
-
-## Shared Modules
-
-Plugins access host libraries via `window.__OXIDE__`:
-
-```javascript
-const {
-  React,         // React 19
-  ReactDOM,      // ReactDOM (createRoot)
-  zustand,       // State management
-  lucideIcons,   // Icon library
-  ui,            // OxideTerm UI Kit components
-  cn,            // className merger (clsx + twMerge)
-  clsx,          // clsx utility
-  useTranslation // i18n hook
-} = window.__OXIDE__;
-```
-
-:::note
-Always use `window.__OXIDE__.React` instead of bundling your own React — this ensures hook compatibility with the host app.
-:::
-
-### UI Kit Components
-
-The `ui` namespace exposes OxideTerm's design system:
-
-```javascript
-const { ui: { Button, Input, Select, Card, ScrollArea, Badge, ... } } = window.__OXIDE__;
-```
-
-These components follow the same styling as the host app, keeping your plugin visually consistent.
-
-## Security Model
-
-| Layer | Mechanism | Protection |
-|-------|-----------|------------|
-| Membrane | `Object.freeze()` | All API objects immutable |
-| Manifest | Runtime validation | Undeclared capabilities rejected |
-| Path Guard | Rust `canonicalize()` | Prevents path traversal |
-| API Whitelist | `apiCommands` | Restricts backend calls |
-| Circuit Breaker | 10 errors / 60s | Auto-disables faulty plugins |
-| Time Budget | 5ms per hook | Prevents terminal I/O blocking |
-
-:::caution
-Plugins share the same JS context as the host — a malicious plugin could theoretically bypass the API whitelist. The whitelist is **defense-in-depth**, not a sandbox. **Only install plugins from trusted sources.**
-:::
-
-## Debugging
-
-- Open DevTools (`Cmd+Shift+I`) to see plugin `console.log` output
-- Plugin Manager shows error states with **actionable messages**
-- Each plugin has a **log viewer** (📜 icon) for lifecycle events
-- Use the **Reload** button to hot-reload after code changes
-
-## Best Practices
-
-1. **Use Disposable pattern** — All `register*` and `on*` calls return `Disposable`. Let the system handle cleanup.
-2. **Keep hooks fast** — Terminal hooks must complete within 5ms. Offload heavy work to `setTimeout`.
-3. **Use shared React** — Never bundle your own React. Always use `window.__OXIDE__.React`.
-4. **Declare capabilities** — Only registered tabs/panels/hooks will work. Update `plugin.json` when adding features.
-5. **Handle errors gracefully** — Uncaught errors count toward the circuit breaker. Use try/catch in event handlers.
-6. **Test with Plugin Manager** — Use the built-in log viewer and reload button during development.
-
-## TypeScript Support
-
-Copy [`plugin-api.d.ts`](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/plugin-api.d.ts) to your project root and reference it in `tsconfig.json`:
-
-```json
-{
-  "include": ["plugin-api.d.ts", "src/**/*.ts"]
+  // 5. Read storage
+  const data = ctx.storage.get('myData');
 }
 ```
 
-This provides full IntelliSense for the `PluginContext` API and all snapshot types.
+**Timeout**: If `activate()` returns a Promise, it must resolve within **5000ms**, or the load is considered failed.
+
+### 5.5 Runtime
+
+After activation, the plugin enters running state:
+
+- Registered Tab/Sidebar components render with React
+- Terminal hooks are called synchronously on every terminal I/O
+- Event handlers are triggered asynchronously (`queueMicrotask()`) when connection state changes
+- Settings/storage reads and writes take effect immediately
+
+### 5.6 Deactivation
+
+Triggered when the user disables or reloads the plugin in Plugin Manager:
+
+```javascript
+export function deactivate() {
+  // Clean up global state
+  delete window.__MY_PLUGIN_STATE__;
+}
+```
+
+**Timeout**: If returning a Promise, it must resolve within **5000ms**.
+
+**Note**: Resources registered via `Disposable` (event listeners, UI components, terminal hooks, etc.) do NOT need to be manually cleaned up in `deactivate()` — the system handles this automatically.
+
+### 5.7 Unloading
+
+```
+unloadPlugin(pluginId)
+  1. Call module.deactivate()      // 5s timeout
+  2. cleanupPlugin(pluginId)       // Dispose all Disposables
+  3. removePluginI18n(pluginId)    // Clean up i18n resources
+  4. Close all Tabs for this plugin
+  5. Clear error trackers
+  6. setPluginState('inactive')
+```
+
+### 5.8 State Machine
+
+```
+                  ┌──────────┐
+                  │ inactive │ ←── initial state / after unload
+                  └────┬─────┘
+                       │ loadPlugin()
+                  ┌────▼─────┐
+                  │ loading  │
+                  └────┬─────┘
+                 ✓ /   │   \ ✗
+             ┌────▼──┐   ┌──▼───┐
+             │ active │   │ error│
+             └────┬───┘   └──┬───┘
+                  │          │ (can retry)
+         unload / │          ▼
+         disable  │    ┌──────────┐
+                  │    │ disabled │ ←── manually disabled / circuit breaker
+                  │    └──────────┘
+                  ▼
+            ┌──────────┐
+            │ inactive │
+            └──────────┘
+```
+
+**PluginState** enum values:
+
+| State | Meaning |
+|-------|---------|
+| `'inactive'` | Not loaded / unloaded |
+| `'loading'` | Currently loading |
+| `'active'` | Activated, running normally |
+| `'error'` | Load or runtime error |
+| `'disabled'` | Disabled by user or circuit breaker |
+
+---
+## 6. PluginContext API Reference
+
+`PluginContext` (`ctx`) is a frozen object passed to `activate(ctx)`. All sub-objects are also frozen via `Object.freeze()`.
+
+### 6.1 ctx.pluginId
+
+`string` — the current plugin's ID (read-only).
+
+```javascript
+export function activate(ctx) {
+  console.log('Plugin ID:', ctx.pluginId); // e.g. "my-first-plugin"
+}
+```
+
+### 6.2 ctx.connections
+
+Provides access to all active SSH connections.
+
+#### Methods
+
+**`getAll(): ConnectionSnapshot[]`**
+
+Returns all current active connections.
+
+```javascript
+const connections = ctx.connections.getAll();
+connections.forEach(conn => {
+  console.log(`${conn.label} → ${conn.host}:${conn.port} [${conn.state}]`);
+});
+```
+
+**`get(nodeId: string): ConnectionSnapshot | undefined`**
+
+Returns the connection with the given `nodeId`, or `undefined` if not found.
+
+```javascript
+const conn = ctx.connections.get('node-abc123');
+if (conn) {
+  console.log('State:', conn.state); // 'active' | 'connecting' | 'disconnected' | ...
+}
+```
+
+**`refresh(): void`**
+
+Triggers a connection list refresh from the backend.
+
+```javascript
+ctx.connections.refresh();
+```
+
+**`formatAddress(conn: ConnectionSnapshot): string`**
+
+Returns a formatted `"host:port"` string, or `""` if the connection has no host.
+
+```javascript
+const addr = ctx.connections.formatAddress(conn); // "example.com:22"
+```
+
+**`onChanged(handler: (connections: ConnectionSnapshot[]) => void): Disposable`**
+
+Subscribes to connection list changes. Returns a `Disposable` — call `.dispose()` to unsubscribe.
+
+```javascript
+const sub = ctx.connections.onChanged(connections => {
+  console.log('Active connections:', connections.length);
+});
+
+// Unsubscribe when done
+sub.dispose();
+```
+
+#### ConnectionSnapshot Type
+
+```typescript
+type ConnectionSnapshot = {
+  nodeId: string;               // Unique node ID
+  sessionId: string | null;     // Underlying session ID (null if not yet connected)
+  label: string;                // Display name
+  host: string;                 // Hostname / IP
+  port: number;                 // SSH port
+  username: string;             // SSH username
+  state: ConnectionState;       // Current connection state
+  connectedAt: number | null;   // Unix timestamp (ms) when connected, null if not yet
+  lastActivity: number | null;  // Unix timestamp (ms) of last activity
+  forwardCount: number;         // Number of active port forwards
+  sftpActive: boolean;          // Whether SFTP channel is open
+  tags: string[];               // User tags
+};
+
+type ConnectionState =
+  | 'idle'           // Not yet connected
+  | 'connecting'     // Handshake in progress
+  | 'active'         // Connected normally
+  | 'reconnecting'   // Reconnecting (after link drop)
+  | 'disconnected'   // Disconnected
+  | 'error'          // Terminal error state
+  | 'grace_period';  // Grace period (newly v1.11.1 — probing old connection)
+```
+
+### 6.3 ctx.events
+
+Subscribes to connection lifecycle events. All event handlers are called asynchronously via `queueMicrotask()`.
+
+**`onConnect(handler: (conn: ConnectionSnapshot) => void): Disposable`**
+
+Fires when a connection enters the `active` state.
+
+```javascript
+ctx.events.onConnect(conn => {
+  console.log(`Connected: ${conn.label} (${conn.host})`);
+  ctx.ui.showToast({ title: `Connected to ${conn.label}`, variant: 'success' });
+});
+```
+
+**`onDisconnect(handler: (conn: ConnectionSnapshot) => void): Disposable`**
+
+Fires when a connection is severed (any reason).
+
+```javascript
+ctx.events.onDisconnect(conn => {
+  console.log(`Disconnected: ${conn.label}`);
+});
+```
+
+**`onReconnect(handler: (conn: ConnectionSnapshot) => void): Disposable`**
+
+Fires when a previously dropped connection reconnects successfully.
+
+```javascript
+ctx.events.onReconnect(conn => {
+  console.log(`Reconnected: ${conn.label}`);
+  // e.g. re-send pending commands
+});
+```
+
+**`onLinkDown(handler: (conn: ConnectionSnapshot) => void): Disposable`**
+
+Fires when a connection link drops (network interruption). State is usually `reconnecting` or `grace_period` at this point.
+
+```javascript
+ctx.events.onLinkDown(conn => {
+  console.log(`Link down: ${conn.label}, state=${conn.state}`);
+});
+```
+
+### 6.4 ctx.ui
+
+UI interaction and component registration APIs.
+
+**`registerTabView(tabId: string, component: React.ComponentType<TabViewProps>): Disposable`**
+
+Registers a Tab view component. `tabId` must be declared in `manifest.contributes.tabs`.
+
+```javascript
+function MyTab({ tabId, pluginId }) {
+  const { React } = window.__OXIDE__;
+  return React.createElement('div', { className: 'p-4' }, 'Hello from Tab!');
+}
+
+ctx.ui.registerTabView('myTab', MyTab);
+```
+
+`TabViewProps`:
+```typescript
+type TabViewProps = {
+  tabId: string;     // The tab's declared ID
+  pluginId: string;  // The plugin's ID
+};
+```
+
+**`registerSidebarPanel(panelId: string, component: React.ComponentType<SidebarPanelProps>): Disposable`**
+
+Registers a sidebar panel component. `panelId` must be declared in `manifest.contributes.sidebarPanels`.
+
+```javascript
+function MyPanel({ panelId, pluginId, isActive }) {
+  const { React } = window.__OXIDE__;
+  return React.createElement('div', { className: 'p-2' }, 'Sidebar Panel');
+}
+
+ctx.ui.registerSidebarPanel('myPanel', MyPanel);
+```
+
+`SidebarPanelProps`:
+```typescript
+type SidebarPanelProps = {
+  panelId: string;   // The panel's declared ID
+  pluginId: string;  // The plugin's ID
+  isActive: boolean; // Whether this panel is currently visible/focused
+};
+```
+
+**`showToast(options: ToastOptions): void`**
+
+Shows a non-blocking toast notification.
+
+```javascript
+ctx.ui.showToast({
+  title: 'File Saved',
+  description: 'config.yaml saved successfully',
+  variant: 'success',  // 'default' | 'success' | 'error' | 'warning'
+  duration: 3000,      // ms, defaults to 3000
+});
+```
+
+**`openTab(tabId: string): void`**
+
+Opens/focuses the specified Tab.
+
+```javascript
+ctx.ui.openTab('dashboard');
+```
+
+**`closeTab(tabId: string): void`**
+
+Closes the specified Tab.
+
+```javascript
+ctx.ui.closeTab('dashboard');
+```
+
+### 6.5 ctx.terminal
+
+Terminal I/O interception and interaction.
+
+**`registerInputInterceptor(fn: TerminalInputInterceptor): Disposable`**
+
+Registers a terminal input interceptor. Called **synchronously** on every keypress. Must complete within 5ms (circuit breaker budget).
+
+`fn` must be declared via `contributes.terminalHooks.inputInterceptor: true`.
+
+```javascript
+export function activate(ctx) {
+  ctx.terminal.registerInputInterceptor((input, sessionId) => {
+    // input is the raw input string (may be ANSI escape sequences)
+    if (input === 'x') {
+      // Block this character
+      return '';
+    }
+    if (input === '\r') {
+      // Append extra text before submitting
+      return input + ' # via plugin';
+    }
+    // Return original (pass-through)
+    return input;
+  });
+}
+```
+
+Interceptor signature:
+```typescript
+type TerminalInputInterceptor = (
+  input: string,
+  sessionId: string | null
+) => string | null | undefined;
+// Return value:
+// - string: replacement input (can be empty string to block)
+// - null/undefined: pass original input through
+```
+
+**`registerOutputProcessor(fn: TerminalOutputProcessor): Disposable`**
+
+Registers a terminal output processor. Called **synchronously** on every chunk of output from the server. Must complete within 5ms.
+
+`fn` must be declared via `contributes.terminalHooks.outputProcessor: true`.
+
+```javascript
+ctx.terminal.registerOutputProcessor((output, sessionId) => {
+  // Hide sensitive keywords
+  return output.replace(/password:\s*/gi, 'password: ***');
+});
+```
+
+Processor signature:
+```typescript
+type TerminalOutputProcessor = (
+  output: string,
+  sessionId: string | null
+) => string | null | undefined;
+// Same return value semantics as input interceptor
+```
+
+**`registerShortcut(command: string, handler: TerminalShortcutHandler): Disposable`**
+
+Registers a terminal shortcut handler. `command` must match a key in `contributes.terminalHooks.shortcuts`.
+
+```javascript
+ctx.terminal.registerShortcut('openDashboard', (sessionId) => {
+  ctx.ui.openTab('dashboard');
+  return true; // true = event consumed (prevent default terminal behavior)
+});
+```
+
+Handler signature:
+```typescript
+type TerminalShortcutHandler = (
+  sessionId: string | null
+) => boolean | void;
+// Return true to consume the event; false/void to pass through
+```
+
+**`getActiveSessionId(): string | null`**
+
+Returns the currently focused session's ID, or `null` if no session is focused.
+
+```javascript
+const sessionId = ctx.terminal.getActiveSessionId();
+if (sessionId) {
+  console.log('Active session:', sessionId);
+}
+```
+
+**`getTerminalBuffer(sessionId?: string): string`**
+
+Returns the current terminal buffer content as plain text (ANSI escape sequences stripped). If `sessionId` is omitted, uses the currently active session.
+
+```javascript
+const buffer = ctx.terminal.getTerminalBuffer();
+console.log('Buffer length:', buffer.length);
+```
+
+**`writeToTerminal(data: string, sessionId?: string): void`**
+
+Writes data directly to the terminal display (client-side only, not sent to server). Useful for displaying plugin notifications or status info in the terminal.
+
+```javascript
+ctx.terminal.writeToTerminal('\r\n\x1b[33m[Plugin] Analysis complete\x1b[0m\r\n');
+```
+
+**`sendToSession(data: string, sessionId?: string): void`**
+
+Sends data to the remote session's stdin (as if the user typed it). Can be used to send commands programmatically.
+
+:::caution[Use with Care]
+`sendToSession` sends raw bytes to the remote SSH session's stdin — use with care. Unexpected command injection could damage remote systems.
+:::
+
+```javascript
+// Send a command to the active session
+ctx.terminal.sendToSession('ls -la\n');
+```
+
+### 6.6 ctx.settings
+
+Plugin settings read/write. Settings are persisted via the `redb` database.
+
+**`get<T>(key: string, defaultValue?: T): T`**
+
+Reads a setting value. Returns `defaultValue` if not set (or `undefined` if no default provided).
+
+```javascript
+const greeting = ctx.settings.get('greeting', 'Hello!');
+const maxItems = ctx.settings.get('maxItems', 50);
+const enabled = ctx.settings.get('enableFeature', false);
+```
+
+**`set(key: string, value: unknown): void`**
+
+Writes a setting value. Triggers `onChange` callbacks.
+
+```javascript
+ctx.settings.set('greeting', 'Hi there!');
+ctx.settings.set('maxItems', 100);
+```
+
+**`onChange(key: string, handler: (value: unknown) => void): Disposable`**
+
+Subscribes to changes for a specific setting key. Triggers when the user modifies the value in Plugin Manager.
+
+```javascript
+ctx.settings.onChange('theme', (newValue) => {
+  applyTheme(newValue);
+});
+```
+
+**`getAll(): Record<string, unknown>`**
+
+Returns all setting key-value pairs for this plugin.
+
+```javascript
+const allSettings = ctx.settings.getAll();
+console.log(allSettings);
+// { greeting: 'Hello!', maxItems: 50, enableFeature: false }
+```
+
+### 6.7 ctx.i18n
+
+Plugin internationalization.
+
+**`t(key: string, params?: Record<string, string>): string`**
+
+Translates the given key using the current language. Falls back to English if the current language has no entry.
+
+```javascript
+// locales/en.json: { "welcome": "Welcome {{name}}!" }
+// locales/zh-CN.json: { "welcome": "欢迎 {{name}}！" }
+
+const msg = ctx.i18n.t('welcome', { name: 'Alice' });
+// English UI: "Welcome Alice!"
+// Chinese UI: "欢迎 Alice！"
+```
+
+**`getCurrentLanguage(): string`**
+
+Returns the current OxideTerm UI language code (e.g. `"en"`, `"zh-CN"`, `"ja"`).
+
+```javascript
+const lang = ctx.i18n.getCurrentLanguage();
+```
+
+**`onLanguageChange(handler: (lang: string) => void): Disposable`**
+
+Subscribes to language changes (when the user switches language in settings).
+
+```javascript
+ctx.i18n.onLanguageChange((newLang) => {
+  console.log('Language changed to:', newLang);
+  // Re-render or update locale-sensitive data
+});
+```
+
+### 6.8 ctx.storage
+
+Persistent key-value storage (plugin-scoped). Data is stored in a `redb` embedded database under AppDataDir and persists across sessions.
+Each plugin gets its own namespaced storage space — keys are isolated per plugin.
+
+**`get<T>(key: string): T | null`**
+
+Reads a stored value. Returns `null` if not found.
+
+```javascript
+const lastSeen = ctx.storage.get('lastSeen'); // null if not stored yet
+```
+
+**`set(key: string, value: unknown): void`**
+
+Stores a value. Overwrites existing value. Value is serialized to JSON.
+
+```javascript
+ctx.storage.set('lastSeen', Date.now());
+ctx.storage.set('config', { theme: 'dark', fontSize: 14 });
+```
+
+**`remove(key: string): void`**
+
+Deletes a stored value.
+
+```javascript
+ctx.storage.remove('tempData');
+```
+
+**`getAll(): Record<string, unknown>`**
+
+Returns all stored key-value pairs for this plugin.
+
+```javascript
+const data = ctx.storage.getAll();
+```
+
+**`clear(): void`**
+
+Deletes all stored data for this plugin.
+
+```javascript
+ctx.storage.clear();
+```
+
+### 6.9 ctx.api
+
+Low-level Tauri backend command invocation.
+
+**`invoke<T>(command: string, args?: Record<string, unknown>): Promise<T>`**
+
+Invokes a Tauri backend command. The `command` must be declared in `contributes.apiCommands`.
+
+```javascript
+// plugin.json: "apiCommands": ["get_app_version"]
+
+const version = await ctx.api.invoke('get_app_version');
+console.log('OxideTerm version:', version);
+
+// With parameters
+const info = await ctx.api.invoke('get_session_info', { sessionId: 'abc123' });
+```
+
+:::caution[Important]
+Calling a command not in the `apiCommands` whitelist will throw a runtime exception and log a console error. Always declare needed commands in the manifest first.
+:::
+
+### 6.10 ctx.assets (v2 Package only)
+
+Asset file access — only available in v2 package plugins (`format: "package"`).
+
+**`getAssetUrl(relativePath: string): Promise<string>`**
+
+Gets a blob URL for a file in the `assets` directory. Useful for `<img>` `src`, CSS `url()`, etc.
+
+```javascript
+// Assets directory: ./assets/logo.png
+const logoUrl = await ctx.assets.getAssetUrl('./assets/logo.png');
+// Use in React JSX:
+// <img src={logoUrl} alt="Logo" />
+```
+
+**`loadCSS(relativePath: string): Promise<Disposable>`**
+
+Dynamically injects a CSS file into `<head>`. Returns a `Disposable` — calling `.dispose()` removes the `<style>` element.
+
+```javascript
+const cssDisposable = await ctx.assets.loadCSS('./styles/plugin.css');
+// To unload:
+cssDisposable.dispose();
+```
+
+### 6.11 ctx.sftp
+
+High-level SFTP operations. Automatically uses the SFTP channel of the target session.
+
+**`listDir(sessionId: string, remotePath: string): Promise<SftpEntry[]>`**
+
+Lists files and directories at `remotePath`.
+
+```javascript
+const entries = await ctx.sftp.listDir('session-123', '/home/user');
+entries.forEach(e => {
+  console.log(`${e.is_dir ? 'DIR' : 'FILE'} ${e.name} (${e.size} bytes)`);
+});
+```
+
+`SftpEntry`:
+```typescript
+type SftpEntry = {
+  name: string;
+  path: string;
+  size: number;
+  is_dir: boolean;
+  is_symlink: boolean;
+  modified: number | null; // Unix timestamp (s)
+  permissions: number | null;
+};
+```
+
+**`stat(sessionId: string, remotePath: string): Promise<SftpEntry>`**
+
+Gets metadata for a file or directory.
+
+**`readFile(sessionId: string, remotePath: string): Promise<Uint8Array>`**
+
+Reads a remote file's full content as bytes.
+
+```javascript
+const bytes = await ctx.sftp.readFile('session-123', '/etc/hostname');
+const content = new TextDecoder().decode(bytes);
+console.log('Hostname:', content.trim());
+```
+
+**`writeFile(sessionId: string, remotePath: string, content: Uint8Array | string): Promise<void>`**
+
+Writes content to a remote file.
+
+```javascript
+await ctx.sftp.writeFile('session-123', '/tmp/test.txt', 'hello from plugin\n');
+```
+
+**`mkdir(sessionId: string, remotePath: string): Promise<void>`**
+
+Creates a remote directory.
+
+**`remove(sessionId: string, remotePath: string): Promise<void>`**
+
+Deletes a remote file.
+
+**`rename(sessionId: string, oldPath: string, newPath: string): Promise<void>`**
+
+Renames or moves a file.
+
+**`download(sessionId: string, remotePath: string, localPath: string): Promise<string>`**
+
+Downloads a remote file to a local path. Returns the transfer ID.
+
+```javascript
+const transferId = await ctx.sftp.download(
+  'session-123',
+  '/var/log/app.log',
+  '/Users/user/Downloads/app.log'
+);
+```
+
+**`upload(sessionId: string, localPath: string, remotePath: string): Promise<string>`**
+
+Uploads a local file to a remote path. Returns the transfer ID.
+
+### 6.12 ctx.forward
+
+Port forwarding management.
+
+**`list(sessionId: string): Promise<PortForward[]>`**
+
+Returns all port forwarding rules for a session.
+
+```javascript
+const forwards = await ctx.forward.list('session-123');
+forwards.forEach(f => {
+  console.log(`${f.local_port} → ${f.remote_host}:${f.remote_port} [${f.status}]`);
+});
+```
+
+`PortForward`:
+```typescript
+type PortForward = {
+  id: string;
+  session_id: string;
+  local_port: number;
+  remote_host: string;
+  remote_port: number;
+  direction: 'local' | 'remote' | 'dynamic';
+  status: 'active' | 'stopped' | 'error';
+  bytes_sent: number;
+  bytes_received: number;
+};
+```
+
+**`create(sessionId: string, options: CreateForwardOptions): Promise<PortForward>`**
+
+Creates a new port forwarding rule.
+
+```javascript
+const forward = await ctx.forward.create('session-123', {
+  local_port: 8080,
+  remote_host: 'localhost',
+  remote_port: 80,
+  direction: 'local',
+});
+console.log('Forward created:', forward.id);
+```
+
+**`stop(forwardId: string): Promise<void>`**
+
+Stops a port forward.
+
+**`delete(forwardId: string): Promise<void>`**
+
+Stops and deletes a port forward rule.
+
+**`restart(forwardId: string): Promise<PortForward>`**
+
+Restarts a stopped or errored port forward.
+
+**`getStats(forwardId: string): Promise<ForwardStats>`**
+
+Gets traffic statistics for a port forward.
+
+```typescript
+type ForwardStats = {
+  bytes_sent: number;
+  bytes_received: number;
+  active_connections: number;
+  uptime_seconds: number;
+};
+```
+
+### 6.13 ctx.sessions (v3, OxideTerm ≥1.6.2)
+
+Advanced session management.
+
+**`getAll(): SessionInfo[]`**
+
+Returns info for all sessions.
+
+```javascript
+const sessions = ctx.sessions.getAll();
+sessions.forEach(s => {
+  console.log(`${s.id}: ${s.host} [${s.status}]`);
+});
+```
+
+`SessionInfo`:
+```typescript
+type SessionInfo = {
+  id: string;
+  node_id: string;
+  host: string;
+  port: number;
+  username: string;
+  status: 'active' | 'reconnecting' | 'disconnected';
+  connected_at: number | null;
+  channel_count: number;
+};
+```
+
+**`get(sessionId: string): SessionInfo | null`**
+
+Gets info for a specific session.
+
+**`subscribe(handler: (sessions: SessionInfo[]) => void): Disposable`**
+
+Subscribes to session list changes.
+
+```javascript
+ctx.sessions.subscribe(sessions => {
+  console.log('Session count changed:', sessions.length);
+});
+```
+
+### 6.14 ctx.transfers (v3, OxideTerm ≥1.6.2)
+
+SFTP transfer queue monitoring.
+
+**`getAll(): TransferItem[]`**
+
+Returns all current transfers (uploading, downloading, pending, completed).
+
+```javascript
+const transfers = ctx.transfers.getAll();
+const active = transfers.filter(t => t.status === 'transferring');
+console.log('Active transfers:', active.length);
+```
+
+`TransferItem`:
+```typescript
+type TransferItem = {
+  id: string;
+  session_id: string;
+  direction: 'upload' | 'download';
+  local_path: string;
+  remote_path: string;
+  total_bytes: number;
+  transferred_bytes: number;
+  status: 'pending' | 'transferring' | 'paused' | 'completed' | 'failed' | 'cancelled';
+  error: string | null;
+  started_at: number | null;
+  completed_at: number | null;
+};
+```
+
+**`subscribe(handler: (transfers: TransferItem[]) => void): Disposable`**
+
+Subscribes to transfer queue changes.
+
+```javascript
+ctx.transfers.subscribe(transfers => {
+  const inProgress = transfers.filter(t => t.status === 'transferring');
+  updateProgressIndicator(inProgress);
+});
+```
+
+### 6.15 ctx.profiler (v3, OxideTerm ≥1.6.2)
+
+Performance measurement tools for plugin self-profiling.
+
+**`start(label: string): void`**
+
+Starts a named performance timer.
+
+```javascript
+ctx.profiler.start('data-processing');
+processData(largeArray);
+ctx.profiler.stop('data-processing');
+```
+
+**`stop(label: string): number`**
+
+Stops the timer and returns elapsed time in milliseconds.
+
+**`getReport(): ProfileReport`**
+
+Returns a performance report for all recorded labels.
+
+```typescript
+type ProfileReport = {
+  [label: string]: {
+    count: number;
+    totalMs: number;
+    avgMs: number;
+    minMs: number;
+    maxMs: number;
+  };
+};
+```
+
+**`reset(): void`**
+
+Resets all profiler data.
+
+### 6.16 ctx.eventLog (v3, OxideTerm ≥1.6.2)
+
+Plugin event logging — logs visible in the Plugin Manager Log Viewer.
+
+**`append(level: 'info' | 'warn' | 'error', message: string, meta?: Record<string, unknown>): void`**
+
+Appends a log entry visible in Plugin Manager's integrated Log Viewer.
+
+```javascript
+ctx.eventLog.append('info', 'Plugin initialized', { version: '1.0.0' });
+ctx.eventLog.append('warn', 'Rate limit approaching', { current: 95, limit: 100 });
+ctx.eventLog.append('error', 'Failed to load config', { error: err.message });
+```
+
+**`query(options?: EventLogQueryOptions): EventLogEntry[]`**
+
+Queries the plugin's event log.
+
+```typescript
+type EventLogQueryOptions = {
+  level?: 'info' | 'warn' | 'error';
+  limit?: number;      // Defaults to 100
+  since?: number;      // Unix timestamp (ms)
+};
+
+type EventLogEntry = {
+  id: string;
+  timestamp: number;
+  level: 'info' | 'warn' | 'error';
+  message: string;
+  meta: Record<string, unknown>;
+};
+```
+
+```javascript
+const errors = ctx.eventLog.query({ level: 'error', limit: 10 });
+```
+
+### 6.17 ctx.ide (v3, OxideTerm ≥1.6.2)
+
+IDE mode integration — remote file editing.
+
+**`openFile(sessionId: string, remotePath: string): Promise<void>`**
+
+Opens a remote file in the IDE editor tab.
+
+```javascript
+await ctx.ide.openFile('session-123', '/etc/nginx/nginx.conf');
+```
+
+**`closeFile(sessionId: string, remotePath: string): Promise<void>`**
+
+Closes a remote file from the IDE editor.
+
+**`getOpenFiles(): IdeFileInfo[]`**
+
+Returns all files currently open in the IDE.
+
+```typescript
+type IdeFileInfo = {
+  session_id: string;
+  remote_path: string;
+  is_modified: boolean;
+  language: string;  // e.g. 'nginx', 'yaml', 'python'
+};
+```
+
+**`onFileChange(handler: (file: IdeFileInfo) => void): Disposable`**
+
+Subscribes to IDE file change events (opening, closing, saving, modification).
+
+### 6.18 ctx.ai (v3, OxideTerm ≥1.6.2)
+
+OxideSens AI feature integration.
+
+**`complete(prompt: string, options?: AiOptions): Promise<string>`**
+
+Sends a prompt to the configured AI model and returns the complete response.
+
+```javascript
+const explanation = await ctx.ai.complete(
+  `Explain this shell command: ${command}`,
+  { maxTokens: 200 }
+);
+ctx.ui.showToast({ title: 'AI Analysis', description: explanation });
+```
+
+**`stream(prompt: string, onChunk: (chunk: string) => void, options?: AiOptions): Promise<void>`**
+
+Streams an AI response chunk by chunk.
+
+```javascript
+let response = '';
+await ctx.ai.stream(
+  'Generate a useful shell alias for this task: ' + taskDescription,
+  (chunk) => {
+    response += chunk;
+    updatePreview(response);
+  }
+);
+```
+
+`AiOptions`:
+```typescript
+type AiOptions = {
+  model?: string;       // Model name override
+  maxTokens?: number;
+  temperature?: number;
+  systemPrompt?: string;
+};
+```
+
+:::caution[Note]
+AI calls use the user's configured API key (stored in OS keychain). Plugins should avoid using AI features without clear user awareness, as each call consumes API credits.
+:::
+
+### 6.19 ctx.app (v3, OxideTerm ≥1.6.2)
+
+Host application metadata and theme access.
+
+**`getVersion(): string`**
+
+Returns the current OxideTerm version string (e.g. `"1.6.2"`).
+
+```javascript
+const version = ctx.app.getVersion();
+if (compareVersions(version, '1.7.0') >= 0) {
+  // Use v1.7+ features
+}
+```
+
+**`getTheme(): AppTheme`**
+
+Returns the current UI theme.
+
+```typescript
+type AppTheme = {
+  mode: 'light' | 'dark' | 'system';
+  resolvedMode: 'light' | 'dark';  // Actual rendered mode ('system' resolved)
+  accentColor: string;              // CSS variable value
+};
+```
+
+```javascript
+const theme = ctx.app.getTheme();
+if (theme.resolvedMode === 'dark') {
+  applyDarkChartTheme();
+}
+```
+
+**`onThemeChange(handler: (theme: AppTheme) => void): Disposable`**
+
+Subscribes to theme changes.
+
+```javascript
+ctx.app.onThemeChange(theme => {
+  updateChartColors(theme.resolvedMode);
+});
+```
+
+---
+## 7. Shared Modules (window.__OXIDE__)
+
+OxideTerm exposes several core library instances through `window.__OXIDE__` for plugins to share. Using the host's instances ensures React hooks work correctly and avoids duplicate library loading.
+
+### 7.1 Available Modules
+
+```typescript
+declare const window: Window & {
+  __OXIDE__: {
+    React: typeof import('react');
+    ReactDOM: typeof import('react-dom');
+    zustand: typeof import('zustand');
+    lucideIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>>;
+  };
+};
+```
+
+### 7.2 React & ReactDOM
+
+```javascript
+const { React, ReactDOM } = window.__OXIDE__;
+const { useState, useEffect, useRef, useMemo, useCallback, createElement } = React;
+
+// Class component (not recommended, but works)
+// Function component with hooks
+function MyComponent({ data }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // Side effects
+    return () => { /* cleanup */ };
+  }, [data]);
+
+  return createElement('div', null,
+    createElement('span', null, `Count: ${count}`),
+    createElement('button', { onClick: () => setCount(c => c + 1) }, '+')
+  );
+}
+```
+
+:::caution[Important]
+You **must** use `window.__OXIDE__.React` — do NOT `import React from 'react'`. Importing creates a separate React instance, breaking hooks (you'll get `Invalid hook call` errors).
+:::
+
+If using JSX (requires a build step), configure your bundler to use the shared React instance:
+
+```javascript
+// esbuild config
+esbuild.build({
+  entryPoints: ['src/main.tsx'],
+  bundle: true,
+  format: 'esm',
+  inject: ['./shims/react-shim.js'], // see below
+});
+```
+
+```javascript
+// shims/react-shim.js
+import * as React from 'react';
+export { React };
+// At bundle time, replace react with window.__OXIDE__.React
+```
+
+Or use the `jsxFactory` option:
+```javascript
+// At the top of each .jsx/.tsx file:
+/* @jsxRuntime classic */
+/* @jsxImportSource ... */
+// Then configure to use __OXIDE__.React.createElement
+```
+
+In practice, the most common approach for OxideTerm plugins is to use `createElement` directly without JSX (no build step needed):
+
+```javascript
+const { React } = window.__OXIDE__;
+const { createElement: h, useState, useEffect } = React;
+
+function Dashboard({ tabId }) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetchData().then(setData);
+  }, []);
+
+  return h('div', { className: 'p-4 space-y-4' },
+    h('h2', { className: 'text-lg font-semibold' }, 'Dashboard'),
+    data ? h(DataTable, { data }) : h('p', null, 'Loading...')
+  );
+}
+```
+
+### 7.3 Zustand
+
+Shared state management via Zustand. Plugins can create their own stores:
+
+```javascript
+const { zustand } = window.__OXIDE__;
+const { create } = zustand;
+
+// Create a plugin-specific store
+const usePluginStore = create((set, get) => ({
+  items: [],
+  loading: false,
+
+  fetchItems: async (sessionId) => {
+    set({ loading: true });
+    try {
+      const items = await ctx.sftp.listDir(sessionId, '/data');
+      set({ items, loading: false });
+    } catch (err) {
+      set({ loading: false });
+    }
+  },
+
+  clearItems: () => set({ items: [] }),
+}));
+
+// Use in components
+function FileList({ sessionId }) {
+  const { React } = window.__OXIDE__;
+  const { items, loading, fetchItems } = usePluginStore();
+
+  React.useEffect(() => {
+    fetchItems(sessionId);
+  }, [sessionId]);
+
+  if (loading) return React.createElement('p', null, 'Loading...');
+  return React.createElement('ul', null,
+    items.map(item =>
+      React.createElement('li', { key: item.path }, item.name)
+    )
+  );
+}
+```
+
+### 7.4 Lucide Icons
+
+A subset of [Lucide React](https://lucide.dev/) icons is exposed via `window.__OXIDE__.lucideIcons`. The full Lucide icon set is available.
+
+```javascript
+const { lucideIcons, React } = window.__OXIDE__;
+const { createElement: h } = React;
+
+const { Server, Activity, Settings, AlertCircle } = lucideIcons;
+
+function StatusIcon({ connected }) {
+  return h(connected ? Activity : AlertCircle, {
+    size: 16,
+    className: connected ? 'text-green-500' : 'text-red-500',
+  });
+}
+```
+
+Icon naming: PascalCase (e.g. `Server`, `LayoutDashboard`, `GitBranch`). Check https://lucide.dev/icons/ for the full list.
+
+### 7.5 UI Kit Overview
+
+OxideTerm exposes a UI component kit via `window.__OXIDE__` to help plugins build interfaces with a native OxideTerm look and feel. The UI Kit provides 24 pre-styled components that automatically follow the current theme (light/dark/accent color).
+
+| Component | Description |
+|-----------|-------------|
+| `Button` | Styled button (variant, size) |
+| `Badge` | Status badge/tag |
+| `Input` | Text input field |
+| `Textarea` | Multi-line text input |
+| `Select` | Dropdown selector |
+| `Checkbox` | Checkbox with label |
+| `Switch` | Toggle switch |
+| `Slider` | Range slider |
+| `Label` | Form label |
+| `Card`, `CardHeader`, `CardContent`, `CardFooter` | Card layout |
+| `ScrollArea` | Custom scrollable area |
+| `Tooltip`, `TooltipProvider`, `TooltipTrigger`, `TooltipContent` | Tooltip |
+| `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter` | Modal dialog |
+| `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuSeparator` | Dropdown menu |
+| `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` | Tab navigation |
+| `Separator` | Visual divider |
+| `Progress` | Progress bar |
+| `Skeleton` | Loading placeholder |
+| `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` | Data table |
+| `Alert`, `AlertTitle`, `AlertDescription` | Alert box |
+| `Avatar`, `AvatarImage`, `AvatarFallback` | User avatar |
+| `HoverCard`, `HoverCardTrigger`, `HoverCardContent` | Hover card |
+
+```javascript
+const {
+  Button, Card, CardHeader, CardContent, CardFooter,
+  Badge, Input, Table, TableBody, TableRow, TableCell,
+} = window.__OXIDE__;
+```
+
+For detailed component usage, see Section 8.
+
+---
+
+## 8. UI Component Development
+
+### 8.1 Building a Tab View
+
+A Tab View is a full-screen panel component rendered within the OxideTerm main area.
+
+```javascript
+const { React } = window.__OXIDE__;
+const { useState, useEffect } = React;
+const {
+  Card, CardHeader, CardContent,
+  Button, Badge, Table, TableBody, TableRow, TableCell, TableHead, TableHeader,
+  ScrollArea, Input,
+} = window.__OXIDE__;
+
+function DashboardTab({ tabId, pluginId }) {
+  const [connections, setConnections] = useState([]);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    // ctx is captured from activate() closure
+    setConnections(ctx.connections.getAll());
+    const sub = ctx.connections.onChanged(setConnections);
+    return () => sub.dispose();
+  }, []);
+
+  const filtered = connections.filter(c =>
+    c.label.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return React.createElement('div', { className: 'h-full flex flex-col p-4 gap-4' },
+    React.createElement('div', { className: 'flex items-center gap-2' },
+      React.createElement(Input, {
+        placeholder: 'Search connections...',
+        value: search,
+        onChange: e => setSearch(e.target.value),
+        className: 'max-w-xs',
+      }),
+      React.createElement(Badge, { variant: 'secondary' }, `${filtered.length} connections`),
+    ),
+    React.createElement(ScrollArea, { className: 'flex-1' },
+      React.createElement(Table, null,
+        React.createElement(TableHeader, null,
+          React.createElement(TableRow, null,
+            React.createElement(TableHead, null, 'Name'),
+            React.createElement(TableHead, null, 'Host'),
+            React.createElement(TableHead, null, 'Status'),
+            React.createElement(TableHead, null, 'Actions'),
+          )
+        ),
+        React.createElement(TableBody, null,
+          filtered.map(conn =>
+            React.createElement(TableRow, { key: conn.nodeId },
+              React.createElement(TableCell, null, conn.label),
+              React.createElement(TableCell, null, ctx.connections.formatAddress(conn)),
+              React.createElement(TableCell, null,
+                React.createElement(Badge, {
+                  variant: conn.state === 'active' ? 'default' : 'secondary',
+                }, conn.state)
+              ),
+              React.createElement(TableCell, null,
+                React.createElement(Button, {
+                  size: 'sm',
+                  variant: 'ghost',
+                  onClick: () => handleAction(conn),
+                }, 'Details')
+              ),
+            )
+          )
+        )
+      )
+    )
+  );
+}
+```
+
+### 8.2 Building a Sidebar Panel
+
+A Sidebar Panel is a compact component displayed in the sidebar.
+
+```javascript
+function QuickInfoPanel({ panelId, pluginId, isActive }) {
+  const { React } = window.__OXIDE__;
+  const { useState, useEffect } = React;
+  const { Card, CardContent, Badge, Separator } = window.__OXIDE__;
+
+  const [stats, setStats] = useState({ active: 0, total: 0 });
+
+  useEffect(() => {
+    if (!isActive) return; // Don't poll when hidden
+
+    const update = () => {
+      const conns = ctx.connections.getAll();
+      setStats({
+        active: conns.filter(c => c.state === 'active').length,
+        total: conns.length,
+      });
+    };
+
+    update();
+    const sub = ctx.connections.onChanged(update);
+    return () => sub.dispose();
+  }, [isActive]);
+
+  return React.createElement(Card, { className: 'mx-2 my-1' },
+    React.createElement(CardContent, { className: 'p-3 space-y-2' },
+      React.createElement('div', { className: 'flex justify-between items-center' },
+        React.createElement('span', { className: 'text-xs text-muted-foreground' }, 'Connections'),
+        React.createElement(Badge, { variant: 'outline' }, `${stats.active}/${stats.total}`),
+      ),
+      React.createElement(Separator, null),
+      React.createElement('p', { className: 'text-xs text-muted-foreground' },
+        `${stats.active} active session${stats.active !== 1 ? 's' : ''}`
+      ),
+    )
+  );
+}
+```
+
+### 8.3 UI Kit Component Reference
+
+#### Button
+
+```javascript
+const { Button } = window.__OXIDE__;
+
+// Variants: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link'
+// Sizes: 'default' | 'sm' | 'lg' | 'icon'
+
+React.createElement(Button, { onClick: handleClick }, 'Click me')
+React.createElement(Button, { variant: 'outline', size: 'sm', disabled: true }, 'Disabled')
+React.createElement(Button, { variant: 'destructive', size: 'icon' },
+  React.createElement(TrashIcon, { size: 16 })
+)
+```
+
+#### Badge
+
+```javascript
+const { Badge } = window.__OXIDE__;
+// variant: 'default' | 'secondary' | 'outline' | 'destructive'
+
+React.createElement(Badge, { variant: 'default' }, 'Active')
+React.createElement(Badge, { variant: 'secondary' }, '42 items')
+```
+
+#### Input & Textarea
+
+```javascript
+const { Input, Textarea } = window.__OXIDE__;
+
+React.createElement(Input, {
+  type: 'text',
+  placeholder: 'Enter value...',
+  value: inputValue,
+  onChange: e => setInputValue(e.target.value),
+  className: 'w-full',
+})
+
+React.createElement(Textarea, {
+  placeholder: 'Multi-line input...',
+  rows: 4,
+  value: textValue,
+  onChange: e => setTextValue(e.target.value),
+})
+```
+
+#### Select
+
+```javascript
+const { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } = window.__OXIDE__;
+
+React.createElement(Select, { value: selected, onValueChange: setSelected },
+  React.createElement(SelectTrigger, { className: 'w-40' },
+    React.createElement(SelectValue, { placeholder: 'Choose...' })
+  ),
+  React.createElement(SelectContent, null,
+    React.createElement(SelectItem, { value: 'option1' }, 'Option 1'),
+    React.createElement(SelectItem, { value: 'option2' }, 'Option 2'),
+  )
+)
+```
+
+#### Card
+
+```javascript
+const { Card, CardHeader, CardContent, CardFooter } = window.__OXIDE__;
+
+React.createElement(Card, { className: 'w-full' },
+  React.createElement(CardHeader, null,
+    React.createElement('h3', { className: 'font-semibold' }, 'Card Title')
+  ),
+  React.createElement(CardContent, null,
+    React.createElement('p', { className: 'text-muted-foreground' }, 'Card content')
+  ),
+  React.createElement(CardFooter, { className: 'justify-end gap-2' },
+    React.createElement(Button, { variant: 'outline' }, 'Cancel'),
+    React.createElement(Button, null, 'Confirm'),
+  )
+)
+```
+
+#### Dialog
+
+```javascript
+const {
+  Dialog, DialogTrigger, DialogContent,
+  DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} = window.__OXIDE__;
+
+React.createElement(Dialog, { open: isOpen, onOpenChange: setIsOpen },
+  React.createElement(DialogTrigger, { asChild: true },
+    React.createElement(Button, null, 'Open Dialog')
+  ),
+  React.createElement(DialogContent, { className: 'max-w-md' },
+    React.createElement(DialogHeader, null,
+      React.createElement(DialogTitle, null, 'Confirm Action'),
+      React.createElement(DialogDescription, null, 'This action cannot be undone.')
+    ),
+    React.createElement('p', { className: 'py-4' }, 'Are you sure?'),
+    React.createElement(DialogFooter, null,
+      React.createElement(Button, { variant: 'outline', onClick: () => setIsOpen(false) }, 'Cancel'),
+      React.createElement(Button, { variant: 'destructive', onClick: confirmAction }, 'Delete'),
+    )
+  )
+)
+```
+
+#### Progress & Skeleton
+
+```javascript
+const { Progress, Skeleton } = window.__OXIDE__;
+
+// Progress bar (0-100)
+React.createElement(Progress, { value: 65, className: 'w-full' })
+
+// Loading skeleton
+React.createElement('div', { className: 'space-y-2' },
+  React.createElement(Skeleton, { className: 'h-4 w-full' }),
+  React.createElement(Skeleton, { className: 'h-4 w-3/4' }),
+  React.createElement(Skeleton, { className: 'h-4 w-1/2' }),
+)
+```
+
+#### Alert
+
+```javascript
+const { Alert, AlertTitle, AlertDescription } = window.__OXIDE__;
+
+React.createElement(Alert, { variant: 'destructive' },
+  React.createElement(AlertTitle, null, 'Error'),
+  React.createElement(AlertDescription, null, 'Something went wrong.')
+)
+```
+
+#### Tooltip
+
+```javascript
+const { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } = window.__OXIDE__;
+
+React.createElement(TooltipProvider, null,
+  React.createElement(Tooltip, null,
+    React.createElement(TooltipTrigger, { asChild: true },
+      React.createElement(Button, { size: 'icon', variant: 'ghost' },
+        React.createElement(InfoIcon, { size: 16 })
+      )
+    ),
+    React.createElement(TooltipContent, null,
+      React.createElement('p', null, 'Helpful tooltip text')
+    )
+  )
+)
+```
+
+#### DropdownMenu
+
+```javascript
+const {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuSeparator,
+} = window.__OXIDE__;
+
+React.createElement(DropdownMenu, null,
+  React.createElement(DropdownMenuTrigger, { asChild: true },
+    React.createElement(Button, { variant: 'outline' }, 'Actions')
+  ),
+  React.createElement(DropdownMenuContent, { align: 'end' },
+    React.createElement(DropdownMenuItem, { onClick: handleEdit }, 'Edit'),
+    React.createElement(DropdownMenuItem, { onClick: handleCopy }, 'Copy'),
+    React.createElement(DropdownMenuSeparator, null),
+    React.createElement(DropdownMenuItem, {
+      onClick: handleDelete,
+      className: 'text-destructive',
+    }, 'Delete'),
+  )
+)
+```
+
+### 8.4 Theme CSS Variables
+
+All UI Kit components use CSS custom properties from OxideTerm's theme. You can use these in your own CSS:
+
+```css
+/* Background colors */
+--background          /* Page background */
+--foreground          /* Primary text */
+--card                /* Card background */
+--card-foreground     /* Card text */
+--muted               /* Subtle background */
+--muted-foreground    /* Subtle text */
+
+/* Interactive elements */
+--primary             /* Primary action color */
+--primary-foreground  /* Text on primary */
+--secondary           /* Secondary color */
+--secondary-foreground
+--accent              /* Accent color */
+--accent-foreground
+
+/* Status */
+--destructive         /* Error/delete */
+--destructive-foreground
+
+/* Borders and inputs */
+--border              /* Default border */
+--input               /* Input border */
+--ring                /* Focus ring */
+
+/* Border radius */
+--radius              /* Base border radius (e.g. 0.5rem) */
+```
+
+Use in Tailwind classes by referencing CSS variables:
+```javascript
+// These Tailwind classes map to the CSS variables above:
+'bg-background text-foreground'
+'bg-card border border-border rounded-[var(--radius)]'
+'text-muted-foreground'
+'bg-primary text-primary-foreground'
+'bg-destructive text-destructive-foreground'
+```
+
+### 8.5 Inter-Component Communication
+
+Plugins can use Zustand stores or React context to share state between Tab and Sidebar panel components:
+
+```javascript
+// Create a shared store in activate() and capture in component closures
+const { zustand } = window.__OXIDE__;
+const useSharedStore = zustand.create(set => ({
+  selectedNode: null,
+  setSelectedNode: node => set({ selectedNode: node }),
+}));
+
+// Both Tab and Sidebar panels can use the same store
+function DashboardTab(props) {
+  const { selectedNode, setSelectedNode } = useSharedStore();
+  // ...
+}
+
+function QuickInfoPanel(props) {
+  const { selectedNode } = useSharedStore();
+  // ...
+}
+```
+
+---
+
+## 9. Terminal Hooks
+
+Terminal hooks allow plugins to intercept and transform terminal I/O. All hooks are **called synchronously** and must complete within the **5ms time budget**.
+
+### 9.1 Input Interceptor Chain
+
+When the user types, the input flows:
+
+```
+User keystroke
+  → xterm.js input event
+    → OxideTerm input pipeline
+      → Plugin Input Interceptors (chained, in registration order)
+        → WebSocket binary frame
+          → Remote SSH session
+```
+
+If any interceptor returns an empty string `""`, the input is **blocked** (not sent to the server). If an interceptor returns a non-empty string, the modified value is passed to the next interceptor.
+
+**Example: Input logger and filter**
+
+```javascript
+ctx.terminal.registerInputInterceptor((input, sessionId) => {
+  // Log all inputs (decoded for readability)
+  const printable = input.replace(/[^\x20-\x7e]/g, '·');
+  ctx.eventLog.append('info', 'Input', { raw: printable, sessionId });
+
+  // Block Ctrl+Z (potential shell suspend)
+  if (input === '\x1a') {
+    ctx.ui.showToast({ title: 'Ctrl+Z blocked by plugin', variant: 'warning' });
+    return ''; // Block
+  }
+
+  return input; // Pass through
+});
+```
+
+**Example: Command injection on Enter**
+
+```javascript
+let pendingAnnotation = '';
+
+ctx.terminal.registerInputInterceptor((input, sessionId) => {
+  if (input === '\r' && pendingAnnotation) {
+    const annotated = ` # ${pendingAnnotation}`;
+    pendingAnnotation = '';
+    return input + annotated; // Append annotation before submitting
+  }
+  return input;
+});
+```
+
+### 9.2 Output Processor Chain
+
+Server output flows:
+
+```
+SSH session output
+  → WebSocket binary frame
+    → OxideTerm output pipeline
+      → Plugin Output Processors (chained, in registration order)
+        → xterm.js rendering
+          → Terminal display
+```
+
+**Example: Highlight error keywords**
+
+```javascript
+ctx.terminal.registerOutputProcessor((output, sessionId) => {
+  // Add ANSI red color to lines containing "ERROR" or "FATAL"
+  return output.replace(
+    /(ERROR|FATAL|CRITICAL)/g,
+    '\x1b[31m$1\x1b[0m'
+  );
+});
+```
+
+**Example: Sensitive data scrubbing**
+
+```javascript
+ctx.terminal.registerOutputProcessor((output, sessionId) => {
+  // Redact AWS credentials in output
+  return output
+    .replace(/AKIA[0-9A-Z]{16}/g, '[AWS_KEY_REDACTED]')
+    .replace(/(?<=aws_secret_access_key\s*=\s*)[^\s]+/gi, '[SECRET_REDACTED]');
+});
+```
+
+### 9.3 Keyboard Shortcuts
+
+Plugins can register custom keyboard shortcuts that are active when the terminal has focus.
+
+```javascript
+// In plugin.json:
+// "terminalHooks": {
+//   "shortcuts": [
+//     { "key": "ctrl+shift+d", "command": "openDashboard" },
+//     { "key": "ctrl+shift+s", "command": "saveSession" }
+//   ]
+// }
+
+export function activate(ctx) {
+  ctx.terminal.registerShortcut('openDashboard', (sessionId) => {
+    ctx.ui.openTab('dashboard');
+    return true; // Consume event
+  });
+
+  ctx.terminal.registerShortcut('saveSession', async (sessionId) => {
+    const buffer = ctx.terminal.getTerminalBuffer(sessionId);
+    ctx.storage.set(`buffer:${sessionId}:${Date.now()}`, buffer);
+    ctx.ui.showToast({ title: 'Session buffer saved', variant: 'success' });
+    return true;
+  });
+}
+```
+
+### 9.4 Performance Budget & Circuit Breaker
+
+Each terminal hook invocation has a **5ms time budget**. Exceeding this threshold triggers a timeout warning. After 10 errors (including timeouts) within 60 seconds, the circuit breaker **disables the plugin** to protect terminal performance.
+
+```javascript
+// ❌ BAD: expensive operation in hook
+ctx.terminal.registerOutputProcessor((output) => {
+  // This regex runs on every output chunk — may be slow for large outputs
+  return output.replace(/complex-regex-with-backreference/g, replacement);
+});
+
+// ✓ GOOD: cache compiled regex, short-circuit on no match
+const sensitivePattern = /\b(password|secret|token)\s*[:=]\s*\S+/gi;
+ctx.terminal.registerOutputProcessor((output) => {
+  if (!output.includes('password') && !output.includes('secret') && !output.includes('token')) {
+    return output; // Fast path: most output won't match
+  }
+  return output.replace(sensitivePattern, (m, key) => `${key}=[REDACTED]`);
+});
+```
+
+**Best practices for hook performance**:
+
+1. **Short-circuit early** — return `input`/`output` early if no processing is needed
+2. **Pre-compile regex** — don't use `new RegExp(...)` inside the hook
+3. **Avoid async** — hooks are synchronous; never `await` inside them
+4. **Minimize allocations** — avoid creating heavy objects or arrays on every call
+5. **Use `ctx.profiler`** — measure your hook's actual performance in development
+
+---
+
+## 10. Connection Events System
+
+### 10.1 Lifecycle Events
+
+The complete list of subscribable connection events:
+
+```javascript
+// Connection enters 'active' state
+ctx.events.onConnect(conn => { /* ... */ });
+
+// Connection severed (any reason: disconnect, error, idle timeout)
+ctx.events.onDisconnect(conn => { /* ... */ });
+
+// Previously dropped connection reconnects successfully
+ctx.events.onReconnect(conn => { /* ... */ });
+
+// Network link drops (connection enters reconnecting/grace_period state)
+ctx.events.onLinkDown(conn => { /* ... */ });
+```
+
+### 10.2 Session Events (via ctx.sessions)
+
+```javascript
+// Subscribe to session list changes (more granular than connection events)
+ctx.sessions.subscribe(sessions => {
+  const activeSessions = sessions.filter(s => s.status === 'active');
+  console.log('Active sessions:', activeSessions.length);
+});
+```
+
+### 10.3 Event Sequencing
+
+On a normal connect → use → disconnect cycle:
+
+```
+onConnect fires
+  → User works normally
+    → (optional) onLinkDown fires if network drops
+      → (optional) onReconnect fires when connection restored
+        → onDisconnect fires when user closes connection
+```
+
+During reconnect with Grace Period (v1.11.1+):
+
+```
+Link drop detected
+  → onLinkDown fires (state = 'grace_period')
+    → System probes old connection for 30s
+      → If probe succeeds: no visible change for user (transparent recovery)
+      → If probe fails: destructive reconnect begins
+        → onReconnect fires on success
+        → onDisconnect fires on final failure
+```
+
+### 10.4 Inter-Plugin Communication
+
+Plugins can communicate with each other using a shared event bus pattern through storage or via custom events:
+
+```javascript
+// Plugin A: publish a message via Broadcast Channel
+const channel = new BroadcastChannel('oxideterm-plugin');
+channel.postMessage({ from: ctx.pluginId, type: 'data-update', payload: data });
+
+// Plugin B: subscribe
+const channel = new BroadcastChannel('oxideterm-plugin');
+channel.onmessage = (event) => {
+  const { from, type, payload } = event.data;
+  if (type === 'data-update') {
+    handleUpdate(payload);
+  }
+};
+```
+
+:::tip[Tip]
+Since all plugins run in the same JS context, they can also communicate via `window` properties or `CustomEvent`. However, the `BroadcastChannel` approach is cleanest for loose coupling.
+:::
+
+### 10.5 Transfer Events (v3)
+
+Monitor file transfer progress:
+
+```javascript
+ctx.transfers.subscribe(transfers => {
+  transfers.forEach(t => {
+    if (t.status === 'transferring') {
+      const pct = t.total_bytes ? Math.round(t.transferred_bytes / t.total_bytes * 100) : 0;
+      console.log(`${t.direction}: ${t.local_path} — ${pct}%`);
+    }
+  });
+});
+```
+
+---
+## 11. Internationalization (i18n)
+
+### 11.1 Setting Up Locales
+
+Declare the locales directory in `plugin.json`:
+
+```json
+{
+  "locales": "./locales"
+}
+```
+
+Create one JSON file per supported language in `./locales/`:
+
+```
+locales/
+  en.json          # English (required — serves as fallback)
+  zh-CN.json       # Simplified Chinese
+  zh-TW.json       # Traditional Chinese
+  ja.json          # Japanese
+  ko.json          # Korean
+  fr.json          # French
+  de.json          # German
+  es.json          # Spanish
+  it.json          # Italian
+  pt-BR.json       # Brazilian Portuguese
+  vi.json          # Vietnamese
+```
+
+### 11.2 Translation File Format
+
+Each file is a flat JSON object with string key-value pairs. Interpolation uses `{{variable}}` placeholders.
+
+```json
+{
+  "greeting": "Hello, {{name}}!",
+  "connectionCount": "{{count}} active connections",
+  "noConnections": "No active connections",
+  "confirmDelete": "Delete {{name}}?",
+  "settings.title": "Plugin Settings",
+  "settings.theme": "Theme",
+  "errors.loadFailed": "Failed to load data: {{error}}"
+}
+```
+
+### 11.3 Using Translations
+
+```javascript
+export function activate(ctx) {
+  // Simple key
+  const greeting = ctx.i18n.t('greeting');
+
+  // With interpolation
+  const msg = ctx.i18n.t('connectionCount', { count: '5' });
+
+  // In components
+  function MyComponent() {
+    const { React } = window.__OXIDE__;
+
+    return React.createElement('div', null,
+      React.createElement('h2', null, ctx.i18n.t('settings.title')),
+      React.createElement('p', null, ctx.i18n.t('greeting', { name: 'User' })),
+    );
+  }
+}
+```
+
+:::tip[Tip]
+`ctx.i18n.t()` uses the OxideTerm UI's current language. If the key is not found in the current language, it falls back to `en.json`. If not found in English either, the raw key string is returned.
+:::
+
+### 11.4 Supported Languages
+
+| Code | Language |
+|------|----------|
+| `en` | English |
+| `zh-CN` | Simplified Chinese |
+| `zh-TW` | Traditional Chinese |
+| `ja` | Japanese |
+| `ko` | Korean |
+| `fr` | French |
+| `de` | German |
+| `es` | Spanish |
+| `it` | Italian |
+| `pt-BR` | Brazilian Portuguese |
+| `vi` | Vietnamese |
+
+Language file is matched by `getCurrentLanguage()` return value (e.g. `"zh-CN"`). If no file exists for the current language, falls back to `"en"`.
+
+### 11.5 Reacting to Language Changes
+
+```javascript
+// Update UI when user changes language in settings
+ctx.i18n.onLanguageChange((newLang) => {
+  // React components that use ctx.i18n.t() need to re-render
+  // The simplest way: use a zustand store or React state to trigger re-render
+  langStore.setState({ lang: newLang }); // triggers component re-render
+});
+```
+
+---
+
+## 12. Storage API
+
+### 12.1 Key-Value Storage
+
+The `ctx.storage` API provides persistent key-value storage for plugins. Data survives app restarts.
+
+```javascript
+// Store user preferences
+ctx.storage.set('preferences', {
+  autoRefresh: true,
+  refreshInterval: 30,
+  showOffline: false,
+});
+
+// Read stored preferences
+const prefs = ctx.storage.get('preferences') ?? {
+  autoRefresh: false,
+  refreshInterval: 60,
+  showOffline: true,
+};
+
+// Delete specific key
+ctx.storage.remove('tempCache');
+
+// Clear all plugin storage
+ctx.storage.clear();
+```
+
+### 12.2 Settings vs Storage
+
+| | `ctx.settings` | `ctx.storage` |
+|---|---|---|
+| **Purpose** | User-configurable settings (shown in Plugin Manager) | Plugin internal state (not shown to user) |
+| **Schema** | Declared in `contributes.settings` | Arbitrary keys |
+| **User access** | Viewable/editable in Plugin Manager | Hidden from user |
+| **Typical use** | Preferences, configuration | Cache, history, plugin state |
+
+### 12.3 Storage Best Practices
+
+```javascript
+// ✓ Store small serializable data
+ctx.storage.set('lastSyncTime', Date.now());
+ctx.storage.set('cachedConfig', { version: 2, data: parsedConfig });
+
+// ❌ Don't store large binary data (use file system for that)
+// ctx.storage.set('screenshot', buffer); // Could be MBs
+
+// ✓ Always provide defaults when reading
+const settings = ctx.storage.get('settings') ?? defaultSettings;
+
+// ✓ Batch related data into one key
+ctx.storage.set('sessionStats', {
+  totalConnections: 42,
+  totalBytes: 1024000,
+  lastConnectedAt: Date.now(),
+});
+```
+
+---
+
+## 13. Backend API Whitelist
+
+### 13.1 ctx.api.invoke() Usage
+
+`ctx.api.invoke()` allows calling Tauri backend commands. Commands must be declared in `contributes.apiCommands`.
+
+```javascript
+// plugin.json
+// "apiCommands": ["get_app_version", "get_system_info"]
+
+const version = await ctx.api.invoke('get_app_version');
+const sysInfo = await ctx.api.invoke('get_system_info');
+```
+
+### 13.2 Error Handling
+
+```javascript
+try {
+  const result = await ctx.api.invoke('list_connections');
+  processConnections(result);
+} catch (err) {
+  // OxideTerm errors use the OxideError format:
+  // { code: string, message: string, details?: unknown }
+  ctx.eventLog.append('error', 'API call failed', {
+    command: 'list_connections',
+    error: err.message,
+  });
+}
+```
+
+### 13.3 Common Patterns
+
+```javascript
+// Check connection health before heavy operations
+const health = await ctx.api.invoke('get_connection_health', {
+  node_id: nodeId,
+});
+if (health.status !== 'healthy') {
+  ctx.ui.showToast({ title: 'Connection unhealthy', variant: 'warning' });
+  return;
+}
+
+// Get detailed session info
+const sessionInfo = await ctx.api.invoke('get_session_info', {
+  session_id: sessionId,
+});
+```
+
+---
+
+## 14. Circuit Breaker
+
+### 14.1 How It Works
+
+The circuit breaker monitors runtime errors per plugin. After **10 errors within 60 seconds**, it automatically disables the plugin to prevent performance degradation.
+
+```
+Error count within rolling 60s window
+  → < 10 errors: Normal operation
+  → ≥ 10 errors: Circuit breaker trips
+    → Plugin state set to 'disabled'
+    → Toast notification shown to user
+    → All plugin hooks deactivated
+    → Tab/panel components remain visible but hooks stop
+```
+
+### 14.2 What Counts as an Error
+
+- Terminal hook throwing an exception
+- Terminal hook timeout (> 5ms)
+- `activate()` throwing (not a circuit breaker event — fails load entirely)
+- Event handler throwing
+- API call failure in event handlers
+
+### 14.3 Avoiding Circuit Breaker Trips
+
+```javascript
+// ✓ Wrap hook logic in try/catch
+ctx.terminal.registerOutputProcessor((output, sessionId) => {
+  try {
+    return processOutput(output);
+  } catch (err) {
+    // Log but don't re-throw — re-throwing counts as a circuit breaker error
+    console.error('[plugin] Output processor error:', err);
+    return output; // Fall back to original
+  }
+});
+
+// ✓ Use early returns to minimize processing
+ctx.terminal.registerInputInterceptor((input, sessionId) => {
+  // Fast path: skip if not a special key
+  if (input.length > 10) return input;
+  // ... rest of processing
+  return input;
+});
+```
+
+### 14.4 Recovery
+
+After circuit breaker trips:
+1. User can manually re-enable from Plugin Manager
+2. On re-enable, the error counter is reset and the plugin reloads
+3. If the same errors occur, the circuit breaker trips again
+
+---
+
+## 15. Disposable Pattern
+
+### 15.1 Overview
+
+All API methods that register listeners, hooks, or components return a `Disposable` object:
+
+```typescript
+type Disposable = {
+  dispose(): void;
+};
+```
+
+Calling `.dispose()` unregisters the resource. This is the primary cleanup mechanism.
+
+### 15.2 Manual Disposal
+
+```javascript
+export function activate(ctx) {
+  const sub = ctx.connections.onChanged(handleConnectionChange);
+  const hook = ctx.terminal.registerOutputProcessor(processOutput);
+  const tab = ctx.ui.registerTabView('main', MainTab);
+
+  // Store disposables if you need to clean up early
+  window.__MY_PLUGIN_DISPOSABLES__ = [sub, hook, tab];
+}
+
+export function deactivate() {
+  // Manual disposal for resources not tracked by the system
+  // (Resources registered via ctx.* are auto-disposed — this is optional)
+  if (window.__MY_PLUGIN_DISPOSABLES__) {
+    window.__MY_PLUGIN_DISPOSABLES__.forEach(d => d.dispose());
+    delete window.__MY_PLUGIN_DISPOSABLES__;
+  }
+}
+```
+
+### 15.3 Auto-Disposal on Unload
+
+All resources registered through `ctx.*` are automatically disposed when the plugin is unloaded:
+- `ctx.connections.onChanged()` subscriptions
+- `ctx.events.on*()` subscriptions
+- `ctx.terminal.register*()` hooks
+- `ctx.ui.register*()` components
+- `ctx.settings.onChange()` subscriptions
+- `ctx.sessions.subscribe()` subscriptions
+- `ctx.transfers.subscribe()` subscriptions
+- `ctx.app.onThemeChange()` subscriptions
+- `ctx.i18n.onLanguageChange()` subscriptions
+
+### 15.4 Composing Disposables
+
+```javascript
+// Collect disposables for a feature group
+function setupConnectionMonitoring(ctx) {
+  const disposables = [];
+
+  disposables.push(ctx.events.onConnect(handleConnect));
+  disposables.push(ctx.events.onDisconnect(handleDisconnect));
+  disposables.push(ctx.events.onReconnect(handleReconnect));
+
+  // Return a single Disposable that cleans up all
+  return {
+    dispose() {
+      disposables.forEach(d => d.dispose());
+      disposables.length = 0;
+    }
+  };
+}
+
+export function activate(ctx) {
+  const monitorDisposable = setupConnectionMonitoring(ctx);
+  // monitorDisposable is auto-tracked since each internal disposable was registered through ctx
+}
+```
+
+---
+
+## 16. Complete Demo Plugin
+
+### 16.1 Directory Structure
+
+```
+~/.oxideterm/plugins/connection-monitor/
+├── plugin.json
+├── main.js
+└── locales/
+    ├── en.json
+    └── zh-CN.json
+```
+
+### 16.2 plugin.json
+
+```json
+{
+  "id": "connection-monitor",
+  "name": "Connection Monitor",
+  "version": "1.0.0",
+  "description": "Real-time monitoring dashboard for SSH connections",
+  "author": "Demo Author",
+  "main": "./main.js",
+  "engines": {
+    "oxideterm": ">=1.6.0"
+  },
+  "locales": "./locales",
+  "contributes": {
+    "tabs": [
+      {
+        "id": "monitor",
+        "title": "Connection Monitor",
+        "icon": "Activity"
+      }
+    ],
+    "sidebarPanels": [
+      {
+        "id": "summary",
+        "title": "Monitor Summary",
+        "icon": "BarChart2",
+        "position": "bottom"
+      }
+    ],
+    "settings": [
+      {
+        "id": "refreshInterval",
+        "type": "number",
+        "default": 5,
+        "title": "Refresh Interval (seconds)"
+      },
+      {
+        "id": "showOffline",
+        "type": "boolean",
+        "default": false,
+        "title": "Show offline connections"
+      }
+    ],
+    "terminalHooks": {
+      "shortcuts": [
+        { "key": "ctrl+shift+m", "command": "openMonitor" }
+      ]
+    }
+  }
+}
+```
+
+### 16.3 locales/en.json
+
+```json
+{
+  "title": "Connection Monitor",
+  "connections": "Connections",
+  "active": "Active",
+  "offline": "Offline",
+  "refreshInterval": "Refresh Interval",
+  "noConnections": "No connections found",
+  "host": "Host",
+  "status": "Status",
+  "connectedAt": "Connected At",
+  "forwards": "Forwards",
+  "actions": "Actions",
+  "openTerminal": "Open Terminal",
+  "summary.active": "{{count}} active",
+  "summary.total": "{{count}} total"
+}
+```
+
+### 16.4 main.js
+
+```javascript
+// Connection Monitor Plugin — main.js
+
+const { React } = window.__OXIDE__;
+const { useState, useEffect, useCallback } = React;
+const {
+  Card, CardHeader, CardContent,
+  Button, Badge, Table, TableBody, TableRow, TableCell, TableHead, TableHeader,
+  ScrollArea, Switch, Separator,
+} = window.__OXIDE__;
+
+// Captured in closure from activate()
+let pluginCtx;
+
+// ─── Tab Component ─────────────────────────────────────────────────────
+
+function MonitorTab({ tabId, pluginId }) {
+  const [connections, setConnections] = useState([]);
+  const [showOffline, setShowOffline] = useState(false);
+
+  useEffect(() => {
+    // Load initial settings
+    setShowOffline(pluginCtx.settings.get('showOffline', false));
+
+    // Subscribe to connection changes
+    const sub = pluginCtx.connections.onChanged(setConnections);
+    setConnections(pluginCtx.connections.getAll());
+
+    // Subscribe to settings changes
+    const settingsSub = pluginCtx.settings.onChange('showOffline', setShowOffline);
+
+    return () => {
+      sub.dispose();
+      settingsSub.dispose();
+    };
+  }, []);
+
+  const displayConns = showOffline
+    ? connections
+    : connections.filter(c => c.state !== 'disconnected');
+
+  return React.createElement('div', { className: 'h-full flex flex-col' },
+    // Header
+    React.createElement('div', { className: 'flex items-center justify-between p-4 border-b border-border' },
+      React.createElement('h2', { className: 'text-lg font-semibold text-foreground' },
+        pluginCtx.i18n.t('title')
+      ),
+      React.createElement('div', { className: 'flex items-center gap-3' },
+        React.createElement(Badge, { variant: 'secondary' },
+          `${connections.filter(c => c.state === 'active').length} ${pluginCtx.i18n.t('active')}`
+        ),
+        React.createElement('label', { className: 'flex items-center gap-2 text-sm text-muted-foreground cursor-pointer' },
+          React.createElement(Switch, {
+            checked: showOffline,
+            onCheckedChange: (v) => {
+              setShowOffline(v);
+              pluginCtx.settings.set('showOffline', v);
+            },
+          }),
+          pluginCtx.i18n.t('showOffline', {}),
+        ),
+      ),
+    ),
+
+    // Table
+    React.createElement(ScrollArea, { className: 'flex-1' },
+      displayConns.length === 0
+        ? React.createElement('div', { className: 'flex items-center justify-center h-32 text-muted-foreground' },
+            pluginCtx.i18n.t('noConnections')
+          )
+        : React.createElement(Table, null,
+            React.createElement(TableHeader, null,
+              React.createElement(TableRow, null,
+                React.createElement(TableHead, null, pluginCtx.i18n.t('host')),
+                React.createElement(TableHead, null, pluginCtx.i18n.t('status')),
+                React.createElement(TableHead, null, pluginCtx.i18n.t('forwards')),
+                React.createElement(TableHead, null, pluginCtx.i18n.t('actions')),
+              )
+            ),
+            React.createElement(TableBody, null,
+              displayConns.map(conn =>
+                React.createElement(TableRow, { key: conn.nodeId },
+                  React.createElement(TableCell, { className: 'font-medium' },
+                    React.createElement('div', null,
+                      React.createElement('div', null, conn.label),
+                      React.createElement('div', { className: 'text-xs text-muted-foreground' },
+                        pluginCtx.connections.formatAddress(conn)
+                      ),
+                    )
+                  ),
+                  React.createElement(TableCell, null,
+                    React.createElement(Badge, {
+                      variant: conn.state === 'active' ? 'default' : 'secondary',
+                    }, conn.state)
+                  ),
+                  React.createElement(TableCell, null,
+                    React.createElement(Badge, { variant: 'outline' },
+                      `${conn.forwardCount} ${pluginCtx.i18n.t('forwards')}`
+                    )
+                  ),
+                  React.createElement(TableCell, null,
+                    React.createElement(Button, {
+                      size: 'sm',
+                      variant: 'ghost',
+                      disabled: conn.state !== 'active',
+                      onClick: () => console.log('View details:', conn.nodeId),
+                    }, pluginCtx.i18n.t('actions'))
+                  ),
+                )
+              )
+            )
+          )
+    )
+  );
+}
+
+// ─── Sidebar Panel Component ────────────────────────────────────────────
+
+function SummaryPanel({ panelId, pluginId, isActive }) {
+  const [stats, setStats] = useState({ active: 0, total: 0 });
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    const update = () => {
+      const conns = pluginCtx.connections.getAll();
+      setStats({
+        active: conns.filter(c => c.state === 'active').length,
+        total: conns.length,
+      });
+    };
+
+    update();
+    const sub = pluginCtx.connections.onChanged(update);
+    return () => sub.dispose();
+  }, [isActive]);
+
+  return React.createElement('div', { className: 'p-2 space-y-1' },
+    React.createElement('div', { className: 'flex justify-between items-center text-xs' },
+      React.createElement('span', { className: 'text-muted-foreground' }, pluginCtx.i18n.t('active')),
+      React.createElement('span', { className: 'font-semibold text-foreground' }, stats.active),
+    ),
+    React.createElement('div', { className: 'flex justify-between items-center text-xs' },
+      React.createElement('span', { className: 'text-muted-foreground' }, pluginCtx.i18n.t('connections')),
+      React.createElement('span', { className: 'text-foreground' }, stats.total),
+    ),
+  );
+}
+
+// ─── Activate ──────────────────────────────────────────────────────────
+
+export function activate(ctx) {
+  pluginCtx = ctx;
+
+  // Register UI components
+  ctx.ui.registerTabView('monitor', MonitorTab);
+  ctx.ui.registerSidebarPanel('summary', SummaryPanel);
+
+  // Register shortcut
+  ctx.terminal.registerShortcut('openMonitor', (sessionId) => {
+    ctx.ui.openTab('monitor');
+    return true;
+  });
+
+  // Log activation
+  ctx.eventLog.append('info', 'Connection Monitor activated');
+  ctx.ui.showToast({
+    title: ctx.i18n.t('title'),
+    description: 'Plugin activated. Press Ctrl+Shift+M to open.',
+    variant: 'success',
+    duration: 3000,
+  });
+}
+
+export function deactivate() {
+  ctx.eventLog.append('info', 'Connection Monitor deactivated');
+  pluginCtx = null;
+}
+```
+
+---
+## 17. Best Practices
+
+### 17.1 Component Architecture
+
+```javascript
+// ✓ Capture ctx in activation, use via closure in components
+let ctx;
+
+function MyComponent() {
+  const conns = ctx.connections.getAll(); // Works
+}
+
+export function activate(_ctx) {
+  ctx = _ctx;
+  ctx.ui.registerTabView('main', MyComponent);
+}
+```
+
+```javascript
+// ✓ Use Zustand for shared state between tab and sidebar
+const { zustand } = window.__OXIDE__;
+const useStore = zustand.create(set => ({
+  selectedId: null,
+  select: id => set({ selectedId: id }),
+}));
+
+function Tab() {
+  const { selectedId, select } = useStore();
+  // ...
+}
+
+function Panel({ isActive }) {
+  const { selectedId } = useStore();
+  // ...
+}
+```
+
+### 17.2 Resource Cleanup
+
+```javascript
+// ✓ Return cleanup function from useEffect
+useEffect(() => {
+  const sub = ctx.connections.onChanged(setConnections);
+  return () => sub.dispose();
+}, []);
+
+// ✓ Only poll when component is visible
+useEffect(() => {
+  if (!isActive) return; // Sidebar panel not visible
+  const timer = setInterval(refresh, 5000);
+  return () => clearInterval(timer);
+}, [isActive]);
+```
+
+### 17.3 Error Handling
+
+```javascript
+// ✓ Always handle async errors
+async function loadData(sessionId) {
+  try {
+    const entries = await ctx.sftp.listDir(sessionId, '/data');
+    setEntries(entries);
+  } catch (err) {
+    ctx.eventLog.append('error', 'Failed to list directory', {
+      sessionId,
+      path: '/data',
+      error: err.message,
+    });
+    setError(err.message);
+  }
+}
+
+// ✓ Guard state changes on unmount
+useEffect(() => {
+  let mounted = true;
+  loadData(sessionId).then(data => {
+    if (mounted) setData(data);
+  });
+  return () => { mounted = false; };
+}, [sessionId]);
+```
+
+### 17.4 Performance Guidelines
+
+1. **Memoize expensive computations** with `useMemo`/`useCallback`
+2. **Debounce search inputs** — don't filter on every keystroke for large datasets
+3. **Virtualize long lists** — for >100 items, consider windowing
+4. **Short-circuit hooks early** — fast returns in terminal hooks
+5. **Don't fetch on every render** — use effects with dependencies
+6. **Batch storage operations** — group related keys into one `storage.set()` call
+
+### 17.5 Security Guidelines
+
+1. **Never store sensitive data** — don't store passwords, keys, or tokens in `ctx.storage`
+2. **Sanitize remote content** — terminal output rendered in HTML should be sanitized
+3. **Validate user input** — forms that accept paths or commands should validate input
+4. **Don't log sensitive data** — avoid logging auth tokens or credentials to `ctx.eventLog`
+5. **Minimal permissions** — only declare `apiCommands` you actually need
+6. **Use SFTP API for file ops** — don't try to access files via `ctx.api.invoke()` with raw paths
+
+---
+
+## 18. Debugging Tips
+
+### 18.1 DevTools
+
+Open OxideTerm DevTools (`Cmd+Shift+I` / `Ctrl+Shift+I`):
+- **Console tab**: See `console.log` / `console.error` output from your plugin
+- **Sources tab**: Inspect loaded modules (search for your plugin ID)
+- **Network tab**: Monitor API calls
+
+### 18.2 Plugin Log Viewer
+
+Each plugin in Plugin Manager has a built-in **Log Viewer** (📜 icon). This shows all `ctx.eventLog.append()` entries in real-time. No DevTools needed for production use.
+
+```javascript
+// Add detailed logging in development
+ctx.eventLog.append('info', 'activate() called', {
+  pluginId: ctx.pluginId,
+  version: '1.0.0',
+});
+
+ctx.eventLog.append('info', 'Connections loaded', {
+  count: connections.length,
+  active: connections.filter(c => c.state === 'active').length,
+});
+```
+
+### 18.3 Common Errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Invalid hook call` | Using a different React instance | Use `window.__OXIDE__.React`, not `import React` |
+| `Tab ID 'xxx' is not registered in manifest` | Missing declaration in `contributes.tabs` | Add tab ID to `plugin.json` |
+| `Command 'xxx' is not in the apiCommands whitelist` | Calling undeclared API command | Add command to `contributes.apiCommands` |
+| `activate() timed out after 5000ms` | Async activate() took too long | Check for hanging async operations |
+| `Plugin disabled by circuit breaker` | Too many errors in 60s | Fix throwing errors in hooks/handlers |
+| `Cannot use import statement` | Using ES module imports in v1 bundle | Bundle all imports, or switch to v2 package |
+| `Path traversal` | Using `..` in file paths | Only use relative paths within the plugin dir |
+
+### 18.4 Using ctx.profiler
+
+```javascript
+export async function activate(ctx) {
+  ctx.profiler.start('activation');
+
+  ctx.profiler.start('ui-setup');
+  ctx.ui.registerTabView('main', MainTab);
+  ctx.ui.registerSidebarPanel('summary', SummaryPanel);
+  ctx.profiler.stop('ui-setup');
+
+  ctx.profiler.start('data-fetch');
+  await preloadData(ctx);
+  ctx.profiler.stop('data-fetch');
+
+  ctx.profiler.stop('activation');
+
+  const report = ctx.profiler.getReport();
+  console.log('[Plugin] Activation profile:', report);
+  // { activation: { count: 1, totalMs: 45, avgMs: 45, minMs: 45, maxMs: 45 }, ... }
+}
+```
+
+### 18.5 Hot Reload Workflow
+
+1. Edit your `main.js` (or any plugin file)
+2. In Plugin Manager, click the **Reload** button (↺ icon) next to your plugin
+3. OxideTerm calls `deactivate()`, unloads, then re-reads all plugin files and calls `activate(ctx)` again
+4. Your changes are live — no app restart needed
+
+For v2 package plugins, the local HTTP server is restarted on reload to serve the latest file versions.
+
+---
+
+## 19. Frequently Asked Questions
+
+**Q: Can I use TypeScript?**
+
+A: Yes! Write TypeScript, compile to ESM using `tsc` or `esbuild`, and place the output `main.js` in your plugin directory. OxideTerm provides complete type definitions in `plugin-api.d.ts` (standalone file, no npm install needed):
+
+```bash
+# Copy plugin-api.d.ts to your development directory
+cp /Applications/OxideTerm.app/Contents/Resources/plugin-api.d.ts ./
+
+# Or reference it in tsconfig.json:
+# "typeRoots": ["./node_modules/@types", "./"]
+```
+
+See Section 20 for complete TypeScript types.
+
+---
+
+**Q: Can I import npm packages?**
+
+A: Yes, but you must bundle them. Plugins are loaded as single files (v1) or via a local HTTP server (v2). You can't use bare `import 'lodash'` — bundle it with esbuild:
+
+```bash
+# v1: bundle everything into one file
+esbuild src/main.ts --bundle --format=esm --outfile=main.js
+
+# v2: use package format, install deps locally
+npm install lodash
+# In main.js: import _ from './node_modules/lodash-es/lodash.js'
+```
+
+For React, ReactDOM, and Zustand, **always use `window.__OXIDE__`** — do NOT bundle them.
+
+---
+
+**Q: Can I use JSX?**
+
+A: Yes, with a build step. Configure esbuild to use the host's React:
+
+```javascript
+// src/shim.js (inject with esbuild --inject)
+import * as React from 'react';
+export { React };
+```
+
+Or use `h()` from `createElement` directly (no build step needed):
+
+```javascript
+const { createElement: h } = window.__OXIDE__.React;
+// h('div', { className: 'p-4' }, 'Hello')
+```
+
+---
+
+**Q: Can plugins communicate with each other?**
+
+A: Yes. Since all plugins run in the same JS context, you can:
+
+1. **BroadcastChannel** (recommended for loose coupling):
+
+```javascript
+// Publisher
+const ch = new BroadcastChannel('my-plugin-events');
+ch.postMessage({ type: 'update', data });
+
+// Subscriber (another plugin)
+const ch = new BroadcastChannel('my-plugin-events');
+ch.onmessage = e => handleEvent(e.data);
+```
+
+2. **window properties** (simple but tightly coupled):
+
+```javascript
+// Publisher plugin
+window.__MY_PLUGIN_API__ = { getData: () => data };
+
+// Subscriber plugin
+const api = window.__MY_PLUGIN_API__;
+if (api) api.getData();
+```
+
+---
+
+**Q: Can I publish my plugin to the OxideTerm registry?**
+
+A: Yes! The plugin registry is public. Submission requirements:
+- `plugin.json` with complete metadata (`name`, `version`, `description`, `author`, `repository`)
+- Source code hosted on GitHub/GitLab (open source)
+- No malware or obvious security issues (reviewed before listing)
+- Optional: `checksum` for SHA-256 integrity verification
+
+---
+
+**Q: How do I handle multiple sessions (multi-tab) in my plugin?**
+
+A: Use `ctx.connections.getAll()` to get all sessions, and track state per `nodeId`:
+
+```javascript
+const sessionData = new Map(); // nodeId → plugin-specific data
+
+ctx.events.onConnect(conn => {
+  sessionData.set(conn.nodeId, { connectedAt: Date.now() });
+});
+
+ctx.events.onDisconnect(conn => {
+  sessionData.delete(conn.nodeId);
+});
+```
+
+---
+
+**Q: Can plugins be loaded at login / app start?**
+
+A: Yes. All enabled plugins load automatically when OxideTerm starts. Disabled plugins (manual disable or circuit breaker) do not auto-load.
+
+---
+
+**Q: What happens if my plugin throws during activate()?**
+
+A: The load fails:
+- `state` is set to `'error'`
+- The error message is shown in Plugin Manager
+- A red error indicator is shown on the plugin row
+- The plugin is NOT auto-disabled (you can retry by clicking Reload)
+
+---
+
+**Q: Can I access the local file system?**
+
+A: Currently no direct local file system API is exposed to plugins. You can:
+- Access **remote** files via `ctx.sftp`
+- Store small data via `ctx.storage`
+- Ask the user to choose files via browser's File API (via file input elements)
+
+---
+
+**Q: Can I modify the OxideTerm UI beyond tabs and panels?**
+
+A: No — the plugin API only exposes explicit extension points (tabs, sidebar panels, terminal hooks). Directly manipulating host DOM outside these extension points is not supported and may break with updates.
+
+---
+
+**Q: How do file size limits work for plugins?**
+
+A: There are no hard limits on plugin file size, but very large plugins (>5MB) will show noticeably slower load times. For large data, use external APIs and cache results in `ctx.storage`.
+
+---
+
+**Q: Can I use WebSockets or fetch() in plugins?**
+
+A: Yes. Plugins run in the browser context (Tauri WebView) and have access to standard Web APIs including `fetch()`, `WebSocket`, `BroadcastChannel`, `IndexedDB`, etc. Note that OxideTerm's CSP is currently null, so web requests work without restriction.
+
+---
+
+**Q: How do I handle plugin updates while a session is active?**
+
+A: When a user updates a plugin via Plugin Manager:
+1. The old version's `deactivate()` is called
+2. Resources are cleaned up
+3. The new version is loaded and `activate()` is called
+4. Session connections are unaffected (they live in the Rust backend)
+5. Registered tabs re-mount with fresh component state
+
+If you have persistent state that should survive updates, save it to `ctx.storage` before `deactivate()` and restore it in `activate()`.
+
+---
+
+**Q: Is there a way to test plugins without a full OxideTerm install?**
+
+A: Not currently — there's no standalone mock environment. However:
+- Use `pnpm tauri dev` to run OxideTerm in dev mode with hot reload
+- Use `ctx.profiler` to benchmark performance
+- Run unit tests on pure logic functions outside the OxideTerm context
+
+---
+
+## 20. TypeScript Type Reference
+
+The `plugin-api.d.ts` file ships with OxideTerm and provides complete type definitions. Here are the core types:
+
+```typescript
+// ─── Core Context ──────────────────────────────────────────────────────
+
+export interface PluginContext {
+  /** The plugin's own ID (read-only) */
+  readonly pluginId: string;
+  readonly connections: ConnectionsAPI;
+  readonly events: EventsAPI;
+  readonly ui: UIAPI;
+  readonly terminal: TerminalAPI;
+  readonly settings: SettingsAPI;
+  readonly i18n: I18nAPI;
+  readonly storage: StorageAPI;
+  readonly api: BackendAPI;
+  readonly assets?: AssetsAPI;  // v2 packages only
+  readonly sftp: SftpAPI;
+  readonly forward: ForwardAPI;
+  // v3 APIs (OxideTerm >= 1.6.2)
+  readonly sessions: SessionsAPI;
+  readonly transfers: TransfersAPI;
+  readonly profiler: ProfilerAPI;
+  readonly eventLog: EventLogAPI;
+  readonly ide: IdeAPI;
+  readonly ai: AiAPI;
+  readonly app: AppAPI;
+}
+
+export type Disposable = {
+  dispose(): void;
+};
+
+// ─── Connection Types ───────────────────────────────────────────────────
+
+export type ConnectionState =
+  | 'idle'
+  | 'connecting'
+  | 'active'
+  | 'reconnecting'
+  | 'disconnected'
+  | 'error'
+  | 'grace_period';
+
+export type ConnectionSnapshot = {
+  nodeId: string;
+  sessionId: string | null;
+  label: string;
+  host: string;
+  port: number;
+  username: string;
+  state: ConnectionState;
+  connectedAt: number | null;
+  lastActivity: number | null;
+  forwardCount: number;
+  sftpActive: boolean;
+  tags: string[];
+};
+
+export interface ConnectionsAPI {
+  getAll(): ConnectionSnapshot[];
+  get(nodeId: string): ConnectionSnapshot | undefined;
+  refresh(): void;
+  formatAddress(conn: ConnectionSnapshot): string;
+  onChanged(handler: (connections: ConnectionSnapshot[]) => void): Disposable;
+}
+
+// ─── Events API ─────────────────────────────────────────────────────────
+
+export interface EventsAPI {
+  onConnect(handler: (conn: ConnectionSnapshot) => void): Disposable;
+  onDisconnect(handler: (conn: ConnectionSnapshot) => void): Disposable;
+  onReconnect(handler: (conn: ConnectionSnapshot) => void): Disposable;
+  onLinkDown(handler: (conn: ConnectionSnapshot) => void): Disposable;
+}
+
+// ─── UI API ─────────────────────────────────────────────────────────────
+
+export type TabViewProps = {
+  tabId: string;
+  pluginId: string;
+};
+
+export type SidebarPanelProps = {
+  panelId: string;
+  pluginId: string;
+  isActive: boolean;
+};
+
+export type ToastVariant = 'default' | 'success' | 'error' | 'warning';
+
+export type ToastOptions = {
+  title: string;
+  description?: string;
+  variant?: ToastVariant;
+  duration?: number;
+};
+
+export interface UIAPI {
+  registerTabView(
+    tabId: string,
+    component: React.ComponentType<TabViewProps>
+  ): Disposable;
+  registerSidebarPanel(
+    panelId: string,
+    component: React.ComponentType<SidebarPanelProps>
+  ): Disposable;
+  showToast(options: ToastOptions): void;
+  openTab(tabId: string): void;
+  closeTab(tabId: string): void;
+}
+
+// ─── Terminal API ────────────────────────────────────────────────────────
+
+export type TerminalInputInterceptor = (
+  input: string,
+  sessionId: string | null
+) => string | null | undefined;
+
+export type TerminalOutputProcessor = (
+  output: string,
+  sessionId: string | null
+) => string | null | undefined;
+
+export type TerminalShortcutHandler = (
+  sessionId: string | null
+) => boolean | void;
+
+export interface TerminalAPI {
+  registerInputInterceptor(fn: TerminalInputInterceptor): Disposable;
+  registerOutputProcessor(fn: TerminalOutputProcessor): Disposable;
+  registerShortcut(command: string, handler: TerminalShortcutHandler): Disposable;
+  getActiveSessionId(): string | null;
+  getTerminalBuffer(sessionId?: string): string;
+  writeToTerminal(data: string, sessionId?: string): void;
+  sendToSession(data: string, sessionId?: string): void;
+}
+
+// ─── Settings API ────────────────────────────────────────────────────────
+
+export interface SettingsAPI {
+  get<T>(key: string, defaultValue?: T): T;
+  set(key: string, value: unknown): void;
+  onChange(key: string, handler: (value: unknown) => void): Disposable;
+  getAll(): Record<string, unknown>;
+}
+
+// ─── i18n API ────────────────────────────────────────────────────────────
+
+export interface I18nAPI {
+  t(key: string, params?: Record<string, string>): string;
+  getCurrentLanguage(): string;
+  onLanguageChange(handler: (lang: string) => void): Disposable;
+}
+
+// ─── Storage API ─────────────────────────────────────────────────────────
+
+export interface StorageAPI {
+  get<T>(key: string): T | null;
+  set(key: string, value: unknown): void;
+  remove(key: string): void;
+  getAll(): Record<string, unknown>;
+  clear(): void;
+}
+
+// ─── Backend API ─────────────────────────────────────────────────────────
+
+export interface BackendAPI {
+  invoke<T>(command: string, args?: Record<string, unknown>): Promise<T>;
+}
+
+// ─── Assets API ──────────────────────────────────────────────────────────
+
+export interface AssetsAPI {
+  getAssetUrl(relativePath: string): Promise<string>;
+  loadCSS(relativePath: string): Promise<Disposable>;
+}
+
+// ─── SFTP API ────────────────────────────────────────────────────────────
+
+export type SftpEntry = {
+  name: string;
+  path: string;
+  size: number;
+  is_dir: boolean;
+  is_symlink: boolean;
+  modified: number | null;
+  permissions: number | null;
+};
+
+export interface SftpAPI {
+  listDir(sessionId: string, remotePath: string): Promise<SftpEntry[]>;
+  stat(sessionId: string, remotePath: string): Promise<SftpEntry>;
+  readFile(sessionId: string, remotePath: string): Promise<Uint8Array>;
+  writeFile(sessionId: string, remotePath: string, content: Uint8Array | string): Promise<void>;
+  mkdir(sessionId: string, remotePath: string): Promise<void>;
+  remove(sessionId: string, remotePath: string): Promise<void>;
+  rename(sessionId: string, oldPath: string, newPath: string): Promise<void>;
+  download(sessionId: string, remotePath: string, localPath: string): Promise<string>;
+  upload(sessionId: string, localPath: string, remotePath: string): Promise<string>;
+}
+
+// ─── Forward API ─────────────────────────────────────────────────────────
+
+export type ForwardDirection = 'local' | 'remote' | 'dynamic';
+export type ForwardStatus = 'active' | 'stopped' | 'error';
+
+export type PortForward = {
+  id: string;
+  session_id: string;
+  local_port: number;
+  remote_host: string;
+  remote_port: number;
+  direction: ForwardDirection;
+  status: ForwardStatus;
+  bytes_sent: number;
+  bytes_received: number;
+};
+
+export type CreateForwardOptions = {
+  local_port: number;
+  remote_host: string;
+  remote_port: number;
+  direction?: ForwardDirection;
+};
+
+export type ForwardStats = {
+  bytes_sent: number;
+  bytes_received: number;
+  active_connections: number;
+  uptime_seconds: number;
+};
+
+export interface ForwardAPI {
+  list(sessionId: string): Promise<PortForward[]>;
+  create(sessionId: string, options: CreateForwardOptions): Promise<PortForward>;
+  stop(forwardId: string): Promise<void>;
+  delete(forwardId: string): Promise<void>;
+  restart(forwardId: string): Promise<PortForward>;
+  getStats(forwardId: string): Promise<ForwardStats>;
+}
+
+// ─── Sessions API (v3) ───────────────────────────────────────────────────
+
+export type SessionStatus = 'active' | 'reconnecting' | 'disconnected';
+
+export type SessionInfo = {
+  id: string;
+  node_id: string;
+  host: string;
+  port: number;
+  username: string;
+  status: SessionStatus;
+  connected_at: number | null;
+  channel_count: number;
+};
+
+export interface SessionsAPI {
+  getAll(): SessionInfo[];
+  get(sessionId: string): SessionInfo | null;
+  subscribe(handler: (sessions: SessionInfo[]) => void): Disposable;
+}
+
+// ─── Transfers API (v3) ──────────────────────────────────────────────────
+
+export type TransferStatus =
+  | 'pending'
+  | 'transferring'
+  | 'paused'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
+export type TransferItem = {
+  id: string;
+  session_id: string;
+  direction: 'upload' | 'download';
+  local_path: string;
+  remote_path: string;
+  total_bytes: number;
+  transferred_bytes: number;
+  status: TransferStatus;
+  error: string | null;
+  started_at: number | null;
+  completed_at: number | null;
+};
+
+export interface TransfersAPI {
+  getAll(): TransferItem[];
+  subscribe(handler: (transfers: TransferItem[]) => void): Disposable;
+}
+
+// ─── Profiler API (v3) ───────────────────────────────────────────────────
+
+export type ProfileMetric = {
+  count: number;
+  totalMs: number;
+  avgMs: number;
+  minMs: number;
+  maxMs: number;
+};
+
+export type ProfileReport = Record<string, ProfileMetric>;
+
+export interface ProfilerAPI {
+  start(label: string): void;
+  stop(label: string): number;
+  getReport(): ProfileReport;
+  reset(): void;
+}
+
+// ─── EventLog API (v3) ───────────────────────────────────────────────────
+
+export type EventLogLevel = 'info' | 'warn' | 'error';
+
+export type EventLogEntry = {
+  id: string;
+  timestamp: number;
+  level: EventLogLevel;
+  message: string;
+  meta: Record<string, unknown>;
+};
+
+export type EventLogQueryOptions = {
+  level?: EventLogLevel;
+  limit?: number;
+  since?: number;
+};
+
+export interface EventLogAPI {
+  append(level: EventLogLevel, message: string, meta?: Record<string, unknown>): void;
+  query(options?: EventLogQueryOptions): EventLogEntry[];
+}
+
+// ─── IDE API (v3) ────────────────────────────────────────────────────────
+
+export type IdeFileInfo = {
+  session_id: string;
+  remote_path: string;
+  is_modified: boolean;
+  language: string;
+};
+
+export interface IdeAPI {
+  openFile(sessionId: string, remotePath: string): Promise<void>;
+  closeFile(sessionId: string, remotePath: string): Promise<void>;
+  getOpenFiles(): IdeFileInfo[];
+  onFileChange(handler: (file: IdeFileInfo) => void): Disposable;
+}
+
+// ─── AI API (v3) ─────────────────────────────────────────────────────────
+
+export type AiOptions = {
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+  systemPrompt?: string;
+};
+
+export interface AiAPI {
+  complete(prompt: string, options?: AiOptions): Promise<string>;
+  stream(
+    prompt: string,
+    onChunk: (chunk: string) => void,
+    options?: AiOptions
+  ): Promise<void>;
+}
+
+// ─── App API (v3) ────────────────────────────────────────────────────────
+
+export type AppTheme = {
+  mode: 'light' | 'dark' | 'system';
+  resolvedMode: 'light' | 'dark';
+  accentColor: string;
+};
+
+export interface AppAPI {
+  getVersion(): string;
+  getTheme(): AppTheme;
+  onThemeChange(handler: (theme: AppTheme) => void): Disposable;
+}
+
+// ─── window.__OXIDE__ ────────────────────────────────────────────────────
+
+export type LucideIconComponent = React.ComponentType<{
+  size?: number;
+  className?: string;
+  strokeWidth?: number;
+  color?: string;
+}>;
+
+declare global {
+  interface Window {
+    __OXIDE__: {
+      /** Host React instance — always use this, never import React directly */
+      React: typeof import('react');
+      /** Host ReactDOM instance */
+      ReactDOM: typeof import('react-dom');
+      /** Zustand state management */
+      zustand: typeof import('zustand');
+      /** Full Lucide icon set (PascalCase keys) */
+      lucideIcons: Record<string, LucideIconComponent>;
+
+      // ─── UI Kit Components ───────────────────────────────────────
+      Button: React.ComponentType<{
+        variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link';
+        size?: 'default' | 'sm' | 'lg' | 'icon';
+        disabled?: boolean;
+        onClick?: () => void;
+        className?: string;
+        asChild?: boolean;
+        children?: React.ReactNode;
+      }>;
+
+      Badge: React.ComponentType<{
+        variant?: 'default' | 'secondary' | 'outline' | 'destructive';
+        className?: string;
+        children?: React.ReactNode;
+      }>;
+
+      Input: React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>;
+      Textarea: React.ComponentType<React.TextareaHTMLAttributes<HTMLTextAreaElement>>;
+
+      Select: React.ComponentType<{
+        value?: string;
+        onValueChange?: (value: string) => void;
+        children?: React.ReactNode;
+      }>;
+      SelectTrigger: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      SelectContent: React.ComponentType<{ children?: React.ReactNode }>;
+      SelectItem: React.ComponentType<{ value: string; children?: React.ReactNode }>;
+      SelectValue: React.ComponentType<{ placeholder?: string }>;
+
+      Checkbox: React.ComponentType<{
+        checked?: boolean;
+        onCheckedChange?: (checked: boolean) => void;
+        id?: string;
+      }>;
+
+      Switch: React.ComponentType<{
+        checked?: boolean;
+        onCheckedChange?: (checked: boolean) => void;
+        disabled?: boolean;
+      }>;
+
+      Slider: React.ComponentType<{
+        value?: number[];
+        onValueChange?: (value: number[]) => void;
+        min?: number;
+        max?: number;
+        step?: number;
+        className?: string;
+      }>;
+
+      Label: React.ComponentType<React.LabelHTMLAttributes<HTMLLabelElement>>;
+
+      Card: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      CardHeader: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      CardContent: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      CardFooter: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+
+      ScrollArea: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      Separator: React.ComponentType<{ className?: string; orientation?: 'horizontal' | 'vertical' }>;
+      Progress: React.ComponentType<{ value?: number; className?: string }>;
+      Skeleton: React.ComponentType<{ className?: string }>;
+
+      Alert: React.ComponentType<{ variant?: 'default' | 'destructive'; className?: string; children?: React.ReactNode }>;
+      AlertTitle: React.ComponentType<{ children?: React.ReactNode }>;
+      AlertDescription: React.ComponentType<{ children?: React.ReactNode }>;
+
+      Tooltip: React.ComponentType<{ children?: React.ReactNode }>;
+      TooltipProvider: React.ComponentType<{ children?: React.ReactNode }>;
+      TooltipTrigger: React.ComponentType<{ asChild?: boolean; children?: React.ReactNode }>;
+      TooltipContent: React.ComponentType<{ children?: React.ReactNode }>;
+
+      Dialog: React.ComponentType<{ open?: boolean; onOpenChange?: (open: boolean) => void; children?: React.ReactNode }>;
+      DialogTrigger: React.ComponentType<{ asChild?: boolean; children?: React.ReactNode }>;
+      DialogContent: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      DialogHeader: React.ComponentType<{ children?: React.ReactNode }>;
+      DialogTitle: React.ComponentType<{ children?: React.ReactNode }>;
+      DialogDescription: React.ComponentType<{ children?: React.ReactNode }>;
+      DialogFooter: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+
+      DropdownMenu: React.ComponentType<{ children?: React.ReactNode }>;
+      DropdownMenuTrigger: React.ComponentType<{ asChild?: boolean; children?: React.ReactNode }>;
+      DropdownMenuContent: React.ComponentType<{ align?: 'start' | 'end' | 'center'; children?: React.ReactNode }>;
+      DropdownMenuItem: React.ComponentType<{ onClick?: () => void; className?: string; children?: React.ReactNode }>;
+      DropdownMenuSeparator: React.ComponentType<{}>;
+
+      Tabs: React.ComponentType<{ value?: string; onValueChange?: (v: string) => void; className?: string; children?: React.ReactNode }>;
+      TabsList: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      TabsTrigger: React.ComponentType<{ value: string; children?: React.ReactNode }>;
+      TabsContent: React.ComponentType<{ value: string; className?: string; children?: React.ReactNode }>;
+
+      Table: React.ComponentType<{ children?: React.ReactNode }>;
+      TableHeader: React.ComponentType<{ children?: React.ReactNode }>;
+      TableBody: React.ComponentType<{ children?: React.ReactNode }>;
+      TableRow: React.ComponentType<{ className?: string; children?: React.ReactNode; key?: string }>;
+      TableHead: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      TableCell: React.ComponentType<{ className?: string; children?: React.ReactNode; colSpan?: number }>;
+
+      Avatar: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+      AvatarImage: React.ComponentType<{ src?: string; alt?: string }>;
+      AvatarFallback: React.ComponentType<{ children?: React.ReactNode }>;
+
+      HoverCard: React.ComponentType<{ children?: React.ReactNode }>;
+      HoverCardTrigger: React.ComponentType<{ asChild?: boolean; children?: React.ReactNode }>;
+      HoverCardContent: React.ComponentType<{ className?: string; children?: React.ReactNode }>;
+    };
+  }
+}
+```
+
+---
+
+## Appendix A: plugin.json JSON Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OxideTerm Plugin Manifest",
+  "type": "object",
+  "required": ["id", "name", "version", "main"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9._-]+$",
+      "description": "Unique plugin identifier"
+    },
+    "name": { "type": "string", "description": "Human-readable name" },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+",
+      "description": "Semantic version"
+    },
+    "description": { "type": "string" },
+    "author": { "type": "string" },
+    "main": { "type": "string", "description": "Relative path to ESM entry (e.g. './main.js')" },
+    "engines": {
+      "type": "object",
+      "properties": {
+        "oxideterm": {
+          "type": "string",
+          "pattern": "^>=\\d+\\.\\d+\\.\\d+$",
+          "description": "Minimum OxideTerm version, e.g. '>=1.6.0'"
+        }
+      }
+    },
+    "manifestVersion": { "type": "integer", "enum": [1, 2], "default": 1 },
+    "format": { "type": "string", "enum": ["bundled", "package"], "default": "bundled" },
+    "assets": { "type": "string", "description": "Relative path to assets directory" },
+    "styles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "CSS files to auto-inject on plugin load"
+    },
+    "sharedDependencies": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Host-shared dependency version declarations"
+    },
+    "locales": { "type": "string", "description": "Relative path to locales directory" },
+    "repository": { "type": "string", "format": "uri" },
+    "checksum": { "type": "string", "description": "SHA-256 checksum of the main bundle" },
+    "contributes": {
+      "type": "object",
+      "properties": {
+        "tabs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "icon": { "type": "string", "description": "Lucide icon name (PascalCase)" }
+            }
+          }
+        },
+        "sidebarPanels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "icon": { "type": "string" },
+              "position": { "type": "string", "enum": ["top", "bottom"], "default": "bottom" }
+            }
+          }
+        },
+        "settings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "default", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["string", "number", "boolean", "select"] },
+              "default": {},
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["label", "value"],
+                  "properties": {
+                    "label": { "type": "string" },
+                    "value": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "terminalHooks": {
+          "type": "object",
+          "properties": {
+            "inputInterceptor": { "type": "boolean" },
+            "outputProcessor": { "type": "boolean" },
+            "shortcuts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["key", "command"],
+                "properties": {
+                  "key": { "type": "string" },
+                  "command": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "connectionHooks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
+          }
+        },
+        "apiCommands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Whitelist of Tauri commands this plugin may call"
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## Appendix B: Internal Module Reference
+
+Relevant source files for OxideTerm plugin system internals:
+
+| File | Description |
+|------|-------------|
+| `src-tauri/src/commands/plugin.rs` | Rust backend: list/read/write plugin files, path validation |
+| `src/store/pluginStore.ts` | Frontend state: plugin lifecycle, Disposable registry, circuit breaker |
+| `src/lib/plugin/pluginLoader.ts` | Plugin loading/unloading orchestration |
+| `src/lib/plugin/pluginContext.ts` | `buildPluginContext()` — assembles and freezes the PluginContext |
+| `src/lib/plugin/pluginI18n.ts` | Plugin i18n: load locales, `t()` resolution |
+| `src/components/plugin/PluginManager.tsx` | Plugin Manager UI |
+| `src/components/plugin/PluginTab.tsx` | Renders plugin Tab views |
+| `src/components/plugin/PluginSidebarPanel.tsx` | Renders plugin sidebar panels |
+| `src/lib/plugin/pluginRegistry.ts` | Plugin registry server (v2 package HTTP server) |
+| `plugin-api.d.ts` | TypeScript type definitions (distributed with OxideTerm) |
+
+> This document covers Plugin API v3 (OxideTerm v1.6.2+). For earlier versions, refer to the version-specific documentation.
