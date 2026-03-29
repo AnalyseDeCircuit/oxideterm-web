@@ -1,6 +1,6 @@
 ---
 import type { LangKey } from "@/i18n";
-import { t, languages, langPath } from "@/i18n";
+import { t, languages, langPath, docsPath } from "@/i18n";
 
 interface Props {
   lang: LangKey;
@@ -33,7 +33,7 @@ const i = t(lang);
             </a>
           </li>
           <li>
-            <a href={["en", "zh-hans"].includes(lang) ? (lang === "en" ? "/docs/" : `/${lang}/docs/`) : "/docs/"} class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
+            <a href={docsPath(lang)} class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
               {i.footer.docs}
             </a>
           </li>

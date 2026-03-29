@@ -82,7 +82,8 @@
     "arm64": "ARM64",
     "x64": "x64",
     "get_latest": "Get Latest Release",
-    "all_releases": "View all releases on GitHub"
+    "all_releases": "View all releases on GitHub",
+    "requirements": "Requires macOS 10.15+, Windows 10+, or Linux (glibc 2.31+)"
   },
   "stats": {
     "binary_size": "Binary Size",

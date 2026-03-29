@@ -29,28 +29,36 @@ const rows = [
       {i.comparison.subtitle}
     </p>
 
-    <!-- Column headers -->
-    <div class="hidden sm:grid grid-cols-2 gap-8 pb-3 border-b-2 border-[var(--ot-border)] mb-2">
-      <span class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-text-muted)]">
-        {i.comparison.label_problem}
-      </span>
-      <span class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-text-muted)]">
-        {i.comparison.label_solution}
-      </span>
-    </div>
-
-    <!-- Comparison rows -->
-    {rows.map((row) => (
-      <div class="comparison-row">
-        <div class="flex items-baseline gap-3">
-          <span class="text-[var(--ot-red)] font-bold text-sm shrink-0" aria-hidden="true">&#10005;</span>
-          <span class="text-[var(--ot-text-muted)]">{row.pain}</span>
-        </div>
-        <div class="flex items-baseline gap-3">
-          <span class="text-[var(--ot-green)] font-bold text-sm shrink-0" aria-hidden="true">&#10003;</span>
-          <span class="text-[var(--ot-text-primary)]" set:html={row.answer} />
-        </div>
-      </div>
-    ))}
+    <!-- Semantic comparison table -->
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-text-muted)]">
+            {i.comparison.label_problem}
+          </th>
+          <th class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-text-muted)]">
+            {i.comparison.label_solution}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr>
+            <td>
+              <div class="flex items-baseline gap-3">
+                <span class="text-[var(--ot-red)] font-bold text-sm shrink-0" aria-hidden="true">&#10005;</span>
+                <span class="text-[var(--ot-text-muted)]">{row.pain}</span>
+              </div>
+            </td>
+            <td>
+              <div class="flex items-baseline gap-3">
+                <span class="text-[var(--ot-green)] font-bold text-sm shrink-0" aria-hidden="true">&#10003;</span>
+                <span class="text-[var(--ot-text-primary)]" set:html={row.answer} />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   </div>
 </section>

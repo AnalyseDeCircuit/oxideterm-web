@@ -287,25 +287,58 @@ h1, h2, h3 {
   color: var(--ot-terminal-text);
 }
 .terminal-prompt { color: var(--ot-terminal-green); }
-.terminal-dim { color: #6c6c80; }
+.terminal-dim { color: #8c8ca0; }
 .terminal-success { color: #4ade80; }
 .terminal-info { color: #7c7c94; }
 .terminal-highlight { color: #f0c674; }
 
-/* Comparison Table */
-.comparison-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid var(--ot-border);
-  align-items: baseline;
+/* Comparison Table (semantic) */
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
-.comparison-row:last-child { border-bottom: none; }
+.comparison-table th {
+  text-align: left;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--ot-border);
+}
+.comparison-table td {
+  padding: 1.25rem 0;
+  vertical-align: baseline;
+}
+.comparison-table td:first-child {
+  padding-right: 2rem;
+}
+.comparison-table tbody tr {
+  border-bottom: 1px solid var(--ot-border);
+}
+.comparison-table tbody tr:last-child {
+  border-bottom: none;
+}
 @media (max-width: 640px) {
-  .comparison-row {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
+  .comparison-table thead {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0);
+    white-space: nowrap; border: 0;
+  }
+  .comparison-table tbody,
+  .comparison-table tr,
+  .comparison-table td {
+    display: block;
+    width: 100%;
+  }
+  .comparison-table td {
+    padding: 0.25rem 0;
+  }
+  .comparison-table td:first-child {
+    padding-top: 1.25rem;
+    padding-right: 0;
+  }
+  .comparison-table td:last-child {
+    padding-bottom: 1.25rem;
   }
 }
 
@@ -329,17 +362,11 @@ h1, h2, h3 {
   display: block;
 }
 
-/* Competitive comparison table */
-.competitive-table {
-  border-collapse: collapse;
-  min-width: 700px;
-}
-.competitive-table th,
-.competitive-table td {
-  white-space: nowrap;
-}
-.competitive-highlight {
-  background: rgba(183, 65, 14, 0.04);
+/* Language selector dropdown */
+.lang-dropdown {
+  min-width: 140px;
+  max-height: 320px;
+  overflow-y: auto;
 }
 
 /* Typing cursor animation */

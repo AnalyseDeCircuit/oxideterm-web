@@ -82,7 +82,8 @@
     "arm64": "ARM64",
     "x64": "x64",
     "get_latest": "最新版を取得",
-    "all_releases": "GitHubで全リリースを見る"
+    "all_releases": "GitHubで全リリースを見る",
+    "requirements": "動作環境：macOS 10.15+、Windows 10+、Linux（glibc 2.31+）"
   },
   "stats": {
     "binary_size": "バイナリサイズ",

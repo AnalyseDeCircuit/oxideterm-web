@@ -58,3 +58,8 @@ export function t(lang: LangKey) {
 export function langPath(lang: LangKey): string {
   return lang === "en" ? "/" : `/${lang}/`;
 }
+
+export function docsPath(lang: LangKey): string {
+  if (lang === "zh-hans") return `/${lang}/docs/`;
+  return "/docs/";
+}

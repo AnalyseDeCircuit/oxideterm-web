@@ -1,6 +1,7 @@
 ---
 import type { LangKey } from "@/i18n";
 import { t } from "@/i18n";
+import { icon } from "@/lib/icons";
 
 interface Props {
   lang: LangKey;
@@ -9,41 +10,42 @@ interface Props {
 const { lang } = Astro.props;
 const i = t(lang);
 
+const accent = "var(--ot-accent)";
 const features = [
   {
     id: "terminal",
     title: i.details.terminal_title,
     items: [i.details.terminal_1, i.details.terminal_2, i.details.terminal_3, i.details.terminal_4, i.details.terminal_5],
     img: "/images/screenshots/terminal.png",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ot-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>`,
+    icon: icon("terminal", { size: 28, stroke: accent }),
   },
   {
     id: "sftp",
     title: i.details.sftp_title,
     items: [i.details.sftp_1, i.details.sftp_2, i.details.sftp_3, i.details.sftp_4],
     img: "/images/screenshots/sftp.png",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ot-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 18v-6"/><path d="M14 18v-3"/></svg>`,
+    icon: icon("fileChart", { size: 28, stroke: accent }),
   },
   {
     id: "ide",
     title: i.details.ide_title,
     items: [i.details.ide_1, i.details.ide_2, i.details.ide_3, i.details.ide_4],
     img: "/images/screenshots/ide.png",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ot-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+    icon: icon("code", { size: 28, stroke: accent }),
   },
   {
     id: "ai",
     title: i.details.ai_title,
     items: [i.details.ai_1, i.details.ai_2, i.details.ai_3, i.details.ai_4],
     img: "/images/screenshots/ai.gif",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ot-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>`,
+    icon: icon("bot", { size: 28, stroke: accent }),
   },
   {
     id: "forwarding",
     title: i.details.forwarding_title,
     items: [i.details.forwarding_1, i.details.forwarding_2, i.details.forwarding_3, i.details.forwarding_4],
     img: "/images/screenshots/forwarding.png",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ot-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+    icon: icon("link", { size: 28, stroke: accent }),
   },
 ];
 ---

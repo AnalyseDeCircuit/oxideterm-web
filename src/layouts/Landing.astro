@@ -1,7 +1,7 @@
 ---
 import "@/styles/global.css";
 import type { LangKey } from "@/i18n";
-import { t, languages, langPath } from "@/i18n";
+import { t, languages, langPath, docsPath } from "@/i18n";
 
 interface Props {
   lang: LangKey;
@@ -37,12 +37,33 @@ const i = t(lang);
           <span class="text-[var(--ot-text-primary)]">Oxide</span><span class="text-[var(--ot-accent)]">Term</span>
         </a>
         <div class="hidden sm:flex items-center gap-6">
-          <a href={["en", "zh-hans"].includes(lang) ? (lang === "en" ? "/docs/" : `/${lang}/docs/`) : "/docs/"} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors">
+          <a href={docsPath(lang)} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors">
             {i.footer.docs}
           </a>
           <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors">
             GitHub
           </a>
+          <!-- Language selector -->
+          <div class="relative" id="lang-selector">
+            <button id="lang-btn" class="flex items-center gap-1 text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors" aria-label={i.footer.language}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </button>
+            <div id="lang-menu" class="lang-dropdown hidden absolute right-0 top-full mt-2 py-2 bg-[var(--ot-bg-surface)] border border-[var(--ot-border)] rounded-lg shadow-lg z-50">
+              {languages.map((l) => (
+                <a
+                  href={langPath(l.key)}
+                  class:list={[
+                    "block px-4 py-1.5 text-sm transition-colors",
+                    l.key === lang
+                      ? "text-[var(--ot-accent)]"
+                      : "text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] hover:bg-[var(--ot-bg-elevated)]",
+                  ]}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
           <a href="#download" class="text-sm px-4 py-1.5 rounded-lg cta-primary font-medium">
             {i.hero.cta_download}
           </a>
@@ -54,8 +75,26 @@ const i = t(lang);
       <!-- Mobile menu -->
       <div id="mobile-menu" class="sm:hidden hidden border-t border-[var(--ot-border)] px-6 py-4" style="background: rgba(248,244,235,0.98);">
         <div class="flex flex-col gap-3">
-          <a href={["en", "zh-hans"].includes(lang) ? (lang === "en" ? "/docs/" : `/${lang}/docs/`) : "/docs/"} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)]">{i.footer.docs}</a>
+          <a href={docsPath(lang)} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)]">{i.footer.docs}</a>
           <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)]">GitHub</a>
+          <details class="text-sm">
+            <summary class="text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] cursor-pointer">{i.footer.language}</summary>
+            <div class="pl-4 pt-2 flex flex-col gap-1">
+              {languages.map((l) => (
+                <a
+                  href={langPath(l.key)}
+                  class:list={[
+                    "text-sm py-1 transition-colors",
+                    l.key === lang
+                      ? "text-[var(--ot-accent)]"
+                      : "text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)]",
+                  ]}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </details>
           <a href="#download" class="text-sm px-4 py-1.5 rounded-lg cta-primary font-medium text-center">{i.hero.cta_download}</a>
         </div>
       </div>
@@ -63,6 +102,13 @@ const i = t(lang);
     <script>
       document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
         document.getElementById('mobile-menu')?.classList.toggle('hidden');
+      });
+      document.getElementById('lang-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('lang-menu')?.classList.toggle('hidden');
+      });
+      document.addEventListener('click', () => {
+        document.getElementById('lang-menu')?.classList.add('hidden');
       });
     </script>
     <div class="pt-14">

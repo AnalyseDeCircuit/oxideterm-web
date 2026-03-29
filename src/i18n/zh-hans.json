@@ -82,7 +82,8 @@
     "arm64": "ARM64",
     "x64": "x64",
     "get_latest": "获取最新版本",
-    "all_releases": "在 GitHub 查看所有版本"
+    "all_releases": "在 GitHub 查看所有版本",
+    "requirements": "系统要求：macOS 10.15+、Windows 10+ 或 Linux（glibc 2.31+）"
   },
   "stats": {
     "binary_size": "安装包大小",
