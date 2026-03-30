@@ -234,6 +234,17 @@ h1, h2, h3 {
   background: var(--ot-bg-elevated);
 }
 
+.cta-star {
+  background: var(--ot-bg-elevated);
+  color: var(--ot-text-primary);
+  border: 1px solid var(--ot-border);
+  transition: all 0.2s ease;
+}
+.cta-star:hover {
+  border-color: var(--ot-accent);
+  color: var(--ot-accent);
+}
+
 /* Feature tab active state */
 .feature-tab-active {
   color: var(--ot-accent) !important;
