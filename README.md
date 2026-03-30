@@ -49,4 +49,4 @@ en · zh-hans · zh-hant · ja · ko · fr · de · es · it · pt-br · vi
 ## License
 
 Content is licensed under [CC BY-NC 4.0](LICENSE).
-OxideTerm itself is licensed under [PolyForm Noncommercial 1.0.0](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/LICENSE).
+OxideTerm itself is licensed under [GPL-3.0](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/LICENSE).

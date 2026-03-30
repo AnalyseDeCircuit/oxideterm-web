@@ -11,7 +11,7 @@
     "cta_docs": "文件",
     "version_prefix": "v",
     "cta_star": "GitHub",
-    "source_badge": "原始碼可用 · PolyForm NC 1.0.0"
+    "source_badge": "開源 · GPL-3.0"
   },
   "features": {
     "title": "與眾不同",
@@ -192,7 +192,7 @@
     "grace_reconnect": "Grace Period 續連",
     "plugin_system": "外掛系統",
     "multi_lang": "多語言 UI",
-    "source_available": "原始碼可見"
+    "source_available": "開源"
   },
   "legal": {
     "badge": "合規",
@@ -205,14 +205,14 @@
     "data_title": "資料安全與隱私保障",
     "data_desc": "我們深知維運資料的敏感性。OxideTerm 採用「本地優先」架構，所有伺服器存取憑據、金鑰及設定檔均經由高強度加密演算法儲存於使用者的本地裝置中。本軟體不會主動蒲集、上傳或向第三方洩露使用者的任何敏感連線資料。",
     "license_title": "授權條款",
-    "license_desc": "本軟體採用 Source Available（PolyForm Noncommercial 1.0.0）協議分發。使用者可檢視原始碼並進行非商業用途的使用與分發。商業用途需取得開發者明確的授權許可。",
+    "license_desc": "本軟體採用 GPL-3.0（GNU 通用公共授權條款 v3.0）開源協議分發。所有人均可自由使用、修改和分發，包括商業用途。衍生作品須以相同授權條款的發佈並提供原始碼。",
     "disclaimer": "本頁面僅供參考，不構成法律建議。使用者有責任確保其使用 OxideTerm 符合所有適用的當地及國際法律法規。"
   },
   "faq": {
     "badge": "常見問題",
     "title": "常見問題",
     "q1": "OxideTerm 是免費的嗎？",
-    "a1": "OxideTerm 採用 PolyForm Noncommercial 1.0.0 原始碼可用授權。個人、教育及非商業用途免費。商業使用需另行授權。",
+    "a1": "OxideTerm 採用 GPL-3.0 開源授權條款，所有人均可免費使用，包括個人、教育和商業用途。",
     "q2": "支援哪些 SSH 認證方式？",
     "a2": "密碼認證、私鑰（Ed25519、RSA、ECDSA）、鍵盤互動認證、Agent 轉發，以及 FIDO2/U2F 硬體安全金鑰。",
     "q3": "資料儲存在哪裡？",
@@ -232,14 +232,14 @@
   },
   "footer": {
     "badge": "連結",
-    "license": "基於 PolyForm Noncommercial 1.0.0 授權",
+    "license": "基於 GPL-3.0 授權",
     "source": "原始碼",
     "docs": "文件",
     "releases": "發佈",
     "language": "語言",
     "links": "連結",
     "legal": "法律",
-    "polyform_link": "PolyForm NC 1.0.0 →",
+    "license_link": "GPL-3.0 授權條款 →",
     "built_with": "使用 Astro 建構 · 部署於 Cloudflare"
   }
 }

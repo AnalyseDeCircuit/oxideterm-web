@@ -11,7 +11,7 @@
     "cta_docs": "문서",
     "version_prefix": "v",
     "cta_star": "GitHub",
-    "source_badge": "소스 공개 · PolyForm NC 1.0.0"
+    "source_badge": "오픈소스 · GPL-3.0"
   },
   "features": {
     "title": "차원이 다릅니다",
@@ -192,7 +192,7 @@
     "grace_reconnect": "Grace Period 재접속",
     "plugin_system": "플러그인 시스템",
     "multi_lang": "다국어 UI",
-    "source_available": "소스 공개"
+    "source_available": "오픈소스"
   },
   "legal": {
     "badge": "컴플라이언스",
@@ -205,14 +205,14 @@
     "data_title": "데이터 보안 및 개인정보 보호",
     "data_desc": "운영 데이터의 민감성을 충분히 이해하고 있습니다. OxideTerm은 로컬 우선 아키텍처를 채택하여 모든 서버 자격 증명, 키 및 구성 파일을 고강도 암호화 알고리즘으로 사용자의 로컬 장치에만 저장합니다. 본 소프트웨어는 민감한 연결 데이터를 수집, 업로드하거나 제3자에게 공개하지 않습니다.",
     "license_title": "라이선스",
-    "license_desc": "본 소프트웨어는 Source Available(PolyForm Noncommercial 1.0.0) 라이선스로 배포됩니다. 소스 코드를 열람하고 비상업적 용도로 사용할 수 있습니다. 상업적 사용에는 개발자의 명시적 허가가 필요합니다.",
+    "license_desc": "본 소프트웨어는 GPL-3.0(GNU 일반 공중 사용 허가서 v3.0) 오픈소스 라이선스로 배포됩니다. 모든 사람이 상업적 용도를 포함하여 자유롭게 사용, 수정 및 배포할 수 있습니다. 파생 작품은 동일한 라이선스로 공개하고 소스 코드를 제공해야 합니다.",
     "disclaimer": "이 페이지는 정보 제공 목적으로만 제공되며 법률 자문을 구성하지 않습니다. OxideTerm 사용이 적용 가능한 모든 법률을 준수하는지 확인할 책임은 사용자에게 있습니다."
   },
   "faq": {
     "badge": "자주 묻는 질문",
     "title": "자주 묻는 질문",
     "q1": "OxideTerm은 무료인가요?",
-    "a1": "OxideTerm은 PolyForm Noncommercial 1.0.0 라이선스로 소스가 공개되어 있습니다. 개인, 교육 및 비상업적 용도는 무료입니다. 상업적 사용은 별도의 라이선스가 필요합니다.",
+    "a1": "OxideTerm은 GPL-3.0 오픈소스 라이선스로 제공되며, 개인, 교육 및 상업적 용도를 포함하여 모든 사람이 무료로 사용할 수 있습니다.",
     "q2": "어떤 SSH 인증 방식을 지원하나요?",
     "a2": "비밀번호, 개인키(Ed25519, RSA, ECDSA), 키보드 대화형 인증, 에이전트 전달, FIDO2/U2F 하드웨어 보안 키를 지원합니다.",
     "q3": "데이터는 어디에 저장되나요?",
@@ -232,14 +232,14 @@
   },
   "footer": {
     "badge": "링크",
-    "license": "PolyForm Noncommercial 1.0.0 라이선스",
+    "license": "GPL-3.0 라이선스",
     "source": "소스 코드",
     "docs": "문서",
     "releases": "릴리스",
     "language": "언어",
     "links": "링크",
     "legal": "법적 고지",
-    "polyform_link": "PolyForm NC 1.0.0 →",
+    "license_link": "GPL-3.0 라이선스 →",
     "built_with": "Astro로 구축 · Cloudflare에 배포"
   }
 }

@@ -11,7 +11,7 @@
     "cta_docs": "Tài liệu",
     "version_prefix": "v",
     "cta_star": "GitHub",
-    "source_badge": "Mã nguồn công khai · PolyForm NC 1.0.0"
+    "source_badge": "Mã nguồn mở · GPL-3.0"
   },
   "features": {
     "title": "Thiết kế khác biệt",
@@ -192,7 +192,7 @@
     "grace_reconnect": "Kết nối lại Grace Period",
     "plugin_system": "Hệ thống plugin",
     "multi_lang": "UI đa ngôn ngữ",
-    "source_available": "Nguồn có sẵn"
+    "source_available": "Mã nguồn mở"
   },
   "legal": {
     "badge": "TUÂN THỦ",
@@ -205,14 +205,14 @@
     "data_title": "Bảo mật dữ liệu và quyền riêng tư",
     "data_desc": "Chúng tôi hiểu tính nhạy cảm của dữ liệu vận hành. OxideTerm áp dụng kiến trúc Local-First. Tất cả thông tin xác thực máy chủ, khóa và tệp cấu hình được mã hóa và lưu trữ độc quyền trên thiết bị cục bộ của người dùng bằng thuật toán mã hóa bảo mật cao. Phần mềm này không thu thập, tải lên hoặc tiết lộ bất kỳ dữ liệu kết nối nhạy cảm nào cho bên thứ ba.",
     "license_title": "Giấy phép",
-    "license_desc": "Phần mềm này được phân phối theo giấy phép Source Available (PolyForm Noncommercial 1.0.0). Người dùng có thể xem mã nguồn và sử dụng cho mục đích phi thương mại. Sử dụng thương mại cần có sự cho phép rõ ràng từ nhà phát triển.",
+    "license_desc": "Phần mềm này được phân phối theo giấy phép mã nguồn mở GPL-3.0 (GNU General Public License v3.0). Mọi người đều có thể tự do sử dụng, sửa đổi và phân phối, bao gồm cả mục đích thương mại. Các tác phẩm phái sinh phải được xuất bản theo cùng giấy phép và cung cấp mã nguồn.",
     "disclaimer": "Trang này chỉ được cung cấp cho mục đích thông tin và không cấu thành tư vấn pháp lý. Người dùng có trách nhiệm đảm bảo việc sử dụng OxideTerm tuân thủ tất cả luật pháp địa phương và quốc tế hiện hành."
   },
   "faq": {
     "badge": "HỎI ĐÁP",
     "title": "Câu hỏi thường gặp",
     "q1": "OxideTerm có miễn phí không?",
-    "a1": "OxideTerm được cung cấp mã nguồn theo giấy phép PolyForm Noncommercial 1.0.0. Miễn phí cho mục đích cá nhân, giáo dục và phi thương mại. Sử dụng thương mại cần giấy phép riêng.",
+    "a1": "OxideTerm là mã nguồn mở theo giấy phép GPL-3.0, miễn phí cho tất cả mọi người, bao gồm cá nhân, giáo dục và thương mại.",
     "q2": "Hỗ trợ những phương thức xác thực SSH nào?",
     "a2": "Mật khẩu, khóa riêng (Ed25519, RSA, ECDSA), xác thực tương tác bàn phím, chuyển tiếp agent và khóa bảo mật phần cứng FIDO2/U2F.",
     "q3": "Dữ liệu được lưu ở đâu?",
@@ -232,14 +232,14 @@
   },
   "footer": {
     "badge": "LIÊN KẾT",
-    "license": "Giấy phép PolyForm Noncommercial 1.0.0",
+    "license": "Giấy phép GPL-3.0",
     "source": "Mã nguồn",
     "docs": "Tài liệu",
     "releases": "Phát hành",
     "language": "Ngôn ngữ",
     "links": "Liên kết",
     "legal": "Pháp lý",
-    "polyform_link": "PolyForm NC 1.0.0 →",
+    "license_link": "Giấy phép GPL-3.0 →",
     "built_with": "Xây dựng với Astro · Triển khai trên Cloudflare"
   }
 }

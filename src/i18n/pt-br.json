@@ -11,7 +11,7 @@
     "cta_docs": "Documentação",
     "version_prefix": "v",
     "cta_star": "GitHub",
-    "source_badge": "Código-fonte disponível · PolyForm NC 1.0.0"
+    "source_badge": "Código Aberto · GPL-3.0"
   },
   "features": {
     "title": "Construído diferente",
@@ -192,7 +192,7 @@
     "grace_reconnect": "Reconexão Grace Period",
     "plugin_system": "Sistema de plugins",
     "multi_lang": "UI multilingual",
-    "source_available": "Fonte disponível"
+    "source_available": "Código Aberto"
   },
   "legal": {
     "badge": "CONFORMIDADE",
@@ -205,14 +205,14 @@
     "data_title": "Segurança de dados e privacidade",
     "data_desc": "Entendemos a sensibilidade dos dados operacionais. O OxideTerm adota uma arquitetura Local-First. Todas as credenciais do servidor, chaves e arquivos de configuração são criptografados e armazenados exclusivamente no dispositivo local do usuário usando algoritmos de criptografia de alta segurança. Este software não coleta, carrega nem divulga dados de conexão sensíveis a terceiros.",
     "license_title": "Licença",
-    "license_desc": "Este software é distribuído sob a licença Source Available (PolyForm Noncommercial 1.0.0). Os usuários podem visualizar o código-fonte e usá-lo para fins não comerciais. O uso comercial requer autorização explícita do desenvolvedor.",
+    "license_desc": "Este software é distribuído sob a licença open source GPL-3.0 (GNU General Public License v3.0). Todos podem usar, modificar e distribuir livremente, incluindo para fins comerciais. Obras derivadas devem ser publicadas sob a mesma licença e fornecer o código-fonte.",
     "disclaimer": "Esta página é fornecida apenas para fins informativos e não constitui aconselhamento jurídico. Os usuários são responsáveis por garantir que seu uso do OxideTerm esteja em conformidade com todas as leis locais e internacionais aplicáveis."
   },
   "faq": {
     "badge": "FAQ",
     "title": "Perguntas frequentes",
     "q1": "O OxideTerm é gratuito?",
-    "a1": "O OxideTerm é disponibilizado com código-fonte sob a licença PolyForm Noncommercial 1.0.0. Gratuito para uso pessoal, educacional e não comercial. Uso comercial requer licença separada.",
+    "a1": "O OxideTerm é open source sob a licença GPL-3.0, gratuito para todos, incluindo uso pessoal, educacional e comercial.",
     "q2": "Quais métodos de autenticação SSH são suportados?",
     "a2": "Senha, chave privada (Ed25519, RSA, ECDSA), autenticação interativa por teclado, encaminhamento de agente e chaves de segurança de hardware FIDO2/U2F.",
     "q3": "Onde meus dados são armazenados?",
@@ -232,14 +232,14 @@
   },
   "footer": {
     "badge": "LINKS",
-    "license": "Licença PolyForm Noncommercial 1.0.0",
+    "license": "Licença GPL-3.0",
     "source": "Código fonte",
     "docs": "Documentação",
     "releases": "Lançamentos",
     "language": "Idioma",
     "links": "Links",
     "legal": "Legal",
-    "polyform_link": "PolyForm NC 1.0.0 →",
+    "license_link": "Licença GPL-3.0 →",
     "built_with": "Construído com Astro · Implantado na Cloudflare"
   }
 }

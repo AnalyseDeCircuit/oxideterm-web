@@ -11,7 +11,7 @@
     "cta_docs": "ドキュメント",
     "version_prefix": "v",
     "cta_star": "GitHub",
-    "source_badge": "ソース公開 · PolyForm NC 1.0.0"
+    "source_badge": "オープンソース · GPL-3.0"
   },
   "features": {
     "title": "設計思想が違う",
@@ -192,7 +192,7 @@
     "grace_reconnect": "Grace Period 再接続",
     "plugin_system": "プラグインシステム",
     "multi_lang": "多言語 UI",
-    "source_available": "ソース公開"
+    "source_available": "オープンソース"
   },
   "legal": {
     "badge": "コンプライアンス",
@@ -205,14 +205,14 @@
     "data_title": "データセキュリティとプライバシー",
     "data_desc": "運用データの機密性を十分に理解しています。OxideTerm はローカルファーストアーキテクチャを採用しており、すべてのサーバー認証情報、鍵、設定ファイルは高強度暗号化アルゴリズムを使用してユーザーのローカルデバイスにのみ保存されます。本ソフトウェアは機密性の高い接続データを収集、アップロード、第三者に開示することはありません。",
     "license_title": "ライセンス",
-    "license_desc": "本ソフトウェアは Source Available（PolyForm Noncommercial 1.0.0）ライセンスの下で配布されています。ソースコードの閲覧および非商用目的での使用が可能です。商用利用には開発者からの明示的な許可が必要です。",
+    "license_desc": "本ソフトウェアは GPL-3.0（GNU 一般公衆利用許諾書 v3.0）のもとでオープンソースとして配布されています。すべての人が商用利用を含め自由に使用、修正、配布できます。派生物は同じライセンスで公開し、ソースコードを提供する必要があります。",
     "disclaimer": "このページは情報提供のみを目的としており、法的助言を構成するものではありません。OxideTerm の使用が適用されるすべての法令に準拠していることを確認する責任はユーザーにあります。"
   },
   "faq": {
     "badge": "よくある質問",
     "title": "よくある質問",
     "q1": "OxideTerm は無料ですか？",
-    "a1": "OxideTerm は PolyForm Noncommercial 1.0.0 ライセンスのもとソース公開されています。個人・教育・非商用目的では無料です。商用利用には別途ライセンスが必要です。",
+    "a1": "OxideTerm は GPL-3.0 オープンソースライセンスのもとで提供されており、個人・教育・商用を含むすべての用途で無料でご利用いただけます。",
     "q2": "どの SSH 認証方式に対応していますか？",
     "a2": "パスワード認証、秘密鍵（Ed25519、RSA、ECDSA）、キーボードインタラクティブ認証、エージェント転送、FIDO2/U2F ハードウェアセキュリティキーに対応。",
     "q3": "データはどこに保存されますか？",
@@ -232,14 +232,14 @@
   },
   "footer": {
     "badge": "リンク",
-    "license": "PolyForm Noncommercial 1.0.0 ライセンス",
+    "license": "GPL-3.0 ライセンス",
     "source": "ソースコード",
     "docs": "ドキュメント",
     "releases": "リリース",
     "language": "言語",
     "links": "リンク",
     "legal": "法的情報",
-    "polyform_link": "PolyForm NC 1.0.0 →",
+    "license_link": "GPL-3.0 ライセンス →",
     "built_with": "Astro で構築 · Cloudflare にデプロイ"
   }
 }
