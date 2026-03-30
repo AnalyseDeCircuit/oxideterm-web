@@ -2,6 +2,7 @@
 import "@/styles/global.css";
 import type { LangKey } from "@/i18n";
 import { t, languages, langPath, docsPath } from "@/i18n";
+import AnnouncementBanner from "@/components/AnnouncementBanner.astro";
 
 interface Props {
   lang: LangKey;
@@ -29,9 +30,10 @@ const i = t(lang);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   </head>
-  <body class="bg-[var(--ot-bg-page)] text-[var(--ot-text-primary)] antialiased" style={`font-family: var(--font-serif);`}>
+  <body class="bg-[var(--ot-bg-page)] text-[var(--ot-text-primary)] antialiased" style={`font-family: var(--font-serif); --announcement-height: 0px;`}>
+    <AnnouncementBanner lang={lang} />
     <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 border-b border-[var(--ot-border)]" style="background: rgba(248,244,235,0.92); backdrop-filter: blur(8px);">
+    <nav class="fixed w-full z-50 border-b border-[var(--ot-border)]" style="top: var(--announcement-height); background: rgba(248,244,235,0.92); backdrop-filter: blur(8px);">
       <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         <a href={langPath(lang)} class="text-xl font-bold tracking-tight" style={`font-family: var(--font-serif);`}>
           <span class="text-[var(--ot-text-primary)]">Oxide</span><span class="text-[var(--ot-accent)]">Term</span>
@@ -111,7 +113,7 @@ const i = t(lang);
         document.getElementById('lang-menu')?.classList.add('hidden');
       });
     </script>
-    <div class="pt-14">
+    <div style="padding-top: calc(3.5rem + var(--announcement-height));">
       <slot />
     </div>
   </body>

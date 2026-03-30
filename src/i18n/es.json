@@ -1,4 +1,7 @@
 {
+  "announcement": {
+    "license_change": "📢 Cambio de licencia: OxideTerm ahora es GPL-3.0 — ¡totalmente código abierto! Anteriormente PolyForm Noncommercial."
+  },
   "meta": {
     "lang": "es",
     "title": "OxideTerm — Terminal SSH en Rust puro",

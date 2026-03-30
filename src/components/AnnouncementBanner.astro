@@ -1,0 +1,35 @@
+---
+import type { LangKey } from "@/i18n";
+import { t } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+---
+
+<div id="announcement-banner" class="fixed top-0 left-0 right-0 z-[60] bg-[var(--ot-accent)] text-white text-center py-1.5 px-4 text-xs" style={`font-family: var(--font-mono);`}>
+  <span>{i.announcement.license_change}</span>
+  <button id="close-announcement" class="ml-3 opacity-70 hover:opacity-100 transition-opacity" aria-label="Close">✕</button>
+</div>
+
+<script>
+  const banner = document.getElementById('announcement-banner');
+  const closeBtn = document.getElementById('close-announcement');
+  const STORAGE_KEY = 'oxideterm-announcement-dismissed';
+  
+  if (localStorage.getItem(STORAGE_KEY)) {
+    banner?.remove();
+  } else {
+    // Push navbar and content down
+    document.documentElement.style.setProperty('--announcement-height', '28px');
+    closeBtn?.addEventListener('click', () => {
+      localStorage.setItem(STORAGE_KEY, '1');
+      banner?.remove();
+      document.documentElement.style.setProperty('--announcement-height', '0px');
+    });
+  }
+</script>
+

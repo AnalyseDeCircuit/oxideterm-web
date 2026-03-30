@@ -1,4 +1,7 @@
 {
+  "announcement": {
+    "license_change": "📢 授權變更：OxideTerm 現已採用 GPL-3.0 — 完全開源！先前為 PolyForm Noncommercial。"
+  },
   "meta": {
     "lang": "zh-TW",
     "title": "OxideTerm — 純 Rust SSH 終端",

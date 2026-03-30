@@ -1,4 +1,7 @@
 {
+  "announcement": {
+    "license_change": "📢 라이선스 변경: OxideTerm이 GPL-3.0으로 전환 — 완전 오픈소스! 이전: PolyForm Noncommercial."
+  },
   "meta": {
     "lang": "ko",
     "title": "OxideTerm — 순수 Rust SSH 터미널",

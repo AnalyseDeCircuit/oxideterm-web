@@ -1,4 +1,7 @@
 {
+  "announcement": {
+    "license_change": "📢 ライセンス変更：OxideTerm は GPL-3.0 に移行 — 完全オープンソースに！以前は PolyForm Noncommercial。"
+  },
   "meta": {
     "lang": "ja",
     "title": "OxideTerm — Pure Rust SSH ターミナル",
