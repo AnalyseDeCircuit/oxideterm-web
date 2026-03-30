@@ -1,7 +1,6 @@
 ---
 import type { LangKey } from "@/i18n";
 import { t } from "@/i18n";
-import { icon } from "@/lib/icons";
 
 interface Props {
   lang: LangKey;
@@ -11,24 +10,30 @@ const { lang } = Astro.props;
 const i = t(lang);
 const c = i.competitive;
 
-const s = { size: 20 };
-const features = [
-  { label: c.local_terminal, icon: icon("terminal", s) },
-  { label: c.native_size, icon: icon("package", s) },
-  { label: c.pure_rust, icon: icon("shield", s) },
-  { label: c.builtin_sftp, icon: icon("file", s) },
-  { label: c.builtin_ide, icon: icon("code", s) },
-  { label: c.ai_assistant, icon: icon("bot", s) },
-  { label: c.multiplexing, icon: icon("link", s) },
-  { label: c.grace_reconnect, icon: icon("refresh", s) },
-  { label: c.plugin_system, icon: icon("wrench", s) },
-  { label: c.multi_lang, icon: icon("globe", s) },
-  { label: c.source_available, icon: icon("github", s) },
+const Y = c.yes;
+const N = c.no;
+const P = c.partial;
+
+// Each row: [label, oxideterm, electron, traditional]
+// Values: true = ✓, false = —, string = custom text
+const rows: { label: string; ot: string; el: string; tr: string; highlight?: boolean }[] = [
+  { label: c.row_binary_size, ot: c.val_binary_ot, el: c.val_binary_el, tr: c.val_binary_tr, highlight: false },
+  { label: c.row_ssh_impl, ot: c.val_ssh_ot, el: c.val_ssh_el, tr: c.val_ssh_tr, highlight: false },
+  { label: c.row_local_terminal, ot: Y, el: P, tr: N },
+  { label: c.row_builtin_sftp, ot: Y, el: P, tr: P },
+  { label: c.row_builtin_ide, ot: Y, el: N, tr: N },
+  { label: c.row_ai, ot: Y, el: N, tr: N },
+  { label: c.row_reconnect, ot: Y, el: N, tr: N },
+  { label: c.row_multiplex, ot: Y, el: N, tr: P },
+  { label: c.row_plugin, ot: Y, el: N, tr: P },
+  { label: c.row_i18n, ot: Y, el: P, tr: P },
+  { label: c.row_open_source, ot: Y, el: c.varies, tr: N },
+  { label: c.row_free, ot: Y, el: c.varies, tr: c.varies },
 ];
 ---
 
 <section class="py-20 px-6 border-t border-[var(--ot-border)]">
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-4xl mx-auto">
     <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] text-center mb-3">
       {c.badge}
     </p>
@@ -39,14 +44,63 @@ const features = [
       {c.subtitle}
     </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      {features.map((feature) => (
-        <div class="flex items-center gap-4 px-5 py-4 rounded-xl border border-[var(--ot-border)] bg-[var(--ot-bg-elevated)] hover:border-[var(--ot-accent)] transition-colors">
-          <span class="text-[var(--ot-accent)] shrink-0" aria-hidden="true" set:html={feature.icon} />
-          <span class="text-sm font-medium text-[var(--ot-text-primary)]">{feature.label}</span>
-          <span class="ml-auto text-[var(--ot-green)] font-bold text-lg" aria-hidden="true">✓</span>
-        </div>
-      ))}
+    <div class="overflow-x-auto rounded-xl border border-[var(--ot-border)]">
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr class="bg-[var(--ot-bg-elevated)]">
+            <th class="text-left px-5 py-4 font-medium text-[var(--ot-text-muted)] min-w-[180px]">
+              {c.col_feature}
+            </th>
+            <th class="text-center px-5 py-4 font-bold text-[var(--ot-accent)] min-w-[140px]">
+              {c.col_oxideterm}
+            </th>
+            <th class="text-center px-5 py-4 font-medium text-[var(--ot-text-secondary)] min-w-[140px]">
+              {c.col_electron}
+            </th>
+            <th class="text-center px-5 py-4 font-medium text-[var(--ot-text-secondary)] min-w-[140px]">
+              {c.col_traditional}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, idx) => (
+            <tr class:list={[
+              "border-t border-[var(--ot-border-subtle)]",
+              idx % 2 === 0 ? "bg-[var(--ot-bg-base)]" : "bg-[var(--ot-bg-surface)]"
+            ]}>
+              <td class="px-5 py-3.5 font-medium text-[var(--ot-text-primary)]">
+                {row.label}
+              </td>
+              <td class:list={[
+                "px-5 py-3.5 text-center",
+                row.ot === Y ? "text-[var(--ot-green)] font-bold text-base" : "text-[var(--ot-text-secondary)] text-xs"
+              ]}>
+                {row.ot}
+              </td>
+              <td class:list={[
+                "px-5 py-3.5 text-center",
+                row.el === Y ? "text-[var(--ot-green)] font-bold text-base"
+                  : row.el === N ? "text-[var(--ot-text-muted)]"
+                  : "text-[var(--ot-text-secondary)] text-xs"
+              ]}>
+                {row.el}
+              </td>
+              <td class:list={[
+                "px-5 py-3.5 text-center",
+                row.tr === Y ? "text-[var(--ot-green)] font-bold text-base"
+                  : row.tr === N ? "text-[var(--ot-text-muted)]"
+                  : "text-[var(--ot-text-secondary)] text-xs"
+              ]}>
+                {row.tr}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
+
+    <p class="text-xs text-[var(--ot-text-muted)] text-center mt-6 max-w-lg mx-auto leading-relaxed">
+      {c.note}
+    </p>
   </div>
 </section>
