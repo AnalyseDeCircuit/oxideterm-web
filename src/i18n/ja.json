@@ -10,6 +10,7 @@
     "cta_download": "ダウンロード",
     "cta_docs": "ドキュメント",
     "version_prefix": "v",
+    "cta_star": "GitHubでスターする",
     "source_badge": "ソース公開 · PolyForm NC 1.0.0"
   },
   "features": {

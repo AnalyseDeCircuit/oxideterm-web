@@ -10,6 +10,7 @@
     "cta_download": "Herunterladen",
     "cta_docs": "Dokumentation",
     "version_prefix": "v",
+    "cta_star": "Auf GitHub markieren",
     "source_badge": "Quellcode verfügbar · PolyForm NC 1.0.0"
   },
   "features": {
