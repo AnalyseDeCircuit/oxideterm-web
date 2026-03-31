@@ -246,7 +246,7 @@
   },
   "testimonial": {
     "badge": "FROM THE CREATOR",
-    "quote": "OxideTerm wasn't built to fill a market gap — it was built to challenge the boundary between terminal performance and capability. Pure-Rust SSH with zero C dependencies. A custom binary wire protocol with no JSON serialization in the hot path. ChaCha20-Poly1305 encryption backed by Argon2id at 256 MB memory cost. Every architectural decision reflects one obsession: never trade correctness for convenience.",
+    "quote": "I built OxideTerm because I wanted one tool that actually does everything — SSH, SFTP, port forwarding, code editing — without feeling heavy or asking for a subscription. The tech choices (pure-Rust SSH, binary wire protocol, ChaCha20 encryption) aren't there to show off; they're just what made sense when you want something fast, portable, and correct. It's a solo project, so it won't be perfect, but I'd rather ship something honest than something polished with corners cut.",
     "name": "AnalyseDeCircuit",
     "role": "Creator of OxideTerm"
   },

@@ -246,7 +246,7 @@
   },
   "testimonial": {
     "badge": "DO CRIADOR",
-    "quote": "O OxideTerm não foi criado para preencher uma lacuna de mercado — foi criado para desafiar o limite entre desempenho e capacidade do terminal. SSH em Rust puro, zero dependências de C. Um protocolo binário proprietário sem serialização JSON no caminho crítico. Criptografia de exportação com ChaCha20-Poly1305 + Argon2id (custo de memória de 256 MB). Cada decisão arquitetural reflete uma única obsessão: nunca trocar correção por conveniência.",
+    "quote": "Criei o OxideTerm porque queria uma única ferramenta que realmente fizesse tudo — SSH, SFTP, encaminhamento de portas, edição de código — sem ser pesada ou exigir assinatura. As escolhas técnicas (SSH em Rust puro, protocolo binário, criptografia ChaCha20) não estão lá para impressionar; simplesmente faziam sentido quando se busca algo rápido, portátil e correto. É um projeto solo, então não vai ser perfeito, mas prefiro entregar algo honesto do que algo polido com atalhos.",
     "name": "AnalyseDeCircuit",
     "role": "Criador do OxideTerm"
   },

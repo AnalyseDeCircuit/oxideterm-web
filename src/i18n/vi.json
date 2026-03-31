@@ -246,7 +246,7 @@
   },
   "testimonial": {
     "badge": "TỪ TÁC GIẢ",
-    "quote": "OxideTerm không được tạo ra để lấp một khoảng trống thị trường — mà để thách thức ranh giới giữa hiệu năng và khả năng của terminal. SSH thuần Rust, không phụ thuộc C. Giao thức nhị phân tự phát triển, không JSON serialization trên đường nóng. Mã hóa xuất dữ liệu bằng ChaCha20-Poly1305 + Argon2id (chi phí bộ nhớ 256 MB). Mỗi quyết định kiến trúc đều hướng về một nỗi ám ảnh duy nhất: không bao giờ đánh đổi tính đúng đắn lấy sự tiện lợi.",
+    "quote": "Tôi tạo OxideTerm vì muốn có một công cụ duy nhất làm được mọi thứ — SSH, SFTP, chuyển tiếp cổng, chỉnh sửa mã — mà không nặng nề hay đòi đăng ký. Các lựa chọn kỹ thuật (SSH thuần Rust, giao thức nhị phân, mã hóa ChaCha20) không phải để khoe; đơn giản là chúng hợp lý khi bạn muốn thứ gì đó nhanh, di động và đáng tin. Đây là dự án cá nhân nên sẽ không hoàn hảo, nhưng tôi thà giao một thứ trung thực còn hơn một thứ bóng bẩy nhưng đi đường tắt.",
     "name": "AnalyseDeCircuit",
     "role": "Nhà phát triển OxideTerm"
   },
