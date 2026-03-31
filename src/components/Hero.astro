@@ -10,21 +10,6 @@ interface Props {
 const { lang } = Astro.props;
 const i = t(lang);
 const version = OXIDETERM_VERSION;
-
-// Fetch GitHub stars at build time
-let stars = '';
-try {
-  const res = await fetch('https://api.github.com/repos/AnalyseDeCircuit/oxideterm', { signal: AbortSignal.timeout(5000) });
-  if (res.ok) {
-    const data = await res.json();
-    const count = data.stargazers_count;
-    if (count >= 1000) {
-      stars = `${(count / 1000).toFixed(1)}k`;
-    } else if (count > 0) {
-      stars = String(count);
-    }
-  }
-} catch {}
 ---
 
 <section class="relative py-24 md:py-32 overflow-hidden">
@@ -72,7 +57,6 @@ try {
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             {i.hero.cta_star}
-            {stars && <span class="ml-0.5 text-xs text-[var(--ot-text-muted)]">({stars})</span>}
           </a>
         </div>
 
