@@ -1,7 +1,7 @@
 ---
 import type { LangKey } from "@/i18n";
 import { t, docsPath } from "@/i18n";
-import { OXIDETERM_VERSION } from "@/consts";
+import { getOxideTermVersion } from "@/consts";
 
 interface Props {
   lang: LangKey;
@@ -9,7 +9,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const i = t(lang);
-const version = OXIDETERM_VERSION;
+const version = await getOxideTermVersion();
 ---
 
 <section class="relative py-24 md:py-32 overflow-hidden">
