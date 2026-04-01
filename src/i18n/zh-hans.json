@@ -13,6 +13,7 @@
     "cta_download": "下载",
     "cta_docs": "文档",
     "version_prefix": "v",
+    "stable_badge": "稳定版",
     "cta_star": "GitHub",
     "source_badge": "开源 · GPL-3.0"
   },
