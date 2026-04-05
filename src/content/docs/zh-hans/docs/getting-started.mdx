@@ -13,9 +13,9 @@ import { Image } from 'astro:assets';
 |------|------|
 | SSH 客户端无法做本地 Shell | **混合引擎**：本地 PTY（zsh/bash/fish/pwsh/WSL2）+ 远程 SSH 同窗运行 |
 | 断线重连 = 丢失一切 | **优雅期重连**：断线前先探测旧连接 30 秒——你的 vim/htop/yazi 可以幸存 |
-| 远程文件编辑需要 VS Code Remote | **内置 IDE**：CodeMirror 6 基于 SFTP，30+ 语言，可选约 1 MB 远程 Agent |
+| 远程文件编辑需要 VS Code Remote | **内置 IDE**：CodeMirror 6 基于 SFTP，24 语言，可选约 1 MB 远程 Agent |
 | SSH 连接无法复用 | **连接复用**：终端、SFTP、转发、IDE 共享一个 SSH 连接，引用计数连接池 |
-| SSH 库依赖 OpenSSL | **russh 0.54**：纯 Rust SSH，编译链接 `ring`——零 C 依赖 |
+| SSH 库依赖 OpenSSL | **russh 0.59**：纯 Rust SSH，编译链接 `ring`——零 C 依赖 |
 | 100+ MB 的 Electron 应用 | **Tauri 2.0**：原生 Rust 后端，25–40 MB 二进制 |
 | AI 被锁定在单一供应商 | **OxideSens**：40+ 工具、MCP 协议、RAG 知识库——兼容 OpenAI/Ollama/DeepSeek/任意兼容 API |
 
@@ -26,7 +26,7 @@ OxideTerm 采用 **双平面架构**，将低延迟的终端 I/O 与管理命令
 ```
 ┌─────────────────────────────────────┐
 │        前端 (React 19)              │
-│  xterm.js 6 (WebGL) + 18 stores    │
+│  xterm.js 6 (WebGL) + 19 stores    │
 └──────────┬──────────────┬───────────┘
            │ Tauri IPC    │ WebSocket（二进制）
            │ (JSON)       │ 每会话独立端口
@@ -51,12 +51,12 @@ OxideTerm 采用 **双平面架构**，将低延迟的终端 I/O 与管理命令
 |------|------|------|
 | **框架** | Tauri 2.0 | 原生二进制，25–40 MB |
 | **运行时** | Tokio + DashMap 6 | 全异步，无锁并发映射 |
-| **SSH** | russh 0.54 (`ring`) | 纯 Rust，零 C 依赖，SSH Agent |
+| **SSH** | russh 0.59 (`ring`) | 纯 Rust，零 C 依赖，SSH Agent |
 | **本地 PTY** | portable-pty 0.8 | 功能门控，Windows 使用 ConPTY |
 | **前端** | React 19.1 + TypeScript 5.8 | Vite 7, Tailwind CSS 4 |
 | **状态管理** | Zustand 5 | 18 个专用 Store |
 | **终端** | xterm.js 6 + WebGL | GPU 加速，60 fps+ |
-| **编辑器** | CodeMirror 6 | 30+ 语言模式 |
+| **编辑器** | CodeMirror 6 | 24 语言模式 |
 | **加密** | ChaCha20-Poly1305 + Argon2id | AEAD + 内存硬化 KDF（256 MB） |
 | **存储** | redb 2.1 | 嵌入式键值数据库 |
 | **国际化** | i18next 25 | 11 种语言 × 22 个命名空间 |
@@ -70,7 +70,7 @@ OxideTerm 采用 **双平面架构**，将低延迟的终端 I/O 与管理命令
 | **终端** | 本地 PTY（zsh/bash/fish/pwsh/WSL2）、SSH 远程、分屏、广播输入、会话录制/回放（asciicast v2）、自适应渲染（120 Hz+ 加速 / 60 Hz 正常 / 1–15 Hz 空闲）、命令面板（`⌘K`）、禅模式、30+ 主题 + 自定义编辑器 |
 | **SSH 与认证** | 连接池与复用、ProxyJump（无限跳数）+ 拓扑图、优雅期自动重连。认证：密码、SSH 密钥（RSA/Ed25519/ECDSA）、SSH Agent、证书、键盘交互 2FA、Known Hosts TOFU |
 | **SFTP** | 双面板浏览器、拖放、智能预览（图片/视频/音频/代码/PDF/Hex/字体）、传输队列 + 进度 & ETA、书签、压缩包解压 |
-| **IDE 模式** | CodeMirror 6，30+ 语言，文件树 + Git 状态，LRU 多标签管理，冲突解决（mtime 锁定），集成终端。可选远程 Agent（10+ 架构） |
+| **IDE 模式** | CodeMirror 6，24 语言，文件树 + Git 状态，LRU 多标签管理，冲突解决（mtime 锁定），集成终端。可选远程 Agent（9 架构） |
 | **端口转发** | 本地 (-L)、远程 (-R)、动态 SOCKS5 (-D)，无锁消息传递 I/O，重连自动恢复，死亡报告，智能远程端口检测 |
 | **AI (OxideSens)** | 内联面板（`⌘I`）+ 侧边栏聊天，终端缓冲区捕获（单/全面板），多源上下文（IDE/SFTP/Git），40+ 自主工具，MCP 服务集成，RAG 知识库（BM25 + 向量混合搜索），流式 SSE |
 | **插件** | 运行时 ESM 加载，18 个 API 命名空间，24 个 UI Kit 组件，冻结 API + Proxy ACL，熔断器，错误自动禁用 |

@@ -1,7 +1,7 @@
 ---
 import type { LangKey } from "@/i18n";
 import { t, docsPath } from "@/i18n";
-import { getOxideTermVersion } from "@/consts";
+import { getOxideTermVersion, getGitHubStars } from "@/consts";
 
 interface Props {
   lang: LangKey;
@@ -10,6 +10,7 @@ interface Props {
 const { lang } = Astro.props;
 const i = t(lang);
 const version = await getOxideTermVersion();
+const stars = await getGitHubStars();
 ---
 
 <section class="relative py-24 md:py-32 overflow-hidden">
@@ -57,6 +58,7 @@ const version = await getOxideTermVersion();
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             {i.hero.cta_star}
+            {stars && <span class="ml-1 px-1.5 py-0.5 rounded text-xs font-mono bg-[var(--ot-bg-elevated)] text-[var(--ot-text-muted)] border border-[var(--ot-border)]">{stars}</span>}
           </a>
         </div>
 

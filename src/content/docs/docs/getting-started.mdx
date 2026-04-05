@@ -13,9 +13,9 @@ import { Image } from 'astro:assets';
 |---|---|
 | SSH clients that can't do local shells | **Hybrid engine**: local PTY (zsh/bash/fish/pwsh/WSL2) + remote SSH in one window |
 | Reconnect = lose everything | **Grace Period reconnect**: probes old connection 30s before killing it — your vim/htop/yazi survive |
-| Remote file editing needs VS Code Remote | **Built-in IDE**: CodeMirror 6 over SFTP with 30+ languages, optional ~1 MB remote agent on Linux |
+| Remote file editing needs VS Code Remote | **Built-in IDE**: CodeMirror 6 over SFTP with 24 languages, optional ~1 MB remote agent on Linux |
 | No SSH connection reuse | **Multiplexing**: terminal, SFTP, forwards, IDE share one SSH connection via reference-counted pool |
-| SSH libraries depend on OpenSSL | **russh 0.54**: pure Rust SSH compiled against `ring` — zero C dependencies |
+| SSH libraries depend on OpenSSL | **russh 0.59**: pure Rust SSH compiled against `ring` — zero C dependencies |
 | 100+ MB Electron apps | **Tauri 2.0**: native Rust backend, 25–40 MB binary |
 | AI locked to one provider | **OxideSens**: 40+ tools, MCP protocol, RAG knowledge base — works with OpenAI/Ollama/DeepSeek/any compatible API |
 
@@ -26,7 +26,7 @@ OxideTerm uses a **dual-plane architecture** that separates latency-critical ter
 ```
 ┌─────────────────────────────────────┐
 │        Frontend (React 19)          │
-│  xterm.js 6 (WebGL) + 18 stores    │
+│  xterm.js 6 (WebGL) + 19 stores    │
 └──────────┬──────────────┬───────────┘
            │ Tauri IPC    │ WebSocket (binary)
            │ (JSON)       │ per-session port
@@ -51,12 +51,12 @@ Each SSH session gets its own WebSocket port with single-use, time-limited token
 |---|---|---|
 | **Framework** | Tauri 2.0 | Native binary, 25–40 MB |
 | **Runtime** | Tokio + DashMap 6 | Full async, lock-free concurrent maps |
-| **SSH** | russh 0.54 (`ring`) | Pure Rust, zero C deps, SSH Agent |
+| **SSH** | russh 0.59 (`ring`) | Pure Rust, zero C deps, SSH Agent |
 | **Local PTY** | portable-pty 0.8 | Feature-gated, ConPTY on Windows |
 | **Frontend** | React 19.1 + TypeScript 5.8 | Vite 7, Tailwind CSS 4 |
 | **State** | Zustand 5 | 18 specialized stores |
 | **Terminal** | xterm.js 6 + WebGL | GPU-accelerated, 60 fps+ |
-| **Editor** | CodeMirror 6 | 30+ language modes |
+| **Editor** | CodeMirror 6 | 24 language modes |
 | **Encryption** | ChaCha20-Poly1305 + Argon2id | AEAD + memory-hard KDF (256 MB) |
 | **Storage** | redb 2.1 | Embedded KV store |
 | **i18n** | i18next 25 | 11 languages × 22 namespaces |
@@ -70,7 +70,7 @@ Each SSH session gets its own WebSocket port with single-use, time-limited token
 | **Terminal** | Local PTY (zsh/bash/fish/pwsh/WSL2), SSH remote, split panes, broadcast input, session recording/playback (asciicast v2), adaptive rendering (120 Hz+ Boost / 60 Hz Normal / 1–15 Hz Idle), command palette (`⌘K`), zen mode, 30+ themes + custom editor |
 | **SSH & Auth** | Connection pooling & multiplexing, ProxyJump (unlimited hops) with topology graph, auto-reconnect with Grace Period. Auth: password, SSH key (RSA/Ed25519/ECDSA), SSH Agent, certificates, keyboard-interactive 2FA, Known Hosts TOFU |
 | **SFTP** | Dual-pane browser, drag-and-drop, smart preview (images/video/audio/code/PDF/hex/fonts), transfer queue with progress & ETA, bookmarks, archive extraction |
-| **IDE Mode** | CodeMirror 6 with 30+ languages, file tree + Git status, multi-tab with LRU management, conflict resolution (mtime locking), integrated terminal. Optional remote agent (10+ architectures) |
+| **IDE Mode** | CodeMirror 6 with 24 languages, file tree + Git status, multi-tab with LRU management, conflict resolution (mtime locking), integrated terminal. Optional remote agent (9 architectures) |
 | **Port Forwarding** | Local (-L), Remote (-R), Dynamic SOCKS5 (-D), lock-free message-passing I/O, auto-restore on reconnect, death reporting, smart remote port detection |
 | **AI (OxideSens)** | Inline panel (`⌘I`) + sidebar chat, terminal buffer capture (single/all panes), multi-source context (IDE/SFTP/Git), 40+ autonomous tools, MCP server integration, RAG knowledge base (BM25 + vector hybrid search), streaming SSE |
 | **Plugins** | Runtime ESM loading, 18 API namespaces, 24 UI Kit components, frozen API + Proxy ACL, circuit breaker, auto-disable on errors |
