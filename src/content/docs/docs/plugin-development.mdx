@@ -3,7 +3,14 @@ title: Plugin Development Guide
 description: Complete reference for OxideTerm plugin development — Plugin API v3
 ---
 
-> Applies to OxideTerm v1.6.2+ (Plugin API v3 — updated 2026-03-15)
+> Applies to the current OxideTerm release (Plugin API v3)
+
+Current host-wired UI extension points include:
+
+- `ctx.ui.registerContextMenu()` for `terminal`, `sftp`, `tab`, and `sidebar` targets
+- `ctx.ui.registerStatusBarItem()` rendered in the main bottom status bar
+- `ctx.ui.registerKeybinding()` dispatched by the global keybinding pipeline after built-ins and before terminal hook shortcuts
+- `ctx.ui.showProgress()` rendered as a lightweight top-right progress HUD that auto-dismisses at 100%
 
 ## 1. Plugin System Overview
 
@@ -572,10 +579,10 @@ Declares terminal I/O interception capabilities.
 Declares connection lifecycle events the plugin is interested in.
 
 ```json
-"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
+"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown", "onIdle"]
 ```
 
-Possible values: `"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkDown"`
+Possible values: `"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkDown"` | `"onIdle"`
 
 > Note: This field currently serves as documentation only. Actual event subscription is done via `ctx.events.onConnect()` and similar methods.
 
@@ -890,6 +897,12 @@ type ConnectionState =
   | 'grace_period';  // Grace period (newly v1.11.1 — probing old connection)
 ```
 
+Identifier semantics:
+
+- `nodeId`: stable logical node identity for a connection tree entry. Prefer this when you need something that survives reconnects.
+- `connectionId`: the current transport connection identity surfaced by readiness events such as `onNodeReady()`. It may change after a reconnect.
+- `sessionId`: the currently attached terminal session identity. It can be `null` before a terminal is attached or when no terminal is focused.
+
 ### 6.3 ctx.events
 
 Subscribes to connection lifecycle events. All event handlers are called asynchronously via `queueMicrotask()`.
@@ -935,6 +948,24 @@ ctx.events.onLinkDown(conn => {
   console.log(`Link down: ${conn.label}, state=${conn.state}`);
 });
 ```
+
+**`onIdle(handler: (conn: ConnectionSnapshot) => void): Disposable`**
+
+Fires when a still-live connection releases all terminal references and transitions to `idle`.
+
+```javascript
+ctx.events.onIdle(conn => {
+  console.log(`Idle: ${conn.label}`);
+});
+```
+
+**`onNodeReady(handler: (info: { nodeId: string; connectionId: string }) => void): Disposable`**
+
+Fires when a node reaches the ready state and plugin capabilities such as SFTP or IDE integration can safely attach.
+
+**`onNodeDisconnected(handler: (info: { nodeId: string }) => void): Disposable`**
+
+Fires when a node leaves the ready state and becomes disconnected.
 
 ### 6.4 ctx.ui
 
@@ -1051,6 +1082,8 @@ type TerminalInputInterceptor = (
 // - null/undefined: pass original input through
 ```
 
+If `sessionId` is `null`, treat the event as not being bound to an active terminal session. In that case, prefer returning the original input unchanged unless your plugin explicitly handles the unfocused case.
+
 **`registerOutputProcessor(fn: TerminalOutputProcessor): Disposable`**
 
 Registers a terminal output processor. Called **synchronously** on every chunk of output from the server. Must complete within 5ms.
@@ -1073,6 +1106,8 @@ type TerminalOutputProcessor = (
 // Same return value semantics as input interceptor
 ```
 
+Apply the same rule to output processors: when `sessionId` is `null`, prefer pass-through behavior unless your processor is intentionally session-agnostic.
+
 **`registerShortcut(command: string, handler: TerminalShortcutHandler): Disposable`**
 
 Registers a terminal shortcut handler. `command` must match a key in `contributes.terminalHooks.shortcuts`.
@@ -1091,6 +1126,8 @@ type TerminalShortcutHandler = (
 ) => boolean | void;
 // Return true to consume the event; false/void to pass through
 ```
+
+For shortcuts, `sessionId === null` usually means there is no focused remote terminal. Return `false` or `void` unless your shortcut is designed to work without a bound session.
 
 **`getActiveSessionId(): string | null`**
 
@@ -1873,13 +1910,14 @@ function FileList({ sessionId }) {
 
 ### 7.4 Lucide Icons
 
-A subset of [Lucide React](https://lucide.dev/) icons is exposed via `window.__OXIDE__.lucideIcons`. The full Lucide icon set is available.
+A named icon map is exposed via `window.__OXIDE__.lucideIcons`, and the full icon module is available through `window.__OXIDE__.lucideReact` with a fallback proxy for missing PascalCase icons.
 
 ```javascript
-const { lucideIcons, React } = window.__OXIDE__;
+const { lucideIcons, lucideReact, React } = window.__OXIDE__;
 const { createElement: h } = React;
 
 const { Server, Activity, Settings, AlertCircle } = lucideIcons;
+const Wifi = lucideReact.Wifi;
 
 function StatusIcon({ connected }) {
   return h(connected ? Activity : AlertCircle, {
@@ -1889,7 +1927,7 @@ function StatusIcon({ connected }) {
 }
 ```
 
-Icon naming: PascalCase (e.g. `Server`, `LayoutDashboard`, `GitBranch`). Check https://lucide.dev/icons/ for the full list.
+Icon naming: PascalCase (e.g. `Server`, `LayoutDashboard`, `GitBranch`). Use `lucideIcons['Name']` when indexing by string, and prefer `lucideReact.Name` when you want automatic fallback behavior. Check https://lucide.dev/icons/ for the full list.
 
 ### 7.5 UI Kit Overview
 
@@ -3580,6 +3618,9 @@ export interface EventsAPI {
   onDisconnect(handler: (conn: ConnectionSnapshot) => void): Disposable;
   onReconnect(handler: (conn: ConnectionSnapshot) => void): Disposable;
   onLinkDown(handler: (conn: ConnectionSnapshot) => void): Disposable;
+  onIdle(handler: (conn: ConnectionSnapshot) => void): Disposable;
+  onNodeReady(handler: (info: { nodeId: string; connectionId: string }) => void): Disposable;
+  onNodeDisconnected(handler: (info: { nodeId: string }) => void): Disposable;
 }
 
 // ─── UI API ─────────────────────────────────────────────────────────────
@@ -4145,7 +4186,7 @@ declare global {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
+            "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown", "onIdle"]
           }
         },
         "apiCommands": {
@@ -4178,4 +4219,4 @@ Relevant source files for OxideTerm plugin system internals:
 | `src/lib/plugin/pluginRegistry.ts` | Plugin registry server (v2 package HTTP server) |
 | `plugin-api.d.ts` | TypeScript type definitions (distributed with OxideTerm) |
 
-> This document covers Plugin API v3 (OxideTerm v1.6.2+). For earlier versions, refer to the version-specific documentation.
+> This document covers the current Plugin API v3 surface shipped by OxideTerm as of 2026-04-09.

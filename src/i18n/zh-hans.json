@@ -76,7 +76,7 @@
     "i18n": "11 种语言",
     "i18n_desc": "跨 22 个命名空间的完整 UI 翻译：English、简体中文、繁體中文、日本語、한국어、Français、Deutsch、Español、Italiano、Português、Tiếng Việt。",
     "plugin": "插件生态",
-    "plugin_desc": "运行时 ESM 加载，18 个 API 命名空间、24 个预置 UI 组件、冻结 API 契约、熔断器自动禁用。"
+    "plugin_desc": "运行时 ESM 插件，提供 18 个 API 命名空间、内置 UI Kit，以及原生接入的标签页、侧边栏面板、右键菜单、状态栏项、快捷键和进度 UI。"
   },
   "download": {
     "badge": "立即开始",

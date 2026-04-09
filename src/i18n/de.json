@@ -76,7 +76,7 @@
     "i18n": "11 Sprachen",
     "i18n_desc": "Vollständige UI-Übersetzung über 22 Namespaces: English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español, Italiano, Português, Tiếng Việt.",
     "plugin": "Plugin-Ökosystem",
-    "plugin_desc": "Runtime-ESM-Loading. 18 API-Namespaces, 24 vorgefertigte UI-Komponenten, eingefrorener API-Vertrag, Circuit-Breaker-Autodeaktivierung."
+    "plugin_desc": "Runtime-ESM-Plugins mit 18 API-Namespaces, integriertem UI-Kit sowie nativ eingebundenen Tabs, Seitenleisten-Panels, Kontextmenüs, Statusleisten-Items, Tastenkürzeln und Fortschritts-UI."
   },
   "download": {
     "badge": "JETZT STARTEN",

@@ -1,213 +1,143 @@
 ---
 title: Plugins
-description: Extend OxideTerm with ESM-based plugins, 18 API namespaces, and a frozen security surface.
+description: Extend OxideTerm with runtime ESM plugins, a frozen PluginContext API, and host-wired UI extension points.
 ---
 
-OxideTerm features a runtime plugin system that allows third-party extensions to add functionality without modifying the core application.
+OxideTerm ships with a runtime plugin system that lets third-party extensions add tabs, sidebar panels, terminal hooks, commands, SFTP workflows, and lightweight UI integrations without patching the core application.
 
-## Plugin Architecture
+## Runtime Model
 
-Plugins are **ESM bundles** loaded from `~/.oxideterm/plugins/{plugin-id}/`. Each plugin consists of:
+Plugins are loaded from `~/.oxideterm/plugins/{plugin-id}/` and activated dynamically at runtime.
 
-```
+```text
 ~/.oxideterm/plugins/my-plugin/
-├── plugin.json      # Manifest (metadata + permissions)
-└── index.js         # Main entry point (ESM)
+├── plugin.json
+├── main.js
+├── locales/
+└── assets/
 ```
 
-### Plugin Manifest
+The host validates the manifest, builds a frozen `PluginContext`, then calls `activate(ctx)` from the plugin's ESM entry.
+
+## Manifest Shape
 
 ```json
 {
   "id": "my-plugin",
   "name": "My Plugin",
   "version": "1.0.0",
-  "description": "A sample OxideTerm plugin",
-  "author": "Your Name",
-  "main": "index.js",
-  "permissions": ["terminal.read", "events.subscribe"]
-}
-```
-
-The manifest declares the plugin's identity and the permissions it requires. Permissions are enforced at runtime via Proxy-based ACL.
-
-### Plugin Lifecycle
-
-```typescript
-// index.ts — compiled to ESM
-export function activate(ctx: PluginContext) {
-  // Called when the plugin is loaded
-  // Register event handlers, UI components, commands
-
-  ctx.events.on('connection:active', (connectionId) => {
-    console.log('Connected:', connectionId);
-  });
-
-  // Register a sidebar panel
-  ctx.ui.registerSidebarPanel({
-    id: 'my-panel',
-    title: 'My Panel',
-    icon: 'Terminal',
-    component: MyPanelComponent,
-  });
-}
-
-export function deactivate() {
-  // Called when the plugin is disabled or OxideTerm exits
-  // Clean up resources, timers, subscriptions
-}
-```
-
-## PluginContext API
-
-Plugins receive a frozen `PluginContext` object with **18 namespaces**:
-
-| Namespace | Purpose |
-|-----------|----------|
-| `connections` | List, query, and manage SSH connections |
-| `events` | Subscribe to and emit custom events |
-| `ui` | Register sidebar panels, status bar items, context menus |
-| `terminal` | Read terminal buffer, send input, subscribe to data |
-| `settings` | Read/write plugin-specific settings with schema validation |
-| `i18n` | Internationalization and locale utilities |
-| `storage` | Key-value storage scoped to the plugin (persisted via redb) |
-| `api` | Backend IPC calls to Tauri commands |
-| `assets` | Plugin asset resolution (images, fonts, etc.) |
-| `sftp` | SFTP file operations (list, read, write, stat) |
-| `forward` | Port forwarding management (create, list, remove) |
-| `sessions` | Session tree and lifecycle management |
-| `transfers` | SFTP transfer queue control and monitoring |
-| `profiler` | Resource profiling data (CPU, memory, network) |
-| `eventLog` | Connection lifecycle event log access |
-| `ide` | IDE mode file operations and editor state |
-| `ai` | OxideSens AI chat integration and tool registration |
-| `app` | Application-level utilities, version, platform info |
-
-### 24 UI Kit Components
-
-Plugins have access to **24 pre-built React components** injected via `window.__OXIDE__`:
-
-Buttons, Inputs, Dialogs, Select, Checkbox, Switch, Tabs, Table, Badge, Tooltip, ScrollArea, Separator, and more — all matching OxideTerm's theme and design system.
-
-## Security
-
-The plugin system uses a multi-layered security approach:
-
-### Frozen API Surface
-
-All `PluginContext` objects are recursively sealed with `Object.freeze()`. Plugins interact exclusively through this frozen membrane — they cannot modify, monkey-patch, or extend the API. Connection data is returned as deep-frozen `ConnectionSnapshot` objects; a new snapshot is generated on every call.
-
-### Proxy-Based ACL
-
-Each namespace access is validated against the plugin's declared permissions at runtime. Plugins cannot access Zustand stores directly — all state is mediated through the frozen context API.
-
-### IPC Whitelist
-
-Plugins can only call Tauri backend commands that are explicitly declared in their manifest under `contributes.apiCommands`. The default whitelist is **empty** — a plugin must opt-in to every backend command it needs:
-
-```json
-{
+  "main": "./main.js",
+  "engines": {
+    "oxideterm": ">=1.6.0"
+  },
   "contributes": {
-    "apiCommands": ["get_connection_info", "list_forwards"]
+    "tabs": [
+      {
+        "id": "dashboard",
+        "title": "Dashboard",
+        "icon": "LayoutDashboard"
+      }
+    ],
+    "sidebarPanels": [
+      {
+        "id": "overview",
+        "title": "Overview",
+        "icon": "PanelLeft",
+        "position": "top"
+      }
+    ],
+    "apiCommands": ["list_connections"]
   }
 }
 ```
 
-Any undeclared command call is silently rejected.
+There is no standalone `permissions` field in the current plugin runtime. Backend command access is declared through `contributes.apiCommands`, while higher-level capabilities are exposed through dedicated namespaces like `ctx.sftp`, `ctx.forward`, and `ctx.terminal`.
 
-### Circuit Breaker (Auto-Disable)
+## PluginContext API
 
-Plugins that throw repeated runtime errors are automatically disabled to prevent a buggy plugin from degrading the app:
+Plugins receive a frozen `PluginContext` with a top-level `pluginId` field plus **18 API namespaces**:
 
-1. Each callback exception increments an error counter
-2. If the counter reaches **10 errors within 60 seconds**, the plugin is automatically unloaded
-3. A toast notification informs the user: *"Plugin X has been disabled due to frequent errors"*
-4. The plugin state is set to `disabled`
-5. The user must manually re-enable it from the Plugin Manager
+- `connections`
+- `events`
+- `ui`
+- `terminal`
+- `settings`
+- `i18n`
+- `storage`
+- `api`
+- `assets`
+- `sftp`
+- `forward`
+- `sessions`
+- `transfers`
+- `profiler`
+- `eventLog`
+- `ide`
+- `ai`
+- `app`
 
-### Error Boundaries
+The UI namespace now includes fully host-wired extension points:
 
-- **UI errors** — React `ErrorBoundary` components isolate plugin rendering failures from the host application
-- **Terminal fail-open** — if a plugin's terminal data interceptor throws, the raw data passes through unmodified, ensuring terminal I/O is never blocked
-- **Event isolation** — plugin events are prefixed with `plugin:{id}:`, preventing cross-plugin interference
-- **Path safety** — `read_plugin_file` rejects `..` traversal to prevent directory escape
+- `ctx.ui.registerContextMenu()` for `terminal`, `sftp`, `tab`, and `sidebar`
+- `ctx.ui.registerStatusBarItem()` for the main bottom status bar
+- `ctx.ui.registerKeybinding()` for global shortcuts
+- `ctx.ui.showProgress()` for a top-right progress HUD
 
-### Wire Protocol Protection
+## Shared Modules
 
-Plugins only process terminal data frames (`0x00`). Heartbeat (`0x02`) and error (`0x03`) frames are never passed through the plugin pipeline, protecting the Wire Protocol invariants.
+Plugins use host-provided shared modules through `window.__OXIDE__`:
 
-## Installing Plugins
+- `React`
+- `ReactDOM`
+- `zustand`
+- `lucideIcons`
+- `lucideReact`
+- `ui`
+- `version`
+- `pluginApiVersion`
 
-1. Download the plugin bundle (`.zip`)
-2. Extract to `~/.oxideterm/plugins/{plugin-id}/`
-3. Restart OxideTerm or reload from the Plugin Manager
+This keeps plugins small and avoids duplicate React instances.
 
-The plugin directory must contain a valid `plugin.json` manifest.
+## Security Model
 
-## Plugin Manager
+The current plugin runtime uses layered containment rather than a true browser sandbox:
 
-The built-in Plugin Manager UI provides:
-- List of installed plugins with version, description, and status
-- **Enable / disable toggle** — instantly activate or deactivate plugins
-- **Plugin settings panel** — configure plugin-specific settings
-- **Error logs** — view runtime errors and warnings for debugging
-- **Reload** — reload a plugin without restarting OxideTerm
+- Frozen membrane: `PluginContext` objects are built with `Object.freeze()` to prevent mutation of host API objects.
+- Manifest validation: tabs, sidebar panels, terminal hooks, and backend command access must be declared before use.
+- Advisory backend whitelist: `ctx.api.invoke()` can only call commands listed in `contributes.apiCommands`.
+- Path safety: plugin file loading rejects traversal outside the plugin directory.
+- Circuit breaker: plugins that throw repeatedly are auto-disabled.
+- Terminal fail-open: input/output hooks fall back to the original data when a plugin throws.
 
-## Developing Plugins
+## Minimal Example
 
-### Quick Start
+```javascript
+const { React } = window.__OXIDE__;
+const { createElement: h } = React;
 
-```typescript
-// plugin.json
-{
-  "id": "hello-world",
-  "name": "Hello World",
-  "version": "1.0.0",
-  "main": "index.js"
+function DashboardTab({ pluginId, tabId }) {
+  return h('div', { className: 'p-6' }, `Hello from ${pluginId}:${tabId}`);
 }
 
-// index.ts
-import type { PluginContext } from 'oxideterm-plugin-api';
+export function activate(ctx) {
+  ctx.ui.registerTabView('dashboard', DashboardTab);
 
-export function activate(ctx: PluginContext) {
-  // Listen for new connections
-  ctx.events.on('connection:active', (data) => {
+  ctx.ui.registerCommand(
+    'hello.open-dashboard',
+    { label: 'Open Dashboard', icon: 'LayoutDashboard' },
+    () => ctx.ui.openTab('dashboard'),
+  );
+
+  ctx.events.onConnect((connection) => {
     ctx.ui.showNotification({
-      title: 'Connected!',
-      message: `Connected to ${data.host}`,
+      title: 'Connection active',
+      body: `${connection.username}@${connection.host}`,
+      severity: 'info',
     });
   });
-
-  // Register a command
-  ctx.ui.registerCommand({
-    id: 'hello.greet',
-    title: 'Say Hello',
-    handler: () => {
-      ctx.ui.showNotification({ title: 'Hello!', message: 'Hello from my plugin!' });
-    },
-  });
-}
-
-export function deactivate() {
-  console.log('Plugin deactivated');
 }
 ```
 
-### Shared Modules
+## Next Step
 
-Plugins can access shared modules via `window.__OXIDE__` without bundling them:
-
-| Module | Usage |
-|--------|-------|
-| `React` | UI components |
-| `ReactDOM` | Rendering |
-| `zustand` | State management |
-| `lucide-react` | Icons |
-
-This avoids bundling duplicate copies of common libraries and keeps plugin bundles small.
-
-### TypeScript Support
-
-Full TypeScript type definitions are available in `plugin-api.d.ts` — install it as a dev dependency for autocomplete and type checking during development.
-
-For the complete plugin development guide, see the [Plugin Development documentation](https://github.com/AnalyseDeCircuit/oxideterm/blob/main/docs/reference/PLUGIN_DEVELOPMENT.md).
+For the full API reference, manifest fields, shared module details, and TypeScript definitions, continue to the plugin development guide.

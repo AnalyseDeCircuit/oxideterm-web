@@ -76,7 +76,7 @@
     "i18n": "11 ngôn ngữ",
     "i18n_desc": "Dịch thuật UI đầy đủ trên 22 namespace: English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español, Italiano, Português, Tiếng Việt.",
     "plugin": "Hệ sinh thái plugin",
-    "plugin_desc": "Tải ESM runtime. 18 namespace API, 24 thành phần UI sẵn có, hợp đồng API đóng băng, circuit breaker tự vô hiệu hóa."
+    "plugin_desc": "Plugin ESM runtime với 18 namespace API, UI Kit tích hợp và các tab, panel thanh bên, menu ngữ cảnh, mục thanh trạng thái, phím tắt và giao diện tiến trình được tích hợp sẵn."
   },
   "download": {
     "badge": "BẮT ĐẦU",

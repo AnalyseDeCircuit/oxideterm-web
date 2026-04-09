@@ -76,7 +76,7 @@
     "i18n": "11 idiomas",
     "i18n_desc": "Traducción completa de la UI en 22 espacios de nombres: English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español, Italiano, Português, Tiếng Việt.",
     "plugin": "Ecosistema de plugins",
-    "plugin_desc": "Carga ESM en tiempo de ejecución. 18 espacios de nombres API, 24 componentes UI prediseñados, contrato API congelado, disyuntor auto-desactivación."
+    "plugin_desc": "Plugins ESM en tiempo de ejecución con 18 espacios de nombres API, un UI Kit integrado y pestañas, paneles laterales, menús contextuales, elementos de barra de estado, atajos e interfaz de progreso integrados de forma nativa."
   },
   "download": {
     "badge": "EMPEZAR",

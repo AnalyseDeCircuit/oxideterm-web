@@ -76,7 +76,7 @@
     "i18n": "11 idiomas",
     "i18n_desc": "Tradução completa da UI em 22 namespaces: English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español, Italiano, Português, Tiếng Việt.",
     "plugin": "Ecossistema de plugins",
-    "plugin_desc": "Carregamento ESM em runtime. 18 namespaces API, 24 componentes UI pré-construídos, contrato API congelado, circuit breaker auto-desativação."
+    "plugin_desc": "Plugins ESM em runtime com 18 namespaces de API, UI Kit integrado e abas, painéis laterais, menus de contexto, itens da barra de status, atalhos e interface de progresso integrados nativamente."
   },
   "download": {
     "badge": "COMECE AGORA",

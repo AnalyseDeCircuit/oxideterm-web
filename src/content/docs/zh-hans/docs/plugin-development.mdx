@@ -3,7 +3,7 @@ title: 插件开发指南
 description: OxideTerm 插件开发完全参考 — 适用于 Plugin API v3
 ---
 
-> 适用于 OxideTerm v1.6.2+（Plugin API v3 — 2026-03-15 更新）
+> 适用于当前 OxideTerm 版本（Plugin API v3）
 
 ## 1. 插件系统概述
 
@@ -575,10 +575,10 @@ export function deactivate() {
 声明插件关注的连接生命周期事件。
 
 ```json
-"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
+"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown", "onIdle"]
 ```
 
-可选值：`"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkDown"`
+可选值：`"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkDown"` | `"onIdle"`
 
 > 注意：这个字段当前仅作为文档声明，实际事件订阅通过 `ctx.events.onConnect()` 等方法完成。
 
@@ -797,7 +797,7 @@ unloadPlugin(pluginId)
 
 ## 6. PluginContext API 完全参考
 
-`PluginContext` 是传递给 `activate(ctx)` 的唯一参数。它是一个深度冻结的对象，包含 19 个命名空间（`pluginId` + 18 个子 API）。v3 新增了 7 个只读命名空间。
+`PluginContext` 是传递给 `activate(ctx)` 的唯一参数。它是一个深度冻结的对象，共有 19 个顶层字段，其中包括 `pluginId` 和 18 个 API 命名空间。v3 新增了 7 个只读命名空间。
 
 ```typescript
 type PluginContext = Readonly<{
@@ -909,21 +909,29 @@ events.onReconnect(handler: (snapshot: ConnectionSnapshot) => void): Disposable
 
 当连接从 `'reconnecting'`/`'link_down'`/`error` 状态恢复到 `'active'` 时触发。
 
-#### `onSessionCreated(handler)`
+#### `onIdle(handler)`
 
 ```typescript
-events.onSessionCreated(handler: (info: { sessionId: string; connectionId: string }) => void): Disposable
+events.onIdle(handler: (snapshot: ConnectionSnapshot) => void): Disposable
 ```
 
-当一个新的终端会话（terminal session）在某个连接上创建时触发。
+当一个仍然存活的连接释放掉所有终端引用并进入 `'idle'` 状态时触发。
 
-#### `onSessionClosed(handler)`
+#### `onNodeReady(handler)`
 
 ```typescript
-events.onSessionClosed(handler: (info: { sessionId: string }) => void): Disposable
+events.onNodeReady(handler: (info: { nodeId: string; connectionId: string }) => void): Disposable
 ```
 
-当终端会话关闭时触发。
+当节点进入 ready 状态、插件可安全使用其能力（如 SFTP / IDE）时触发。
+
+#### `onNodeDisconnected(handler)`
+
+```typescript
+events.onNodeDisconnected(handler: (info: { nodeId: string }) => void): Disposable
+```
+
+当节点离开 ready 状态并断开时触发。
 
 #### `on(name, handler)` — 自定义事件
 
@@ -1085,6 +1093,12 @@ ui.registerContextMenu(target: ContextMenuTarget, items: ContextMenuItem[]): Dis
 
 为指定目标区域注册右键菜单项。`target` 可以是 `'terminal'`、`'sftp'`、`'tab'` 或 `'sidebar'`。
 
+当前宿主接线如下：
+- `terminal`：终端内容区域
+- `sftp`：SFTP 文件面板右键菜单
+- `tab`：标签页右键菜单
+- `sidebar`：侧边栏宿主区域右键菜单
+
 ```javascript
 ctx.ui.registerContextMenu('terminal', [
   {
@@ -1148,6 +1162,8 @@ ui.registerKeybinding(keybinding: string, handler: () => void): Disposable
 
 注册全局键盘快捷键（与 Terminal Hooks 的 `registerShortcut` 不同，这里不需要在 manifest 中声明）。
 
+宿主会在全局快捷键分发链路中处理这些按键。内建快捷键仍然优先于插件 keybinding，插件 keybinding 又优先于 terminal hooks 的 `registerShortcut()`。
+
 ```javascript
 ctx.ui.registerKeybinding('ctrl+shift+p', () => {
   console.log('Plugin action triggered!');
@@ -1180,7 +1196,9 @@ ctx.ui.showNotification({
 ui.showProgress(title: string): ProgressReporter
 ```
 
-显示进度指示器，返回可更新和关闭的 `ProgressReporter`。
+显示进度指示器，返回可更新的 `ProgressReporter`。
+
+宿主会在右上角显示轻量进度 HUD。当 `report(value, total)` 到达 100% 时，进度项会自动收起。
 
 ```typescript
 type ProgressReporter = {
@@ -2482,10 +2500,12 @@ function ItemList() {
 ### 7.4 使用 Lucide React Icons
 
 ```javascript
-const { lucideIcons } = window.__OXIDE__;
+const { lucideIcons, lucideReact } = window.__OXIDE__;
 // lucideIcons 是一个 { 名称: 组件 } 映射对象
 const Activity = lucideIcons['Activity'];
 const Terminal = lucideIcons['Terminal'];
+// lucideReact 是带降级的完整模块代理，不存在的 PascalCase 图标会回退到 Puzzle
+const Wifi = lucideReact.Wifi;
 
 function MyIcon() {
   return h(Activity, { className: 'h-4 w-4 text-primary' });
@@ -2494,7 +2514,7 @@ function MyIcon() {
 
 完整图标列表见: https://lucide.dev/icons/
 
-> **Manifest 图标解析**：`plugin.json` 中 `contributes.tabs[].icon` 和 `contributes.sidebarPanels[].icon` 字段使用图标名称字符串（如 `"LayoutDashboard"`），系统会通过 `resolvePluginIcon()` 自动将其解析为对应的 Lucide React 组件，用于标签栏和侧边栏活动栏的图标渲染。插件组件内部通过 `lucideIcons['IconName']` 获取图标组件。
+> **Manifest 图标解析**：`plugin.json` 中 `contributes.tabs[].icon` 和 `contributes.sidebarPanels[].icon` 字段使用图标名称字符串（如 `"LayoutDashboard"`），系统会通过 `resolvePluginIcon()` 自动将其解析为对应的 Lucide React 组件，用于标签栏和侧边栏活动栏的图标渲染。插件组件内部如果要按字符串索引图标，可使用 `lucideIcons['IconName']`；如果直接按属性名取图标并希望在缺失时自动回退，可优先使用 `lucideReact.IconName`。
 
 ### 7.5 使用 UI Kit（推荐）
 
@@ -3316,19 +3336,23 @@ const disposable4 = ctx.events.onReconnect((snapshot) => {
 });
 ```
 
-### 10.2 会话事件
+### 10.2 节点就绪事件
 
 ```javascript
-ctx.events.onSessionCreated(({ sessionId, connectionId }) => {
-  console.log(`New terminal session ${sessionId} on connection ${connectionId}`);
+ctx.events.onNodeReady(({ nodeId, connectionId }) => {
+  console.log(`Node ${nodeId} is ready on connection ${connectionId}`);
 });
 
-ctx.events.onSessionClosed(({ sessionId }) => {
-  console.log(`Session ${sessionId} closed`);
+ctx.events.onNodeDisconnected(({ nodeId }) => {
+  console.log(`Node ${nodeId} disconnected`);
 });
 ```
 
-会话事件通过 diff `terminalIds` 数组检测。
+这两个事件更适合拿来挂载或释放插件能力：
+
+- `nodeId`：稳定的逻辑节点标识，跨重连仍然可用，适合用于终端、SFTP、IDE 相关能力绑定。
+- `connectionId`：当前传输层连接 ID，可能在重连后发生变化。
+- `sessionId`：终端会话 ID；当节点还没有绑定终端，或者当前没有聚焦终端时，可以为 `null`。
 
 ### 10.3 插件间通信
 
@@ -3369,6 +3393,8 @@ type ConnectionSnapshot = Readonly<{
   parentConnectionId?: string;        // 父连接 ID（跳板机场景）
 }>;
 ```
+
+补充说明：`ConnectionSnapshot.id` 表示当前连接实例 ID；如果你需要跨重连保持稳定的标识，请使用 `onNodeReady()` / `onNodeDisconnected()` 事件里的 `nodeId`。
 
 **SshConnectionState** 可能的值：
 
@@ -3898,7 +3924,7 @@ export function deactivate() {
 
 2. **节流事件注意性能**：`transfers.onProgress`（500ms）和 `profiler.onMetrics`（1s）已做节流，但 handler 内仍应保持轻量——避免 DOM 操作或复杂计算。
 
-3. **按需使用命名空间**：v3 的 19 个命名空间按需注入。如果你只需要 `ui` 和 `terminal`，不必关心 `profiler` 或 `ai`。
+3. **按需使用命名空间**：v3 提供 18 个 API 命名空间，外加顶层 `pluginId` 字段。如果你只需要 `ui` 和 `terminal`，不必关心 `profiler` 或 `ai`。
 
 4. **Disposable 生命周期**：v3 事件订阅（`onTreeChange`、`onProgress`、`onMetrics` 等）返回 `Disposable`。务必在 `deactivate()` 中清理，或使用 `ctx.events.on` 系列 API 由框架自动管理。
 
@@ -4736,7 +4762,7 @@ declare global {
         },
         "connectionHooks": {
           "type": "array",
-          "items": { "type": "string", "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"] }
+          "items": { "type": "string", "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown", "onIdle"] }
         },
         "apiCommands": {
           "type": "array",
@@ -4777,4 +4803,4 @@ declare global {
 
 ---
 
-*本文档基于 OxideTerm v1.6.2（Plugin API v3）插件系统源码更新。最后更新：2026-03-15。如有疑问，请参考上述源码文件或提交 Issue。*
+*本文档基于当前仓库中的 OxideTerm Plugin API v3 源码更新。最后更新：2026-04-09。如有疑问，请参考上述源码文件或提交 Issue。*

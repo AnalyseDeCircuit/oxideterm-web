@@ -76,7 +76,7 @@
     "i18n": "11개 언어",
     "i18n_desc": "22개 네임스페이스 전체 UI 번역: English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español, Italiano, Português, Tiếng Việt.",
     "plugin": "플러그인 생태계",
-    "plugin_desc": "런타임 ESM 로딩. 18개 API 네임스페이스, 24개 사전 구축 UI 컴포넌트, 동결 API 계약, 서킷 브레이커 자동 비활성화."
+    "plugin_desc": "런타임 ESM 플러그인. 18개 API 네임스페이스, 내장 UI Kit, 그리고 네이티브로 통합된 탭, 사이드바 패널, 컨텍스트 메뉴, 상태 표시줄 항목, 단축키, 진행 UI를 제공합니다."
   },
   "download": {
     "badge": "시작하기",
