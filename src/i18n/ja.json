@@ -26,7 +26,11 @@
     "allinone_title": "オールインワンワークスペース",
     "allinone_desc": "ターミナル、SFTP、IDE、AIアシスタント、ポートフォワーディング、プラグイン——一つのウィンドウに統合。ツール間の切り替え不要。",
     "reconnect_title": "Grace Period 再接続",
-    "reconnect_desc": "ネットワーク断絶？OxideTermは再接続前に旧接続を30秒間プローブ。vim、htop、yaziのセッションが生き残ります。"
+    "reconnect_desc": "ネットワーク断絶？OxideTermは再接続前に旧接続を30秒間プローブ。vim、htop、yaziのセッションが生き残ります。",
+    "proxyjump_title": "マルチホップ ProxyJump",
+    "proxyjump_desc": "無制限のジャンプホストを連鎖可能。内蔵トポロジーグラフ付き。SSH 設定ファイル不要——視覚的にマルチホップ接続をセットアップ。",
+    "plugins_title": "公式プラグイン",
+    "plugins_desc": "Cloud Sync で暗号化セルフホスト型バックアップ（WebDAV、HTTP、Dropbox、Git、S3）、Quick Commands でワンクリックコマンド実行。"
   },
   "comparison": {
     "badge": "差別化",
@@ -47,7 +51,11 @@
     "pain_6": "100+ MB の Electron アプリ",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB バイナリ。ラッパーではなく、Rust バックエンドの本物のネイティブアプリ",
     "pain_7": "AI が一つのプロバイダーに縛られる",
-    "answer_7": "<strong>OxideSens</strong> — 40+ 自律ツール、MCP プロトコル、RAG ナレッジベース。任意の API に対応"
+    "answer_7": "<strong>OxideSens</strong> — 40+ 自律ツール、MCP プロトコル、RAG ナレッジベース。任意の API に対応",
+    "pain_8": "資格情報が設定ファイルに平文で保存される",
+    "answer_8": "<strong>保存時暗号化</strong> — パスワードは OS キーチェーンに保存、.oxide エクスポートは ChaCha20-Poly1305 + Argon2id で暗号化。平文保存なし",
+    "pain_9": "クラウド依存、アカウント必須のツール",
+    "answer_9": "<strong>ローカルファースト</strong> — アカウント不要、テレメトリなし。Cloud Sync は公式プラグインでオプトイン"
   },
   "showcase": {
     "title": "主な機能",
@@ -174,7 +182,7 @@
     "subtitle": "oxt の紹介 —— ターミナルの相棒。",
     "desc": "JSON-RPC 2.0 を Unix Socket（macOS/Linux）または名前付きパイプ（Windows）で通信。ヒューマンフレンドリーかつマシンパーサブルな出力。",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v0.21.0  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
@@ -235,7 +243,7 @@
     "q1": "OxideTerm は無料ですか？",
     "a1": "OxideTerm は GPL-3.0 オープンソースライセンスのもとで提供されており、個人・教育・商用を含むすべての用途で無料でご利用いただけます。",
     "q2": "どの SSH 認証方式に対応していますか？",
-    "a2": "パスワード認証、秘密鍵（Ed25519、RSA、ECDSA）、キーボードインタラクティブ認証、エージェント転送、FIDO2/U2F ハードウェアセキュリティキーに対応。",
+    "a2": "パスワード認証、秘密鍵（Ed25519、RSA、ECDSA）、キーボードインタラクティブ 2FA、エージェント転送、証明書認証、SSH Agent に対応。",
     "q3": "データはどこに保存されますか？",
     "a3": "すべてのデータはお使いのデバイスに保存されます。認証情報は OS のキーチェーン（macOS キーチェーン、Windows 資格情報マネージャー、Linux Secret Service）に格納。エクスポート設定は ChaCha20-Poly1305 で暗号化。サーバーへのアップロードは一切ありません。",
     "q4": "オフラインで使用できますか？",

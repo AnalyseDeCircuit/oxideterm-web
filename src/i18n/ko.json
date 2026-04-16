@@ -26,7 +26,11 @@
     "allinone_title": "올인원 워크스페이스",
     "allinone_desc": "터미널, SFTP, IDE, AI 어시스턴트, 포트 포워딩, 플러그인 — 하나의 창에 통합. 도구 전환이 필요 없습니다.",
     "reconnect_title": "Grace Period 재접속",
-    "reconnect_desc": "네트워크 끊김? OxideTerm은 재접속 전 기존 연결을 30초간 탐지합니다. vim, htop, yazi 세션이 살아남습니다."
+    "reconnect_desc": "네트워크 끊김? OxideTerm은 재접속 전 기존 연결을 30초간 탐지합니다. vim, htop, yazi 세션이 살아남습니다.",
+    "proxyjump_title": "멀티홉 ProxyJump",
+    "proxyjump_desc": "무제한 점프 호스트 체인. 내장 토폴로지 그래프. SSH 설정 파일 불필요 — 시각적으로 멀티홉 연결 설정.",
+    "plugins_title": "공식 플러그인",
+    "plugins_desc": "Cloud Sync로 암호화된 셀프 호스팅 백업(WebDAV, HTTP, Dropbox, Git, S3), Quick Commands로 원클릭 명령 실행."
   },
   "comparison": {
     "badge": "차별점",
@@ -47,7 +51,11 @@
     "pain_6": "100+ MB Electron 앱",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB 바이너리. 래퍼가 아닌 Rust 백엔드의 진정한 네이티브 앱",
     "pain_7": "AI가 하나의 제공업체에 종속",
-    "answer_7": "<strong>OxideSens</strong> — 40+ 자율 도구, MCP 프로토콜, RAG 지식 베이스. 모든 API와 호환"
+    "answer_7": "<strong>OxideSens</strong> — 40+ 자율 도구, MCP 프로토콜, RAG 지식 베이스. 모든 API와 호환",
+    "pain_8": "자격 증명이 설정 파일에 평문으로 저장됨",
+    "answer_8": "<strong>저장 시 암호화</strong> — 비밀번호는 OS 키체인에 저장, .oxide 내보내기는 ChaCha20-Poly1305 + Argon2id로 암호화. 평문 저장 없음",
+    "pain_9": "클라우드 의존, 계정 필수 도구",
+    "answer_9": "<strong>로컬 우선</strong> — 계정 불필요, 텔레메트리 없음. Cloud Sync는 공식 플러그인으로 선택적 사용"
   },
   "showcase": {
     "title": "주요 기능",
@@ -174,7 +182,7 @@
     "subtitle": "oxt를 소개합니다 — 터미널의 좋은 동료.",
     "desc": "JSON-RPC 2.0을 Unix Socket (macOS/Linux) 또는 명명된 파이프 (Windows)로 통신. 사람 친화적이고 기계 파싱 가능한 출력.",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v0.21.0  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
@@ -235,7 +243,7 @@
     "q1": "OxideTerm은 무료인가요?",
     "a1": "OxideTerm은 GPL-3.0 오픈소스 라이선스로 제공되며, 개인, 교육 및 상업적 용도를 포함하여 모든 사람이 무료로 사용할 수 있습니다.",
     "q2": "어떤 SSH 인증 방식을 지원하나요?",
-    "a2": "비밀번호, 개인키(Ed25519, RSA, ECDSA), 키보드 대화형 인증, 에이전트 전달, FIDO2/U2F 하드웨어 보안 키를 지원합니다.",
+    "a2": "비밀번호, 개인키(Ed25519, RSA, ECDSA), 키보드 대화형 2FA, 에이전트 전달, 인증서, SSH Agent를 지원합니다.",
     "q3": "데이터는 어디에 저장되나요?",
     "a3": "모든 데이터는 사용자의 기기에 보관됩니다. 인증 정보는 OS 키체인(macOS 키체인, Windows 자격 증명 관리자, Linux Secret Service)에 저장됩니다. 내보낸 설정은 ChaCha20-Poly1305로 암호화됩니다. 어떤 서버에도 업로드되지 않습니다.",
     "q4": "오프라인에서 사용할 수 있나요?",

@@ -26,7 +26,11 @@
     "allinone_title": "Espacio de trabajo todo en uno",
     "allinone_desc": "Terminal, SFTP, IDE, asistente IA, reenvío de puertos y plugins — unificados en una sola ventana. Sin más cambios entre herramientas.",
     "reconnect_title": "Reconexión Grace Period",
-    "reconnect_desc": "¿Corte de red? OxideTerm sondea la conexión anterior durante 30 segundos antes de reconectar. Tus sesiones de vim, htop y yazi sobreviven."
+    "reconnect_desc": "¿Corte de red? OxideTerm sondea la conexión anterior durante 30 segundos antes de reconectar. Tus sesiones de vim, htop y yazi sobreviven.",
+    "proxyjump_title": "ProxyJump multi-salto",
+    "proxyjump_desc": "Encadena hosts de salto ilimitados con el grafo de topología integrado. Sin configuración SSH necesaria — configura conexiones multi-salto visualmente.",
+    "plugins_title": "Plugins oficiales",
+    "plugins_desc": "Cloud Sync para respaldo cifrado auto-alojado (WebDAV, HTTP, Dropbox, Git, S3) y Quick Commands para ejecución de comandos con un clic."
   },
   "comparison": {
     "badge": "LA DIFERENCIA",
@@ -47,7 +51,11 @@
     "pain_6": "Aplicaciones Electron de 100+ MB",
     "answer_6": "<strong>Tauri 2.0</strong> — binario de 25–40 MB. No es un wrapper — aplicación nativa real con backend Rust",
     "pain_7": "IA limitada a un solo proveedor",
-    "answer_7": "<strong>OxideSens</strong> — 40+ herramientas autónomas, protocolo MCP, base de conocimientos RAG. Compatible con cualquier API"
+    "answer_7": "<strong>OxideSens</strong> — 40+ herramientas autónomas, protocolo MCP, base de conocimientos RAG. Compatible con cualquier API",
+    "pain_8": "Credenciales almacenadas en texto plano en archivos de configuración",
+    "answer_8": "<strong>Cifrado en reposo</strong> — llavero del SO para contraseñas, ChaCha20-Poly1305 + Argon2id para exportaciones .oxide. Nada en texto plano",
+    "pain_9": "Herramientas dependientes de la nube que requieren cuenta",
+    "answer_9": "<strong>Local-first</strong> — cero cuentas, cero telemetría. Cloud Sync opcional mediante plugin oficial"
   },
   "showcase": {
     "title": "Funcionalidades",
@@ -174,7 +182,7 @@
     "subtitle": "Conozca oxt — su aliado de terminal.",
     "desc": "JSON-RPC 2.0 vía Unix Socket (macOS/Linux) o Named Pipe (Windows). Salida legible y parseable.",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v0.21.0  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
@@ -235,7 +243,7 @@
     "q1": "¿OxideTerm es gratuito?",
     "a1": "OxideTerm es de código abierto bajo la licencia GPL-3.0, gratuito para todos, incluyendo uso personal, educativo y comercial.",
     "q2": "¿Qué métodos de autenticación SSH se soportan?",
-    "a2": "Contraseña, clave privada (Ed25519, RSA, ECDSA), autenticación interactiva por teclado, reenvío de agente y llaves de seguridad de hardware FIDO2/U2F.",
+    "a2": "Contraseña, clave privada (Ed25519, RSA, ECDSA), autenticación interactiva 2FA, reenvío de agente, certificados y SSH Agent.",
     "q3": "¿Dónde se almacenan mis datos?",
     "a3": "Todo permanece en tu dispositivo. Las credenciales se guardan en el llavero del sistema operativo (Llavero de macOS, Administrador de credenciales de Windows, Linux Secret Service). Las configuraciones exportadas están cifradas con ChaCha20-Poly1305. Nada se sube a ningún servidor.",
     "q4": "¿Puedo usar OxideTerm sin conexión?",

@@ -26,7 +26,11 @@
     "allinone_title": "All-in-One 工作站",
     "allinone_desc": "終端、SFTP、IDE、AI 助手、連接埠轉發、外掛——統一在一個視窗。無需在工具間反覆切換。",
     "reconnect_title": "Grace Period 斷線續連",
-    "reconnect_desc": "網路中斷？OxideTerm 會先探測舊連線 30 秒再重連。您的 vim、htop、yazi 工作階段得以保留。"
+    "reconnect_desc": "網路中斷？OxideTerm 會先探測舊連線 30 秒再重連。您的 vim、htop、yazi 工作階段得以保留。",
+    "proxyjump_title": "多跳 ProxyJump",
+    "proxyjump_desc": "串聯無限跳板主機，內建拓撲圖。無需 SSH 設定檔——以視覺化方式設定多跳連線。",
+    "plugins_title": "官方外掛",
+    "plugins_desc": "Cloud Sync 提供加密自託管備份（WebDAV、HTTP、Dropbox、Git、S3），Quick Commands 提供一鍵命令執行。"
   },
   "comparison": {
     "badge": "與眾不同",
@@ -47,7 +51,11 @@
     "pain_6": "100+ MB 的 Electron 應用",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB 二進位檔案。非外殼——Rust 後端的真正原生應用",
     "pain_7": "AI 只能用一家供應商",
-    "answer_7": "<strong>OxideSens</strong> — 40+ 自主工具、MCP 協議、RAG 知識庫。相容任意 API"
+    "answer_7": "<strong>OxideSens</strong> — 40+ 自主工具、MCP 協議、RAG 知識庫。相容任意 API",
+    "pain_8": "憑證以明文儲存在設定檔中",
+    "answer_8": "<strong>靜態加密</strong> — 密碼儲存於系統鑰匙圈，.oxide 匯出使用 ChaCha20-Poly1305 + Argon2id 加密。無明文儲存",
+    "pain_9": "依賴雲端、需要註冊帳號的工具",
+    "answer_9": "<strong>本地優先</strong> — 零帳號、零遙測。Cloud Sync 透過官方外掛可選啟用"
   },
   "showcase": {
     "title": "功能一覽",
@@ -174,7 +182,7 @@
     "subtitle": "認識 oxt —— 你的終端好夥伴。",
     "desc": "JSON-RPC 2.0 基於 Unix Socket（macOS/Linux）或具名管道（Windows）。人類友善且機器可解析的輸出。",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v0.21.0  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
@@ -235,7 +243,7 @@
     "q1": "OxideTerm 是免費的嗎？",
     "a1": "OxideTerm 採用 GPL-3.0 開源授權條款，所有人均可免費使用，包括個人、教育和商業用途。",
     "q2": "支援哪些 SSH 認證方式？",
-    "a2": "密碼認證、私鑰（Ed25519、RSA、ECDSA）、鍵盤互動認證、Agent 轉發，以及 FIDO2/U2F 硬體安全金鑰。",
+    "a2": "密碼認證、私鑰（Ed25519、RSA、ECDSA）、鍵盤互動 2FA、Agent 轉發、憑證認證，以及 SSH Agent。",
     "q3": "資料儲存在哪裡？",
     "a3": "所有資料都保留在您的裝置上。憑證儲存在作業系統鑰匙圈中（macOS 鑰匙圈、Windows 認證管理員、Linux Secret Service）。匯出設定使用 ChaCha20-Poly1305 加密。不會向任何伺服器上傳資料。",
     "q4": "可以離線使用嗎？",

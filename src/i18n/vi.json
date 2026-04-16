@@ -26,7 +26,11 @@
     "allinone_title": "Không gian làm việc tất cả trong một",
     "allinone_desc": "Terminal, SFTP, IDE, trợ lý AI, chuyển tiếp cổng và plugin — hợp nhất trong một cửa sổ. Không cần chuyển đổi giữa các công cụ.",
     "reconnect_title": "Kết nối lại Grace Period",
-    "reconnect_desc": "Mất mạng? OxideTerm thăm dò kết nối cũ trong 30 giây trước khi kết nối lại. Phiên vim, htop và yazi của bạn vẫn còn."
+    "reconnect_desc": "Mất mạng? OxideTerm thăm dò kết nối cũ trong 30 giây trước khi kết nối lại. Phiên vim, htop và yazi của bạn vẫn còn.",
+    "proxyjump_title": "ProxyJump đa chặng",
+    "proxyjump_desc": "Chuỗi không giới hạn jump host với đồ thị topology tích hợp. Không cần cấu hình SSH — thiết lập kết nối đa chặng bằng giao diện trực quan.",
+    "plugins_title": "Plugin chính thức",
+    "plugins_desc": "Cloud Sync cho sao lưu mã hóa tự lưu trữ (WebDAV, HTTP, Dropbox, Git, S3) và Quick Commands cho thực thi lệnh một cú nhấp."
   },
   "comparison": {
     "badge": "SỰ KHÁC BIỆT",
@@ -47,7 +51,11 @@
     "pain_6": "Ứng dụng Electron 100+ MB",
     "answer_6": "<strong>Tauri 2.0</strong> — binary 25–40 MB. Không phải wrapper — ứng dụng gốc thực sự với backend Rust",
     "pain_7": "AI bị khóa với một nhà cung cấp",
-    "answer_7": "<strong>OxideSens</strong> — 40+ công cụ tự động, giao thức MCP, cơ sở tri thức RAG. Tương thích mọi API"
+    "answer_7": "<strong>OxideSens</strong> — 40+ công cụ tự động, giao thức MCP, cơ sở tri thức RAG. Tương thích mọi API",
+    "pain_8": "Thông tin đăng nhập lưu dạng văn bản thuần trong file cấu hình",
+    "answer_8": "<strong>Mã hóa khi lưu trữ</strong> — keychain hệ điều hành cho mật khẩu, ChaCha20-Poly1305 + Argon2id cho xuất khẩu .oxide. Không có gì ở dạng văn bản thuần",
+    "pain_9": "Công cụ phụ thuộc đám mây, yêu cầu tài khoản",
+    "answer_9": "<strong>Ưu tiên cục bộ</strong> — không tài khoản, không telemetry. Cloud Sync tùy chọn qua plugin chính thức"
   },
   "showcase": {
     "title": "Tính năng chính",
@@ -174,7 +182,7 @@
     "subtitle": "Gặp oxt — đồng hành terminal của bạn.",
     "desc": "JSON-RPC 2.0 qua Unix Socket (macOS/Linux) hoặc Named Pipe (Windows). Đầu ra dễ đọc và phân tích được.",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v0.21.0  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
@@ -235,7 +243,7 @@
     "q1": "OxideTerm có miễn phí không?",
     "a1": "OxideTerm là mã nguồn mở theo giấy phép GPL-3.0, miễn phí cho tất cả mọi người, bao gồm cá nhân, giáo dục và thương mại.",
     "q2": "Hỗ trợ những phương thức xác thực SSH nào?",
-    "a2": "Mật khẩu, khóa riêng (Ed25519, RSA, ECDSA), xác thực tương tác bàn phím, chuyển tiếp agent và khóa bảo mật phần cứng FIDO2/U2F.",
+    "a2": "Mật khẩu, khóa riêng (Ed25519, RSA, ECDSA), xác thực tương tác bàn phím 2FA, chuyển tiếp agent, chứng chỉ và SSH Agent.",
     "q3": "Dữ liệu được lưu ở đâu?",
     "a3": "Mọi thứ đều nằm trên thiết bị của bạn. Thông tin đăng nhập được lưu trong keychain hệ điều hành (macOS Keychain, Windows Credential Manager, Linux Secret Service). Cấu hình xuất ra được mã hóa bằng ChaCha20-Poly1305. Không có gì được tải lên bất kỳ máy chủ nào.",
     "q4": "Có thể sử dụng OxideTerm ngoại tuyến không?",

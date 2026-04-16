@@ -26,7 +26,11 @@
     "allinone_title": "All-in-One Workspace",
     "allinone_desc": "Terminal, SFTP, IDE, AI assistant, port forwarding, and plugins — unified in a single window. No more juggling tools.",
     "reconnect_title": "Grace Period Reconnect",
-    "reconnect_desc": "Network drops? OxideTerm probes your old connection for 30 seconds before reconnecting. Your vim, htop, and yazi sessions survive."
+    "reconnect_desc": "Network drops? OxideTerm probes your old connection for 30 seconds before reconnecting. Your vim, htop, and yazi sessions survive.",
+    "proxyjump_title": "Multi-Hop ProxyJump",
+    "proxyjump_desc": "Chain unlimited jump hosts with built-in topology graph. No SSH config needed — set up multi-hop connections visually.",
+    "plugins_title": "Official Plugins",
+    "plugins_desc": "Cloud Sync for encrypted self-hosted backup (WebDAV, HTTP, Dropbox, Git, S3) and Quick Commands for one-click command execution."
   },
   "comparison": {
     "badge": "THE DIFFERENCE",
@@ -47,7 +51,11 @@
     "pain_6": "100+ MB Electron apps",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB binary. Not a wrapper — genuine native app with Rust backend",
     "pain_7": "AI locked to one provider",
-    "answer_7": "<strong>OxideSens</strong> — 40+ autonomous tools, MCP protocol, RAG knowledge base. Works with any API"
+    "answer_7": "<strong>OxideSens</strong> — 40+ autonomous tools, MCP protocol, RAG knowledge base. Works with any API",
+    "pain_8": "Credentials stored in plain-text configs",
+    "answer_8": "<strong>Encrypted at rest</strong> — OS keychain for passwords, ChaCha20-Poly1305 + Argon2id for .oxide exports. Nothing in plain text",
+    "pain_9": "Cloud-dependent, account-required tools",
+    "answer_9": "<strong>Local-first</strong> — zero accounts, zero telemetry. Cloud sync opt-in via official plugin"
   },
   "showcase": {
     "title": "See It in Action",
@@ -174,7 +182,7 @@
     "subtitle": "Meet oxt — your terminal wingman.",
     "desc": "JSON-RPC 2.0 over Unix Socket (macOS/Linux) or Named Pipe (Windows). Human-friendly and machine-parseable output.",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v0.21.0  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
@@ -235,7 +243,7 @@
     "q1": "Is OxideTerm free?",
     "a1": "OxideTerm is open source under the GPL-3.0 license. Free for everyone — personal, educational, and commercial use. Derivative works must also be open sourced under GPL-3.0.",
     "q2": "Which SSH authentication methods are supported?",
-    "a2": "Password, private key (Ed25519, RSA, ECDSA), keyboard-interactive, agent forwarding, and FIDO2/U2F hardware security keys.",
+    "a2": "Password, private key (Ed25519, RSA, ECDSA), keyboard-interactive 2FA, agent forwarding, certificates, and SSH Agent.",
     "q3": "Where is my data stored?",
     "a3": "Everything stays on your device. Credentials are stored in your OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service). Exported configs use ChaCha20-Poly1305 encryption. Nothing is uploaded to any server.",
     "q4": "Can I use OxideTerm offline?",

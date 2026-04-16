@@ -26,7 +26,11 @@
     "allinone_title": "All-in-One 工作站",
     "allinone_desc": "终端、SFTP、IDE、AI 助手、端口转发、插件——统一在一个窗口。无需在工具间反复切换。",
     "reconnect_title": "Grace Period 断线续连",
-    "reconnect_desc": "网络中断？OxideTerm 会先探测旧连接 30 秒再重连。你的 vim、htop、yazi 会话得以保留。"
+    "reconnect_desc": "网络中断？OxideTerm 会先探测旧连接 30 秒再重连。你的 vim、htop、yazi 会话得以保留。",
+    "proxyjump_title": "多跳 ProxyJump",
+    "proxyjump_desc": "串联无限跳板主机，内置拓扑图。无需 SSH 配置文件——可视化设置多跳连接。",
+    "plugins_title": "官方插件",
+    "plugins_desc": "Cloud Sync 提供加密自托管备份（WebDAV、HTTP、Dropbox、Git、S3），Quick Commands 提供一键命令执行。"
   },
   "comparison": {
     "badge": "与众不同",
@@ -47,7 +51,11 @@
     "pain_6": "100+ MB 的 Electron 应用",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB 二进制文件。非套壳——Rust 后端的真正原生应用",
     "pain_7": "AI 只能用一家供应商",
-    "answer_7": "<strong>OxideSens</strong> — 40+ 自主工具、MCP 协议、RAG 知识库。兼容任意 API"
+    "answer_7": "<strong>OxideSens</strong> — 40+ 自主工具、MCP 协议、RAG 知识库。兼容任意 API",
+    "pain_8": "凭证以明文存储在配置文件中",
+    "answer_8": "<strong>静态加密</strong> — 密码存储于系统钥匙串，.oxide 导出使用 ChaCha20-Poly1305 + Argon2id 加密。无明文存储",
+    "pain_9": "依赖云端、需要注册账号的工具",
+    "answer_9": "<strong>本地优先</strong> — 零账号、零遥测。Cloud Sync 通过官方插件可选启用"
   },
   "showcase": {
     "title": "功能一览",
@@ -174,7 +182,7 @@
     "subtitle": "认识 oxt —— 你的终端好搭档。",
     "desc": "JSON-RPC 2.0 基于 Unix Socket（macOS/Linux）或命名管道（Windows）。人类友好且机器可解析的输出。",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v0.21.0  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
@@ -235,7 +243,7 @@
     "q1": "OxideTerm 是免费的吗？",
     "a1": "OxideTerm 采用 GPL-3.0 开源许可证，所有人均可免费使用，包括个人、教育和商业用途。",
     "q2": "支持哪些 SSH 认证方式？",
-    "a2": "密码认证、私钥（Ed25519、RSA、ECDSA）、键盘交互认证、Agent 转发，以及 FIDO2/U2F 硬件安全密钥。",
+    "a2": "密码认证、私钥（Ed25519、RSA、ECDSA）、键盘交互 2FA、Agent 转发、证书认证，以及 SSH Agent。",
     "q3": "数据存储在哪里？",
     "a3": "所有数据都保存在你的设备上。凭证存储在操作系统钥匙链中（macOS 钥匙串、Windows 凭据管理器、Linux Secret Service）。导出配置使用 ChaCha20-Poly1305 加密。不向任何服务器上传数据。",
     "q4": "可以离线使用吗？",
