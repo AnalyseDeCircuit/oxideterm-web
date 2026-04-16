@@ -17,9 +17,11 @@ Open the **New Connection** dialog from the sidebar (`+` button) or Session Mana
 | **SSH Key** | RSA, Ed25519, ECDSA — file path or OS keychain |
 | **SSH Agent** | Delegates to the running `ssh-agent` or macOS Keychain |
 | **Certificate** | SSH certificate with optional CA verification |
-| **Keyboard Interactive** | 2FA / OTP / PAM challenges |
+| **Keyboard Interactive** | 2FA / OTP / PAM challenges on direct connections |
 
 OxideTerm auto-detects the `~/.ssh/` directory and imports keys without configuration.
+
+For direct connections, password auth can also fall back into keyboard-interactive prompts when the server requires it. For ProxyJump chains, explicit `KeyboardInteractive` auth is still limited today, so password/key/agent/certificate auth is the safer choice per hop.
 
 ### Connection Options
 
@@ -28,6 +30,7 @@ OxideTerm auto-detects the `~/.ssh/` directory and imports keys without configur
 - **Group** — organize into folders in the sidebar and Session Manager
 - **Tags** — freeform labels for filtering and searching
 - **ProxyJump (Jump Host)** — chain through one or more bastion hosts
+- **Agent Forwarding** — optionally forward your local SSH Agent to the remote host
 
 ## ProxyJump: Multi-Hop SSH
 
@@ -40,6 +43,13 @@ Local Machine ──► Bastion A ──► Bastion B ──► Target Server
 - Intermediate sessions are opened automatically
 - Each hop is tracked individually in the Connection Pool
 - If any intermediate hop drops, its children are marked `link_down` and cascade-reconnected
+
+### Per-Hop Auth Notes
+
+- Direct connections support password, key, certificate, SSH Agent, and keyboard-interactive prompts
+- ProxyJump hops work best with password, key, certificate, or SSH Agent auth
+- Explicit `KeyboardInteractive` auth over proxy chains remains limited today
+- Imported `ProxyJump` chains from `~/.ssh/config` keep their route structure when brought into OxideTerm
 
 ## Connection Groups
 
@@ -59,9 +69,20 @@ OxideTerm reads your existing `~/.ssh/config` file and imports defined `Host` bl
 On first connection to a new host, OxideTerm uses **Trust On First Use (TOFU)**:
 
 1. The host's public key fingerprint is shown in a confirmation dialog
-2. On acceptance, the key is pinned to OxideTerm's known hosts store
+2. On acceptance, the key is appended to `~/.ssh/known_hosts` using OpenSSH-compatible semantics
 3. On subsequent connects, the stored fingerprint is verified automatically
 4. Key-mismatch warnings are shown prominently — never silently ignored
+
+## Saved Connections at Rest
+
+OxideTerm encrypts saved connection metadata on disk instead of leaving it as plaintext JSON.
+
+- **Passwords / key passphrases / API keys** stay in the OS keychain
+- **Saved connection metadata** is sealed locally with ChaCha20-Poly1305
+- **Local config key** lives in the OS keychain and unlocks the encrypted config document at startup
+- **Legacy plaintext configs** are migrated to encrypted storage on startup
+
+This means hosts, labels, auth metadata, jump routes, and related saved-connection state are protected at rest even before you export anything.
 
 ## Encrypted Export / Import (.oxide)
 
@@ -95,3 +116,5 @@ Right-click any node for quick actions: Connect, Disconnect, New Terminal, Open 
 ## Auto-Route
 
 The **Auto-Route** feature automatically selects the optimal ProxyJump path to a target host by analyzing the current active session tree.
+
+Combined with the topology graph, this gives you a route-aware connection model instead of a flat host list: jump nodes can be reused, downstream failures cascade visibly, and reconnect logic can rebuild the tree from the parent hop outward.

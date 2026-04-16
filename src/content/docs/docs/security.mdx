@@ -30,6 +30,17 @@ All sensitive credentials are stored in the **operating system's native keychain
 
 Passwords, private key passphrases, and API keys are **never** stored in configuration files, databases, or plaintext.
 
+### Encrypted Local Config
+
+Not every important field belongs in the OS keychain, so OxideTerm also encrypts saved local configuration at rest.
+
+- The on-disk local config is stored as an encrypted document, not plaintext JSON
+- A dedicated local config key is kept in the OS keychain
+- Connection metadata, jump routes, labels, and related saved state are sealed locally with ChaCha20-Poly1305
+- Older plaintext configs are migrated to encrypted storage on startup
+
+In practice: secrets stay in the system keychain, while the rest of your saved connection state is still protected on disk.
+
 ### AI API Keys
 
 OxideSens AI API keys are stored under the `com.oxideterm.ai` service in the OS keychain, separate from SSH credentials.
@@ -67,7 +78,7 @@ OxideTerm implements **TOFU (Trust On First Use)**:
 - First connection: accept and store the host key
 - Subsequent connections: verify against stored key
 - **Reject host key changes** — protects against MITM attacks
-- Uses `~/.ssh/known_hosts` for compatibility with OpenSSH
+- Uses `~/.ssh/known_hosts` with OpenSSH-compatible behavior
 
 ### Supported Key Types
 
@@ -119,8 +130,9 @@ The Tauri application uses a null CSP. No external web content is loaded — all
 ## Data Privacy
 
 - **No telemetry** — OxideTerm does not collect or transmit usage data
-- **No cloud services** — all data stays on your machine
+- **Local-first by default** — no mandatory account, no required cloud service
 - **Local-first** — bring your own API keys for AI features
+- **Opt-in cloud workflows** — Cloud Sync is available as an official plugin, not a core requirement
 - **Explicit data send** — terminal buffer data is only sent to AI providers when you click the Context button and send a message
 - **Local AI** — use Ollama for fully offline AI assistance with zero network traffic
 - **redb storage** — all persistent data (sessions, settings, chat history) stored locally in an embedded key-value database

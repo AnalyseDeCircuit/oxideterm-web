@@ -5,6 +5,25 @@ description: Extend OxideTerm with runtime ESM plugins, a frozen PluginContext A
 
 OxideTerm ships with a runtime plugin system that lets third-party extensions add tabs, sidebar panels, terminal hooks, commands, SFTP workflows, and lightweight UI integrations without patching the core application.
 
+This page covers both the user-facing plugin model and the developer-facing runtime API.
+
+## Official Plugins
+
+OxideTerm keeps the core app local-first and optional by design. Official plugins extend that baseline with focused workflows:
+
+- **Cloud Sync** — encrypted self-hosted sync and backup for `.oxide` snapshots via WebDAV, HTTP JSON, Dropbox, Git, or S3
+- **Quick Commands** — save, organize, and run frequently used terminal commands with per-host filtering
+
+Official plugins are optional. You do not need an account to use OxideTerm, and cloud-backed workflows stay opt-in.
+
+## Installing Plugins
+
+A plugin becomes available when its manifest and entry file are present under `~/.oxideterm/plugins/{plugin-id}/`.
+
+- Download or clone the plugin into the plugins directory
+- Keep the `plugin.json` manifest and ESM entry point together
+- If a plugin does not appear immediately, restart OxideTerm after adding it
+
 ## Runtime Model
 
 Plugins are loaded from `~/.oxideterm/plugins/{plugin-id}/` and activated dynamically at runtime.

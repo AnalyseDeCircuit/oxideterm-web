@@ -35,13 +35,15 @@ OxideTerm uses **Tauri 2.0**, which leverages the system's native webview instea
 
 ### How big is the codebase?
 
-236,000+ lines of Rust & TypeScript.
+271,000+ lines of Rust & TypeScript.
 
 ## Connections
 
 ### How are passwords stored?
 
-Passwords are stored in your operating system's native keychain (Keychain Access on macOS, Windows Credential Manager, Secret Service on Linux). They are **never** stored in configuration files, databases, or plaintext.
+Passwords are stored in your operating system's native keychain (Keychain Access on macOS, Windows Credential Manager, Secret Service on Linux). They are **never** stored in plaintext configuration files.
+
+Saved connection metadata is also encrypted at rest locally. OxideTerm keeps secrets in the OS keychain and seals the on-disk connection config with a local encryption key stored in that same keychain layer.
 
 ### Can I import connections from other SSH clients?
 
@@ -58,6 +60,7 @@ Yes. OxideTerm supports **unlimited ProxyJump hops** with a network topology gra
 - Dijkstra pathfinding calculates optimal routes
 - Visual topology graph shows all nodes and connections
 - Each hop can use a different authentication method (password, key, agent, certificate)
+- Keyboard-interactive / 2FA is supported on direct connections; explicit KeyboardInteractive auth over proxy chains is still limited today
 - Jump nodes are reusable as independent sessions
 
 ### What SSH key types are supported?
@@ -75,6 +78,7 @@ Yes. OxideTerm integrates with the system SSH Agent:
 - **Windows**: via `\\.\pipe\openssh-ssh-agent`
 - Agent auth is replayed automatically on reconnect
 - Each ProxyJump hop can independently use Agent auth
+- Optional Agent Forwarding is available per connection when remote tools need to reach your local agent
 
 ### What happens when my connection drops?
 
@@ -129,6 +133,15 @@ Yes. OxideTerm records sessions in **asciicast v2** format with precise timestam
 Toggle broadcast mode from the toolbar to send identical keystrokes to all selected split panes simultaneously. Useful for managing clusters or running the same command across multiple servers.
 
 ## Plugins
+
+### Are there official plugins?
+
+Yes. OxideTerm currently ships an official plugin lineup focused on optional workflows rather than mandatory accounts:
+
+- **Cloud Sync** — encrypted self-hosted sync for `.oxide` snapshots via WebDAV, HTTP JSON, Dropbox, Git, or S3
+- **Quick Commands** — save, organize, and run frequently used terminal commands with per-host filtering
+
+Plugins are opt-in. The core app remains local-first and works without any cloud account.
 
 ### Where are plugins installed?
 

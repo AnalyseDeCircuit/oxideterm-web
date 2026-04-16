@@ -499,13 +499,13 @@ CLI 会自动检测 stdout 是否为终端：
 ```bash
 # 人类可读格式的状态信息
 $ oxt status
-OxideTerm v0.21.0
+OxideTerm v1.2.1
   Sessions:      5 active
   Connections:   3 SSH, 2 local
 
 # JSON 格式输出（适合脚本使用）
 $ oxt status --json
-{"version":"0.21.0","sessions":5,"connections":{"ssh":3,"local":2},"pid":12345}
+{"version":"1.2.1","sessions":5,"connections":{"ssh":3,"local":2},"pid":12345}
 
 # 在脚本中列出连接
 $ oxt list connections --json | jq '.[].host'

@@ -35,7 +35,7 @@ OxideTerm 使用 **Tauri 2.0**，利用系统原生 webview 而非捆绑 Chromiu
 
 ### 代码库有多大？
 
-236,000+ 行 Rust 和 TypeScript 代码。
+271,000+ 行 Rust 和 TypeScript 代码。
 
 ## 连接
 
@@ -131,25 +131,30 @@ OxideTerm 内置 **优雅期重连** 系统：
 ## 插件
 
 ### 插件安装在哪里？
-
+271,000+ 行 Rust 和 TypeScript 代码。
 插件存储在 `~/.oxideterm/plugins/{plugin-id}/`。每个插件有一个 `plugin.json` 清单文件和一个 ESM 入口点。
 
-### 插件有沙箱保护吗？
+密码存储在操作系统原生钥匙串中（macOS 的钥匙串访问、Windows 凭据管理器、Linux 的 Secret Service）。**绝不** 以明文形式存储在配置文件中。
+
+已保存连接的元数据也会在本地静态加密。OxideTerm 将真正的秘密保存在系统钥匙串中，同时使用同一层钥匙串保护的本地密钥去解锁磁盘上的连接配置。
 
 有。插件运行在多层安全机制下：
-- 冻结 API 表面（`Object.freeze`）
-- 基于 Proxy 的权限 ACL
-- IPC 命令白名单
-- 熔断器——多次错误后自动禁用
-- React 错误边界隔离 UI 故障
+- 键盘交互 / 2FA 在直连场景支持；通过 ProxyJump 链路显式使用 KeyboardInteractive 目前仍有限制
 
 ### 插件可以访问文件系统吗？
 
-不能直接访问。插件通过 PluginContext API 的 `sftp` 和 `storage` 命名空间访问文件。没有直接的文件系统访问权限。
-
-## 故障排除
+当远端工具需要使用本地 Agent 时，也可以按连接开启 Agent Forwarding。
 
 ### macOS 上应用无法启动
+
+### 有官方插件吗？
+
+有。OxideTerm 当前的官方插件主要提供可选工作流，而不是强制账号体系：
+
+- **Cloud Sync** — 通过 WebDAV、HTTP JSON、Dropbox、Git 或 S3 对 `.oxide` 快照进行加密的自托管同步
+- **Quick Commands** — 保存、组织并按主机筛选常用终端命令，一键执行
+
+插件是完全按需启用的。核心应用仍然是本地优先，不要求任何云账号。
 
 首次启动时 macOS Gatekeeper 可能会阻止应用。右键点击应用 → **打开**，或前往 **系统设置** → **隐私与安全性** → **允许**。
 
