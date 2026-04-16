@@ -17,6 +17,14 @@ OxideTerm 插件系统遵循以下设计原则：
 - **失败安全 (Fail-Open)**：Terminal hooks 中的异常不会阻塞终端 I/O，而是回退到原始数据
 - **自动清理**：基于 `Disposable` 模式的自动资源回收，插件卸载时所有注册自动清除
 
+当前 PluginContext 还包含两个面向同步插件的正式命名空间：`ctx.sync`（保存连接的加密导出/导入与冲突策略）和 `ctx.secrets`（插件作用域的 OS keychain 安全存储）。这使得 WebDAV / iCloud / Syncthing 一类同步插件不必再滥用 `ctx.storage` 或直接调用未封装的宿主命令。
+
+当插件一次操作需要读取多个 secret 时，应优先使用 `ctx.secrets.getMany(keys)`，而不是连续多次调用 `ctx.secrets.get()`。宿主会尽量把多项读取合并为一次 keychain 解锁流程，避免在 macOS 上重复弹出 Touch ID / 系统鉴权。
+
+`ctx.sync.importOxide()` 现在支持 `rename`、`skip`、`replace`、`merge` 四种策略。其中 `merge` 适合多端同步场景：宿主会保留现有连接 ID 与本地元数据，导入侧更新主连接字段，`tags` 做并集，本地已保存但导入缺失的 password / key passphrase / certificate passphrase 会继续复用；`.oxide` 中的端口转发规则会以 owner-bound saved forward 的形式一并导入导出，但导入时不会直接创建活跃转发。除了连接本身，`.oxide` 现在还可以携带全局 OxideTerm settings 快照和声明式 plugin settings 偏好快照；插件在导出时可通过 `ctx.sync.exportOxide({ includeAppSettings: true, selectedAppSettingsSections: ['general', 'appearance'], includePluginSettings: true, includeLocalTerminalEnvVars: false })` 精确控制要打包的宿主 settings section，并决定是否携带本地终端环境变量。对应地，`ctx.sync.importOxide()` 也支持 `selectedAppSettingsSections`，可以只导入快照中的部分 settings section；`ctx.sync.previewImport()` 会返回 `hasAppSettings`、`appSettingsSections`、`pluginSettingsCount`、`pluginSettingsByPlugin`、`forwardDetails` 以及记录级 `records`，插件可以直接渲染"为什么会重命名 / 跳过 / 替换 / 合并"，也可以提前提示用户这份快照会恢复哪些全局设置、插件偏好和保存转发。
+
+`ctx.sync.getLocalSyncMetadata()` 现在除了整体的 `savedConnectionsRevision`、`savedForwardsRevision`、`settingsRevision` 之外，还会返回 `appSettingsSectionRevisions` 和 `pluginSettingsRevisions`。同步插件可以基于这些 revision map 做 per-section / per-plugin 的脏检查与增量上传，而不必直接读取宿主内部 store 或 localStorage。
+
 ### 1.2 架构模型
 
 ```
@@ -398,7 +406,7 @@ export function deactivate() {
 | `author` | `string` | ⬜ | 作者 |
 | `main` | `string` | ✅ | ESM 入口文件的相对路径 (如 `"./main.js"` 或 `"./src/main.js"`) |
 | `engines` | `object` | ⬜ | 版本兼容性要求 |
-| `engines.oxideterm` | `string` | ⬜ | 所需最低 OxideTerm 版本 (如 `">=1.6.0"`)。支持 `>=x.y.z` 格式。 |
+| `engines.oxideterm` | `string` | ⬜ | 所需最低 OxideTerm 版本 (如 `">=1.6.0"`)。当前仅支持 `>=x.y.z` 和 `>x.y.z`，预发布后缀会按基础版本比较。 |
 | `contributes` | `object` | ⬜ | 插件贡献的能力声明 |
 | `locales` | `string` | ⬜ | i18n 翻译文件目录的相对路径 (如 `"./locales"`) |
 
@@ -575,10 +583,10 @@ export function deactivate() {
 声明插件关注的连接生命周期事件。
 
 ```json
-"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown", "onIdle"]
+"connectionHooks": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"]
 ```
 
-可选值：`"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkDown"` | `"onIdle"`
+可选值：`"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkDown"`
 
 > 注意：这个字段当前仅作为文档声明，实际事件订阅通过 `ctx.events.onConnect()` 等方法完成。
 
@@ -633,6 +641,9 @@ export function deactivate() {
 | | `sftp_transfer_stats` | 传输队列统计 |
 | **系统** | `get_app_version` | 获取 OxideTerm 版本 |
 | | `get_system_info` | 获取系统信息 |
+| **网络** | `plugin_http_request` | 通过宿主 Rust 后端发起二进制安全 HTTP 请求，适用于 WebDAV、对象存储或其他受 CORS 影响的同步场景 |
+
+> `plugin_http_request` 的请求体和响应体都使用 base64 传输，便于插件安全地处理非文本载荷。使用前仍需在 `contributes.apiCommands` 中显式声明该命令。
 
 ### 4.8 locales
 
@@ -668,7 +679,7 @@ list_plugins()
 前端 `loadPlugin()` 收到 manifest 后进行二次验证：
 
 1. **必需字段检查**：`id`、`name`、`version`、`main` 必须为非空 string
-2. **版本兼容检查**：如果声明了 `engines.oxideterm`，与当前 OxideTerm 版本做简单 semver `>=` 比较
+2. **版本兼容检查**：如果声明了 `engines.oxideterm`，与当前 OxideTerm 版本做简单 semver 比较；当前仅支持 `>=` 和 `>` 两种写法，预发布后缀会被折叠到基础版本号
 3. 验证失败 → 设置 `state: 'error'` 并记录错误信息
 
 ### 5.3 加载 (Loading)
@@ -797,7 +808,7 @@ unloadPlugin(pluginId)
 
 ## 6. PluginContext API 完全参考
 
-`PluginContext` 是传递给 `activate(ctx)` 的唯一参数。它是一个深度冻结的对象，共有 19 个顶层字段，其中包括 `pluginId` 和 18 个 API 命名空间。v3 新增了 7 个只读命名空间。
+`PluginContext` 是传递给 `activate(ctx)` 的唯一参数。它是一个深度冻结的对象，包含 19 个命名空间（`pluginId` + 18 个子 API）。v3 新增了 7 个只读命名空间。
 
 ```typescript
 type PluginContext = Readonly<{
@@ -909,29 +920,21 @@ events.onReconnect(handler: (snapshot: ConnectionSnapshot) => void): Disposable
 
 当连接从 `'reconnecting'`/`'link_down'`/`error` 状态恢复到 `'active'` 时触发。
 
-#### `onIdle(handler)`
+#### `onSessionCreated(handler)`
 
 ```typescript
-events.onIdle(handler: (snapshot: ConnectionSnapshot) => void): Disposable
+events.onSessionCreated(handler: (info: { sessionId: string; connectionId: string }) => void): Disposable
 ```
 
-当一个仍然存活的连接释放掉所有终端引用并进入 `'idle'` 状态时触发。
+当一个新的终端会话（terminal session）在某个连接上创建时触发。
 
-#### `onNodeReady(handler)`
+#### `onSessionClosed(handler)`
 
 ```typescript
-events.onNodeReady(handler: (info: { nodeId: string; connectionId: string }) => void): Disposable
+events.onSessionClosed(handler: (info: { sessionId: string }) => void): Disposable
 ```
 
-当节点进入 ready 状态、插件可安全使用其能力（如 SFTP / IDE）时触发。
-
-#### `onNodeDisconnected(handler)`
-
-```typescript
-events.onNodeDisconnected(handler: (info: { nodeId: string }) => void): Disposable
-```
-
-当节点离开 ready 状态并断开时触发。
+当终端会话关闭时触发。
 
 #### `on(name, handler)` — 自定义事件
 
@@ -1200,6 +1203,8 @@ ui.showProgress(title: string): ProgressReporter
 
 宿主会在右上角显示轻量进度 HUD。当 `report(value, total)` 到达 100% 时，进度项会自动收起。
 
+> 注意：当前 `ProgressReporter` 没有 `dispose()` 或手动关闭接口。如果一次操作已经失败或提前结束，也应主动调用一次完成态上报，例如 `progress.report(1, 1, 'Failed')`，否则 HUD 会持续停留。
+
 ```typescript
 type ProgressReporter = {
   report(value: number, total: number, message?: string): void;
@@ -1324,47 +1329,80 @@ ctx.terminal.registerShortcut('openDashboard', () => {
 });
 ```
 
-#### `writeToTerminal(sessionId, text)`
+#### `getActiveTarget()` <small>v3</small>
 
 ```typescript
-terminal.writeToTerminal(sessionId: string, text: string): void
+terminal.getActiveTarget(): Readonly<{
+  sessionId: string;
+  terminalType: 'terminal' | 'local_terminal';
+  nodeId: string | null;
+  connectionId: string | null;
+  connectionState: string | null;
+  label: string | null;
+}> | null
 ```
 
-向指定会话的终端写入文本数据。通过 `terminalRegistry` 查找对应的 writer 回调，直接写入终端的数据通道（SSH WebSocket 或本地 PTY）。
+获取最近一次聚焦的终端目标。它同时覆盖 SSH 终端和本地终端，因此插件在自己的 Tab 中也能把命令发送回用户刚才操作的终端。
+其中 `connectionState === 'active'` 表示当前目标可写；`label` 是宿主提供的最佳努力显示名称（SSH 一般是 host，本地终端一般是 shell 名称）。
 
 ```javascript
-// 向终端发送命令
-ctx.terminal.writeToTerminal(sessionId, 'ls -la\n');
-
-// 发送特殊控制字符（如 Ctrl+C）
-ctx.terminal.writeToTerminal(sessionId, '\x03');
+const target = ctx.terminal.getActiveTarget();
+if (target) {
+  console.log(target.terminalType, target.label, target.sessionId);
+}
 ```
 
-> 如果找不到 sessionId 对应的终端或 writer 未注册，会输出 `console.warn` 但不会抛异常。
-
-#### `getBuffer(sessionId)`
+#### `writeToActive(text)` <small>v3</small>
 
 ```typescript
-terminal.getBuffer(sessionId: string): string | null
+terminal.writeToActive(text: string): boolean
 ```
 
-返回指定会话的终端缓冲区文本内容。
+向最近一次聚焦的终端直接写入文本。适合"发送到当前终端"这类动作，支持 SSH 和本地终端。
+当目标不存在，或目标状态不是 `active` 时，返回 `false`。
 
 ```javascript
-const buffer = ctx.terminal.getBuffer(sessionId);
+const ok = ctx.terminal.writeToActive('ls -la\n');
+if (!ok) {
+  ctx.ui.showToast({ title: 'No active terminal', variant: 'warning' });
+}
+```
+
+#### `writeToNode(nodeId, text)`
+
+```typescript
+terminal.writeToNode(nodeId: string, text: string): void
+```
+
+向指定 SSH 节点对应的终端写入文本。`nodeId` 在重连后保持稳定，适合绑定到会话树节点的插件逻辑。
+
+```javascript
+ctx.terminal.writeToNode(nodeId, 'journalctl -xe\n');
+```
+
+#### `getNodeBuffer(nodeId)`
+
+```typescript
+terminal.getNodeBuffer(nodeId: string): string | null
+```
+
+返回指定 SSH 节点终端的缓冲区文本内容。
+
+```javascript
+const buffer = ctx.terminal.getNodeBuffer(nodeId);
 if (buffer) {
   const lastLine = buffer.split('\n').pop();
   console.log('Last line:', lastLine);
 }
 ```
 
-#### `getSelection(sessionId)`
+#### `getNodeSelection(nodeId)`
 
 ```typescript
-terminal.getSelection(sessionId: string): string | null
+terminal.getNodeSelection(nodeId: string): string | null
 ```
 
-返回用户在指定会话终端中选中的文本。
+返回用户在指定 SSH 节点终端中选中的文本。
 
 #### `search(nodeId, query, options?)` <small>v3</small>
 
@@ -3336,23 +3374,19 @@ const disposable4 = ctx.events.onReconnect((snapshot) => {
 });
 ```
 
-### 10.2 节点就绪事件
+### 10.2 会话事件
 
 ```javascript
-ctx.events.onNodeReady(({ nodeId, connectionId }) => {
-  console.log(`Node ${nodeId} is ready on connection ${connectionId}`);
+ctx.events.onSessionCreated(({ sessionId, connectionId }) => {
+  console.log(`New terminal session ${sessionId} on connection ${connectionId}`);
 });
 
-ctx.events.onNodeDisconnected(({ nodeId }) => {
-  console.log(`Node ${nodeId} disconnected`);
+ctx.events.onSessionClosed(({ sessionId }) => {
+  console.log(`Session ${sessionId} closed`);
 });
 ```
 
-这两个事件更适合拿来挂载或释放插件能力：
-
-- `nodeId`：稳定的逻辑节点标识，跨重连仍然可用，适合用于终端、SFTP、IDE 相关能力绑定。
-- `connectionId`：当前传输层连接 ID，可能在重连后发生变化。
-- `sessionId`：终端会话 ID；当节点还没有绑定终端，或者当前没有聚焦终端时，可以为 `null`。
+会话事件通过 diff `terminalIds` 数组检测。
 
 ### 10.3 插件间通信
 
@@ -3393,8 +3427,6 @@ type ConnectionSnapshot = Readonly<{
   parentConnectionId?: string;        // 父连接 ID（跳板机场景）
 }>;
 ```
-
-补充说明：`ConnectionSnapshot.id` 表示当前连接实例 ID；如果你需要跨重连保持稳定的标识，请使用 `onNodeReady()` / `onNodeDisconnected()` 事件里的 `nodeId`。
 
 **SshConnectionState** 可能的值：
 
@@ -3924,7 +3956,7 @@ export function deactivate() {
 
 2. **节流事件注意性能**：`transfers.onProgress`（500ms）和 `profiler.onMetrics`（1s）已做节流，但 handler 内仍应保持轻量——避免 DOM 操作或复杂计算。
 
-3. **按需使用命名空间**：v3 提供 18 个 API 命名空间，外加顶层 `pluginId` 字段。如果你只需要 `ui` 和 `terminal`，不必关心 `profiler` 或 `ai`。
+3. **按需使用命名空间**：v3 的 19 个命名空间按需注入。如果你只需要 `ui` 和 `terminal`，不必关心 `profiler` 或 `ai`。
 
 4. **Disposable 生命周期**：v3 事件订阅（`onTreeChange`、`onProgress`、`onMetrics` 等）返回 `Disposable`。务必在 `deactivate()` 中清理，或使用 `ctx.events.on` 系列 API 由框架自动管理。
 
@@ -4076,7 +4108,12 @@ npx esbuild src/index.ts \
 
 ### Q: 插件可以发网络请求吗？
 
-可以使用浏览器原生的 `fetch()` API。但注意 Tauri 的 CSP 策略可能限制某些域名。
+可以，但要区分两类场景：
+
+1. 普通 JSON API 可以直接使用浏览器原生的 `fetch()`。
+2. WebDAV、S3 兼容存储、Dropbox 或其他二进制请求较多且容易被 WebView CORS 限制的场景，建议声明 `plugin_http_request` 并通过 `ctx.api.invoke()` 走宿主 Rust 代理。
+
+`plugin_http_request` 只允许 HTTP/HTTPS URL，请求体参数为 `bodyBase64`，响应会返回 `{ status, headers, bodyBase64 }`。这种方式通常比插件侧直接 `fetch()` 更稳定，尤其适合同步插件。
 
 ### Q: 如何在插件中使用 JSX？
 
@@ -4364,6 +4401,8 @@ export type PluginTerminalAPI = {
   registerInputInterceptor(handler: InputInterceptor): Disposable;
   registerOutputProcessor(handler: OutputProcessor): Disposable;
   registerShortcut(command: string, handler: () => void): Disposable;
+  getActiveTarget(): PluginActiveTerminalTarget | null;
+  writeToActive(text: string): boolean;
   /** Write to terminal by nodeId (stable across reconnects) */
   writeToNode(nodeId: string, text: string): void;
   /** Get terminal buffer by nodeId */
@@ -4762,7 +4801,7 @@ declare global {
         },
         "connectionHooks": {
           "type": "array",
-          "items": { "type": "string", "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown", "onIdle"] }
+          "items": { "type": "string", "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"] }
         },
         "apiCommands": {
           "type": "array",
