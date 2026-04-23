@@ -8,7 +8,7 @@
     "description": "Terminal SSH đa nền tảng xây dựng bằng Rust và Tauri. Shell cục bộ, SSH, SFTP, IDE, AI, chuyển tiếp cổng — tất cả trong một binary gốc."
   },
   "hero": {
-    "tagline": "Không Electron. Không OpenSSL. SSH Rust, Tauri UI.",
+    "tagline": "Không Electron. Không OpenSSL. SSH thuần Rust.",
     "subtitle": "Một binary gốc duy nhất — shell cục bộ, SSH, SFTP, IDE từ xa, AI, chuyển tiếp cổng, plugin, 30+ giao diện, 11 ngôn ngữ.",
     "cta_download": "Tải xuống",
     "cta_docs": "Tài liệu",

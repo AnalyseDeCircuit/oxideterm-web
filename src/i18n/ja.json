@@ -8,7 +8,7 @@
     "description": "RustとTauriで構築されたクロスプラットフォームSSHターミナル。ローカルシェル、SSH、SFTP、IDE、AI、ポートフォワーディング——すべてを一つのネイティブバイナリに。"
   },
   "hero": {
-    "tagline": "Electron不要。OpenSSL不要。Rust SSH、Tauri UI。",
+    "tagline": "Electron不要。OpenSSL不要。Pure Rust SSH。",
     "subtitle": "一つのネイティブバイナリ——ローカルシェル、SSH、SFTP、リモートIDE、AI、ポートフォワーディング、プラグイン、30+テーマ、11言語。",
     "cta_download": "ダウンロード",
     "cta_docs": "ドキュメント",

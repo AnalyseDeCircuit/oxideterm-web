@@ -8,7 +8,7 @@
     "description": "Plattformübergreifendes SSH-Terminal mit Rust und Tauri. Lokale Shells, SSH, SFTP, IDE, KI, Portweiterleitung — alles in einer nativen Binärdatei."
   },
   "hero": {
-    "tagline": "Kein Electron. Kein OpenSSL. Rust SSH, Tauri UI.",
+    "tagline": "Kein Electron. Kein OpenSSL. Reines Rust SSH.",
     "subtitle": "Eine native Binärdatei — lokale Shells, SSH, SFTP, Remote-IDE, KI, Portweiterleitung, Plugins, 30+ Themes, 11 Sprachen.",
     "cta_download": "Herunterladen",
     "cta_docs": "Dokumentation",

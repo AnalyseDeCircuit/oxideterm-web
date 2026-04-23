@@ -8,7 +8,7 @@
     "description": "Rust와 Tauri로 구축된 크로스 플랫폼 SSH 터미널. 로컬 셸, SSH, SFTP, IDE, AI, 포트 포워딩 — 하나의 네이티브 바이너리로."
   },
   "hero": {
-    "tagline": "Electron 없음. OpenSSL 없음. Rust SSH, Tauri UI.",
+    "tagline": "Electron 없음. OpenSSL 없음. 순수 Rust SSH.",
     "subtitle": "하나의 네이티브 바이너리 — 로컬 셸, SSH, SFTP, 원격 IDE, AI, 포트 포워딩, 플러그인, 30+ 테마, 11개 언어.",
     "cta_download": "다운로드",
     "cta_docs": "문서",

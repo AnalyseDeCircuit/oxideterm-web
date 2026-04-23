@@ -8,7 +8,7 @@
     "description": "Terminale SSH multipiattaforma costruito con Rust e Tauri. Shell locali, SSH, SFTP, IDE, IA, port forwarding — tutto in un unico binario nativo."
   },
   "hero": {
-    "tagline": "Zero Electron. Zero OpenSSL. SSH Rust, UI Tauri.",
+    "tagline": "Zero Electron. Zero OpenSSL. SSH in puro Rust.",
     "subtitle": "Un unico binario nativo — shell locali, SSH, SFTP, IDE remoto, IA, port forwarding, plugin, 30+ temi, 11 lingue.",
     "cta_download": "Scarica",
     "cta_docs": "Documentazione",
