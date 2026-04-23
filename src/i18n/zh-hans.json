@@ -4,11 +4,11 @@
   },
   "meta": {
     "lang": "zh-CN",
-    "title": "OxideTerm — 纯 Rust SSH 终端",
+    "title": "OxideTerm — Rust & Tauri SSH 终端",
     "description": "基于 Rust 和 Tauri 构建的跨平台 SSH 终端。本地 Shell、SSH、SFTP、IDE、AI、端口转发——一个客户端全包。"
   },
   "hero": {
-    "tagline": "零 Electron。零 OpenSSL。纯 Rust SSH。",
+    "tagline": "零 Electron。零 OpenSSL。Rust SSH，Tauri UI。",
     "subtitle": "一个原生二进制——本地 Shell、SSH、SFTP、远程 IDE、AI、端口转发、插件、30+ 主题、11 种语言。",
     "cta_download": "下载",
     "cta_docs": "文档",

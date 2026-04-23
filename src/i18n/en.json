@@ -4,11 +4,11 @@
   },
   "meta": {
     "lang": "en",
-    "title": "OxideTerm — Pure Rust SSH Terminal",
+    "title": "OxideTerm — Rust & Tauri SSH Terminal",
     "description": "A cross-platform SSH terminal built with Rust and Tauri. Local shells, SSH, SFTP, IDE, AI, port forwarding — all in one native binary."
   },
   "hero": {
-    "tagline": "Zero Electron. Zero OpenSSL. Pure Rust SSH.",
+    "tagline": "Zero Electron. Zero OpenSSL. Rust SSH, Tauri UI.",
     "subtitle": "One native binary — local shells, SSH, SFTP, remote IDE, AI, port forwarding, plugins, 30+ themes, 11 languages.",
     "cta_download": "Download",
     "cta_docs": "Documentation",

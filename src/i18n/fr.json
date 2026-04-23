@@ -4,11 +4,11 @@
   },
   "meta": {
     "lang": "fr",
-    "title": "OxideTerm — Terminal SSH en Rust pur",
+    "title": "OxideTerm — Terminal SSH Rust & Tauri",
     "description": "Terminal SSH multiplateforme construit avec Rust et Tauri. Shells locaux, SSH, SFTP, IDE, IA, redirection de ports — le tout dans un seul binaire natif."
   },
   "hero": {
-    "tagline": "Zéro Electron. Zéro OpenSSL. SSH pur Rust.",
+    "tagline": "Zéro Electron. Zéro OpenSSL. SSH Rust, UI Tauri.",
     "subtitle": "Un seul binaire natif — shells locaux, SSH, SFTP, IDE distant, IA, redirection de ports, plugins, 30+ thèmes, 11 langues.",
     "cta_download": "Télécharger",
     "cta_docs": "Documentation",
