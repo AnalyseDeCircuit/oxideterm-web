@@ -4,12 +4,12 @@
   },
   "meta": {
     "lang": "vi",
-    "title": "OxideTerm — Terminal SSH Rust & Tauri",
-    "description": "Terminal SSH đa nền tảng xây dựng bằng Rust và Tauri. Shell cục bộ, SSH, SFTP, IDE, AI, chuyển tiếp cổng — tất cả trong một binary gốc."
+    "title": "OxideTerm — Workspace SSH AI-native",
+    "description": "Một workspace SSH AI-native cho terminal, tệp, cổng và ngữ cảnh từ xa. Không Electron, không OpenSSL, SSH thuần Rust."
   },
   "hero": {
-    "tagline": "Không Electron. Không OpenSSL. SSH thuần Rust.",
-    "subtitle": "Một binary gốc duy nhất — shell cục bộ, SSH, SFTP, IDE từ xa, AI, chuyển tiếp cổng, plugin, 30+ giao diện, 11 ngôn ngữ.",
+    "tagline": "Không Electron. Không OpenSSL. Không thu thập dữ liệu. Không đăng ký trả phí. SSH thuần Rust.",
+    "subtitle": "Một workspace SSH AI-native cho terminal, tệp, cổng và ngữ cảnh từ xa — shell cục bộ, SSH, SFTP, chỉnh sửa từ xa, plugin và OxideSens AI trong một binary gốc.",
     "cta_download": "Tải xuống",
     "cta_docs": "Tài liệu",
     "version_prefix": "v",
@@ -30,7 +30,7 @@
     "proxyjump_title": "ProxyJump đa chặng",
     "proxyjump_desc": "Chuỗi không giới hạn jump host với đồ thị topology tích hợp. Không cần cấu hình SSH — thiết lập kết nối đa chặng bằng giao diện trực quan.",
     "plugins_title": "Plugin chính thức",
-    "plugins_desc": "Cloud Sync cho sao lưu mã hóa tự lưu trữ (WebDAV, HTTP, Dropbox, Git, S3) và Quick Commands cho thực thi lệnh một cú nhấp."
+    "plugins_desc": "Cloud Sync, Quick Commands và Telnet Client mở rộng OxideTerm mà không làm phình ứng dụng lõi."
   },
   "comparison": {
     "badge": "SỰ KHÁC BIỆT",
@@ -64,7 +64,7 @@
     "tab_ide": "IDE",
     "tab_forwarding": "Chuyển tiếp",
     "tab_ai": "AI",
-    "terminal_desc": "Chia panel, phát sóng đầu vào, kết xuất WebGL 60fps+, 30+ giao diện tích hợp, ghi phiên, bảng lệnh.",
+    "terminal_desc": "Chia panel, phát sóng đầu vào, kết xuất WebGL 60fps+, 31+ giao diện tích hợp, ghi phiên, bảng lệnh.",
     "sftp_desc": "Trình duyệt file hai panel. Truyền kéo-thả, xem trước thông minh ảnh/video/code/PDF/hex, hàng đợi truyền với tiến trình.",
     "ide_desc": "Trình soạn thảo CodeMirror 6. 24 chế độ ngôn ngữ, cây file với trạng thái Git, giải quyết xung đột, terminal tích hợp.",
     "forwarding_desc": "Chuyển tiếp cục bộ (-L), từ xa (-R) và SOCKS5 động (-D). I/O không khóa, tự phục hồi khi kết nối lại, báo cáo lỗi.",
@@ -99,7 +99,7 @@
     "x64": "x64",
     "get_latest": "Tải phiên bản mới nhất",
     "all_releases": "Xem tất cả bản phát hành trên GitHub",
-    "requirements": "Yêu cầu hệ thống: macOS 10.15+, Windows 10+, Linux (glibc 2.31+)"
+    "requirements": "Yêu cầu hệ thống: macOS 10.15+, Windows 10+, Linux (glibc 2.31+). Sử dụng WebView runtime của hệ thống; hầu hết hệ thống đã có sẵn."
   },
   "stats": {
     "binary_size": "Kích thước nhị phân",
@@ -118,7 +118,7 @@
   "demo": {
     "badge": "DEMO TRỰC TIẾP",
     "title": "Xem thực tế",
-    "subtitle": "OxideSens AI mở terminal cục bộ và chạy lệnh — hoàn toàn tự chủ, hoàn toàn tích hợp.",
+    "subtitle": "OxideSens AI có thể điều khiển terminal đang chạy và công cụ workspace từ một trợ lý duy nhất.",
     "fallback": "Trình duyệt của bạn không hỗ trợ phát video."
   },
   "details": {
@@ -182,7 +182,7 @@
     "subtitle": "Gặp oxt — đồng hành terminal của bạn.",
     "desc": "JSON-RPC 2.0 qua Unix Socket (macOS/Linux) hoặc Named Pipe (Windows). Đầu ra dễ đọc và phân tích được.",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.3.3  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",

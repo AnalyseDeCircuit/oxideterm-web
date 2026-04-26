@@ -4,12 +4,12 @@
   },
   "meta": {
     "lang": "zh-TW",
-    "title": "OxideTerm — Rust & Tauri SSH 終端",
-    "description": "基於 Rust 和 Tauri 構建的跨平台 SSH 終端。本機 Shell、SSH、SFTP、IDE、AI、連接埠轉發——一個用戶端全包。"
+    "title": "OxideTerm — AI 原生 SSH 工作區",
+    "description": "面向終端、檔案、連接埠與遠端上下文的 AI 原生 SSH 工作區。零 Electron、零 OpenSSL、純 Rust SSH。"
   },
   "hero": {
-    "tagline": "零 Electron。零 OpenSSL。純 Rust SSH。",
-    "subtitle": "一個原生二進位——本機 Shell、SSH、SFTP、遠端 IDE、AI、連接埠轉發、外掛、30+ 主題、11 種語言。",
+    "tagline": "零 Electron。零 OpenSSL。零遙測。零訂閱。純 Rust SSH。",
+    "subtitle": "面向終端、檔案、連接埠與遠端上下文的 AI 原生 SSH 工作區——一個原生二進位檔整合本機 Shell、SSH、SFTP、遠端編輯、外掛與 OxideSens AI。",
     "cta_download": "下載",
     "cta_docs": "文件",
     "version_prefix": "v",
@@ -30,7 +30,7 @@
     "proxyjump_title": "多跳 ProxyJump",
     "proxyjump_desc": "串聯無限跳板主機，內建拓撲圖。無需 SSH 設定檔——以視覺化方式設定多跳連線。",
     "plugins_title": "官方外掛",
-    "plugins_desc": "Cloud Sync 提供加密自託管備份（WebDAV、HTTP、Dropbox、Git、S3），Quick Commands 提供一鍵命令執行。"
+    "plugins_desc": "Cloud Sync、Quick Commands 和 Telnet Client 以外掛形式擴展 OxideTerm，不臃腫核心應用。"
   },
   "comparison": {
     "badge": "與眾不同",
@@ -64,7 +64,7 @@
     "tab_ide": "IDE",
     "tab_forwarding": "連接埠轉發",
     "tab_ai": "AI",
-    "terminal_desc": "分割面板、廣播輸入、WebGL 渲染 60fps+、30+ 內建主題、工作階段錄製、命令面板。",
+    "terminal_desc": "分割面板、廣播輸入、WebGL 渲染 60fps+、31+ 內建主題、工作階段錄製、命令面板。",
     "sftp_desc": "雙欄檔案瀏覽器，支援拖放傳輸、圖片/影片/程式碼/PDF/十六進位智慧預覽、帶進度的傳輸佇列。",
     "ide_desc": "CodeMirror 6 編輯器，支援 24 語言模式、檔案樹 Git 狀態、衝突解決、整合終端。",
     "forwarding_desc": "本地 (-L)、遠端 (-R) 和動態 SOCKS5 (-D) 轉發。無鎖 I/O、重連後自動恢復、故障報告。",
@@ -99,7 +99,7 @@
     "x64": "x64",
     "get_latest": "取得最新版本",
     "all_releases": "在 GitHub 查看所有版本",
-    "requirements": "系統需求：macOS 10.15+、Windows 10+ 或 Linux（glibc 2.31+）"
+    "requirements": "系統需求：macOS 10.15+、Windows 10+ 或 Linux（glibc 2.31+）。使用系統 WebView 執行階段，大多數系統已內建。"
   },
   "stats": {
     "binary_size": "安裝包大小",
@@ -118,7 +118,7 @@
   "demo": {
     "badge": "實機演示",
     "title": "一分鐘了解 OxideTerm",
-    "subtitle": "OxideSens AI 開啟本地終端並執行命令——全自主、全整合。",
+    "subtitle": "OxideSens AI 可以從一個助手控制即時終端與工作區工具。",
     "fallback": "您的瀏覽器不支援影片播放。"
   },
   "details": {
@@ -182,7 +182,7 @@
     "subtitle": "認識 oxt —— 你的終端好夥伴。",
     "desc": "JSON-RPC 2.0 基於 Unix Socket（macOS/Linux）或具名管道（Windows）。人類友善且機器可解析的輸出。",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.3.3  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",

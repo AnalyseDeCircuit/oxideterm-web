@@ -1,6 +1,6 @@
 // OxideTerm application version — fetched from GitHub latest release at build time.
 // Falls back to hardcoded version if the API call fails.
-const FALLBACK_VERSION = "1.2.1";
+const FALLBACK_VERSION = "1.3.3";
 
 let _cachedVersion: string | null = null;
 

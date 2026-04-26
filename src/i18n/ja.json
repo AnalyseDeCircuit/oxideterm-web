@@ -4,12 +4,12 @@
   },
   "meta": {
     "lang": "ja",
-    "title": "OxideTerm — Rust & Tauri SSH ターミナル",
-    "description": "RustとTauriで構築されたクロスプラットフォームSSHターミナル。ローカルシェル、SSH、SFTP、IDE、AI、ポートフォワーディング——すべてを一つのネイティブバイナリに。"
+    "title": "OxideTerm — AI ネイティブ SSH ワークスペース",
+    "description": "ターミナル、ファイル、ポート、リモートコンテキストのための AI ネイティブ SSH ワークスペース。Electron ゼロ、OpenSSL ゼロ、純粋な Rust SSH。"
   },
   "hero": {
-    "tagline": "Electron不要。OpenSSL不要。Pure Rust SSH。",
-    "subtitle": "一つのネイティブバイナリ——ローカルシェル、SSH、SFTP、リモートIDE、AI、ポートフォワーディング、プラグイン、30+テーマ、11言語。",
+    "tagline": "Electron ゼロ。OpenSSL ゼロ。テレメトリゼロ。サブスクゼロ。純粋な Rust SSH。",
+    "subtitle": "ターミナル、ファイル、ポート、リモートコンテキストのための AI ネイティブ SSH ワークスペース——ローカルシェル、SSH、SFTP、リモート編集、プラグイン、OxideSens AI を 1 つのネイティブバイナリに。",
     "cta_download": "ダウンロード",
     "cta_docs": "ドキュメント",
     "version_prefix": "v",
@@ -30,7 +30,7 @@
     "proxyjump_title": "マルチホップ ProxyJump",
     "proxyjump_desc": "無制限のジャンプホストを連鎖可能。内蔵トポロジーグラフ付き。SSH 設定ファイル不要——視覚的にマルチホップ接続をセットアップ。",
     "plugins_title": "公式プラグイン",
-    "plugins_desc": "Cloud Sync で暗号化セルフホスト型バックアップ（WebDAV、HTTP、Dropbox、Git、S3）、Quick Commands でワンクリックコマンド実行。"
+    "plugins_desc": "Cloud Sync、Quick Commands、Telnet Client が、コアアプリを重くせずに OxideTerm を拡張します。"
   },
   "comparison": {
     "badge": "差別化",
@@ -64,7 +64,7 @@
     "tab_ide": "IDE",
     "tab_forwarding": "ポートフォワーディング",
     "tab_ai": "AI",
-    "terminal_desc": "分割ペイン、ブロードキャスト入力、WebGLレンダリング60fps+、30+ビルトインテーマ、セッション録画、コマンドパレット。",
+    "terminal_desc": "分割ペイン、ブロードキャスト入力、WebGLレンダリング60fps+、31+ビルトインテーマ、セッション録画、コマンドパレット。",
     "sftp_desc": "デュアルペインファイルブラウザ。ドラッグ＆ドロップ転送、画像/動画/コード/PDF/HEXスマートプレビュー、進捗付き転送キュー。",
     "ide_desc": "CodeMirror 6エディタ。24 言語モード、ファイルツリーGitステータス、コンフリクト解決、統合ターミナル。",
     "forwarding_desc": "ローカル(-L)、リモート(-R)、ダイナミックSOCKS5(-D)フォワーディング。ロックフリーI/O、再接続時自動復元、障害レポート。",
@@ -99,7 +99,7 @@
     "x64": "x64",
     "get_latest": "最新版を取得",
     "all_releases": "GitHubで全リリースを見る",
-    "requirements": "動作環境：macOS 10.15+、Windows 10+、Linux（glibc 2.31+）"
+    "requirements": "動作環境：macOS 10.15+、Windows 10+、Linux（glibc 2.31+）。システム WebView ランタイムを使用します。ほとんどのシステムにはすでに含まれています。"
   },
   "stats": {
     "binary_size": "バイナリサイズ",
@@ -118,7 +118,7 @@
   "demo": {
     "badge": "ライブデモ",
     "title": "OxideTerm を動画で見る",
-    "subtitle": "OxideSens AI がローカルターミナルを開いてコマンドを実行——完全自律、完全統合。",
+    "subtitle": "OxideSens AI はライブターミナルとワークスペースツールを 1 つのアシスタントから操作できます。",
     "fallback": "お使いのブラウザは動画再生に対応していません。"
   },
   "details": {
@@ -182,7 +182,7 @@
     "subtitle": "oxt の紹介 —— ターミナルの相棒。",
     "desc": "JSON-RPC 2.0 を Unix Socket（macOS/Linux）または名前付きパイプ（Windows）で通信。ヒューマンフレンドリーかつマシンパーサブルな出力。",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.3.3  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",

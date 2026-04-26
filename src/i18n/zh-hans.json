@@ -4,12 +4,12 @@
   },
   "meta": {
     "lang": "zh-CN",
-    "title": "OxideTerm — Rust & Tauri SSH 终端",
-    "description": "基于 Rust 和 Tauri 构建的跨平台 SSH 终端。本地 Shell、SSH、SFTP、IDE、AI、端口转发——一个客户端全包。"
+    "title": "OxideTerm — AI 原生 SSH 工作区",
+    "description": "面向终端、文件、端口与远程上下文的 AI 原生 SSH 工作区。零 Electron、零 OpenSSL、纯 Rust SSH。"
   },
   "hero": {
-    "tagline": "零 Electron。零 OpenSSL。纯 Rust SSH。",
-    "subtitle": "一个原生二进制——本地 Shell、SSH、SFTP、远程 IDE、AI、端口转发、插件、30+ 主题、11 种语言。",
+    "tagline": "零 Electron。零 OpenSSL。零遥测。零订阅。纯 Rust SSH。",
+    "subtitle": "面向终端、文件、端口与远程上下文的 AI 原生 SSH 工作区——一个原生二进制集成本地 Shell、SSH、SFTP、远程编辑、插件与 OxideSens AI。",
     "cta_download": "下载",
     "cta_docs": "文档",
     "version_prefix": "v",
@@ -30,7 +30,7 @@
     "proxyjump_title": "多跳 ProxyJump",
     "proxyjump_desc": "串联无限跳板主机，内置拓扑图。无需 SSH 配置文件——可视化设置多跳连接。",
     "plugins_title": "官方插件",
-    "plugins_desc": "Cloud Sync 提供加密自托管备份（WebDAV、HTTP、Dropbox、Git、S3），Quick Commands 提供一键命令执行。"
+    "plugins_desc": "Cloud Sync、Quick Commands 和 Telnet Client 以插件形式扩展 OxideTerm，不臃肿核心应用。"
   },
   "comparison": {
     "badge": "与众不同",
@@ -64,7 +64,7 @@
     "tab_ide": "IDE",
     "tab_forwarding": "端口转发",
     "tab_ai": "AI",
-    "terminal_desc": "分屏面板、广播输入、WebGL 渲染 60fps+、30+ 内置主题、会话录制、命令面板。",
+    "terminal_desc": "分屏面板、广播输入、WebGL 渲染 60fps+、31+ 内置主题、会话录制、命令面板。",
     "sftp_desc": "双栏文件浏览器，支持拖拽传输、图片/视频/代码/PDF/十六进制智能预览、带进度的传输队列。",
     "ide_desc": "CodeMirror 6 编辑器，支持 24 语言模式、文件树 Git 状态、冲突解决、集成终端。",
     "forwarding_desc": "本地 (-L)、远程 (-R) 和动态 SOCKS5 (-D) 转发。无锁 I/O、重连后自动恢复、故障报告。",
@@ -99,7 +99,7 @@
     "x64": "x64",
     "get_latest": "获取最新版本",
     "all_releases": "在 GitHub 查看所有版本",
-    "requirements": "系统要求：macOS 10.15+、Windows 10+ 或 Linux（glibc 2.31+）"
+    "requirements": "系统要求：macOS 10.15+、Windows 10+ 或 Linux（glibc 2.31+）。使用系统 WebView 运行时，大多数系统已自带。"
   },
   "stats": {
     "binary_size": "安装包大小",
@@ -118,7 +118,7 @@
   "demo": {
     "badge": "实机演示",
     "title": "一分钟了解 OxideTerm",
-    "subtitle": "OxideSens AI 打开本地终端并执行命令——全自主，全集成。",
+    "subtitle": "OxideSens AI 可以从一个助手控制实时终端与工作区工具。",
     "fallback": "您的浏览器不支持视频播放。"
   },
   "details": {
@@ -182,7 +182,7 @@
     "subtitle": "认识 oxt —— 你的终端好搭档。",
     "desc": "JSON-RPC 2.0 基于 Unix Socket（macOS/Linux）或命名管道（Windows）。人类友好且机器可解析的输出。",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.3.3  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",

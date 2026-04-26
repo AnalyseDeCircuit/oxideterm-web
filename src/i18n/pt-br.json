@@ -4,12 +4,12 @@
   },
   "meta": {
     "lang": "pt-BR",
-    "title": "OxideTerm — Terminal SSH Rust & Tauri",
-    "description": "Terminal SSH multiplataforma construído com Rust e Tauri. Shells locais, SSH, SFTP, IDE, IA, encaminhamento de portas — tudo em um único binário nativo."
+    "title": "OxideTerm — Workspace SSH nativo para IA",
+    "description": "Um workspace SSH nativo para IA com terminais, arquivos, portas e contexto remoto. Zero Electron, zero OpenSSL, SSH puro em Rust."
   },
   "hero": {
-    "tagline": "Zero Electron. Zero OpenSSL. SSH em Rust puro.",
-    "subtitle": "Um único binário nativo — shells locais, SSH, SFTP, IDE remoto, IA, encaminhamento de portas, plugins, 30+ temas, 11 idiomas.",
+    "tagline": "Zero Electron. Zero OpenSSL. Zero telemetria. Zero assinatura. SSH puro em Rust.",
+    "subtitle": "Um workspace SSH nativo para IA com terminais, arquivos, portas e contexto remoto — shells locais, SSH, SFTP, edição remota, plugins e OxideSens AI em um único binário nativo.",
     "cta_download": "Baixar",
     "cta_docs": "Documentação",
     "version_prefix": "v",
@@ -30,7 +30,7 @@
     "proxyjump_title": "ProxyJump multi-salto",
     "proxyjump_desc": "Encadeie hosts de salto ilimitados com o grafo de topologia integrado. Sem configuração SSH necessária — configure conexões multi-salto visualmente.",
     "plugins_title": "Plugins oficiais",
-    "plugins_desc": "Cloud Sync para backup criptografado auto-hospedado (WebDAV, HTTP, Dropbox, Git, S3) e Quick Commands para execução de comandos com um clique."
+    "plugins_desc": "Cloud Sync, Quick Commands e Telnet Client estendem o OxideTerm sem inflar o app principal."
   },
   "comparison": {
     "badge": "O DIFERENCIAL",
@@ -64,7 +64,7 @@
     "tab_ide": "IDE",
     "tab_forwarding": "Encaminhamento",
     "tab_ai": "IA",
-    "terminal_desc": "Painéis divididos, entrada broadcast, renderização WebGL a 60fps+, 30+ temas integrados, gravação de sessão, paleta de comandos.",
+    "terminal_desc": "Painéis divididos, entrada broadcast, renderização WebGL a 60fps+, 31+ temas integrados, gravação de sessão, paleta de comandos.",
     "sftp_desc": "Navegador de arquivos de painel duplo. Transferência arrasta-e-solta, pré-visualização inteligente imagens/vídeo/código/PDF/hex, fila de transferência com progresso.",
     "ide_desc": "Editor CodeMirror 6. 24 modos de linguagem, árvore de arquivos com status Git, resolução de conflitos, terminal integrado.",
     "forwarding_desc": "Encaminhamento local (-L), remoto (-R) e dinâmico SOCKS5 (-D). I/O lock-free, restauração automática na reconexão, relatórios de erro.",
@@ -99,7 +99,7 @@
     "x64": "x64",
     "get_latest": "Obter última versão",
     "all_releases": "Ver todos os lançamentos no GitHub",
-    "requirements": "Requisitos: macOS 10.15+, Windows 10+, Linux (glibc 2.31+)"
+    "requirements": "Requisitos: macOS 10.15+, Windows 10+, Linux (glibc 2.31+). Usa o runtime WebView do sistema; a maioria dos sistemas já o inclui."
   },
   "stats": {
     "binary_size": "Tamanho do binário",
@@ -118,7 +118,7 @@
   "demo": {
     "badge": "DEMO AO VIVO",
     "title": "Veja em ação",
-    "subtitle": "OxideSens AI abre um terminal local e executa um comando — totalmente autônomo, totalmente integrado.",
+    "subtitle": "OxideSens AI pode controlar terminais ativos e ferramentas do workspace a partir de um único assistente.",
     "fallback": "Seu navegador não suporta reprodução de vídeo."
   },
   "details": {
@@ -182,7 +182,7 @@
     "subtitle": "Conheça o oxt — seu parceiro de terminal.",
     "desc": "JSON-RPC 2.0 via Unix Socket (macOS/Linux) ou Named Pipe (Windows). Saída legível e analisável.",
     "line_1": "$ oxt status",
-    "line_2": "OxideTerm v1.2.1  ●  running  ●  pid 42187",
+    "line_2": "OxideTerm v1.3.3  ●  running  ●  pid 42187",
     "line_3": "$ oxt list",
     "line_4": "  prod-server    ● active    2h 15m    3 channels",
     "line_5": "  staging-db     ● active    45m       1 channel",
