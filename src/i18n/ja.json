@@ -1,6 +1,6 @@
 {
   "announcement": {
-    "license_change": "📢 ライセンス変更：OxideTerm は GPL-3.0 に移行 — 完全オープンソースに！以前は PolyForm Noncommercial。"
+    "license_change": "📢 ライセンス変更：OxideTerm は GPL-3.0 に移行 — 完全オープンソースに！以前は PolyForm Noncommercial。この移行は意図的です。非商用トラップも競業禁止条項もなく、明確な copyleft の自由だけを提供します。"
   },
   "meta": {
     "lang": "ja",

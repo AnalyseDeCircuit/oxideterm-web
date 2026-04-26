@@ -1,6 +1,6 @@
 {
   "announcement": {
-    "license_change": "📢 许可证变更：OxideTerm 现已采用 GPL-3.0 — 完全开源！此前为 PolyForm Noncommercial。"
+    "license_change": "📢 许可证变更：OxideTerm 现已采用 GPL-3.0 — 完全开源！此前为 PolyForm Noncommercial。我们主动转换，就是为了不玩非商用陷阱或竞业禁止附加条款，而是给出清晰的 copyleft 自由。"
   },
   "meta": {
     "lang": "zh-CN",
