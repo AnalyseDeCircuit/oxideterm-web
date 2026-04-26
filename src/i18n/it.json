@@ -137,7 +137,7 @@
     "sftp_2": "Anteprima intelligente: immagini, video, audio, codice, PDF, hex, font",
     "sftp_3": "Coda trasferimenti con progresso in tempo reale ed ETA",
     "sftp_4": "Segnalibri ed estrazione archivi",
-    "sftp_5": "Rinomina, chmod, chown in batch",
+    "sftp_5": "Rinomina, elimina, crea cartelle e trasferimenti batch",
     "sftp_6": "Modalità sorveglianza: caricamento automatico su modifiche locali",
     "ide_title": "IDE integrato",
     "ide_1": "CodeMirror 6 con 24 modalità linguaggio",

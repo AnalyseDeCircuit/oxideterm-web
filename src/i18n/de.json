@@ -137,7 +137,7 @@
     "sftp_2": "Intelligente Vorschau: Bilder, Video, Audio, Code, PDF, Hex, Schriften",
     "sftp_3": "Übertragungswarteschlange mit Echtzeit-Fortschritt und ETA",
     "sftp_4": "Lesezeichen und Archiv-Entpackung",
-    "sftp_5": "Stapel-Umbenennung, chmod, chown",
+    "sftp_5": "Umbenennen, Löschen, Ordner erstellen und Stapelübertragungen",
     "sftp_6": "Überwachungsmodus: automatischer Upload bei lokalen Änderungen",
     "ide_title": "Integrierte IDE",
     "ide_1": "CodeMirror 6 mit 24 Sprachmodi",

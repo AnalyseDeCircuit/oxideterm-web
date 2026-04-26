@@ -57,24 +57,9 @@ Shell scanning reads `/etc/shells` on macOS/Linux and probes common paths on Win
 3. Select your preferred shell from the dropdown
 4. Click **Save**
 
-### Custom Shells
+### Shells Outside the Scanner
 
-If your shell isn't auto-detected, add it to `~/.oxideterm/shells.json` (macOS/Linux) or `%APPDATA%\OxideTerm\shells.json` (Windows):
-
-```json
-{
-  "custom_shells": [
-    {
-      "name": "custom-shell",
-      "label": "My Custom Shell",
-      "path": "/usr/local/bin/my-shell",
-      "args": ["--login"]
-    }
-  ]
-}
-```
-
-Restart OxideTerm to pick up the changes.
+OxideTerm does not currently read a `shells.json` file. If a shell is not listed, make sure the executable is installed in a standard location, available in `/etc/shells` on macOS/Linux, or discoverable from the platform-specific shell scanner. You can still configure the default shell, working directory, profile loading, Oh My Posh, and custom environment variables from **Settings → Local Terminal**.
 
 ## Windows Enhancements
 
@@ -129,28 +114,9 @@ When closing a tab that contains split panes, OxideTerm recursively cleans up al
 
 ## Advanced Configuration
 
-### Shell Arguments
+### Startup Options
 
-Some shells need specific arguments for the best experience:
-
-```json
-{
-  "custom_shells": [
-    {
-      "name": "zsh",
-      "label": "Zsh (Login)",
-      "path": "/bin/zsh",
-      "args": ["-l"]
-    },
-    {
-      "name": "bash",
-      "label": "Bash (Interactive)",
-      "path": "/bin/bash",
-      "args": ["-i"]
-    }
-  ]
-}
-```
+OxideTerm chooses safe default startup arguments for detected shells. In **Settings → Local Terminal**, you can enable or disable shell profile loading, set a default working directory, configure Oh My Posh on Windows, and add custom environment variables for new local terminal sessions.
 
 ### Shell-Specific Initialization
 
@@ -211,7 +177,7 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 ## Troubleshooting
 
 **Shell not detected?**
-Check that the shell binary exists and is executable. Verify with `which zsh` (Unix) or `where pwsh` (Windows). If it's in a non-standard path, add it to `shells.json` and restart OxideTerm.
+Check that the shell binary exists and is executable. Verify with `which zsh` (Unix) or `where pwsh` (Windows). On macOS/Linux, adding the shell path to `/etc/shells` can make it discoverable by the scanner.
 
 **Terminal won't start?**
 Check the developer console (`⌘⌥I` / `Ctrl+Shift+I`) for error logs. Make sure OxideTerm has permission to execute the shell binary. Try a different shell.

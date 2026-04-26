@@ -137,7 +137,7 @@
     "sftp_2": "Xem trước thông minh: hình ảnh, video, âm thanh, mã, PDF, hex, font",
     "sftp_3": "Hàng đợi truyền với tiến độ thực tế và ETA",
     "sftp_4": "Bookmark và giải nén file",
-    "sftp_5": "Đổi tên, chmod, chown hàng loạt",
+    "sftp_5": "Đổi tên, xóa, tạo thư mục và truyền hàng loạt",
     "sftp_6": "Chế độ giám sát: tự động tải lên khi thay đổi file cục bộ",
     "ide_title": "IDE tích hợp",
     "ide_1": "CodeMirror 6 với 24 chế độ ngôn ngữ",

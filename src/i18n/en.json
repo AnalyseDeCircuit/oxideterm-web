@@ -137,7 +137,7 @@
     "sftp_2": "Smart preview: images, video, audio, code, PDF, hex, fonts",
     "sftp_3": "Transfer queue with real-time progress & ETA",
     "sftp_4": "Bookmarks and archive extraction",
-    "sftp_5": "Rename, chmod, chown with batch operations",
+    "sftp_5": "Rename, delete, create folders, and batch transfers",
     "sftp_6": "Watch mode with auto-upload on local changes",
     "ide_title": "Built-in IDE",
     "ide_1": "CodeMirror 6 with 24 language modes",

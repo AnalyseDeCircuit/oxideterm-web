@@ -137,7 +137,7 @@
     "sftp_2": "Aperçu intelligent : images, vidéo, audio, code, PDF, hex, polices",
     "sftp_3": "File de transfert avec progression en temps réel et ETA",
     "sftp_4": "Favoris et extraction d'archives",
-    "sftp_5": "Renommage, chmod, chown par lot",
+    "sftp_5": "Renommer, supprimer, créer des dossiers et transferts par lot",
     "sftp_6": "Mode surveillance : téléversement automatique lors de modifications locales",
     "ide_title": "IDE intégré",
     "ide_1": "CodeMirror 6 avec 24 modes de langage",
