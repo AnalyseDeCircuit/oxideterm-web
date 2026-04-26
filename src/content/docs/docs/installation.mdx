@@ -11,6 +11,16 @@ description: How to download and install OxideTerm on macOS, Windows, and Linux.
 | **Windows** | 10 (1803+) | x64, ARM64 |
 | **Linux** | Ubuntu 22.04+ / Fedora 38+ | x64, ARM64 |
 
+## Runtime Dependencies
+
+OxideTerm uses the native WebView runtime provided by the operating system. Most users already have it installed; install these manually only if the app fails to launch or your environment is air-gapped.
+
+| Platform | Runtime Dependency |
+|----------|--------------------|
+| **Windows** | [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) — pre-installed on Windows 10 (1803+) and Windows 11. For air-gapped or intranet environments, use the Evergreen Standalone Installer or deploy the Fixed Version runtime via group policy. |
+| **macOS** | None (uses native WebKit) |
+| **Linux** | `libwebkit2gtk-4.1` (usually pre-installed on modern desktops) |
+
 ## Download
 
 Download the latest release from [GitHub Releases](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest).

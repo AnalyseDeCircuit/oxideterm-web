@@ -1,11 +1,11 @@
 ---
 title: 简介
-description: OxideTerm — 基于纯 Rust 和现代 Web 技术构建的跨平台 SSH 终端客户端。
+description: OxideTerm — 基于纯 Rust 和现代 Web 技术构建的 AI 原生 SSH 工作区。
 ---
 
 import { Image } from 'astro:assets';
 
-**OxideTerm** 是一款跨平台 SSH 终端客户端和本地终端模拟器，将原生性能与现代界面完美结合。基于 **Tauri 2.0**（Rust 后端）和 **React 19**（TypeScript 前端）构建，生成 25–40 MB 的轻量级原生二进制文件，无 Electron 开销。
+**OxideTerm** 是面向终端、文件、端口与远程上下文的 AI 原生 SSH 工作区。基于 **Tauri 2.0**（Rust 后端）和 **React 19**（TypeScript 前端）构建，生成 25–40 MB 的轻量级原生二进制文件，零 Electron、零 OpenSSL、零遥测，并使用纯 Rust SSH。
 
 ## 为什么选择 OxideTerm？
 
@@ -69,13 +69,13 @@ OxideTerm 采用 **双平面架构**，将低延迟的终端 I/O 与管理命令
 
 | 类别 | 功能 |
 |------|------|
-| **终端** | 本地 PTY（zsh/bash/fish/pwsh/WSL2）、SSH 远程、分屏、广播输入、会话录制/回放（asciicast v2）、自适应渲染（120 Hz+ 加速 / 60 Hz 正常 / 1–15 Hz 空闲）、命令面板（`⌘K`）、禅模式、30+ 主题 + 自定义编辑器 |
+| **终端** | 本地 PTY（zsh/bash/fish/pwsh/WSL2）、SSH 远程、分屏、广播输入、会话录制/回放（asciicast v2）、自适应渲染（120 Hz+ 加速 / 60 Hz 正常 / 1–15 Hz 空闲）、命令面板（`⌘K`）、禅模式、31+ 主题 + 自定义编辑器 |
 | **SSH 与认证** | 连接池与复用、ProxyJump（无限跳数）+ 拓扑图、优雅期自动重连、Agent Forwarding。认证：密码、SSH 密钥（RSA/Ed25519/ECDSA）、SSH Agent、证书、直连时的键盘交互 2FA、Known Hosts TOFU。ProxyJump 链路当前更适合使用密码/密钥/Agent/证书认证 |
 | **SFTP** | 双面板浏览器、拖放、智能预览（图片/视频/音频/代码/PDF/Hex/字体）、传输队列 + 进度 & ETA、书签、压缩包解压 |
 | **IDE 模式** | CodeMirror 6，24 语言，文件树 + Git 状态，LRU 多标签管理，冲突解决（mtime 锁定），集成终端。可选远程 Agent，其他架构需自行编译并上传 |
 | **端口转发** | 本地 (-L)、远程 (-R)、动态 SOCKS5 (-D)，无锁消息传递 I/O，重连自动恢复，死亡报告，智能远程端口检测 |
 | **AI (OxideSens)** | 内联面板（`⌘I`）+ 侧边栏聊天，终端缓冲区捕获（单/全面板），多源上下文（IDE/SFTP/Git），40+ 自主工具，MCP 服务集成，RAG 知识库（BM25 + 向量混合搜索），流式 SSE |
-| **插件** | 运行时 ESM 加载，18 个 API 命名空间，24 个 UI Kit 组件，冻结 API + Proxy ACL，熔断器，错误自动禁用。官方插件包括 Cloud Sync 和 Quick Commands |
+| **插件** | 运行时 ESM 加载，18 个 API 命名空间，24 个 UI Kit 组件，冻结 API + Proxy ACL，熔断器，错误自动禁用。官方插件包括 Cloud Sync、Quick Commands 和 Telnet Client |
 | **CLI** | `oxt` 伴侣工具：JSON-RPC 2.0，Unix Socket / Named Pipe |
 | **安全** | .oxide 加密导出（ChaCha20-Poly1305 + Argon2id 256 MB）、OS 钥匙串、本地配置静态加密、Touch ID（macOS）、主机密钥 TOFU、`zeroize` 内存清除 |
 | **国际化** | 11 种语言：EN、简体中文、繁體中文、日本語、한국어、FR、DE、ES、IT、PT-BR、VI |

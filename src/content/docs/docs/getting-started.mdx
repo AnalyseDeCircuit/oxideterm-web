@@ -1,11 +1,11 @@
 ---
 title: Introduction
-description: OxideTerm — a cross-platform SSH terminal client built with pure Rust and modern web technologies.
+description: OxideTerm — an AI-native SSH workspace built with pure Rust and modern web technologies.
 ---
 
 import { Image } from 'astro:assets';
 
-**OxideTerm** is a cross-platform SSH terminal client and local terminal emulator that combines native performance with a modern interface. Built with **Tauri 2.0** (Rust backend) and **React 19** (TypeScript frontend), it delivers a lightweight 25–40 MB native binary with zero Electron overhead.
+**OxideTerm** is an AI-native SSH workspace for terminals, files, ports, and remote context. Built with **Tauri 2.0** (Rust backend) and **React 19** (TypeScript frontend), it delivers a lightweight 25–40 MB native binary with zero Electron, zero OpenSSL, zero telemetry, and pure Rust SSH.
 
 ## Why OxideTerm?
 
@@ -69,13 +69,13 @@ Each SSH session gets its own WebSocket port with single-use, time-limited token
 
 | Category | Features |
 |---|---|
-| **Terminal** | Local PTY (zsh/bash/fish/pwsh/WSL2), SSH remote, split panes, broadcast input, session recording/playback (asciicast v2), adaptive rendering (120 Hz+ Boost / 60 Hz Normal / 1–15 Hz Idle), command palette (`⌘K`), zen mode, 30+ themes + custom editor |
+| **Terminal** | Local PTY (zsh/bash/fish/pwsh/WSL2), SSH remote, split panes, broadcast input, session recording/playback (asciicast v2), adaptive rendering (120 Hz+ Boost / 60 Hz Normal / 1–15 Hz Idle), command palette (`⌘K`), zen mode, 31+ themes + custom editor |
 | **SSH & Auth** | Connection pooling & multiplexing, ProxyJump (unlimited hops) with topology graph, auto-reconnect with Grace Period, Agent Forwarding. Auth: password, SSH key (RSA/Ed25519/ECDSA), SSH Agent, certificates, keyboard-interactive 2FA on direct connections, Known Hosts TOFU. Proxy chains currently favor password/key/agent/certificate auth |
 | **SFTP** | Dual-pane browser, drag-and-drop, smart preview (images/video/audio/code/PDF/hex/fonts), transfer queue with progress & ETA, bookmarks, archive extraction |
 | **IDE Mode** | CodeMirror 6 with 24 languages, file tree + Git status, multi-tab with LRU management, conflict resolution (mtime locking), integrated terminal. Optional remote agent; unsupported architectures can self-build and upload |
 | **Port Forwarding** | Local (-L), Remote (-R), Dynamic SOCKS5 (-D), lock-free message-passing I/O, auto-restore on reconnect, death reporting, smart remote port detection |
 | **AI (OxideSens)** | Inline panel (`⌘I`) + sidebar chat, terminal buffer capture (single/all panes), multi-source context (IDE/SFTP/Git), 40+ autonomous tools, MCP server integration, RAG knowledge base (BM25 + vector hybrid search), streaming SSE |
-| **Plugins** | Runtime ESM loading, 18 API namespaces, 24 UI Kit components, frozen API + Proxy ACL, circuit breaker, auto-disable on errors. Official plugins include Cloud Sync and Quick Commands |
+| **Plugins** | Runtime ESM loading, 18 API namespaces, 24 UI Kit components, frozen API + Proxy ACL, circuit breaker, auto-disable on errors. Official plugins include Cloud Sync, Quick Commands, and Telnet Client |
 | **CLI** | `oxt` companion: JSON-RPC 2.0 over Unix Socket / Named Pipe |
 | **Security** | .oxide encrypted export (ChaCha20-Poly1305 + Argon2id 256 MB), OS keychain, encrypted local config at rest, Touch ID (macOS), host key TOFU, `zeroize` memory clearing |
 | **i18n** | 11 languages: EN, 简体中文, 繁體中文, 日本語, 한국어, FR, DE, ES, IT, PT-BR, VI |

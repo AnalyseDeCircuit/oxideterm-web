@@ -3,7 +3,123 @@ title: 插件开发指南
 description: OxideTerm 插件开发完全参考 — 适用于 Plugin API v3
 ---
 
-> 适用于当前 OxideTerm 版本（Plugin API v3）
+{/* AUTO-GENERATED from OxideTerm/docs/reference/PLUGIN_DEVELOPMENT.md. Do not edit manually. */}
+{/* source-sha256: ae260e70a28366d04cbf100c897f8ad4dad35596be272a0d9e8fff36f247de0b */}
+
+> **版本**: 适用于当前 OxideTerm 版本（Plugin API v3）
+> **最后更新**: 2026-04-26
+
+---
+
+## 目录
+
+- [1. 插件系统概述](#1-插件系统概述)
+  - [1.1 设计哲学](#11-设计哲学)
+  - [1.2 架构模型](#12-架构模型)
+  - [1.3 安全模型](#13-安全模型)
+- [2. 快速入门](#2-快速入门)
+  - [2.1 开发环境准备](#21-开发环境准备)
+  - [2.2 创建第一个插件](#22-创建第一个插件)
+  - [2.3 安装与调试](#23-安装与调试)
+- [3. 插件结构](#3-插件结构)
+  - [3.1 目录布局](#31-目录布局)
+  - [3.2 plugin.json 清单文件](#32-pluginjson-清单文件)
+  - [3.3 入口文件 (ESM)](#33-入口文件-esm)
+- [4. Manifest 完全参考](#4-manifest-完全参考)
+  - [4.1 顶层字段](#41-顶层字段)
+  - [4.2 contributes.tabs](#42-contributestabs)
+  - [4.3 contributes.sidebarPanels](#43-contributessidebarpanels)
+  - [4.4 contributes.settings](#44-contributessettings)
+  - [4.5 contributes.terminalHooks](#45-contributesterminalhooks)
+  - [4.6 contributes.terminalTransports](#46-contributesterminaltransports)
+  - [4.7 contributes.connectionHooks](#47-contributesconnectionhooks)
+  - [4.8 contributes.aiTools](#48-contributesaitools)
+  - [4.9 contributes.apiCommands](#49-contributesapicommands)
+  - [4.10 locales](#410-locales)
+- [5. 插件生命周期](#5-插件生命周期)
+  - [5.1 发现 (Discovery)](#51-发现-discovery)
+  - [5.2 验证 (Validation)](#52-验证-validation)
+  - [5.3 加载 (Loading)](#53-加载-loading)
+  - [5.4 激活 (Activation)](#54-激活-activation)
+  - [5.5 运行时 (Runtime)](#55-运行时-runtime)
+  - [5.6 停用 (Deactivation)](#56-停用-deactivation)
+  - [5.7 卸载 (Unloading)](#57-卸载-unloading)
+  - [5.8 状态机](#58-状态机)
+- [6. PluginContext API 完全参考](#6-plugincontext-api-完全参考)
+  - [6.1 ctx.pluginId](#61-ctxpluginid)
+  - [6.2 ctx.connections](#62-ctxconnections)
+  - [6.3 ctx.events](#63-ctxevents)
+  - [6.4 ctx.ui](#64-ctxui)
+  - [6.5 ctx.terminal](#65-ctxterminal)
+  - [6.6 ctx.settings](#66-ctxsettings)
+  - [6.7 ctx.i18n](#67-ctxi18n)
+  - [6.8 ctx.storage](#68-ctxstorage)
+  - [6.9 ctx.api](#69-ctxapi)
+  - [6.10 ctx.assets](#610-ctxassets)
+  - [6.11 ctx.sftp](#611-ctxsftp)
+  - [6.12 ctx.forward](#612-ctxforward)
+  - [6.13 ctx.sessions (v3)](#613-ctxsessions-v3)
+  - [6.14 ctx.transfers (v3)](#614-ctxtransfers-v3)
+  - [6.15 ctx.profiler (v3)](#615-ctxprofiler-v3)
+  - [6.16 ctx.eventLog (v3)](#616-ctxeventlog-v3)
+  - [6.17 ctx.ide (v3)](#617-ctxide-v3)
+  - [6.18 ctx.ai (v3)](#618-ctxai-v3)
+  - [6.19 ctx.app (v3)](#619-ctxapp-v3)
+  - [6.20 ctx.sync](#620-ctxsync)
+  - [6.21 ctx.secrets](#621-ctxsecrets)
+- [7. 共享模块 (window.\_\_OXIDE\_\_)](#7-共享模块-window__oxide__)
+  - [7.1 可用模块](#71-可用模块)
+  - [7.2 使用 React](#72-使用-react)
+  - [7.3 使用 Zustand](#73-使用-zustand)
+  - [7.4 使用 Lucide React Icons](#74-使用-lucide-react-icons)
+  - [7.5 使用 UI Kit（推荐）](#75-使用-ui-kit推荐)
+- [8. UI 组件开发](#8-ui-组件开发)
+  - [8.1 Tab View 组件](#81-tab-view-组件)
+  - [8.2 Sidebar Panel 组件](#82-sidebar-panel-组件)
+  - [8.3 UI Kit 组件详解](#83-ui-kit-组件详解)
+  - [8.4 主题 CSS 变量参考（高级）](#84-主题-css-变量参考高级)
+  - [8.5 组件间通信](#85-组件间通信)
+- [9. Terminal Hooks 开发](#9-terminal-hooks-开发)
+  - [9.1 Input Interceptor](#91-input-interceptor)
+  - [9.2 Output Processor](#92-output-processor)
+  - [9.3 快捷键 (Shortcuts)](#93-快捷键-shortcuts)
+  - [9.4 性能预算与断路器](#94-性能预算与断路器)
+- [10. 连接事件系统](#10-连接事件系统)
+  - [10.1 连接生命周期事件](#101-连接生命周期事件)
+  - [10.2 会话事件](#102-会话事件)
+  - [10.3 插件间通信](#103-插件间通信)
+  - [10.4 ConnectionSnapshot 结构](#104-connectionsnapshot-结构)
+- [11. 国际化 (i18n)](#11-国际化-i18n)
+  - [11.1 插件 i18n 概述](#111-插件-i18n-概述)
+  - [11.2 目录结构](#112-目录结构)
+  - [11.3 使用翻译](#113-使用翻译)
+  - [11.4 支持的语言列表](#114-支持的语言列表)
+- [12. 持久化存储](#12-持久化存储)
+  - [12.1 KV 存储 (ctx.storage)](#121-kv-存储-ctxstorage)
+  - [12.2 设置存储 (ctx.settings)](#122-设置存储-ctxsettings)
+  - [12.3 存储隔离](#123-存储隔离)
+- [13. 后端 API 调用](#13-后端-api-调用)
+  - [13.1 白名单机制](#131-白名单机制)
+  - [13.2 声明与使用](#132-声明与使用)
+  - [13.3 安全限制](#133-安全限制)
+- [14. 断路器与错误处理](#14-断路器与错误处理)
+  - [14.1 断路器机制](#141-断路器机制)
+  - [14.2 错误处理最佳实践](#142-错误处理最佳实践)
+  - [14.3 自动禁用持久化](#143-自动禁用持久化)
+- [15. Disposable 模式](#15-disposable-模式)
+  - [15.1 概述](#151-概述)
+  - [15.2 手动释放](#152-手动释放)
+  - [15.3 自动清理](#153-自动清理)
+- [16. 完整示例：Demo Plugin](#16-完整示例demo-plugin)
+  - [16.1 目录结构](#161-目录结构)
+  - [16.2 plugin.json](#162-pluginjson)
+  - [16.3 main.js 解析](#163-mainjs-解析)
+- [17. 最佳实践](#17-最佳实践)
+- [18. 调试技巧](#18-调试技巧)
+- [19. 常见问题 (FAQ)](#19-常见问题-faq)
+- [20. 类型参考 (TypeScript)](#20-类型参考-typescript)
+
+---
 
 ## 1. 插件系统概述
 
@@ -21,9 +137,13 @@ OxideTerm 插件系统遵循以下设计原则：
 
 当插件一次操作需要读取多个 secret 时，应优先使用 `ctx.secrets.getMany(keys)`，而不是连续多次调用 `ctx.secrets.get()`。宿主会尽量把多项读取合并为一次 keychain 解锁流程，避免在 macOS 上重复弹出 Touch ID / 系统鉴权。
 
-`ctx.sync.importOxide()` 现在支持 `rename`、`skip`、`replace`、`merge` 四种策略。其中 `merge` 适合多端同步场景：宿主会保留现有连接 ID 与本地元数据，导入侧更新主连接字段，`tags` 做并集，本地已保存但导入缺失的 password / key passphrase / certificate passphrase 会继续复用；`.oxide` 中的端口转发规则会以 owner-bound saved forward 的形式一并导入导出，但导入时不会直接创建活跃转发。除了连接本身，`.oxide` 现在还可以携带全局 OxideTerm settings 快照和声明式 plugin settings 偏好快照；插件在导出时可通过 `ctx.sync.exportOxide({ includeAppSettings: true, selectedAppSettingsSections: ['general', 'appearance'], includePluginSettings: true, includeLocalTerminalEnvVars: false })` 精确控制要打包的宿主 settings section，并决定是否携带本地终端环境变量。对应地，`ctx.sync.importOxide()` 也支持 `selectedAppSettingsSections`，可以只导入快照中的部分 settings section；`ctx.sync.previewImport()` 会返回 `hasAppSettings`、`appSettingsSections`、`pluginSettingsCount`、`pluginSettingsByPlugin`、`forwardDetails` 以及记录级 `records`，插件可以直接渲染"为什么会重命名 / 跳过 / 替换 / 合并"，也可以提前提示用户这份快照会恢复哪些全局设置、插件偏好和保存转发。
+`ctx.sync.importOxide()` 现在支持 `rename`、`skip`、`replace`、`merge` 四种策略。其中 `merge` 适合多端同步场景：宿主会保留现有连接 ID 与本地元数据，导入侧更新主连接字段，`tags` 做并集，本地已保存但导入缺失的 password / key passphrase / certificate passphrase 会继续复用；`.oxide` 中的端口转发规则现在会以 owner-bound saved forward 的形式一并导入导出，但导入时不会直接创建活跃转发。除了连接本身，`.oxide` 现在还可以携带全局 OxideTerm settings 快照和声明式 plugin settings 偏好快照；插件在导出时可通过 `ctx.sync.exportOxide({ includeAppSettings: true, selectedAppSettingsSections: ['general', 'appearance'], includePluginSettings: true, includeLocalTerminalEnvVars: false })` 显式控制要打包的宿主 settings section，并决定是否携带本地终端环境变量。对应地，`ctx.sync.importOxide()` 现在也支持 `selectedAppSettingsSections`，可以只导入快照中的部分 settings section；`ctx.sync.previewImport()` 会返回 `hasAppSettings`、`appSettingsSections`、`pluginSettingsCount`、`pluginSettingsByPlugin`、`forwardDetails` 以及记录级 `records`，插件可以直接渲染“为什么会重命名 / 跳过 / 替换 / 合并”，也可以提前提示用户这份快照会恢复哪些全局设置、插件偏好和保存转发。
 
 `ctx.sync.getLocalSyncMetadata()` 现在除了整体的 `savedConnectionsRevision`、`savedForwardsRevision`、`settingsRevision` 之外，还会返回 `appSettingsSectionRevisions` 和 `pluginSettingsRevisions`。同步插件可以基于这些 revision map 做 per-section / per-plugin 的脏检查与增量上传，而不必直接读取宿主内部 store 或 localStorage。
+
+对于需要长期维护同步状态的插件，宿主侧还补齐了两条相关原语：`ctx.forward.listSavedForwards()` / `exportSavedForwardsSnapshot()` / `applySavedForwardsSnapshot()` 可独立同步保存转发；`ctx.settings.exportSyncableSettings()` / `applySyncableSettings()` 可对白名单设置做宿主校验、归一化并返回 `warnings`。
+
+当前 `reasonCode` 的稳定取值为：`new-connection`、`name-conflict`、`name-conflict-skipped`、`replace-existing`、`merge-existing`。`SyncableSettingsWarning.code` 的稳定取值为：`unsupported-language`、`invalid-ui-density`、`font-size-clamped`、`invalid-font-size`、`missing-theme`、`invalid-auto-reconnect`。
 
 ### 1.2 架构模型
 
@@ -60,8 +180,8 @@ OxideTerm 插件系统遵循以下设计原则：
 │              │  activate(ctx) ←── PluginContext (frozen)      │   │
 │              │    ctx.connections  ctx.events  ctx.ui         │   │
 │              │    ctx.terminal    ctx.settings  ctx.i18n      │   │
-│              │    ctx.storage     ctx.api      ctx.assets     │   │
-│              │    ctx.sftp  ctx.forward                       │   │
+│              │    ctx.storage  ctx.sync  ctx.secrets          │   │
+│              │    ctx.api  ctx.assets  ctx.sftp  ctx.forward  │   │
 │              │    ctx.sessions  ctx.transfers  ctx.profiler   │   │
 │              │    ctx.eventLog  ctx.ide  ctx.ai  ctx.app      │   │
 │              │                                                │   │
@@ -84,14 +204,13 @@ OxideTerm 插件系统遵循以下设计原则：
 |------|------|------|
 | **膜式隔离** | `Object.freeze()` | 所有 API 对象不可修改、不可扩展 |
 | **Manifest 声明** | 运行时校验 | 未声明的 tab/panel/hook/command 注册时抛异常 |
+| **AI 工具声明** | `contributes.aiTools` | 可选 Tool Protocol v2 元数据，用于描述插件工具语义；不是执行权限边界 |
 | **路径保护** | Rust `validate_plugin_id()` + `validate_relative_path()` + canonicalize | 防止路径遍历攻击 |
 | **API 白名单** | `contributes.apiCommands` | 限制插件可调用的 Tauri 命令（**Advisory**） |
 | **断路器** | 10 次错误 / 60 秒 → 自动禁用 | 防止故障插件拖垮系统 |
 | **时间预算** | Terminal hooks 5ms 预算 | 超时计入断路器 |
 
-:::caution[安全提示]
-当前插件运行在同一 JS 上下文中，理论上可以直接 `import '@tauri-apps/api/core'` 绕过 API 白名单。白名单是**纵深防御**措施，防止意外误用；真正的沙箱隔离需要 iframe/WebWorker 架构（未来计划）。**请仅安装来源可信的插件**。
-:::
+> **⚠️ 安全提示**：当前插件运行在同一 JS 上下文中，理论上可以直接 `import '@tauri-apps/api/core'` 绕过 API 白名单。白名单是**纵深防御**措施，防止意外误用；真正的沙箱隔离需要 iframe/WebWorker 架构（未来计划）。**请仅安装来源可信的插件**。
 
 ---
 
@@ -291,7 +410,9 @@ v2 多文件包通过内置的本地 HTTP 文件服务器（`127.0.0.1`，OS 分
     "sidebarPanels": [...],
     "settings": [...],
     "terminalHooks": {...},
+    "terminalTransports": ["telnet"],
     "connectionHooks": [...],
+    "aiTools": [...],
     "apiCommands": [...]
   }
 }
@@ -564,7 +685,23 @@ export function deactivate() {
 - 用 `+` 连接：`ctrl+shift+d`
 - 内部会对修饰键排序归一化
 
-### 4.6 contributes.connectionHooks
+### 4.6 contributes.terminalTransports
+
+声明插件需要打开的额外终端 transport。目前支持：
+
+```json
+"terminalTransports": ["telnet"]
+```
+
+| 值 | 说明 |
+|----|------|
+| `"telnet"` | 允许插件调用 `ctx.terminal.openTelnet()` 打开 Telnet 终端标签 |
+
+Telnet 是明文协议，适合老设备、交换机、串口服务器、实验环境等兼容性场景。插件应在自己的 UI 中向用户明确提示该连接不会提供 SSH 级别的加密和主机身份校验。
+
+未声明 `terminalTransports: ["telnet"]` 的插件调用 `ctx.terminal.openTelnet()` 会抛出异常。
+
+### 4.7 contributes.connectionHooks
 
 声明插件关注的连接生命周期事件。
 
@@ -576,7 +713,87 @@ export function deactivate() {
 
 > 注意：这个字段当前仅作为文档声明，实际事件订阅通过 `ctx.events.onConnect()` 等方法完成。
 
-### 4.7 contributes.apiCommands
+### 4.8 contributes.aiTools
+
+声明插件提供或计划提供给 OxideSens 使用的 AI 工具元数据。这个字段是 **Tool Protocol v2 的可选声明层**：旧插件可以完全不写；新插件写了以后，宿主可以在工具列表、权限提示、工具调用 UI 和未来的插件工具执行层中更准确地展示 capability、risk、target 和结构化结果。
+
+```json
+"aiTools": [
+  {
+    "name": "router_backup",
+    "description": "Back up the running configuration from a network device.",
+    "parameters": {
+      "type": "object",
+      "required": ["targetId"],
+      "properties": {
+        "targetId": {
+          "type": "string",
+          "description": "Target terminal session or SSH node ID"
+        }
+      }
+    },
+    "capabilities": ["terminal.send", "terminal.observe", "filesystem.write"],
+    "risk": "write-file",
+    "targetKinds": ["terminal-session", "ssh-node"],
+    "resultSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "bytes": { "type": "number" }
+      }
+    }
+  }
+]
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | `string` | 插件内工具名。未来暴露给 OxideSens 时会由宿主加插件命名空间，避免与内置工具冲突。 |
+| `description` | `string` | 面向模型和用户的简短说明。 |
+| `parameters` | `object?` | Function Calling 参数 JSON Schema。省略时按空对象处理。 |
+| `capabilities` | `string[]?` | 语义能力列表，例如 `filesystem.read`、`terminal.send`、`state.list`。 |
+| `risk` | `string?` | 明确风险等级。省略时宿主按 legacy 规则推断。 |
+| `targetKinds` | `string[]?` | 可操作目标类型，例如 `ssh-node`、`terminal-session`、`sftp-session`。 |
+| `resultSchema` | `object?` | 工具返回 envelope 中 `data` 字段的 JSON Schema。 |
+
+可用 `capabilities`：
+
+`command.run`、`terminal.send`、`terminal.observe`、`terminal.wait`、`filesystem.read`、`filesystem.write`、`filesystem.search`、`navigation.open`、`state.list`、`network.forward`、`settings.read`、`settings.write`、`plugin.invoke`、`mcp.invoke`
+
+可用 `risk`：
+
+`read`、`write-file`、`execute-command`、`interactive-input`、`destructive`、`network-expose`、`settings-change`、`credential-sensitive`
+
+可用 `targetKinds`：
+
+`local-shell`、`ssh-node`、`terminal-session`、`sftp-session`、`ide-workspace`、`app-tab`、`mcp-server`、`rag-index`
+
+**兼容规则**：
+
+- 未声明 `aiTools` 的插件继续按 legacy 插件处理。
+- 声明 `aiTools` 不会自动授予任何额外权限，也不会绕过用户批准。
+- `risk` / `capabilities` 只影响展示、审批提示和未来插件工具注册的默认语义；真正的宿主操作仍受 `PluginContext` API 与 `apiCommands` 白名单约束。
+- 插件工具返回旧字符串或旧对象时，宿主会按 legacy result 显示；如果返回 Tool Protocol v2 envelope，工具 UI 会优先展示 `summary`、`data`、`warnings` 和 `meta.targetId`。
+
+推荐的新工具返回格式：
+
+```javascript
+return {
+  ok: true,
+  summary: 'Backed up router configuration to backups/router-1.cfg',
+  data: { path: 'backups/router-1.cfg', bytes: 42192 },
+  output: 'Saved 42192 bytes',
+  warnings: [],
+  meta: {
+    toolName: 'router_backup',
+    capability: 'filesystem.write',
+    targetId: 'terminal-session:abc123',
+    durationMs: 840
+  }
+};
+```
+
+### 4.9 contributes.apiCommands
 
 声明插件需要调用的 Tauri 后端命令白名单。
 
@@ -586,9 +803,7 @@ export function deactivate() {
 
 只有声明在此列表中的命令才能通过 `ctx.api.invoke()` 调用。未声明的命令会在调用时抛出异常并在 console 输出警告。
 
-:::tip[提示]
-大多数 SFTP 和端口转发操作可以直接通过 `ctx.sftp` 和 `ctx.forward` 命名空间调用，无需在 `apiCommands` 中声明。只有这两个命名空间未覆盖的底层命令才需要通过 `ctx.api.invoke()` 调用。
-:::
+> **提示**：大多数 SFTP 和端口转发操作可以直接通过 `ctx.sftp` 和 `ctx.forward` 命名空间调用，无需在 `apiCommands` 中声明。只有这两个命名空间未覆盖的底层命令才需要通过 `ctx.api.invoke()` 调用。
 
 #### 可用的 apiCommands 列表
 
@@ -631,7 +846,7 @@ export function deactivate() {
 
 > `plugin_http_request` 的请求体和响应体都使用 base64 传输，便于插件安全地处理非文本载荷。使用前仍需在 `contributes.apiCommands` 中显式声明该命令。
 
-### 4.8 locales
+### 4.10 locales
 
 指向 i18n 翻译文件目录的相对路径。
 
@@ -794,7 +1009,7 @@ unloadPlugin(pluginId)
 
 ## 6. PluginContext API 完全参考
 
-`PluginContext` 是传递给 `activate(ctx)` 的唯一参数。它是一个深度冻结的对象，包含 19 个命名空间（`pluginId` + 18 个子 API）。v3 新增了 7 个只读命名空间。
+`PluginContext` 是传递给 `activate(ctx)` 的唯一参数。它是一个深度冻结的对象，包含 21 个命名空间（`pluginId` + 20 个子 API）。v3 新增了 7 个只读命名空间。
 
 ```typescript
 type PluginContext = Readonly<{
@@ -806,6 +1021,8 @@ type PluginContext = Readonly<{
   settings: PluginSettingsAPI;
   i18n: PluginI18nAPI;
   storage: PluginStorageAPI;
+  sync: PluginSyncAPI;           // 加密导入/导出与同步元数据
+  secrets: PluginSecretsAPI;     // OS keychain 安全存储
   api: PluginBackendAPI;
   assets: PluginAssetsAPI;
   sftp: PluginSftpAPI;
@@ -866,14 +1083,6 @@ connections.getState(connectionId: string): SshConnectionState | null
 
 快速获取连接当前状态。不存在时返回 `null`。
 
-#### `getByNode(nodeId)`
-
-```typescript
-connections.getByNode(nodeId: string): ConnectionSnapshot | null
-```
-
-根据稳定的 `nodeId` 反查当前连接快照。若节点不存在，或当前未绑定到连接，则返回 `null`。
-
 可能的状态值：`'idle'` | `'connecting'` | `'active'` | `'disconnecting'` | `'disconnected'` | `'reconnecting'` | `'link_down'` | `{ error: string }`
 
 ---
@@ -925,8 +1134,6 @@ ctx.sessions.getActiveNodes(): ReadonlyArray<{ nodeId: string; sessionId: string
 ctx.sessions.onTreeChange(handler: (tree: ReadonlyArray<SessionTreeNodeSnapshot>) => void): Disposable
 ctx.sessions.onNodeStateChange(nodeId: string, handler: (state: string) => void): Disposable
 ```
-
-其中，`onTreeChange()` 适合感知节点增删或树结构变化；`onNodeStateChange()` 适合在你已经持有某个 `nodeId` 时，订阅该节点的连接状态变化。
 
 #### `on(name, handler)` — 自定义事件
 
@@ -986,9 +1193,7 @@ function MyTab({ tabId, pluginId }) {
 ctx.ui.registerTabView('myTab', MyTab);
 ```
 
-:::caution
-未在 manifest 中声明的 tabId 会抛出 `Error: Tab "xxx" not declared in plugin manifest contributes.tabs`
-:::
+> ⚠️ 未在 manifest 中声明的 tabId 会抛出 `Error: Tab "xxx" not declared in plugin manifest contributes.tabs`
 
 #### `registerSidebarPanel(panelId, component)`
 
@@ -1350,7 +1555,7 @@ if (target) {
 terminal.writeToActive(text: string): boolean
 ```
 
-向最近一次聚焦的终端直接写入文本。适合"发送到当前终端"这类动作，支持 SSH 和本地终端。
+向最近一次聚焦的终端直接写入文本。适合“发送到当前终端”这类动作，支持 SSH 和本地终端。
 当目标不存在，或目标状态不是 `active` 时，返回 `false`。
 
 ```javascript
@@ -1456,6 +1661,39 @@ terminal.clearBuffer(nodeId: string): Promise<void>
 await ctx.terminal.clearBuffer(nodeId);
 ```
 
+#### `openTelnet(options)` <small>v3</small>
+
+```typescript
+terminal.openTelnet(options: {
+  host: string;
+  port?: number;
+  cols?: number;
+  rows?: number;
+}): Promise<{
+  sessionId: string;
+  info: LocalTerminalInfo;
+}>
+```
+
+打开一个 Telnet 终端标签。插件必须先在 manifest 中声明 `contributes.terminalTransports: ["telnet"]`，否则调用会抛出异常。
+
+```json
+{
+  "contributes": {
+    "terminalTransports": ["telnet"]
+  }
+}
+```
+
+```javascript
+await ctx.terminal.openTelnet({
+  host: '192.168.1.1',
+  port: 23,
+});
+```
+
+Telnet transport 由 Rust core 负责 TCP 连接、Telnet IAC 协商、NAWS resize 和终端事件转发；插件只负责提供入口和 UI。Telnet 是明文协议，插件应在连接前明确提示用户它不提供 SSH 的加密和主机身份校验。
+
 ---
 
 ### 6.6 ctx.settings
@@ -1497,32 +1735,56 @@ ctx.settings.onChange('greeting', (newVal) => {
 });
 ```
 
+**存储键格式**：`oxide-plugin-{pluginId}-setting-{settingId}`
+
 #### `exportSyncableSettings()`
 
 ```typescript
-settings.exportSyncableSettings(): Promise<Readonly<{
+settings.exportSyncableSettings(): Promise<{
   revision: string;
   exportedAt: string;
   payload: SyncableSettingsPayload;
   warnings: ReadonlyArray<SyncableSettingsWarning>;
-}>>
+}>
 ```
 
-导出宿主允许同步的这部分插件设置，供同步插件单独打包或上传。
+导出宿主允许跨设备同步的稳定设置白名单。目前包含语言、UI density、终端字体大小、主题和自动重连开关。
+
+```javascript
+const exported = await ctx.settings.exportSyncableSettings();
+console.log(exported.revision, exported.payload, exported.warnings);
+```
 
 #### `applySyncableSettings(payload)`
 
 ```typescript
-settings.applySyncableSettings(payload: SyncableSettingsPayload): Promise<Readonly<{
+settings.applySyncableSettings(payload: SyncableSettingsPayload): Promise<{
   revision: string;
   appliedPayload: SyncableSettingsPayload;
   warnings: ReadonlyArray<SyncableSettingsWarning>;
-}>>
+}>
 ```
 
-以宿主侧校验与归一化逻辑应用可同步设置载荷。
+应用白名单设置。宿主会做字段级校验和归一化；非法字段会出现在 `warnings` 中，而不是让整次应用失败。
 
-**存储键格式**：`oxide-plugin-{pluginId}-setting-{settingId}`
+```javascript
+const result = await ctx.settings.applySyncableSettings({
+  terminal: { fontSize: 100.4 },
+  reconnect: { autoReconnect: false },
+});
+
+console.log(result.appliedPayload); // { terminal: { fontSize: 32 }, reconnect: { autoReconnect: false } }
+console.log(result.warnings);       // 含 font-size-clamped 等告警
+```
+
+`warnings` 中的 `code` 当前稳定取值如下：
+
+- `unsupported-language`
+- `invalid-ui-density`
+- `font-size-clamped`
+- `invalid-font-size`
+- `missing-theme`
+- `invalid-auto-reconnect`
 
 ---
 
@@ -1855,31 +2117,6 @@ forward.stopAll(sessionId: string): Promise<void>
 
 停止某个会话的所有端口转发。
 
-#### `listSavedForwards()` <small>v3</small>
-
-```typescript
-forward.listSavedForwards(): ReadonlyArray<SavedForwardSnapshot>
-```
-
-返回当前由宿主持久化的保存转发快照。
-
-#### `onSavedForwardsChange(handler)` <small>v3</small>
-
-```typescript
-forward.onSavedForwardsChange(handler: (items: ReadonlyArray<SavedForwardSnapshot>) => void): Disposable
-```
-
-订阅保存转发快照更新。
-
-#### `exportSavedForwardsSnapshot()` / `applySavedForwardsSnapshot()` <small>v3</small>
-
-```typescript
-forward.exportSavedForwardsSnapshot(): Promise<SavedForwardsSyncSnapshot>
-forward.applySavedForwardsSnapshot(snapshot: SavedForwardsSyncSnapshot): Promise<ApplySavedForwardsSyncSnapshotResult>
-```
-
-导出或应用宿主管理的保存转发同步快照。
-
 #### `getStats(sessionId, forwardId)`
 
 ```typescript
@@ -1892,6 +2129,41 @@ forward.getStats(sessionId: string, forwardId: string): Promise<{
 ```
 
 获取端口转发的流量统计信息。
+
+#### `listSavedForwards()`
+
+```typescript
+forward.listSavedForwards(): ReadonlyArray<SavedForwardSnapshot>
+```
+
+返回可同步的保存转发快照。这些记录是 owner-bound 的持久化规则，不等同于当前会话里的活跃转发。
+
+#### `onSavedForwardsChange(handler)`
+
+```typescript
+forward.onSavedForwardsChange(handler: (items: ReadonlyArray<SavedForwardSnapshot>) => void): Disposable
+```
+
+监听保存转发变化，适合同步插件刷新本地缓存。
+
+#### `exportSavedForwardsSnapshot()`
+
+```typescript
+forward.exportSavedForwardsSnapshot(): Promise<SavedForwardsSyncSnapshot>
+```
+
+导出带 revision / updatedAt / tombstone 语义的结构化保存转发快照。
+
+#### `applySavedForwardsSnapshot(snapshot)`
+
+```typescript
+forward.applySavedForwardsSnapshot(snapshot: SavedForwardsSyncSnapshot): Promise<{
+  applied: number;
+  skipped: number;
+}>
+```
+
+应用保存转发快照。宿主会过滤 owner 丢失的孤儿记录，并通过标准刷新链路触发前端更新。
 
 #### 相关类型
 
@@ -1914,20 +2186,6 @@ type PluginForwardRule = Readonly<{
   target_host: string;
   target_port: number;
   status: string;
-  description?: string;
-}>;
-
-type SavedForwardSnapshot = Readonly<{
-  id: string;
-  session_id: string;
-  owner_connection_id?: string;
-  forward_type: string;
-  bind_address: string;
-  bind_port: number;
-  target_host: string;
-  target_port: number;
-  auto_start: boolean;
-  created_at: string;
   description?: string;
 }>;
 ```
@@ -2346,9 +2604,7 @@ ctx.ide.onActiveFileChange((file) => {
 
 AI 对话只读访问 API。可读取对话列表和消息，但不能发起对话或发送消息。
 
-:::caution
-AI 消息可能包含终端缓冲区内容，应视为敏感数据。
-:::
+> ⚠️ AI 消息可能包含终端缓冲区内容，应视为敏感数据。
 
 #### `getConversations()`
 
@@ -2519,26 +2775,6 @@ const stats = await ctx.app.getPoolStats();
 console.log(`Pool: ${stats.activeConnections} connections, ${stats.totalSessions} sessions`);
 ```
 
-#### `refreshAfterExternalSync(options?)`
-
-```typescript
-app.refreshAfterExternalSync(options?: {
-  connections?: boolean;
-  savedForwards?: boolean;
-  settings?: boolean;
-}): Promise<void>
-```
-
-当外部同步流程在宿主常规变更链路之外修改了保存连接、保存转发或设置后，主动触发宿主刷新对应状态。
-
-```javascript
-await ctx.app.refreshAfterExternalSync({
-  connections: true,
-  savedForwards: true,
-  settings: true,
-});
-```
-
 ---
 
 ### 6.20 ctx.sync
@@ -2582,7 +2818,7 @@ type SavedConnectionSnapshot = Readonly<{
 }>;
 ```
 
-这个快照刻意只暴露非 secret 元数据。插件拿不到 password，也拿不到 key / certificate 的 passphrase；但会拿到 key_path、cert_path 和 proxy_chain 拓扑，方便同步类或审计类插件识别证书认证跳板，而不需要接触私密凭据。
+这个快照刻意只暴露非 secret 元数据。插件拿不到 password，也拿不到 key / certificate 的 passphrase；但会拿到 key_path、cert_path 和 proxy_chain 拓扑，便于同步类或审计类插件识别证书认证跳板，而不需要接触私密凭据。
 
 #### `onSavedConnectionsChange(handler)`
 
@@ -2913,9 +3149,7 @@ function MyComponent({ name }) {
 }
 ```
 
-:::note
-由于插件是纯 JS（非 JSX），需使用 `React.createElement`（通常缩写为 `h`）代替 JSX 语法。如果使用打包工具，可配置 JSX transform。
-:::
+> 📝 由于插件是纯 JS（非 JSX），需使用 `React.createElement`（通常缩写为 `h`）代替 JSX 语法。如果使用打包工具，可配置 JSX transform。
 
 **所有 React Hooks 均可使用**，包括但不限于：
 - `useState` / `useReducer` — 状态管理
@@ -3060,9 +3294,7 @@ function MySidebar() {
 }
 ```
 
-:::note
-所有 UI Kit 组件都接受 `className` prop，可以追加自定义 Tailwind 类名进行微调。
-:::
+> 📝 所有 UI Kit 组件都接受 `className` prop，可以追加自定义 Tailwind 类名进行微调。
 
 ---
 
@@ -3534,9 +3766,7 @@ h(ui.CodeBlock, { maxHeight: '200px', wrap: true },
 |------|------|
 | `border-theme-border` | 标准边框 |
 
-:::caution
-**不要使用硬编码颜色**（如 `text-white`、`bg-gray-800`）。始终使用语义化类名以兼容所有主题。
-:::
+> ⚠️ **不要使用硬编码颜色**（如 `text-white`、`bg-gray-800`）。始终使用语义化类名以兼容所有主题。
 
 ### 8.5 组件间通信
 
@@ -3801,7 +4031,7 @@ activeNodes.forEach(({ nodeId }) => {
 });
 ```
 
-如需感知终端节点的增减或连接状态变化，请基于 `ctx.sessions` 暴露的树快照和节点状态订阅实现，而不是依赖未公开的内部事件名。
+如需感知终端节点的增减或状态变化，请基于 `ctx.sessions` 暴露的树快照和节点状态订阅实现，而不是依赖未公开的内部事件名。
 
 ### 10.3 插件间通信
 
@@ -4034,7 +4264,8 @@ try {
 
 ### 13.3 安全限制
 
-:::caution[建议性白名单（Advisory Whitelist）]
+> **⚠️ Advisory Whitelist（建议性白名单）**
+
 当前的白名单是**建议性的**，不是硬隔离。原因：
 
 1. 插件运行在与宿主相同的 JS 上下文中
@@ -4046,7 +4277,6 @@ try {
   - `console.warn()` 输出警告
   - 抛出 `Error: Command "xxx" not whitelisted...`
 - 不会尝试实际调用该命令
-:::
 
 ---
 
@@ -4981,6 +5211,30 @@ export type PluginContext = Readonly<{
 }>;
 
 // ── Plugin Manifest (v2) ────────────────────────────────────
+export type PluginToolCapability =
+  | 'command.run' | 'terminal.send' | 'terminal.observe' | 'terminal.wait'
+  | 'filesystem.read' | 'filesystem.write' | 'filesystem.search'
+  | 'navigation.open' | 'state.list' | 'network.forward'
+  | 'settings.read' | 'settings.write' | 'plugin.invoke' | 'mcp.invoke';
+
+export type PluginToolTargetKind =
+  | 'local-shell' | 'ssh-node' | 'terminal-session' | 'sftp-session'
+  | 'ide-workspace' | 'app-tab' | 'mcp-server' | 'rag-index';
+
+export type PluginToolRisk =
+  | 'read' | 'write-file' | 'execute-command' | 'interactive-input'
+  | 'destructive' | 'network-expose' | 'settings-change' | 'credential-sensitive';
+
+export type PluginAiToolDef = {
+  name: string;
+  description: string;
+  parameters?: Record<string, unknown>;
+  capabilities?: PluginToolCapability[];
+  risk?: PluginToolRisk;
+  targetKinds?: PluginToolTargetKind[];
+  resultSchema?: Record<string, unknown>;
+};
+
 export type PluginManifest = {
   id: string;
   name: string;
@@ -4997,7 +5251,11 @@ export type PluginManifest = {
   sharedDependencies?: Record<string, string>;
   repository?: string;
   checksum?: string;
-  contributes?: { /* ... */ };
+  contributes?: {
+    aiTools?: PluginAiToolDef[];
+    /* tabs, sidebarPanels, settings, terminalHooks, terminalTransports,
+       connectionHooks, apiCommands */
+  };
   locales?: string;
 };
 
@@ -5152,9 +5410,78 @@ declare global {
             }
           }
         },
+        "terminalTransports": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["telnet"] }
+        },
         "connectionHooks": {
           "type": "array",
           "items": { "type": "string", "enum": ["onConnect", "onDisconnect", "onReconnect", "onLinkDown"] }
+        },
+        "aiTools": {
+          "type": "array",
+          "description": "Optional Tool Protocol v2 metadata for plugin AI tools",
+          "items": {
+            "type": "object",
+            "required": ["name", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "parameters": { "type": "object" },
+              "capabilities": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "command.run",
+                    "terminal.send",
+                    "terminal.observe",
+                    "terminal.wait",
+                    "filesystem.read",
+                    "filesystem.write",
+                    "filesystem.search",
+                    "navigation.open",
+                    "state.list",
+                    "network.forward",
+                    "settings.read",
+                    "settings.write",
+                    "plugin.invoke",
+                    "mcp.invoke"
+                  ]
+                }
+              },
+              "risk": {
+                "type": "string",
+                "enum": [
+                  "read",
+                  "write-file",
+                  "execute-command",
+                  "interactive-input",
+                  "destructive",
+                  "network-expose",
+                  "settings-change",
+                  "credential-sensitive"
+                ]
+              },
+              "targetKinds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "local-shell",
+                    "ssh-node",
+                    "terminal-session",
+                    "sftp-session",
+                    "ide-workspace",
+                    "app-tab",
+                    "mcp-server",
+                    "rag-index"
+                  ]
+                }
+              },
+              "resultSchema": { "type": "object" }
+            }
+          }
         },
         "apiCommands": {
           "type": "array",
@@ -5185,7 +5512,7 @@ declare global {
 | `src/lib/plugin/pluginUIKit.tsx` | 24 个预置 UI 组件（UIKit） |
 | `src-tauri/src/commands/plugin.rs` | Rust 后端（文件 I/O + 路径安全） |
 | `src-tauri/src/commands/plugin_server.rs` | Plugin File Server（多文件 HTTP 访问） |
-
+| `src-tauri/src/commands/plugin_registry.rs` | 插件仓库注册/搜索 |
 | `src/components/plugin/PluginManagerView.tsx` | Plugin Manager UI |
 | `src/components/plugin/PluginTabRenderer.tsx` | 插件 Tab 渲染器 |
 | `src/components/plugin/PluginSidebarRenderer.tsx` | 插件 Sidebar 渲染器 |
@@ -5195,4 +5522,4 @@ declare global {
 
 ---
 
-*本文档基于当前仓库中的 OxideTerm Plugin API v3 源码更新。最后更新：2026-04-09。如有疑问，请参考上述源码文件或提交 Issue。*
+*本文档基于当前仓库中的 OxideTerm Plugin API v3 源码更新。最后更新：2026-04-26。如有疑问，请参考上述源码文件或提交 Issue。*

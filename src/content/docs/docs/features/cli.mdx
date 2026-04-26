@@ -499,13 +499,13 @@ Use `--json` to always force JSON output.
 ```bash
 # Human-readable status
 $ oxt status
-OxideTerm v1.2.1
+OxideTerm v1.3.3
   Sessions:      5 active
   Connections:   3 SSH, 2 local
 
 # JSON output (for scripting)
 $ oxt status --json
-{"version":"1.2.1","sessions":5,"connections":{"ssh":3,"local":2},"pid":12345}
+{"version":"1.3.3","sessions":5,"connections":{"ssh":3,"local":2},"pid":12345}
 
 # List connections in scripts
 $ oxt list connections --json | jq '.[].host'

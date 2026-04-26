@@ -3,6 +3,9 @@ title: Plugin Development Guide
 description: Complete reference for OxideTerm plugin development — Plugin API v3
 ---
 
+{/* MANUAL-TRANSLATION of OxideTerm/docs/reference/PLUGIN_DEVELOPMENT.md. Update source-sha256 after reviewing translation changes. */}
+{/* source-sha256: ae260e70a28366d04cbf100c897f8ad4dad35596be272a0d9e8fff36f247de0b */}
+
 > Applies to the current OxideTerm version (Plugin API v3)
 
 ## 1. Plugin System Overview
@@ -291,6 +294,7 @@ This is the core descriptor file of a plugin. OxideTerm discovers plugins by sca
     "sidebarPanels": [...],
     "settings": [...],
     "terminalHooks": {...},
+    "terminalTransports": ["telnet"],
     "connectionHooks": [...],
     "apiCommands": [...]
   }
@@ -564,7 +568,23 @@ Declares terminal I/O interception capabilities.
 - Combine segments with `+`: `ctrl+shift+d`
 - Modifier order is normalized internally
 
-### 4.6 contributes.connectionHooks
+### 4.6 contributes.terminalTransports
+
+Declares extra terminal transports that the plugin needs to open. Currently supported:
+
+```json
+"terminalTransports": ["telnet"]
+```
+
+| Value | Description |
+|------|-------------|
+| `"telnet"` | Allows the plugin to call `ctx.terminal.openTelnet()` and open a Telnet terminal tab |
+
+Telnet is a plaintext protocol intended for legacy devices, switches, serial servers, labs, and compatibility scenarios. Plugins should clearly warn users in their own UI that Telnet does not provide SSH-level encryption or host identity verification.
+
+Calling `ctx.terminal.openTelnet()` without declaring `terminalTransports: ["telnet"]` throws.
+
+### 4.7 contributes.connectionHooks
 
 Declares which connection lifecycle events the plugin cares about.
 
@@ -576,7 +596,7 @@ Supported values: `"onConnect"` | `"onDisconnect"` | `"onReconnect"` | `"onLinkD
 
 > Note: this field currently serves only as documentation. Actual event subscription is done through methods such as `ctx.events.onConnect()`.
 
-### 4.7 contributes.apiCommands
+### 4.8 contributes.apiCommands
 
 Declares the whitelist of backend Tauri commands that the plugin needs to call.
 
@@ -631,7 +651,7 @@ Most SFTP and port-forwarding operations are already covered by the `ctx.sftp` a
 
 > Both the request body and response body for `plugin_http_request` are transferred as base64 so the plugin can safely handle non-text payloads. You still need to explicitly declare this command in `contributes.apiCommands` before using it.
 
-### 4.8 locales
+### 4.9 locales
 
 Points to the relative path of the i18n translation directory.
 
@@ -1449,6 +1469,39 @@ Clears the terminal buffer for the specified node.
 ```javascript
 await ctx.terminal.clearBuffer(nodeId);
 ```
+
+#### `openTelnet(options)` <small>v3</small>
+
+```typescript
+terminal.openTelnet(options: {
+  host: string;
+  port?: number;
+  cols?: number;
+  rows?: number;
+}): Promise<{
+  sessionId: string;
+  info: LocalTerminalInfo;
+}>
+```
+
+Opens a Telnet terminal tab. The plugin must first declare `contributes.terminalTransports: ["telnet"]` in its manifest; otherwise the call throws.
+
+```json
+{
+  "contributes": {
+    "terminalTransports": ["telnet"]
+  }
+}
+```
+
+```javascript
+await ctx.terminal.openTelnet({
+  host: '192.168.1.1',
+  port: 23,
+});
+```
+
+The Telnet transport is handled by the Rust core, including TCP connection setup, Telnet IAC negotiation, NAWS resize, and terminal event forwarding. The plugin is responsible only for the entry point and UI. Telnet is plaintext, so plugins should warn users before connecting that it does not provide SSH encryption or host identity verification.
 
 ---
 
@@ -4863,6 +4916,10 @@ export type PluginContext = Readonly<{
               }
             }
           }
+        },
+        "terminalTransports": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["telnet"] }
         },
         "connectionHooks": {
           "type": "array",
