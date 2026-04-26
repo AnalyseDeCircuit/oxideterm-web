@@ -234,7 +234,7 @@
     "data_title": "Sécurité des données et confidentialité",
     "data_desc": "Nous comprenons la sensibilité des données opérationnelles. OxideTerm adopte une architecture Local-First. Tous les identifiants serveur, clés et fichiers de configuration sont chiffrés et stockés exclusivement sur l'appareil local de l'utilisateur à l'aide d'algorithmes de chiffrement haute sécurité. Ce logiciel ne collecte, ne télécharge ni ne divulgue aucune donnée de connexion sensible à des tiers.",
     "license_title": "Licence",
-    "license_desc": "Ce logiciel est distribué sous la licence open source GPL-3.0 (GNU General Public License v3.0). Tout le monde peut librement l'utiliser, le modifier et le distribuer, y compris à des fins commerciales. Les œuvres dérivées doivent être publiées sous la même licence et fournir le code source.",
+    "license_desc": "Ce logiciel est distribué sous la licence open source GPL-3.0 (GNU General Public License v3.0). Tout le monde peut librement l'utiliser, le modifier et le distribuer, y compris à des fins commerciales. Les œuvres dérivées doivent être publiées sous la même licence et fournir le code source. Du code public n'est pas automatiquement open source : les clauses interdisant redistribution, reconditionnement, produits concurrents ou plateformes non autorisées relèvent du source-available. OxideTerm n'ajoute aucune de ces restrictions.",
     "disclaimer": "Cette page est fournie à titre informatif uniquement et ne constitue pas un avis juridique. Il incombe aux utilisateurs de s'assurer que leur utilisation d'OxideTerm est conforme à toutes les lois locales et internationales applicables."
   },
   "faq": {

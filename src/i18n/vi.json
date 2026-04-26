@@ -234,7 +234,7 @@
     "data_title": "Bảo mật dữ liệu và quyền riêng tư",
     "data_desc": "Chúng tôi hiểu tính nhạy cảm của dữ liệu vận hành. OxideTerm áp dụng kiến trúc Local-First. Tất cả thông tin xác thực máy chủ, khóa và tệp cấu hình được mã hóa và lưu trữ độc quyền trên thiết bị cục bộ của người dùng bằng thuật toán mã hóa bảo mật cao. Phần mềm này không thu thập, tải lên hoặc tiết lộ bất kỳ dữ liệu kết nối nhạy cảm nào cho bên thứ ba.",
     "license_title": "Giấy phép",
-    "license_desc": "Phần mềm này được phân phối theo giấy phép mã nguồn mở GPL-3.0 (GNU General Public License v3.0). Mọi người đều có thể tự do sử dụng, sửa đổi và phân phối, bao gồm cả mục đích thương mại. Các tác phẩm phái sinh phải được xuất bản theo cùng giấy phép và cung cấp mã nguồn.",
+    "license_desc": "Phần mềm này được phân phối theo giấy phép mã nguồn mở GPL-3.0 (GNU General Public License v3.0). Mọi người đều có thể tự do sử dụng, sửa đổi và phân phối, bao gồm cả mục đích thương mại. Các tác phẩm phái sinh phải được xuất bản theo cùng giấy phép và cung cấp mã nguồn. Mã công khai không tự động là mã nguồn mở: các điều khoản cấm phân phối lại, đóng gói lại, sản phẩm cạnh tranh hoặc nền tảng chưa được phê duyệt chỉ là bao bì source-available. OxideTerm không thêm những hạn chế đó.",
     "disclaimer": "Trang này chỉ được cung cấp cho mục đích thông tin và không cấu thành tư vấn pháp lý. Người dùng có trách nhiệm đảm bảo việc sử dụng OxideTerm tuân thủ tất cả luật pháp địa phương và quốc tế hiện hành."
   },
   "faq": {
