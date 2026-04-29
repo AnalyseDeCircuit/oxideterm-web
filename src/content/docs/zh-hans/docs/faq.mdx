@@ -7,18 +7,19 @@ description: OxideTerm 常见问题解答。
 
 ### OxideTerm 是什么？
 
-OxideTerm 是一款基于 Tauri 2.0（Rust）和 React 19（TypeScript）构建的 AI 原生 SSH 工作区。它将 SSH 终端、本地 PTY、SFTP、IDE 模式、端口转发、AI 辅助、插件系统、31+ 主题和 11 种语言整合在一个原生应用中。
+OxideTerm 是一个基于 Tauri 2.0（Rust）和 React 19（TypeScript）构建的**本地优先 SSH 工作区**。它把 SSH 终端、本地 Shell、SFTP、IDE 模式、端口转发、trzsz 传输、BYOK AI 辅助、插件系统、主题和 11 种语言整合在一个原生应用里。
 
 ### OxideTerm 免费吗？
 
 OxideTerm 采用 **GPL-3.0**（GNU 通用公共许可证 v3.0）：
-- **所有人**：免费——个人、教育、研究和商业用途
-- **衍生作品**：必须在同一 GPL-3.0 许可证下发布
-- **源代码**：分发修改版本时必须提供源代码
+
+- **所有人**：可免费用于个人、教育、研究和商业用途。
+- **衍生作品**：分发时必须继续使用 GPL-3.0。
+- **源代码**：分发修改版本时必须提供源码。
+
+OxideTerm 曾使用 PolyForm Noncommercial，后来转为 GPL-3.0，是为了避免 source-available 陷阱、非商用歧义和竞业禁止附加条款。
 
 公开代码不自动等于开源。如果许可证在熟悉的开源名称之外又加上“禁止再分发”“禁止重新打包”“禁止竞争产品”或平台审批条款，那它更像 source-available 的包装，而不是开源自由。OxideTerm 不添加这些附加限制：GPL-3.0 就是完整许可证。
-
-如果不确定你的使用是否符合条件，可以 [提交 Issue](https://github.com/AnalyseDeCircuit/oxideterm/issues) 咨询。
 
 ### 支持哪些平台？
 
@@ -26,7 +27,7 @@ macOS（Apple Silicon 和 Intel）、Windows（x64 和 ARM64）、Linux（x64 �
 
 ### OxideTerm 和基于 Electron 的终端有什么区别？
 
-OxideTerm 使用 **Tauri 2.0**，利用系统原生 webview 而非捆绑 Chromium：
+OxideTerm 使用 **Tauri 2.0**，利用系统原生 WebView 而不是捆绑 Chromium：
 
 | 对比项 | Electron | Tauri (OxideTerm) |
 |--------|----------|-------------------|
@@ -35,148 +36,125 @@ OxideTerm 使用 **Tauri 2.0**，利用系统原生 webview 而非捆绑 Chromiu
 | 安全模型 | Chromium | Rust 内存安全 + 沙箱 |
 | SSH 实现 | Node.js 绑定（ssh2） | 纯 Rust（russh） |
 
-### 代码库有多大？
-
-271,000+ 行 Rust 和 TypeScript 代码。
-
-## 连接
+## 连接与安全
 
 ### 密码如何存储？
 
-密码存储在操作系统原生钥匙串中（macOS 的钥匙串访问、Windows 凭据管理器、Linux 的 Secret Service）。**绝不** 存储在配置文件、数据库或明文中。
+密码存储在操作系统原生钥匙串中（macOS 钥匙串、Windows 凭据管理器、Linux Secret Service），不会以明文形式存储在配置文件中。已保存连接的元数据也会在本地静态加密。
 
 ### 能从其他 SSH 客户端导入连接吗？
 
-OxideTerm 支持：
-- 从自有的 `.oxide` 加密格式导入
-- **SSH config 导入** — 自动解析 `~/.ssh/config`，导入现有主机、跳板机、密钥路径和其他设置
-- 通过连接向导手动创建
+可以。OxideTerm 支持：
+
+- 从 `.oxide` 加密格式导入。
+- **SSH config 导入**：解析 `~/.ssh/config` 中的主机、跳板机、密钥路径和常见选项。
+- 通过连接向导手动创建连接。
 
 ### 支持跳板机（ProxyJump）吗？
 
-支持。OxideTerm 支持 **无限跳数的 ProxyJump**，并配有网络拓扑图：
-- 在连接向导中配置跳板链
-- 从 `~/.ssh/config` 自动解析 ProxyJump
-- Dijkstra 寻路计算最优路由
-- 可视化拓扑图展示所有节点和连接
-- 每一跳可使用不同的认证方式（密码、密钥、Agent、证书）
-- 跳板节点可作为独立会话复用
+支持。OxideTerm 支持多跳 ProxyJump 和拓扑图：
 
-### 支持哪些 SSH 密钥类型？
+- 在连接向导中配置跳板链。
+- 从 `~/.ssh/config` 自动解析 ProxyJump。
+- 可视化展示节点和连接关系。
+- 每一跳可使用不同认证方式。
+- 直连场景支持 keyboard-interactive / 2FA；ProxyJump 链路中的显式 keyboard-interactive 仍有限制。
 
-- **Ed25519**（推荐——最快、最小的密钥）
-- **ECDSA**（P-256, P-384）
-- **RSA**（最低 2048 位）
-- **SSH 证书** — 完整的基于证书的认证
-- 支持带口令的密钥（口令存储在 OS 钥匙串中）
+### 支持哪些 SSH 认证方式？
 
-### 支持 SSH Agent 吗？
-
-支持。OxideTerm 集成系统 SSH Agent：
-- **macOS/Linux**：通过 `SSH_AUTH_SOCK`
-- **Windows**：通过 `\\.\pipe\openssh-ssh-agent`
-- 重连时自动重放 Agent 认证
-- 每个 ProxyJump 跳板可独立使用 Agent 认证
+支持密码、Ed25519/RSA/ECDSA 密钥、带口令密钥、SSH 证书、SSH Agent 和直连 keyboard-interactive。Agent Forwarding 可按连接开启。
 
 ### 连接断开时会怎样？
 
-OxideTerm 内置 **优雅期重连** 系统：
-1. 通过 WebSocket 心跳检测断连（300 秒超时，针对 macOS App Nap 优化）
-2. **探测旧连接 30 秒** — 如果 SSH TCP 流恢复（如 Wi-Fi 切换），你正在运行的 TUI 应用（vim、htop、yazi）可以完整幸存
-3. 如果恢复失败 → 新建 SSH 连接 → 自动恢复端口转发、SFTP 传输和 IDE 文件
+OxideTerm 内置**优雅期重连**：
 
-重连协调器端到端处理，无需用户干预。
+1. 检测断连后先探测旧连接。
+2. 如果旧 SSH TCP 流在短时间内恢复，vim、htop、yazi 等 TUI 程序可以继续保留。
+3. 如果恢复失败，则建立新 SSH 连接，并恢复端口转发、SFTP 和 IDE 相关消费者。
 
 ### 多个功能可以共享一个 SSH 连接吗？
 
-可以。OxideTerm 使用 **引用计数连接池**。终端、SFTP、端口转发和 IDE 模式共享一个物理 SSH 连接——无冗余 TCP 握手或认证提示。
+可以。终端、SFTP、端口转发和 IDE 模式共享同一个物理 SSH 连接，避免重复握手和重复认证。
 
-### 空闲超时有哪些选项？
-
-可配置：5 分钟、15 分钟、30 分钟（默认）、1 小时或永不。没有活跃消费者（无终端标签、无 SFTP 面板、无端口转发）的连接会在超时后自动断开。
-
-## 功能
+## AI
 
 ### 可以使用自己的 AI 服务商吗？
 
-可以。OxideSens 采用 **BYOK（自带密钥）** 模式。你提供自己的 API 密钥，支持 OpenAI、Anthropic、Google、DeepSeek、Ollama、OneAPI 或任何 OpenAI 兼容端点。密钥安全存储在 OS 钥匙串中。
+可以。OxideSens 采用 **BYOK（自带密钥）** 模式，支持 OpenAI、Anthropic、Google、DeepSeek、Ollama 和 OpenAI 兼容端点。密钥存储在系统钥匙串。OxideTerm 的核心 SSH 工作区不需要应用订阅；AI provider 费用由你选择的 provider 决定。
 
-### AI 功能会将终端数据发送到云端吗？
+### AI 功能会把终端数据发送到云端吗？
 
-仅在你主动请求时。终端缓冲区数据只在你点击 Context 按钮并发送消息时才会发送给你配置的 AI 服务商。不会自动收集任何数据。如需完全离线 AI，使用 Ollama 本地模型。
+只在你主动请求并让 OxideSens 使用相关上下文时才会发送给你配置的 AI provider。OxideTerm 不做遥测，也不会自动收集终端内容。需要完全离线 AI 时，可以使用 Ollama 本地模型。
 
-### 可以在无网络连接的情况下使用 OxideTerm 吗？
+### 什么是 target-first OxideSens？
 
-可以，用于本地终端会话和连接本地网络上的服务器。AI 功能可通过 Ollama（本地模型）离线使用。
+OxideSens 不再把大量底层工具直接摊给模型，而是把保存连接、活动 SSH 会话、终端缓冲区、SFTP 路径、设置和知识库看成工作区目标。模型需要先明确目标，再执行连接、命令、文件或设置操作。
+
+### 可以无网络使用 OxideTerm 吗？
+
+可以。SSH/SFTP/端口转发/本地 Shell 工作流不需要 OxideTerm 账号或订阅。访问远程网络目标、检查更新、可选 Cloud Sync 或云端 AI provider 时才需要网络。AI 可通过 Ollama 本地模型离线使用。
+
+## 功能
 
 ### 什么是远程 Agent？
 
-一个可选的约 1 MB Rust 二进制文件，部署到远程 Linux 服务器以增强 IDE 模式：
-- 更快的文件树操作和符号搜索
-- 实时文件监控
-- 43 个 JSON-RPC 方法
-- 在 x86_64/aarch64 Linux 上自动部署；其他架构需自行从源码构建并手动上传
-- IDE 模式在没有 Agent 的情况下也能完整工作
+远程 Agent 是一个可选的小型 Rust 二进制，用于增强 IDE 模式，例如更快的文件树、符号搜索和文件监听。IDE 模式在没有 Agent 的情况下也可以工作。
 
 ### 什么是 CLI 伴侣工具（`oxt`）？
 
-约 1 MB 的二进制文件，用于从命令行控制 OxideTerm。使用 JSON-RPC 2.0 通过 Unix Socket（macOS/Linux）或 Named Pipe（Windows）通信。命令包括 `status`、`list` 和 `ping`，支持人类可读和 JSON 输出。
+`oxt` 是用于从命令行控制 OxideTerm 的伴侣工具，通过 Unix Socket（macOS/Linux）或 Named Pipe（Windows）使用 JSON-RPC 2.0 通信。
 
 ### 可以录制终端会话吗？
 
-可以。OxideTerm 以 **asciicast v2** 格式录制会话，精确记录时间戳。回放支持变速（0.5×–8×）。录制文件可导出分享。
+可以。OxideTerm 以 asciicast v2 格式录制终端会话，支持变速回放和导出。
 
 ### 广播输入是怎么工作的？
 
-从工具栏切换广播模式，同时向所有选中的分屏面板发送相同的按键。适用于管理集群或在多台服务器上执行相同命令。
+开启广播模式后，相同按键会发送到选中的多个分屏面板，适合管理多台服务器或同时运行相同命令。
 
 ## 插件
 
-### 插件安装在哪里？
-271,000+ 行 Rust 和 TypeScript 代码。
-插件存储在 `~/.oxideterm/plugins/{plugin-id}/`。每个插件有一个 `plugin.json` 清单文件和一个 ESM 入口点。
-
-密码存储在操作系统原生钥匙串中（macOS 的钥匙串访问、Windows 凭据管理器、Linux 的 Secret Service）。**绝不** 以明文形式存储在配置文件中。
-
-已保存连接的元数据也会在本地静态加密。OxideTerm 将真正的秘密保存在系统钥匙串中，同时使用同一层钥匙串保护的本地密钥去解锁磁盘上的连接配置。
-
-有。插件运行在多层安全机制下：
-- 键盘交互 / 2FA 在直连场景支持；通过 ProxyJump 链路显式使用 KeyboardInteractive 目前仍有限制
-
-### 插件可以访问文件系统吗？
-
-当远端工具需要使用本地 Agent 时，也可以按连接开启 Agent Forwarding。
-
-### macOS 上应用无法启动
-
 ### 有官方插件吗？
 
-有。OxideTerm 当前的官方插件主要提供可选工作流，而不是强制账号体系：
+有。官方插件提供可选工作流，而不是强制账号体系：
 
-- **Cloud Sync** — 通过 WebDAV、HTTP JSON、Dropbox、Git 或 S3 对 `.oxide` 快照进行加密的自托管同步
-- **Quick Commands** — 保存、组织并按主机筛选常用终端命令，一键执行
+- **Cloud Sync**：通过 WebDAV、HTTP JSON、Dropbox、Git 或 S3 同步加密 `.oxide` 快照。
+- **Quick Commands**：保存、组织并按主机筛选常用终端命令。
+- **Telnet Client**：面向旧路由器、交换机和设备的原生 Telnet 客户端。
 
-插件是完全按需启用的。核心应用仍然是本地优先，不要求任何云账号。
+插件是按需启用的。核心应用仍然是本地优先，不要求云账号。
+
+### 插件安装在哪里？
+
+插件存储在 `~/.oxideterm/plugins/{plugin-id}/`。每个插件包含 `plugin.json` 清单和 ESM 入口文件。
+
+### 插件是沙箱化的吗？
+
+是。插件运行在多层安全机制下：冻结 API surface、Proxy 权限 ACL、IPC 命令白名单、熔断器和 React 错误边界。
+
+### 插件可以直接访问文件系统吗？
+
+不能直接访问。插件通过 PluginContext API 中的 SFTP、storage 等命名空间访问允许的能力。
+
+## 故障排查
+
+### macOS 上应用无法启动
 
 首次启动时 macOS Gatekeeper 可能会阻止应用。右键点击应用 → **打开**，或前往 **系统设置** → **隐私与安全性** → **允许**。
 
 ### 连接频繁断开
 
-- 检查网络稳定性
-- OxideTerm 的**优雅期重连**会先尝试 30 秒自动恢复再重新连接
-- 在连接配置中调整 keepalive 设置
-- SSH keepalive 间隔默认为 15 秒
+- 检查网络稳定性。
+- OxideTerm 的优雅期重连会先尝试恢复旧连接。
+- 在连接配置中调整 keepalive。
+- 默认 SSH keepalive 间隔为 15 秒。
 
 ### 终端渲染缓慢
 
-- 确保系统启用了 **WebGL**
-- 尝试减小终端字体大小
-- 检查 GPU 驱动是否为最新版本
-- OxideTerm 使用自适应渲染——大量输出时自动触发 120 Hz+ 加速模式
-
-### Windows 上中日韩输入法问题
-
-Windows IME 集成在某些配置下可能存在问题。请确保使用最新版本的 OxideTerm，其中包含针对 CJK 输入的 ConPTY 改进。
+- 确保系统启用了 WebGL。
+- 如果 WebGL 实际走软件渲染，OxideTerm 会在 auto 模式下回退 Canvas。
+- 检查 GPU 驱动是否正常。
+- 可尝试减小字体大小或切换渲染器。
 
 ### 配置文件存储在哪里？
 
@@ -190,7 +168,7 @@ Windows IME 集成在某些配置下可能存在问题。请确保使用最新�
 
 ### 如何完全卸载 OxideTerm？
 
-1. 删除应用（拖入废纸篓 / 卸载 / 删除 AppImage）
-2. 删除配置目录（见上方路径）
-3. 删除钥匙串条目：在 OS 钥匙串管理器中搜索 `com.oxideterm`
-4. （可选）删除插件：删除 `~/.oxideterm/`
+1. 删除应用（拖入废纸篓 / 卸载 / 删除 AppImage）。
+2. 删除配置目录（见上方路径）。
+3. 删除钥匙串条目：在系统钥匙串管理器中搜索 `com.oxideterm`。
+4. （可选）删除插件：删除 `~/.oxideterm/`。

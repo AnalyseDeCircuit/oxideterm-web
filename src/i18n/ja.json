@@ -1,21 +1,18 @@
 {
-  "announcement": {
-    "license_change": "📢 ライセンス変更：OxideTerm は GPL-3.0 に移行 — 完全オープンソースに！以前は PolyForm Noncommercial。この移行は意図的です。非商用トラップも競業禁止条項もなく、明確な copyleft の自由だけを提供します。"
-  },
   "meta": {
     "lang": "ja",
-    "title": "OxideTerm — AI ネイティブ SSH ワークスペース",
-    "description": "ターミナル、ファイル、ポート、リモートコンテキストのための AI ネイティブ SSH ワークスペース。Electron ゼロ、OpenSSL ゼロ、純粋な Rust SSH。"
+    "title": "OxideTerm — ローカルファースト SSH ワークスペース",
+    "description": "リモートノード中心のローカルファースト SSH ワークスペース。Shell、SFTP、ポート転送、trzsz、軽量編集、ローカル Shell、BYOK AI。Electron/OpenSSL/テレメトリなし。"
   },
   "hero": {
-    "tagline": "Electron ゼロ。OpenSSL ゼロ。テレメトリゼロ。サブスクゼロ。純粋な Rust SSH。",
-    "subtitle": "ターミナル、ファイル、ポート、リモートコンテキストのための AI ネイティブ SSH ワークスペース——ローカルシェル、SSH、SFTP、リモート編集、プラグイン、OxideSens AI を 1 つのネイティブバイナリに。",
+    "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
+    "subtitle": "ローカルファースト SSH ワークスペース。リモートノードを一度開けば、Shell、SFTP、ポート転送、trzsz、軽量編集、ローカル Shell、BYOK 優先の OxideSens AI を同じ場所で扱えます。",
     "cta_download": "ダウンロード",
     "cta_docs": "ドキュメント",
     "version_prefix": "v",
     "stable_badge": "安定版",
     "cta_star": "GitHub",
-    "source_badge": "オープンソース · GPL-3.0"
+    "source_badge": "Open Source · GPL-3.0 · BYOK-first"
   },
   "features": {
     "title": "設計思想が違う",
@@ -35,13 +32,13 @@
   "comparison": {
     "badge": "差別化",
     "title": "なぜ OxideTerm？",
-    "subtitle": "リアルな課題、リアルな解決策。",
+    "subtitle": "単なる端末ではなく、ローカルファーストなリモートノード用ワークスペース。",
     "label_problem": "課題",
     "label_solution": "OxideTerm の答え",
-    "pain_1": "SSH クライアントでローカルシェルが使えない",
-    "answer_1": "<strong>ハイブリッドエンジン</strong> — ローカル PTY（zsh/bash/fish/pwsh/WSL2）+ リモート SSH を一つのウィンドウに",
-    "pain_2": "再接続 = すべて失う",
-    "answer_2": "<strong>Grace Period 再接続</strong> — 切断後 30 秒間旧接続をプローブしてから再接続。vim、htop、yazi が生き残る",
+    "pain_1": "Shell だけではない SSH ワークスペース",
+    "answer_1": "<strong>リモートノード・ワークスペース</strong> — 端末、SFTP、ポート転送、trzsz、軽量 IDE、監視、AI コンテキストを 1 つのノードに集約",
+    "pain_2": "ローカル Shell も必要",
+    "answer_2": "<strong>統合ローカル Shell</strong> — zsh/bash/fish/pwsh/WSL2 を SSH セッションと並べ、ローカルとリモートの作業を同じ UI で扱えます",
     "pain_3": "リモートファイル編集に VS Code Remote が必要",
     "answer_3": "<strong>内蔵 IDE</strong> — SFTP 経由の CodeMirror 6、24 言語モード、オプションの ~1 MB リモート Agent",
     "pain_4": "SSH 接続の再利用ができない",
@@ -50,12 +47,12 @@
     "answer_5": "<strong>russh 0.59</strong> — ring 対応の純粋な Rust SSH。C 依存ゼロ",
     "pain_6": "100+ MB の Electron アプリ",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB バイナリ。ラッパーではなく、Rust バックエンドの本物のネイティブアプリ",
-    "pain_7": "AI が一つのプロバイダーに縛られる",
-    "answer_7": "<strong>OxideSens</strong> — 40+ 自律ツール、MCP プロトコル、RAG ナレッジベース。任意の API に対応",
+    "pain_7": "テレメトリやアプリ購読はいらない",
+    "answer_7": "<strong>追跡なし、コア SSH ワークフローにアプリ購読なし</strong> — SSH/SFTP/ポート転送/ローカル Shell は OxideTerm アカウントも購読も不要。Cloud Sync はプラグインで任意",
     "pain_8": "資格情報が設定ファイルに平文で保存される",
     "answer_8": "<strong>保存時暗号化</strong> — パスワードは OS キーチェーンに保存、.oxide エクスポートは ChaCha20-Poly1305 + Argon2id で暗号化。平文保存なし",
-    "pain_9": "クラウド依存、アカウント必須のツール",
-    "answer_9": "<strong>ローカルファースト</strong> — アカウント不要、テレメトリなし。Cloud Sync は公式プラグインでオプトイン"
+    "pain_9": "プラットフォームアカウントなしで AI を使いたい",
+    "answer_9": "<strong>BYOK-first OxideSens</strong> — 保存済み接続、ライブ SSH、端末バッファ、SFTP パス、設定、ナレッジベースを対象として扱うワークスペース AI"
   },
   "showcase": {
     "title": "主な機能",
@@ -68,7 +65,7 @@
     "sftp_desc": "デュアルペインファイルブラウザ。ドラッグ＆ドロップ転送、画像/動画/コード/PDF/HEXスマートプレビュー、進捗付き転送キュー。",
     "ide_desc": "CodeMirror 6エディタ。24 言語モード、ファイルツリーGitステータス、コンフリクト解決、統合ターミナル。",
     "forwarding_desc": "ローカル(-L)、リモート(-R)、ダイナミックSOCKS5(-D)フォワーディング。ロックフリーI/O、再接続時自動復元、障害レポート。",
-    "ai_desc": "OxideSens AI。40+自律ツール、MCPサーバー統合、RAGナレッジベース、マルチソースコンテキストキャプチャ。"
+    "ai_desc": "OxideSens は target-first なワークスペース AI です。保存済み接続、ライブ SSH セッション、端末バッファ、SFTP パス、設定、ナレッジベースを操作対象として扱います。BYOK、OxideTerm アカウント不要。"
   },
   "tech": {
     "badge": "アーキテクチャ",
@@ -108,8 +105,8 @@
     "themes_value": "31+",
     "languages_count": "言語",
     "languages_value": "11",
-    "ai_tools": "AI ツール",
-    "ai_tools_value": "40+",
+    "ai_tools": "AI 方針",
+    "ai_tools_value": "BYOK",
     "stores": "ステートストア",
     "stores_value": "19",
     "zero_c": "C 依存関係",
@@ -148,10 +145,10 @@
     "ide_6": "24 言語のシンタックスハイライト：Rust、Python、JS/TS、Go、C/C++、Java、YAML、JSON、TOML、Markdown、Shell など",
     "ai_title": "OxideSens AI",
     "ai_1": "インラインパネル（⌘I） + サイドバーチャット",
-    "ai_2": "40+ 自律ツール、MCP プロトコル対応",
-    "ai_3": "RAG ナレッジベース（BM25 + ベクトルハイブリッド検索）",
-    "ai_4": "マルチソースコンテキスト：ターミナル、IDE、SFTP、Git",
-    "ai_5": "API キー持ち込み — OpenAI、Anthropic、Google、または互換エンドポイント",
+    "ai_2": "巨大なツール一覧ではなく target-first ワークスペースツール",
+    "ai_3": "キーワード + ベクトル検索の RAG ナレッジベース",
+    "ai_4": "リモート出力の診断、承認済みコマンド実行、ファイル検査、失敗説明",
+    "ai_5": "OpenAI、Anthropic、Google、DeepSeek、Ollama、互換エンドポイントの API キーを持ち込み",
     "forwarding_title": "ポートフォワーディング",
     "forwarding_1": "ローカル (-L)、リモート (-R)、ダイナミック SOCKS5 (-D)",
     "forwarding_2": "ロックフリーメッセージパッシング I/O",
@@ -234,7 +231,7 @@
     "data_title": "データセキュリティとプライバシー",
     "data_desc": "運用データの機密性を十分に理解しています。OxideTerm はローカルファーストアーキテクチャを採用しており、すべてのサーバー認証情報、鍵、設定ファイルは高強度暗号化アルゴリズムを使用してユーザーのローカルデバイスにのみ保存されます。本ソフトウェアは機密性の高い接続データを収集、アップロード、第三者に開示することはありません。",
     "license_title": "ライセンス",
-    "license_desc": "本ソフトウェアは GPL-3.0（GNU 一般公衆利用許諾書 v3.0）のもとでオープンソースとして配布されています。すべての人が商用利用を含め自由に使用、修正、配布できます。派生物は同じライセンスで公開し、ソースコードを提供する必要があります。コードが公開されているだけではオープンソースとは限りません。再配布禁止、再パッケージ禁止、競合製品禁止、未承認プラットフォーム禁止といった追加条項は source-available の看板です。OxideTerm はそのような制限を追加しません。",
+    "license_desc": "本ソフトウェアは GNU General Public License v3.0 (GPL-3.0) で配布されています。OxideTerm は以前 PolyForm Noncommercial を使っていましたが、source-available の罠、非商用の曖昧さ、競業禁止条項を避けるため GPL-3.0 へ移行しました。公開コードは自動的にオープンソースではありません。再配布禁止、再パッケージ禁止、競合製品禁止、プラットフォーム承認条項は source-available に近づけます。OxideTerm はそうした追加制限を付けません。",
     "disclaimer": "このページは情報提供のみを目的としており、法的助言を構成するものではありません。OxideTerm の使用が適用されるすべての法令に準拠していることを確認する責任はユーザーにあります。"
   },
   "faq": {
@@ -247,9 +244,9 @@
     "q3": "データはどこに保存されますか？",
     "a3": "すべてのデータはお使いのデバイスに保存されます。認証情報は OS のキーチェーン（macOS キーチェーン、Windows 資格情報マネージャー、Linux Secret Service）に格納。エクスポート設定は ChaCha20-Poly1305 で暗号化。サーバーへのアップロードは一切ありません。",
     "q4": "オフラインで使用できますか？",
-    "a4": "はい。OxideTerm はローカルファーストのアプリケーションで、クラウドに依存しません。AI チャット以外のすべての機能がオフラインで動作します。AI チャットは設定した API プロバイダーへのインターネット接続が必要です。",
+    "a4": "はい。OxideTerm はローカルファーストです。SSH、SFTP、ポート転送、ローカル Shell、保存済み接続、設定といったコア SSH ワークフローに OxideTerm アカウントや購読は不要です。AI は利用時に設定済み provider API へ接続します。",
     "q5": "AI 機能には何が必要ですか？",
-    "a5": "API キーをご自身でご用意ください（BYOK）。OpenAI、Anthropic、Google、および OpenAI 互換エンドポイントに対応。キーは OS のキーチェーンに安全に保存されます。",
+    "a5": "BYOK（自分の API キーを使用）です。OpenAI、Anthropic、Google、DeepSeek、Ollama、OpenAI 互換エンドポイントに対応します。Provider の利用料金は provider 側のものです。OxideTerm のコア SSH ワークスペースにはアプリ購読は不要です。",
     "q6": "なぜ OxideTerm は libssh2 や OpenSSL を使わないのですか？",
     "a6": "理由は三つあります。第一に、メモリ安全性：OpenSSL の C コードベースは Heartbleed のような重大な CVE を生んできました。Rust の所有権モデルはそのクラスのバグを根本から排除します。第二に、ゼロデプロイ摩擦：libssh2 は各ターゲットプラットフォームに C 開発ヘッダーとバージョンが一致するシステム OpenSSL を要求します（1.0/1.1/3.0 はABI が非互換）。russh は純粋な Rust ソースとして提供され、Cargo がすべてを処理します。第三に、ネイティブ非同期パフォーマンス：libssh2 はブロッキング C API で Tokio との統合にラッパーが必要ですが、russh は非同期ネイティブで、ホットパスに FFI 境界が存在しません。結果として、C ツールチェーンなしで 10 以上の Linux アーキテクチャにコンパイルできる単一バイナリと、実際に監査可能な暗号スタックを実現しています。"
   },

@@ -4,7 +4,7 @@ description: OxideTerm 插件开发完全参考 — 适用于 Plugin API v3
 ---
 
 {/* AUTO-GENERATED from OxideTerm/plugin-development/README.zh-CN.md. Do not edit manually. */}
-{/* source-sha256: ecd8cb055f0ba393ed0b457c721f9d5dcad29c9dca947711e2fffca442b705c1 */}
+{/* source-sha256: bf204dbf1339c1827ac161f537a72712f182e39d45d259102a05b91cfa98bb08 */}
 
 > **版本**: 适用于当前 OxideTerm 版本（Plugin API v3）
 > **最后更新**: 2026-04-26
@@ -716,6 +716,8 @@ Telnet 是明文协议，适合老设备、交换机、串口服务器、实验�
 ### 4.8 contributes.aiTools
 
 声明插件提供或计划提供给 OxideSens 使用的 AI 工具元数据。这个字段是 **Tool Protocol v2 的可选声明层**：旧插件可以完全不写；新插件写了以后，宿主可以在工具列表、权限提示、工具调用 UI 和未来的插件工具执行层中更准确地展示 capability、risk、target 和结构化结果。
+
+OxideSens 现在内部采用 target-first 的任务编排器。内置聊天默认不会把所有底层宿主工具直接暴露给模型，插件工具也不会因为声明了 `aiTools` 就自动进入默认工具面；只有用户明确调用插件 participant，或宿主启用对应能力路径时，插件工具才会被纳入可见工具集合。manifest API 保持兼容；`aiTools` 是元数据，不是执行权限。
 
 ```json
 "aiTools": [

@@ -1,21 +1,18 @@
 {
-  "announcement": {
-    "license_change": "📢 许可证变更：OxideTerm 现已采用 GPL-3.0 — 完全开源！此前为 PolyForm Noncommercial。我们主动转换，就是为了不玩非商用陷阱或竞业禁止附加条款，而是给出清晰的 copyleft 自由。"
-  },
   "meta": {
     "lang": "zh-CN",
-    "title": "OxideTerm — AI 原生 SSH 工作区",
-    "description": "面向终端、文件、端口与远程上下文的 AI 原生 SSH 工作区。零 Electron、零 OpenSSL、纯 Rust SSH。"
+    "title": "OxideTerm — 本地优先 SSH 工作区",
+    "description": "本地优先的 SSH 工作区：围绕远程节点使用 Shell、SFTP、端口转发、trzsz、轻量编辑、本地 Shell 和 BYOK AI。零 Electron、零 OpenSSL、零遥测。"
   },
   "hero": {
-    "tagline": "零 Electron。零 OpenSSL。零遥测。零订阅。纯 Rust SSH。",
-    "subtitle": "面向终端、文件、端口与远程上下文的 AI 原生 SSH 工作区——一个原生二进制集成本地 Shell、SSH、SFTP、远程编辑、插件与 OxideSens AI。",
+    "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
+    "subtitle": "本地优先的 SSH 工作区：打开一次远程节点，就围绕它使用 Shell、SFTP、端口转发、trzsz、轻量编辑、本地 Shell 和 BYOK 优先的 OxideSens AI。",
     "cta_download": "下载",
     "cta_docs": "文档",
     "version_prefix": "v",
     "stable_badge": "稳定版",
     "cta_star": "GitHub",
-    "source_badge": "开源 · GPL-3.0"
+    "source_badge": "开源 · GPL-3.0 · BYOK 优先"
   },
   "features": {
     "title": "与众不同",
@@ -35,13 +32,13 @@
   "comparison": {
     "badge": "与众不同",
     "title": "为什么选择 OxideTerm？",
-    "subtitle": "真实的痛点，真实的方案。",
+    "subtitle": "不只是终端，而是本地优先的远程节点工作区。",
     "label_problem": "痛点",
     "label_solution": "OxideTerm 的方案",
-    "pain_1": "SSH 客户端不支持本地终端",
-    "answer_1": "<strong>混合引擎</strong> — 本地 PTY（zsh/bash/fish/pwsh/WSL2）+ 远程 SSH 同窗运行",
-    "pain_2": "断线重连 = 丢失一切",
-    "answer_2": "<strong>Grace Period 断线续连</strong> — 断线后先探测旧连接 30 秒再重连。你的 vim、htop、yazi 会话得以保留",
+    "pain_1": "SSH 工作区，而不只是 Shell",
+    "answer_1": "<strong>远程节点工作区</strong> — 一个节点下聚合终端、SFTP、端口转发、trzsz、轻量 IDE、监控和 AI 上下文",
+    "pain_2": "你仍然需要本地 Shell",
+    "answer_2": "<strong>集成本地 Shell</strong> — zsh/bash/fish/pwsh/WSL2 与 SSH 会话并列，本地和远程任务共用同一界面",
     "pain_3": "远程编辑文件需要 VS Code Remote",
     "answer_3": "<strong>内置 IDE</strong> — CodeMirror 6 基于 SFTP 运行，24 语言模式，可选 ~1 MB 远程 Agent",
     "pain_4": "每个功能单独建立 SSH 连接",
@@ -50,12 +47,12 @@
     "answer_5": "<strong>russh 0.59</strong> — 纯 Rust SSH，基于 ring 加密后端。零 C 依赖",
     "pain_6": "100+ MB 的 Electron 应用",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB 二进制文件。非套壳——Rust 后端的真正原生应用",
-    "pain_7": "AI 只能用一家供应商",
-    "answer_7": "<strong>OxideSens</strong> — 40+ 自主工具、MCP 协议、RAG 知识库。兼容任意 API",
+    "pain_7": "不想要遥测或应用订阅",
+    "answer_7": "<strong>零追踪，核心 SSH 工作流零应用订阅</strong> — SSH/SFTP/端口转发/本地 Shell 不需要 OxideTerm 账号或订阅；云同步通过插件按需启用",
     "pain_8": "凭证以明文存储在配置文件中",
     "answer_8": "<strong>静态加密</strong> — 密码存储于系统钥匙串，.oxide 导出使用 ChaCha20-Poly1305 + Argon2id 加密。无明文存储",
-    "pain_9": "依赖云端、需要注册账号的工具",
-    "answer_9": "<strong>本地优先</strong> — 零账号、零遥测。Cloud Sync 通过官方插件可选启用"
+    "pain_9": "想要 AI，但不想绑定平台账号",
+    "answer_9": "<strong>BYOK 优先的 OxideSens</strong> — target-first 工作区 AI，把保存连接、活动 SSH、终端缓冲区、SFTP 路径、设置和知识库都当成可操作目标"
   },
   "showcase": {
     "title": "功能一览",
@@ -68,7 +65,7 @@
     "sftp_desc": "双栏文件浏览器，支持拖拽传输、图片/视频/代码/PDF/十六进制智能预览、带进度的传输队列。",
     "ide_desc": "CodeMirror 6 编辑器，支持 24 语言模式、文件树 Git 状态、冲突解决、集成终端。",
     "forwarding_desc": "本地 (-L)、远程 (-R) 和动态 SOCKS5 (-D) 转发。无锁 I/O、重连后自动恢复、故障报告。",
-    "ai_desc": "OxideSens AI，40+ 自主工具、MCP 服务器集成、RAG 知识库、多源上下文捕获。"
+    "ai_desc": "OxideSens 是 target-first 的工作区 AI：它能理解保存连接、活动 SSH 会话、终端缓冲区、SFTP 路径、设置和知识库条目。BYOK，无需 OxideTerm 账号。"
   },
   "tech": {
     "badge": "技术架构",
@@ -108,8 +105,8 @@
     "themes_value": "31+",
     "languages_count": "语言支持",
     "languages_value": "11",
-    "ai_tools": "AI 工具",
-    "ai_tools_value": "40+",
+    "ai_tools": "AI 策略",
+    "ai_tools_value": "BYOK",
     "stores": "状态管理器",
     "stores_value": "19",
     "zero_c": "C 依赖",
@@ -148,10 +145,10 @@
     "ide_6": "24 语言语法高亮：Rust、Python、JS/TS、Go、C/C++、Java、YAML、JSON、TOML、Markdown、Shell 等",
     "ai_title": "OxideSens AI",
     "ai_1": "内联面板（⌘I） + 侧边栏对话",
-    "ai_2": "40+ 自主工具，MCP 协议支持",
-    "ai_3": "RAG 知识库（BM25 + 向量混合搜索）",
-    "ai_4": "多源上下文捕获：终端、IDE、SFTP、Git",
-    "ai_5": "自带 API 密钥——支持 OpenAI、Anthropic、Google 及任何兼容接口",
+    "ai_2": "Target-first 工作区工具，而不是巨大工具清单",
+    "ai_3": "RAG 知识库，支持关键词 + 向量检索",
+    "ai_4": "诊断远程输出、运行已批准命令、检查文件并解释失败",
+    "ai_5": "自带 API Key：OpenAI、Anthropic、Google、DeepSeek、Ollama 或兼容端点",
     "forwarding_title": "端口转发",
     "forwarding_1": "本地 (-L)、远程 (-R)、动态 SOCKS5 (-D)",
     "forwarding_2": "无锁消息传递 I/O",
@@ -234,7 +231,7 @@
     "data_title": "数据安全与隐私保障",
     "data_desc": "我们深知运维数据的敏感性。OxideTerm 采用「本地优先」架构，所有服务器访问凭据、密钥及配置文件均经由高强度加密算法存储于用户的本地设备中。本软件不会主动采集、上传或向第三方泄露用户的任何敏感连接数据。",
     "license_title": "许可协议",
-    "license_desc": "本软件采用 GPL-3.0（GNU 通用公共许可证 v3.0）开源协议分发。所有人均可自由使用、修改和分发，包括商业用途。衍生作品须以相同许可证发布并提供源代码。公开代码不自动等于开源：禁止再分发、禁止重新打包、禁止竞争产品或平台审批条款，只是 source-available 的包装。OxideTerm 不添加这些附加限制。",
+    "license_desc": "本软件采用 GNU General Public License v3.0 (GPL-3.0) 发布。OxideTerm 曾使用 PolyForm Noncommercial，后来转为 GPL-3.0，是为了避免 source-available 陷阱、非商用歧义和竞业禁止附加条款。公开代码不等于开源：禁止再分发、禁止再打包、禁止竞争产品或平台审批条款都会把项目变成 source-available 品牌。OxideTerm 不添加这些附加限制。",
     "disclaimer": "本页面仅供参考，不构成法律建议。用户有责任确保其使用 OxideTerm 符合所有适用的本地及国际法律法规。"
   },
   "faq": {
@@ -247,9 +244,9 @@
     "q3": "数据存储在哪里？",
     "a3": "所有数据都保存在你的设备上。凭证存储在操作系统钥匙链中（macOS 钥匙串、Windows 凭据管理器、Linux Secret Service）。导出配置使用 ChaCha20-Poly1305 加密。不向任何服务器上传数据。",
     "q4": "可以离线使用吗？",
-    "a4": "可以。OxideTerm 是本地优先应用，不依赖云服务。所有功能均可离线使用，AI 聊天除外——它需要网络连接来访问你配置的 API 提供商。",
+    "a4": "可以。OxideTerm 是本地优先应用。核心 SSH 工作流——SSH、SFTP、端口转发、本地 Shell、保存连接和设置——不需要 OxideTerm 账号或订阅。AI 只在你选择使用时连接你配置的 provider API。",
     "q5": "AI 功能需要什么？",
-    "a5": "自带 API 密钥（BYOK）。OxideTerm 支持 OpenAI、Anthropic、Google 以及任何 OpenAI 兼容接口。密钥安全存储在操作系统钥匙链中。",
+    "a5": "自带 API Key（BYOK）。OxideTerm 支持 OpenAI、Anthropic、Google、DeepSeek、Ollama 和 OpenAI 兼容端点。Provider 费用由你和对应 provider 决定；OxideTerm 的核心 SSH 工作区不需要应用订阅。",
     "q6": "为什么 OxideTerm 不使用 libssh2 或 OpenSSL？",
     "a6": "三个原因。其一，内存安全：OpenSSL 的 C 代码库已产生 Heartbleed 等严重 CVE，Rust 的所有权模型从根本上消除了这整类漏洞。其二，零部署摩擦：libssh2 要求每个目标平台都有 C 开发头文件，且系统 OpenSSL 版本必须匹配（1.0/1.1/3.0 ABI 不兼容）；russh 是纯 Rust 源码，Cargo 全权处理。其三，原生异步性能：libssh2 是阻塞式 C API，需要胶水代码才能接入 Tokio；russh 天生异步，热路径无 FFI 开销。结果是：一个 Rust 二进制文件无需 C 工具链即可编译到 10 余种 Linux 架构——加密栈也是可以真正审计的。"
   },

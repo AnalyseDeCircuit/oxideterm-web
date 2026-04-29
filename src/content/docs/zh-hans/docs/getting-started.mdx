@@ -1,127 +1,112 @@
 ---
 title: 简介
-description: OxideTerm — 基于纯 Rust 和现代 Web 技术构建的 AI 原生 SSH 工作区。
+description: OxideTerm — 基于纯 Rust SSH 和现代 Web 技术构建的本地优先 SSH 工作区。
 ---
 
-import { Image } from 'astro:assets';
+**OxideTerm** 是一个**本地优先的 SSH 工作区**，不只是一个终端。打开一次远程节点后，你可以在同一处围绕它使用 Shell、SFTP、端口转发、trzsz 传输、轻量编辑、本地 Shell 和 BYOK 优先的 OxideSens AI。
 
-**OxideTerm** 是面向终端、文件、端口与远程上下文的 AI 原生 SSH 工作区。基于 **Tauri 2.0**（Rust 后端）和 **React 19**（TypeScript 前端）构建，生成 25–40 MB 的轻量级原生二进制文件，零 Electron、零 OpenSSL、零遥测，并使用纯 Rust SSH。
+OxideTerm 基于 **Tauri 2.0**（Rust 后端）和 **React 19**（TypeScript 前端）构建，提供 25–40 MB 的轻量原生二进制，并坚持 **零 Electron**、**零 OpenSSL**、**零遥测**、**核心应用零订阅** 和 **纯 Rust SSH**。
+
+OxideTerm 不是云端 AI 平台、托管 Agent 服务、泛远程协议工具箱，也不以终端渲染性能跑分为主要卖点。许多现代终端正在围绕本地 Shell、AI 面板或云端 Agent 平台演进；OxideTerm 专注的是本地优先的 SSH 工作区。
 
 ## 为什么选择 OxideTerm？
 
-| 痛点 | OxideTerm 的解决方案 |
-|------|------|
-| SSH 客户端无法做本地 Shell | **混合引擎**：本地 PTY（zsh/bash/fish/pwsh/WSL2）+ 远程 SSH 同窗运行 |
-| 断线重连 = 丢失一切 | **优雅期重连**：断线前先探测旧连接 30 秒——你的 vim/htop/yazi 可以幸存 |
-| 远程文件编辑需要 VS Code Remote | **内置 IDE**：CodeMirror 6 基于 SFTP，24 语言，可选约 1 MB 远程 Agent |
-| SSH 连接无法复用 | **连接复用**：终端、SFTP、转发、IDE 共享一个 SSH 连接，引用计数连接池 |
-| SSH 库依赖 OpenSSL | **russh 0.59**：纯 Rust SSH，编译链接 `ring`——零 C 依赖 |
-| 100+ MB 的 Electron 应用 | **Tauri 2.0**：原生 Rust 后端，25–40 MB 二进制 |
-| AI 被锁定在单一供应商 | **OxideSens**：40+ 工具、MCP 协议、RAG 知识库——兼容 OpenAI/Ollama/DeepSeek/任意兼容 API |
-| 凭据保存在明文配置里 | **静态加密**：密码和 API Key 留在系统钥匙串，已保存连接元数据在本地密封加密 |
-| 云依赖、必须注册账号的工具 | **本地优先**：默认零账号。Cloud Sync 也是通过官方插件按需启用 |
+| 痛点 | OxideTerm 的回答 |
+|---|---|
+| SSH 工作区，而不只是 Shell | **远程节点工作区**：一个节点下聚合终端、SFTP、端口转发、trzsz、轻量 IDE、监控和 AI 上下文 |
+| 你仍然需要本地 Shell | **集成本地 Shell**：zsh/bash/fish/pwsh/WSL2 与 SSH 会话并列，本地和远程任务共用同一界面 |
+| 重连 = 丢失一切 | **优雅期重连**：先探测旧连接 30 秒再杀掉它；如果 TCP 流恢复，vim/htop/yazi 可以继续幸存 |
+| 远程编辑总要 VS Code Remote | **轻量 IDE**：通过 SFTP 使用 CodeMirror 6，支持 24 种语言，Linux 上可选约 1 MB 远程 Agent |
+| SSH 连接不能复用 | **连接复用**：终端、SFTP、端口转发和 IDE 共享同一个引用计数 SSH 连接 |
+| SSH 库依赖 OpenSSL | **russh 0.59**：纯 Rust SSH，基于 `ring`，零 C 依赖 |
+| 100+ MB Electron 应用 | **Tauri 2.0**：Rust 原生后端，系统 WebView，25–40 MB 二进制 |
+| 不想要遥测或应用订阅 | **零追踪，核心 SSH 工作流零应用订阅**：SSH/SFTP/端口转发/本地 Shell 不需要 OxideTerm 账号或订阅；云同步通过插件按需启用 |
+| 想要 AI，但不想绑定平台账号 | **BYOK 优先的 OxideSens**：target-first 工作区 AI，把保存连接、活动 SSH、终端缓冲区、SFTP 路径、设置和知识库都当成可操作目标 |
 
 ## 架构概览
 
-OxideTerm 采用 **双平面架构**，将低延迟的终端 I/O 与管理命令分离：
+OxideTerm 使用**双平面架构**，将低延迟终端 I/O 与管理命令分离：
 
-```
+```text
 ┌─────────────────────────────────────┐
-│        前端 (React 19)              │
-│  xterm.js 6 (WebGL) + 19 stores    │
+│        Frontend (React 19)          │
+│  xterm.js 6 (WebGL) + Zustand       │
 └──────────┬──────────────┬───────────┘
-           │ Tauri IPC    │ WebSocket（二进制）
-           │ (JSON)       │ 每会话独立端口
+           │ Tauri IPC    │ WebSocket (binary)
+           │ (JSON)       │ per-session port
 ┌──────────▼──────────────▼───────────┐
-│         后端 (Rust)                 │
+│         Backend (Rust)              │
 │  NodeRouter → SshConnectionRegistry │
 │  Wire Protocol v1                   │
 │  [Type:1][Length:4][Payload:n]       │
 └─────────────────────────────────────┘
 ```
 
-| 平面 | 传输方式 | 用途 |
-|------|---------|------|
-| **数据平面** | WebSocket（二进制） | 终端 I/O — Type-Length-Payload 帧格式，无 JSON/Base64，热路径零开销 |
-| **控制平面** | Tauri IPC（JSON） | 管理操作：连接、SFTP、端口转发、配置、AI 聊天 |
+| 平面 | 传输 | 用途 |
+|-------|-----------|---------|
+| **数据平面** | WebSocket（二进制） | 终端 I/O：Type-Length-Payload 帧，热路径不走 JSON/Base64 |
+| **控制平面** | Tauri IPC（JSON） | 连接、SFTP、端口转发、配置、AI 聊天等管理操作 |
 
-每个 SSH 会话拥有独立的 WebSocket 端口，首帧即进行一次性、有时限的令牌认证。前端通过 `nodeId` 寻址所有资源——后端 `NodeRouter` 原子解析，因此 SSH 重连（底层 `connectionId` 变更）不会破坏 SFTP、IDE 或端口转发。
+每个 SSH 会话都会获得独立的 WebSocket 端口，并在第一帧使用一次性限时 token 认证。前端用稳定节点标识访问远程资源；后端在背后解析实时连接状态，因此重连不会让 SFTP、IDE 或端口转发消费者失效。
 
 ## 技术栈
 
-| 层次 | 技术 | 说明 |
-|------|------|------|
-| **框架** | Tauri 2.0 | 原生二进制，25–40 MB |
-| **运行时** | Tokio + DashMap 6 | 全异步，无锁并发映射 |
-| **SSH** | russh 0.59 (`ring`) | 纯 Rust，零 C 依赖，SSH Agent |
-| **本地 PTY** | portable-pty 0.8 | 功能门控，Windows 使用 ConPTY |
-| **前端** | React 19.1 + TypeScript 5.8 | Vite 7, Tailwind CSS 4 |
-| **状态管理** | Zustand 5 | 18 个专用 Store |
-| **终端** | xterm.js 6 + WebGL | GPU 加速，60 fps+ |
-| **编辑器** | CodeMirror 6 | 24 语言模式 |
-| **加密** | ChaCha20-Poly1305 + Argon2id | AEAD + 内存硬化 KDF（256 MB） |
-| **存储** | redb 2.1 | 嵌入式键值数据库 |
-| **国际化** | i18next 25 | 11 种语言 × 22 个命名空间 |
-| **插件** | ESM 运行时 | 冻结 PluginContext + 24 UI Kit |
-| **CLI** | JSON-RPC 2.0 | Unix Socket / Named Pipe |
+| 层级 | 技术 | 说明 |
+|---|---|---|
+| **框架** | Tauri 2.0 | 原生应用，25–40 MB |
+| **运行时** | Tokio + DashMap | 异步后端与并发 registry |
+| **SSH** | russh 0.59 (`ring`) | 纯 Rust，零 OpenSSL，支持 SSH Agent |
+| **本地 PTY** | portable-pty | Windows ConPTY，本地 zsh/bash/fish/pwsh/WSL2 工作流 |
+| **前端** | React 19 + TypeScript | Vite、Tailwind CSS |
+| **状态管理** | Zustand | 终端、SSH、SFTP、插件、AI、设置等专用 store |
+| **终端** | xterm.js 6 + WebGL/Canvas | 自适应渲染，软件 renderer 自动回退 |
+| **编辑器** | CodeMirror 6 | 轻量远程编辑 |
+| **加密** | ChaCha20-Poly1305 + Argon2id | `.oxide` 导出加密和本地配置密封 |
+| **存储** | redb | 本地嵌入式 KV 存储 |
+| **i18n** | i18next | 11 种 UI 语言 |
+| **插件** | ESM Runtime | 官方 Cloud Sync、Quick Commands、Telnet Client 和运行时扩展 API |
+| **CLI** | JSON-RPC 2.0 | Unix Socket / Named Pipe 伴侣工具 |
 
 ## 核心功能
 
-| 类别 | 功能 |
-|------|------|
-| **终端** | 本地 PTY（zsh/bash/fish/pwsh/WSL2）、SSH 远程、分屏、广播输入、会话录制/回放（asciicast v2）、自适应渲染（120 Hz+ 加速 / 60 Hz 正常 / 1–15 Hz 空闲）、命令面板（`⌘K`）、禅模式、31+ 主题 + 自定义编辑器 |
-| **SSH 与认证** | 连接池与复用、ProxyJump（无限跳数）+ 拓扑图、优雅期自动重连、Agent Forwarding。认证：密码、SSH 密钥（RSA/Ed25519/ECDSA）、SSH Agent、证书、直连时的键盘交互 2FA、Known Hosts TOFU。ProxyJump 链路当前更适合使用密码/密钥/Agent/证书认证 |
-| **SFTP** | 双面板浏览器、拖放、智能预览（图片/视频/音频/代码/PDF/Hex/字体）、传输队列 + 进度 & ETA、书签、压缩包解压 |
-| **IDE 模式** | CodeMirror 6，24 语言，文件树 + Git 状态，LRU 多标签管理，冲突解决（mtime 锁定），集成终端。可选远程 Agent，其他架构需自行编译并上传 |
-| **端口转发** | 本地 (-L)、远程 (-R)、动态 SOCKS5 (-D)，无锁消息传递 I/O，重连自动恢复，死亡报告，智能远程端口检测 |
-| **AI (OxideSens)** | 内联面板（`⌘I`）+ 侧边栏聊天，终端缓冲区捕获（单/全面板），多源上下文（IDE/SFTP/Git），40+ 自主工具，MCP 服务集成，RAG 知识库（BM25 + 向量混合搜索），流式 SSE |
-| **插件** | 运行时 ESM 加载，18 个 API 命名空间，24 个 UI Kit 组件，冻结 API + Proxy ACL，熔断器，错误自动禁用。官方插件包括 Cloud Sync、Quick Commands 和 Telnet Client |
-| **CLI** | `oxt` 伴侣工具：JSON-RPC 2.0，Unix Socket / Named Pipe |
-| **安全** | .oxide 加密导出（ChaCha20-Poly1305 + Argon2id 256 MB）、OS 钥匙串、本地配置静态加密、Touch ID（macOS）、主机密钥 TOFU、`zeroize` 内存清除 |
+| 分类 | 功能 |
+|---|---|
+| **终端** | 本地 PTY、SSH 远程、分屏、广播输入、会话录制/回放、自适应渲染、命令面板、禅模式、主题与自定义编辑器 |
+| **SSH 与认证** | 连接池、ProxyJump 拓扑、优雅期重连、Agent Forwarding、密码/密钥/证书/SSH Agent/直连 keyboard-interactive、Known Hosts TOFU |
+| **SFTP** | 双面板浏览、拖放、智能预览、传输队列、书签、压缩包提取、目录传输控制 |
+| **IDE 模式** | CodeMirror 6 编辑、文件树 + Git 状态、多标签、冲突检测、可选远程 Agent |
+| **端口转发** | 本地 (-L)、远程 (-R)、动态 SOCKS5 (-D)，重连后自动恢复，状态与进程可见 |
+| **AI (OxideSens)** | Target-first 的 BYOK 助手。它把保存连接、活动 SSH、终端缓冲区、SFTP 路径、设置和知识库看作工作区目标；可诊断远程输出、运行已批准命令、检查文件并解释失败，无需 OxideTerm 账号 |
+| **插件** | 运行时 ESM 加载、PluginContext API、侧边栏/状态栏/标签页贡献、官方可选工作流 |
+| **安全** | OS 钥匙串、本地配置静态加密、`.oxide` 导出加密、macOS Touch ID 门控、主机密钥 TOFU、敏感内存清零 |
 | **国际化** | 11 种语言：EN、简体中文、繁體中文、日本語、한국어、FR、DE、ES、IT、PT-BR、VI |
 
 ## SSH 连接池
 
-OxideTerm 使用基于 `DashMap` 的引用计数 `SshConnectionRegistry`，提供无锁并发访问：
+OxideTerm 使用引用计数 SSH 连接 registry：
 
-- **一个连接，多个消费者** — 终端、SFTP、端口转发和 IDE 共享一个物理 SSH 连接——无冗余 TCP 握手
-- **每连接状态机** — `connecting → active → idle → link_down → reconnecting`
-- **生命周期管理** — 可配置空闲超时（5m / 15m / 30m / 1h / 永不），15 秒 keepalive 间隔，心跳失败检测
-- **级联传播** — 跳板机故障 → 所有下游节点自动标记为 `link_down` 并同步状态
+- **一个连接，多种消费者**：终端、SFTP、端口转发和 IDE 共享同一个物理 SSH 连接。
+- **运行态状态机**：`connecting → active → idle → link_down → reconnecting`。
+- **生命周期管理**：可配置空闲超时、keepalive、link-down 检测和恢复。
+- **级联传播**：跳板机失败会一致地标记下游节点和 UI surface。
 
-## 18 个 Zustand Store
+## 本地优先边界
 
-前端通过 18 个专用 Zustand Store 管理状态：
+OxideTerm 的核心 SSH 工作流不需要 OxideTerm 账号或订阅：
 
-| Store | 职责 |
-|-------|------|
-| `sessionTreeStore` | 用户意图（会话树结构、连接流程） |
-| `appStore` | 连接状态事实（`connections` Map，后端状态镜像） |
-| `localTerminalStore` | 本地 PTY 生命周期 |
-| `ideStore` | IDE 模式状态 |
-| `reconnectOrchestratorStore` | 自动重连流水线编排 |
-| `transferStore` | SFTP 传输队列 |
-| `pluginStore` | 插件运行时状态 |
-| `profilerStore` | 资源分析器 |
-| `aiChatStore` | OxideSens AI 聊天状态 |
-| `agentStore` | 远程 Agent 管理 |
-| `ragStore` | RAG 知识搜索状态 |
-| `settingsStore` | 应用设置 |
-| `broadcastStore` | 广播输入到多个终端面板 |
-| `commandPaletteStore` | 命令面板状态 |
-| `eventLogStore` | 连接生命周期事件日志 |
-| `launcherStore` | 平台应用启动器 |
-| `recordingStore` | 会话录制与回放 |
-| `updateStore` | 自动更新生命周期 |
+- SSH、SFTP、端口转发、本地 Shell、保存连接和设置都在本地工作。
+- 凭据和 API Key 存在系统钥匙串。
+- AI 是 BYOK：provider 费用由你选择的 provider 决定，不是 OxideTerm 应用订阅。
+- Cloud Sync 是可选官方插件，不是使用工作区的前置条件。
 
 ## 下一步
 
 - [安装指南](/zh-hans/docs/installation/) — 下载并安装 OxideTerm
-- [终端功能](/zh-hans/docs/features/terminal/) — 了解终端功能
+- [终端](/zh-hans/docs/features/terminal/) — 了解终端功能
 - [SFTP](/zh-hans/docs/features/sftp/) — SSH 文件管理
 - [IDE 模式](/zh-hans/docs/features/ide/) — 远程代码编辑
 - [端口转发](/zh-hans/docs/features/forwarding/) — SSH 隧道
-- [OxideSens AI](/zh-hans/docs/features/ai/) — AI 终端助手
-- [连接管理](/zh-hans/docs/features/connections/) — 认证方式、ProxyJump、SSH config 导入、加密预设
-- [插件系统](/zh-hans/docs/features/plugins/) — 官方插件与运行时扩展模型
-- [安全](/zh-hans/docs/security/) — 加密与凭证管理
+- [OxideSens AI](/zh-hans/docs/features/ai/) — 面向 SSH 工作区的 target-first BYOK AI
+- [连接](/zh-hans/docs/features/connections/) — 认证方式、ProxyJump、SSH config 导入、加密预设
+- [插件](/zh-hans/docs/features/plugins/) — 官方插件和运行时扩展模型
+- [安全](/zh-hans/docs/security/) — 加密与凭据管理

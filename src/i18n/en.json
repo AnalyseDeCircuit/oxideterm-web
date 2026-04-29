@@ -1,21 +1,18 @@
 {
-  "announcement": {
-    "license_change": "📢 License Change: OxideTerm is now GPL-3.0 — fully open source! Previously PolyForm Noncommercial. We made the switch deliberately: no noncommercial traps, no no-competition riders, just clear copyleft freedom."
-  },
   "meta": {
     "lang": "en",
-    "title": "OxideTerm — AI-native SSH Workspace",
-    "description": "An AI-native SSH workspace for terminals, files, ports, and remote context. Zero Electron, zero OpenSSL, pure Rust SSH."
+    "title": "OxideTerm — Local-first SSH Workspace",
+    "description": "A local-first SSH workspace for remote nodes: shell, SFTP, port forwarding, trzsz, lightweight editing, local shell, and BYOK AI. Zero Electron, zero OpenSSL, zero telemetry."
   },
   "hero": {
-    "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. Pure Rust SSH.",
-    "subtitle": "An AI-native SSH workspace for terminals, files, ports, and remote context — local shells, SSH, SFTP, remote editing, plugins, and OxideSens AI in one native binary.",
+    "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
+    "subtitle": "A local-first SSH workspace: open a remote node once, then work around it with shell, SFTP, port forwarding, trzsz, lightweight editing, local shell, and BYOK-first OxideSens AI.",
     "cta_download": "Download",
     "cta_docs": "Documentation",
     "version_prefix": "v",
     "stable_badge": "Stable",
     "cta_star": "GitHub",
-    "source_badge": "Open Source · GPL-3.0"
+    "source_badge": "Open Source · GPL-3.0 · BYOK-first"
   },
   "features": {
     "title": "Built Different",
@@ -35,13 +32,13 @@
   "comparison": {
     "badge": "THE DIFFERENCE",
     "title": "Why OxideTerm?",
-    "subtitle": "Real problems, real solutions.",
+    "subtitle": "Not just a terminal. A remote-node workspace that stays local-first.",
     "label_problem": "The Problem",
     "label_solution": "OxideTerm's Answer",
-    "pain_1": "SSH clients that can't do local shells",
-    "answer_1": "<strong>Hybrid engine</strong> — local PTY (zsh/bash/fish/pwsh/WSL2) + remote SSH in one window",
-    "pain_2": "Reconnect = lose everything",
-    "answer_2": "<strong>Grace Period reconnect</strong> — probes old connection for 30s before killing it. Your vim, htop, yazi survive",
+    "pain_1": "SSH workspace, not just a shell",
+    "answer_1": "<strong>Remote node workspace</strong> — terminals, SFTP, port forwarding, trzsz, lightweight IDE, monitoring, and AI context under one node",
+    "pain_2": "You still need a local shell",
+    "answer_2": "<strong>Integrated local shell</strong> — zsh/bash/fish/pwsh/WSL2 beside SSH sessions, so local and remote tasks share one UI",
     "pain_3": "Remote file editing needs VS Code Remote",
     "answer_3": "<strong>Built-in IDE</strong> — CodeMirror 6 over SFTP with 24 languages, optional ~1 MB remote agent",
     "pain_4": "No SSH connection reuse",
@@ -50,12 +47,12 @@
     "answer_5": "<strong>russh 0.59</strong> — pure Rust SSH compiled against ring. Zero C dependencies",
     "pain_6": "100+ MB Electron apps",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB binary. Not a wrapper — genuine native app with Rust backend",
-    "pain_7": "AI locked to one provider",
-    "answer_7": "<strong>OxideSens</strong> — 40+ autonomous tools, MCP protocol, RAG knowledge base. Works with any API",
+    "pain_7": "You do not want telemetry or app subscriptions",
+    "answer_7": "<strong>Zero tracking, zero core app subscription</strong> — SSH/SFTP/port forwarding/local shell need no OxideTerm account or subscription; Cloud Sync is opt-in via plugin",
     "pain_8": "Credentials stored in plain-text configs",
     "answer_8": "<strong>Encrypted at rest</strong> — OS keychain for passwords, ChaCha20-Poly1305 + Argon2id for .oxide exports. Nothing in plain text",
-    "pain_9": "Cloud-dependent, account-required tools",
-    "answer_9": "<strong>Local-first</strong> — zero accounts, zero telemetry. Cloud sync opt-in via official plugin"
+    "pain_9": "You want AI without a platform account",
+    "answer_9": "<strong>BYOK-first OxideSens</strong> — target-first workspace AI for saved connections, live SSH sessions, terminal buffers, SFTP paths, settings, and knowledge base entries"
   },
   "showcase": {
     "title": "See It in Action",
@@ -68,7 +65,7 @@
     "sftp_desc": "Dual-pane file browser with drag-and-drop, smart preview for images, video, code, PDF, and hex. Transfer queue with progress tracking.",
     "ide_desc": "CodeMirror 6 editor with 24 language modes, file tree with Git status, conflict resolution, and integrated terminal.",
     "forwarding_desc": "Local (-L), Remote (-R), and Dynamic SOCKS5 (-D) forwarding. Lock-free I/O, auto-restore on reconnect, death reporting.",
-    "ai_desc": "OxideSens AI with 40+ autonomous tools, MCP server integration, RAG knowledge base, multi-source context capture."
+    "ai_desc": "OxideSens is target-first: it treats saved connections, live SSH sessions, terminal buffers, SFTP paths, settings, and knowledge base entries as workspace targets. BYOK, no OxideTerm account required."
   },
   "tech": {
     "badge": "ARCHITECTURE",
@@ -108,8 +105,8 @@
     "themes_value": "31+",
     "languages_count": "Languages",
     "languages_value": "11",
-    "ai_tools": "AI Tools",
-    "ai_tools_value": "40+",
+    "ai_tools": "AI Stance",
+    "ai_tools_value": "BYOK",
     "stores": "State Stores",
     "stores_value": "19",
     "zero_c": "C Dependencies",
@@ -148,10 +145,10 @@
     "ide_6": "Syntax highlighting for 24 languages: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell, and more",
     "ai_title": "OxideSens AI",
     "ai_1": "Inline panel (⌘I) + sidebar chat",
-    "ai_2": "40+ autonomous tools with MCP protocol",
-    "ai_3": "RAG knowledge base (BM25 + vector hybrid search)",
-    "ai_4": "Multi-source context capture: terminal, IDE, SFTP, Git",
-    "ai_5": "Bring your own key — OpenAI, Anthropic, Google, or any compatible endpoint",
+    "ai_2": "Target-first workspace tools, not a giant tool list",
+    "ai_3": "RAG knowledge base with keyword + vector retrieval",
+    "ai_4": "Diagnose remote output, run approved commands, inspect files, and explain failures",
+    "ai_5": "Bring your own key — OpenAI, Anthropic, Google, DeepSeek, Ollama, or compatible endpoints",
     "forwarding_title": "Port Forwarding",
     "forwarding_1": "Local (-L), Remote (-R), Dynamic SOCKS5 (-D)",
     "forwarding_2": "Lock-free message-passing I/O",
@@ -234,7 +231,7 @@
     "data_title": "Data Security & Privacy",
     "data_desc": "We understand the sensitivity of operational data. OxideTerm adopts a Local-First architecture. All server credentials, keys, and configuration files are encrypted and stored exclusively on the user's local device using high-strength encryption algorithms. This software does not collect, upload, or disclose any sensitive connection data to third parties.",
     "license_title": "License",
-    "license_desc": "This software is distributed under the GNU General Public License v3.0 (GPL-3.0). Users may freely use, modify, and distribute the source code. Any derivative work must also be distributed under the same license. Public code is not automatically open source: no-redistribution, no-repackaging, no-competing-products, or platform-approval riders turn it into source-available branding. OxideTerm adds none of those riders.",
+    "license_desc": "This software is distributed under the GNU General Public License v3.0 (GPL-3.0). OxideTerm previously used PolyForm Noncommercial and moved to GPL-3.0 to avoid source-available traps, noncommercial ambiguity, and no-competition riders. Public code is not automatically open source: no-redistribution, no-repackaging, no-competing-products, or platform-approval riders turn it into source-available branding. OxideTerm adds none of those riders.",
     "disclaimer": "This page is provided for informational purposes only and does not constitute legal advice. Users are responsible for ensuring their use of OxideTerm complies with all applicable local and international laws."
   },
   "faq": {
@@ -247,9 +244,9 @@
     "q3": "Where is my data stored?",
     "a3": "Everything stays on your device. Credentials are stored in your OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service). Exported configs use ChaCha20-Poly1305 encryption. Nothing is uploaded to any server.",
     "q4": "Can I use OxideTerm offline?",
-    "a4": "Yes. OxideTerm is a local-first application with zero cloud dependency. All features work offline except AI chat, which requires an internet connection to reach your configured API provider.",
+    "a4": "Yes. OxideTerm is local-first. Core SSH workflows — SSH, SFTP, port forwarding, local shell, saved connections, and settings — do not require an OxideTerm account or subscription. AI needs your configured provider API when you choose to use it.",
     "q5": "What do I need for AI features?",
-    "a5": "Bring your own API key (BYOK). OxideTerm supports OpenAI, Anthropic, Google, and any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain.",
+    "a5": "Bring your own API key (BYOK). OxideTerm supports OpenAI, Anthropic, Google, DeepSeek, Ollama, and OpenAI-compatible endpoints. Provider usage fees are between you and that provider; OxideTerm does not require an app subscription for the core SSH workspace.",
     "q6": "Why doesn't OxideTerm use libssh2 or OpenSSL?",
     "a6": "Three reasons. First, memory safety: OpenSSL's C codebase has produced critical CVEs like Heartbleed — Rust's ownership model eliminates that entire class of bug. Second, zero deployment friction: libssh2 requires each target platform to have C dev headers and the system OpenSSL matching in version (1.0 vs 1.1 vs 3.0 have incompatible ABIs); russh ships as pure Rust source and Cargo handles everything. Third, async-native performance: libssh2 is a blocking C API that needs wrapper glue for Tokio; russh is async-first with zero FFI boundary in the hot path. The result: a single Rust binary that compiles to 9 Linux architectures without a C toolchain — and a crypto stack you can actually audit."
   },

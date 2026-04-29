@@ -7,7 +7,7 @@ description: Frequently asked questions about OxideTerm.
 
 ### What is OxideTerm?
 
-OxideTerm is an AI-native SSH workspace built with Tauri 2.0 (Rust) and React 19 (TypeScript). It combines SSH terminal, local PTY, SFTP, IDE mode, port forwarding, AI assistance, plugins, 31+ themes, and 11 languages into a single native application.
+OxideTerm is a **local-first SSH workspace** built with Tauri 2.0 (Rust) and React 19 (TypeScript). It combines SSH terminal, local shell, SFTP, IDE mode, port forwarding, trzsz transfers, BYOK AI assistance, plugins, themes, and 11 languages into a single native application.
 
 ### Is OxideTerm free?
 
@@ -15,6 +15,8 @@ OxideTerm is licensed under **GPL-3.0** (GNU General Public License v3.0):
 - **Everyone**: free — personal, educational, research, and commercial use
 - **Derivative works**: must be distributed under the same GPL-3.0 license
 - **Source code**: must be made available when distributing modified versions
+
+OxideTerm previously used PolyForm Noncommercial and moved to GPL-3.0 to avoid source-available traps, noncommercial ambiguity, and no-competition riders.
 
 Public code is not automatically open source. If a license adds "no redistribution", "no repackaging", "no competing products", or platform approval clauses on top of a familiar open-source name, it is source-available branding, not open-source freedom. OxideTerm does not add those riders: GPL-3.0 is the whole license.
 
@@ -103,15 +105,15 @@ Configurable: 5 minutes, 15 minutes, 30 minutes (default), 1 hour, or never. Con
 
 ### Can I use my own AI provider?
 
-Yes. OxideSens uses a **BYOK (Bring Your Own Key)** model. You provide your own API key for OpenAI, Anthropic, Google, DeepSeek, Ollama, OneAPI, or any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain.
+Yes. OxideSens uses a **BYOK (Bring Your Own Key)** model. You provide your own API key for OpenAI, Anthropic, Google, DeepSeek, Ollama, or any OpenAI-compatible endpoint. Keys are stored securely in your OS keychain. OxideTerm does not require an app subscription for the core SSH workspace; AI provider costs belong to the provider you choose.
 
 ### Does the AI feature send my terminal data to the cloud?
 
-Only when you explicitly request it. Terminal buffer data is sent to your configured AI provider only when you click the Context button and send a message. No automatic data collection occurs. For fully offline AI, use Ollama with local models.
+Only when you explicitly request it. Terminal buffer data is sent to your configured AI provider only when you ask OxideSens to use that context. No automatic data collection occurs. For fully offline AI, use Ollama with local models.
 
 ### Can I use OxideTerm without an internet connection?
 
-Yes, for local terminal sessions and connections to servers on your local network. AI features can work offline with Ollama (local models).
+Yes. SSH/SFTP/port forwarding/local shell workflows work without an OxideTerm account or subscription. Internet access is only needed for remote network targets, update checks, optional Cloud Sync, or cloud AI providers. AI features can work offline with Ollama local models.
 
 ### What is the Remote Agent?
 

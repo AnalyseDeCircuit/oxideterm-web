@@ -1,21 +1,18 @@
 {
-  "announcement": {
-    "license_change": "📢 Lizenzänderung: OxideTerm ist jetzt GPL-3.0 — vollständig Open Source! Zuvor PolyForm Noncommercial. Dieser Schritt war bewusst: keine Noncommercial-Fallen, keine No-Competition-Klauseln, sondern klare Copyleft-Freiheit."
-  },
   "meta": {
     "lang": "de",
-    "title": "OxideTerm — KI-nativer SSH-Workspace",
-    "description": "Ein KI-nativer SSH-Workspace für Terminals, Dateien, Ports und Remote-Kontext. Kein Electron, kein OpenSSL, reines Rust-SSH."
+    "title": "OxideTerm — Local-first SSH Workspace",
+    "description": "Ein local-first SSH-Workspace für Remote-Knoten: Shell, SFTP, Port-Forwarding, trzsz, leichtes Editing, lokale Shell und BYOK-KI. Zero Electron, zero OpenSSL, zero Telemetry."
   },
   "hero": {
-    "tagline": "Kein Electron. Kein OpenSSL. Keine Telemetrie. Kein Abo. Reines Rust-SSH.",
-    "subtitle": "Ein KI-nativer SSH-Workspace für Terminals, Dateien, Ports und Remote-Kontext — lokale Shells, SSH, SFTP, Remote-Bearbeitung, Plugins und OxideSens AI in einer nativen Binärdatei.",
+    "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
+    "subtitle": "Ein local-first SSH-Workspace: Remote-Knoten einmal öffnen, dann Shell, SFTP, Port-Forwarding, trzsz, leichtes Editing, lokale Shell und BYOK-first OxideSens KI nutzen.",
     "cta_download": "Herunterladen",
     "cta_docs": "Dokumentation",
     "version_prefix": "v",
     "stable_badge": "Stabil",
     "cta_star": "GitHub",
-    "source_badge": "Open Source · GPL-3.0"
+    "source_badge": "Open Source · GPL-3.0 · BYOK-first"
   },
   "features": {
     "title": "Anders konstruiert",
@@ -35,13 +32,13 @@
   "comparison": {
     "badge": "DER UNTERSCHIED",
     "title": "Warum OxideTerm?",
-    "subtitle": "Echte Probleme, echte Lösungen.",
+    "subtitle": "Nicht nur ein Terminal, sondern ein local-first Workspace für Remote-Knoten.",
     "label_problem": "Das Problem",
     "label_solution": "OxideTerms Antwort",
-    "pain_1": "SSH-Clients können keine lokalen Shells",
-    "answer_1": "<strong>Hybrid-Engine</strong> — lokales PTY (zsh/bash/fish/pwsh/WSL2) + Remote-SSH in einem Fenster",
-    "pain_2": "Neuverbindung = alles verlieren",
-    "answer_2": "<strong>Grace Period Wiederverbindung</strong> — prüft die alte Verbindung 30s bevor sie getrennt wird. Ihre vim-, htop-, yazi-Sitzungen überleben",
+    "pain_1": "SSH-Workspace, nicht nur Shell",
+    "answer_1": "<strong>Remote-Knoten-Workspace</strong> — Terminals, SFTP, Port-Forwarding, trzsz, leichtes IDE, Monitoring und KI-Kontext unter einem Knoten",
+    "pain_2": "Du brauchst weiterhin eine lokale Shell",
+    "answer_2": "<strong>Integrierte lokale Shell</strong> — zsh/bash/fish/pwsh/WSL2 neben SSH-Sessions, lokale und entfernte Aufgaben in einer UI",
     "pain_3": "Remote-Dateibearbeitung braucht VS Code Remote",
     "answer_3": "<strong>Integrierte IDE</strong> — CodeMirror 6 über SFTP mit 24 Sprachen, optionaler ~1 MB Remote-Agent",
     "pain_4": "Keine Wiederverwendung von SSH-Verbindungen",
@@ -50,12 +47,12 @@
     "answer_5": "<strong>russh 0.59</strong> — reines Rust SSH kompiliert mit ring. Null C-Abhängigkeiten",
     "pain_6": "100+ MB Electron-Apps",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB Binärdatei. Kein Wrapper — echte native App mit Rust-Backend",
-    "pain_7": "KI auf einen Anbieter beschränkt",
-    "answer_7": "<strong>OxideSens</strong> — 40+ autonome Tools, MCP-Protokoll, RAG-Wissensbasis. Funktioniert mit jeder API",
+    "pain_7": "Keine Telemetrie oder App-Abos",
+    "answer_7": "<strong>Kein Tracking, kein App-Abo für den SSH-Kern</strong> — SSH/SFTP/Port-Forwarding/lokale Shell brauchen kein OxideTerm-Konto oder Abo; Cloud Sync ist optional per Plugin",
     "pain_8": "Anmeldedaten im Klartext in Konfigurationsdateien",
     "answer_8": "<strong>Verschlüsselt gespeichert</strong> — OS-Schlüsselbund für Passwörter, ChaCha20-Poly1305 + Argon2id für .oxide-Exporte. Nichts im Klartext",
-    "pain_9": "Cloud-abhängige Tools mit Kontozwang",
-    "answer_9": "<strong>Local-first</strong> — null Konten, null Telemetrie. Cloud Sync optional über offizielles Plugin"
+    "pain_9": "KI ohne Plattformkonto",
+    "answer_9": "<strong>BYOK-first OxideSens</strong> — target-first Workspace-KI für gespeicherte Verbindungen, Live-SSH-Sessions, Terminal-Buffer, SFTP-Pfade, Einstellungen und Wissensbasis"
   },
   "showcase": {
     "title": "Funktionen im Überblick",
@@ -68,7 +65,7 @@
     "sftp_desc": "Dual-Panel-Dateibrowser. Drag-and-Drop-Transfer, Smart-Preview für Bilder/Video/Code/PDF/Hex, Transfer-Queue mit Fortschritt.",
     "ide_desc": "CodeMirror 6 Editor. 24 Sprachmodi, Dateibaum mit Git-Status, Konfliktlösung, integriertes Terminal.",
     "forwarding_desc": "Lokale (-L), Remote (-R) und dynamische SOCKS5 (-D) Weiterleitung. Lock-freies I/O, Auto-Wiederherstellung bei Neuverbindung, Fehlerberichte.",
-    "ai_desc": "OxideSens KI. 40+ autonome Tools, MCP-Server-Integration, RAG-Wissensbasis, Multi-Source-Kontexterfassung."
+    "ai_desc": "OxideSens ist target-first: gespeicherte Verbindungen, Live-SSH-Sessions, Terminal-Buffer, SFTP-Pfade, Einstellungen und Wissensbasis-Einträge werden zu Workspace-Zielen. BYOK, kein OxideTerm-Konto erforderlich."
   },
   "tech": {
     "badge": "ARCHITEKTUR",
@@ -108,8 +105,8 @@
     "themes_value": "31+",
     "languages_count": "Sprachen",
     "languages_value": "11",
-    "ai_tools": "KI-Tools",
-    "ai_tools_value": "40+",
+    "ai_tools": "KI-Ansatz",
+    "ai_tools_value": "BYOK",
     "stores": "State Stores",
     "stores_value": "19",
     "zero_c": "C-Abhängigkeiten",
@@ -148,10 +145,10 @@
     "ide_6": "Syntaxhervorhebung für 24 Sprachen: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell und mehr",
     "ai_title": "OxideSens AI",
     "ai_1": "Inline-Panel (⌘I) + Seitenleisten-Chat",
-    "ai_2": "40+ autonome Tools, MCP-Protokoll",
-    "ai_3": "RAG-Wissensbasis (BM25 + Vektor-Hybridsuche)",
-    "ai_4": "Multi-Source-Kontexterfassung: Terminal, IDE, SFTP, Git",
-    "ai_5": "Eigenen API-Schlüssel mitbringen — OpenAI, Anthropic, Google oder kompatible Endpunkte",
+    "ai_2": "Target-first Workspace-Tools statt riesiger Tool-Liste",
+    "ai_3": "RAG-Wissensbasis mit Keyword- und Vektorsuche",
+    "ai_4": "Remote-Ausgaben diagnostizieren, genehmigte Befehle ausführen, Dateien prüfen und Fehler erklären",
+    "ai_5": "Eigene Schlüssel für OpenAI, Anthropic, Google, DeepSeek, Ollama oder kompatible Endpunkte",
     "forwarding_title": "Port-Weiterleitung",
     "forwarding_1": "Lokal (-L), Remote (-R), Dynamisch SOCKS5 (-D)",
     "forwarding_2": "Lock-freie Nachrichtenbasierte I/O",
@@ -234,7 +231,7 @@
     "data_title": "Datensicherheit und Datenschutz",
     "data_desc": "Wir verstehen die Sensibilität von Betriebsdaten. OxideTerm verwendet eine Local-First-Architektur. Alle Serverzugangsdaten, Schlüssel und Konfigurationsdateien werden mit hochsicheren Verschlüsselungsalgorithmen ausschließlich auf dem lokalen Gerät des Benutzers gespeichert. Diese Software sammelt, lädt hoch oder gibt keine sensiblen Verbindungsdaten an Dritte weiter.",
     "license_title": "Lizenz",
-    "license_desc": "Diese Software wird unter der Open-Source-Lizenz GPL-3.0 (GNU General Public License v3.0) vertrieben. Jeder kann sie frei verwenden, modifizieren und verbreiten, einschließlich für kommerzielle Zwecke. Abgeleitete Werke müssen unter derselben Lizenz veröffentlicht werden und den Quellcode bereitstellen. Öffentlich einsehbarer Code ist nicht automatisch Open Source: Verbote von Weiterverbreitung, Repackaging, Konkurrenzprodukten oder Plattformfreigaben sind Source-Available-Branding. OxideTerm fügt solche Zusatzklauseln nicht hinzu.",
+    "license_desc": "Diese Software wird unter der GNU General Public License v3.0 (GPL-3.0) verteilt. OxideTerm nutzte zuvor PolyForm Noncommercial und wechselte zu GPL-3.0, um source-available-Fallen, Noncommercial-Mehrdeutigkeit und No-Competition-Klauseln zu vermeiden. Öffentlicher Code ist nicht automatisch Open Source: Verbote von Weiterverteilung, Repackaging, Konkurrenzprodukten oder Plattformfreigaben machen daraus source-available Branding. OxideTerm fügt keine solchen Zusatzbeschränkungen hinzu.",
     "disclaimer": "Diese Seite dient nur zu Informationszwecken und stellt keine Rechtsberatung dar. Die Benutzer sind dafür verantwortlich sicherzustellen, dass ihre Nutzung von OxideTerm allen geltenden lokalen und internationalen Gesetzen entspricht."
   },
   "faq": {
@@ -247,9 +244,9 @@
     "q3": "Wo werden meine Daten gespeichert?",
     "a3": "Alles bleibt auf Ihrem Gerät. Anmeldedaten werden im Schlüsselbund des Betriebssystems gespeichert (macOS Schlüsselbund, Windows Anmeldeinformationsverwaltung, Linux Secret Service). Exportierte Konfigurationen sind mit ChaCha20-Poly1305 verschlüsselt. Nichts wird auf einen Server hochgeladen.",
     "q4": "Kann ich OxideTerm offline nutzen?",
-    "a4": "Ja. OxideTerm ist eine Local-First-Anwendung ohne Cloud-Abhängigkeit. Alle Funktionen sind offline verfügbar, außer dem AI-Chat, der eine Internetverbindung zu Ihrem konfigurierten API-Anbieter benötigt.",
+    "a4": "Ja. OxideTerm ist local-first. Die zentralen SSH-Workflows — SSH, SFTP, Port-Forwarding, lokale Shell, gespeicherte Verbindungen und Einstellungen — benötigen kein OxideTerm-Konto oder Abo. KI verbindet sich nur bei Nutzung mit deinem konfigurierten Provider.",
     "q5": "Was brauche ich für die KI-Funktionen?",
-    "a5": "Bringen Sie Ihren eigenen API-Schlüssel mit (BYOK). OxideTerm unterstützt OpenAI, Anthropic, Google und jeden OpenAI-kompatiblen Endpunkt. Schlüssel werden sicher im Schlüsselbund des Betriebssystems gespeichert.",
+    "a5": "Bring your own API key (BYOK). OxideTerm unterstützt OpenAI, Anthropic, Google, DeepSeek, Ollama und OpenAI-kompatible Endpunkte. Providerkosten liegen beim jeweiligen Provider; für den Kern-SSH-Workspace verlangt OxideTerm kein App-Abo.",
     "q6": "Warum verwendet OxideTerm kein libssh2 oder OpenSSL?",
     "a6": "Drei Gründe. Erstens, Speichersicherheit: Die C-Codebasis von OpenSSL hat kritische CVEs wie Heartbleed hervorgebracht — Rusts Eigentümerschaftsmodell eliminiert diese ganze Fehlerklasse. Zweitens, null Deployment-Reibung: libssh2 erfordert C-Entwicklungsheader für jede Zielplattform und eine passende System-OpenSSL-Version (1.0, 1.1 und 3.0 haben inkompatible ABIs); russh wird als reiner Rust-Quellcode geliefert und Cargo erledigt alles. Drittens, native Async-Performance: libssh2 ist eine blockierende C-API, die für Tokio einen Wrapper benötigt; russh ist async-nativ ohne FFI-Grenze im Hot-Path. Das Ergebnis: ein einziges Rust-Binary, das ohne C-Toolchain für über 10 Linux-Architekturen kompiliert — mit einem Crypto-Stack, den man tatsächlich prüfen kann."
   },
