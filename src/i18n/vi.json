@@ -27,7 +27,7 @@
     "proxyjump_title": "ProxyJump đa chặng",
     "proxyjump_desc": "Chuỗi không giới hạn jump host với đồ thị topology tích hợp. Không cần cấu hình SSH — thiết lập kết nối đa chặng bằng giao diện trực quan.",
     "plugins_title": "Plugin chính thức",
-    "plugins_desc": "Cloud Sync, Quick Commands và Telnet Client mở rộng OxideTerm mà không làm phình ứng dụng lõi."
+    "plugins_desc": "Cloud Sync và Telnet Client mở rộng OxideTerm mà không làm phình ứng dụng lõi."
   },
   "comparison": {
     "badge": "SỰ KHÁC BIỆT",

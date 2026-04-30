@@ -27,7 +27,7 @@
     "proxyjump_title": "マルチホップ ProxyJump",
     "proxyjump_desc": "無制限のジャンプホストを連鎖可能。内蔵トポロジーグラフ付き。SSH 設定ファイル不要——視覚的にマルチホップ接続をセットアップ。",
     "plugins_title": "公式プラグイン",
-    "plugins_desc": "Cloud Sync、Quick Commands、Telnet Client が、コアアプリを重くせずに OxideTerm を拡張します。"
+    "plugins_desc": "Cloud Sync と Telnet Client が、コアアプリを重くせずに OxideTerm を拡張します。"
   },
   "comparison": {
     "badge": "差別化",

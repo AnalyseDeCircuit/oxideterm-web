@@ -27,7 +27,7 @@
     "proxyjump_title": "ProxyJump multi-salto",
     "proxyjump_desc": "Encadeie hosts de salto ilimitados com o grafo de topologia integrado. Sem configuração SSH necessária — configure conexões multi-salto visualmente.",
     "plugins_title": "Plugins oficiais",
-    "plugins_desc": "Cloud Sync, Quick Commands e Telnet Client estendem o OxideTerm sem inflar o app principal."
+    "plugins_desc": "Cloud Sync e Telnet Client estendem o OxideTerm sem inflar o app principal."
   },
   "comparison": {
     "badge": "O DIFERENCIAL",

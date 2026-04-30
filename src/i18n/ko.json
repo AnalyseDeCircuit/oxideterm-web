@@ -27,7 +27,7 @@
     "proxyjump_title": "멀티홉 ProxyJump",
     "proxyjump_desc": "무제한 점프 호스트 체인. 내장 토폴로지 그래프. SSH 설정 파일 불필요 — 시각적으로 멀티홉 연결 설정.",
     "plugins_title": "공식 플러그인",
-    "plugins_desc": "Cloud Sync, Quick Commands, Telnet Client가 핵심 앱을 무겁게 만들지 않고 OxideTerm을 확장합니다."
+    "plugins_desc": "Cloud Sync와 Telnet Client가 핵심 앱을 무겁게 만들지 않고 OxideTerm을 확장합니다."
   },
   "comparison": {
     "badge": "차별점",

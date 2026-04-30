@@ -27,7 +27,7 @@
     "proxyjump_title": "Multi-Hop ProxyJump",
     "proxyjump_desc": "Unbegrenzte Jump-Hosts verketten mit integriertem Topologie-Graphen. Keine SSH-Konfiguration nötig — Multi-Hop-Verbindungen visuell einrichten.",
     "plugins_title": "Offizielle Plugins",
-    "plugins_desc": "Cloud Sync, Quick Commands und Telnet Client erweitern OxideTerm, ohne die Kern-App aufzublähen."
+    "plugins_desc": "Cloud Sync und Telnet Client erweitern OxideTerm, ohne die Kern-App aufzublähen."
   },
   "comparison": {
     "badge": "DER UNTERSCHIED",

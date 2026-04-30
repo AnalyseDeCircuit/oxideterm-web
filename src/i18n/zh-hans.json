@@ -27,7 +27,7 @@
     "proxyjump_title": "多跳 ProxyJump",
     "proxyjump_desc": "串联无限跳板主机，内置拓扑图。无需 SSH 配置文件——可视化设置多跳连接。",
     "plugins_title": "官方插件",
-    "plugins_desc": "Cloud Sync、Quick Commands 和 Telnet Client 以插件形式扩展 OxideTerm，不臃肿核心应用。"
+    "plugins_desc": "Cloud Sync 和 Telnet Client 以插件形式扩展 OxideTerm，不臃肿核心应用。"
   },
   "comparison": {
     "badge": "与众不同",
