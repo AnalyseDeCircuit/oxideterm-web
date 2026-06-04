@@ -1,12 +1,12 @@
 {
   "meta": {
     "lang": "zh-TW",
-    "title": "OxideTerm — 本地優先 SSH 工作區",
-    "description": "本地優先的 SSH 工作區：圍繞遠端節點使用 Shell、SFTP、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 BYOK AI。零 Electron、零 OpenSSL、零遙測。"
+    "title": "OxideTerm — 面向遠端伺服器的 AI-native 工作區",
+    "description": "面向遠端伺服器的 AI-native 工作區：SSH 終端、SFTP、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 OxideSens AI。零 Electron、零 OpenSSL、零遙測。"
   },
   "hero": {
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "本地優先的 SSH 工作區：開啟一次遠端節點，就圍繞它使用 Shell、SFTP、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 BYOK 優先的 OxideSens AI。",
+    "subtitle": "透過 SSH 連接你的伺服器，然後在一個本地優先應用裡使用終端、SFTP、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 OxideSens AI。",
     "cta_download": "下載",
     "cta_docs": "文件",
     "version_prefix": "v",
@@ -36,7 +36,7 @@
     "label_problem": "痛點",
     "label_solution": "OxideTerm 的方案",
     "pain_1": "SSH 工作區，而不只是 Shell",
-    "answer_1": "<strong>遠端節點工作區</strong> — 一個節點下聚合終端、SFTP、連接埠轉發、trzsz、輕量 IDE、監控和 AI 上下文",
+    "answer_1": "<strong>AI-native 遠端伺服器工作區</strong> — 一個節點下聚合終端、SFTP、連接埠轉發、trzsz、輕量 IDE、監控和 OxideSens AI",
     "pain_2": "你仍然需要本地 Shell",
     "answer_2": "<strong>整合本地 Shell</strong> — zsh/bash/fish/pwsh/WSL2 與 SSH 會話並列，本地和遠端任務共用同一介面",
     "pain_3": "遠端編輯檔案需要 VS Code Remote",
@@ -52,7 +52,7 @@
     "pain_8": "憑證以明文儲存在設定檔中",
     "answer_8": "<strong>靜態加密</strong> — 密碼儲存於系統鑰匙圈，.oxide 匯出使用 ChaCha20-Poly1305 + Argon2id 加密。無明文儲存",
     "pain_9": "想要 AI，但不想綁定平台帳號",
-    "answer_9": "<strong>BYOK 優先的 OxideSens</strong> — target-first 工作區 AI，把儲存連線、活動 SSH、終端緩衝區、SFTP 路徑、設定和知識庫都當成可操作目標"
+    "answer_9": "<strong>BYOK-first OxideSens AI</strong> — 可檢查儲存連線、活動 SSH、終端緩衝區、SFTP 路徑、設定和知識庫，並執行已核准的工作區操作"
   },
   "showcase": {
     "title": "功能一覽",
@@ -65,7 +65,7 @@
     "sftp_desc": "雙欄檔案瀏覽器，支援拖放傳輸、圖片/影片/程式碼/PDF/十六進位智慧預覽、帶進度的傳輸佇列。",
     "ide_desc": "CodeMirror 6 編輯器，支援 24 語言模式、檔案樹 Git 狀態、衝突解決、整合終端。",
     "forwarding_desc": "本地 (-L)、遠端 (-R) 和動態 SOCKS5 (-D) 轉發。無鎖 I/O、重連後自動恢復、故障報告。",
-    "ai_desc": "OxideSens 是 target-first 的工作區 AI：它能理解儲存連線、活動 SSH 會話、終端緩衝區、SFTP 路徑、設定和知識庫條目。BYOK，無需 OxideTerm 帳號。"
+    "ai_desc": "OxideSens 是面向遠端伺服器工作區的 BYOK AI。它把儲存連線、活動 SSH 會話、終端緩衝區、SFTP 路徑、設定和知識庫條目視為目標，並執行已核准的操作，無需 OxideTerm 帳號。"
   },
   "tech": {
     "badge": "技術架構",
@@ -115,7 +115,7 @@
   "demo": {
     "badge": "實機演示",
     "title": "一分鐘了解 OxideTerm",
-    "subtitle": "OxideSens AI 可以從一個助手控制即時終端與工作區工具。",
+    "subtitle": "OxideSens AI 可以從一個助手檢查即時終端並使用已核准的工作區工具。",
     "fallback": "您的瀏覽器不支援影片播放。"
   },
   "details": {
@@ -144,7 +144,7 @@
     "ide_5": "正則搜尋取代，跨遠端檔案",
     "ide_6": "24 語言語法高亮：Rust、Python、JS/TS、Go、C/C++、Java、YAML、JSON、TOML、Markdown、Shell 等",
     "ai_title": "OxideSens AI",
-    "ai_1": "內嵌面板（⌘I） + 側邊欄對話",
+    "ai_1": "內嵌面板（⌘I） + 對話",
     "ai_2": "Target-first 工作區工具，而不是巨大工具清單",
     "ai_3": "RAG 知識庫，支援關鍵字 + 向量檢索",
     "ai_4": "診斷遠端輸出、執行已批准命令、檢查檔案並解釋失敗",

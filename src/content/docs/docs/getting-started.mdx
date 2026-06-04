@@ -1,19 +1,19 @@
 ---
 title: Introduction
-description: OxideTerm — a local-first SSH workspace built with pure Rust SSH and modern web technologies.
+description: OxideTerm — an AI-native workspace for remote servers built with pure Rust SSH and modern web technologies.
 ---
 
-**OxideTerm** is a **local-first SSH workspace**, not just a terminal. Open a remote node once, then work around it in one place: shell, SFTP, port forwarding, trzsz transfers, lightweight editing, local shell, and BYOK-first OxideSens AI.
+**OxideTerm** is an **AI-native workspace for remote servers**, not just a terminal. Connect to a server once, then work around it in one place: SSH shell, SFTP, port forwarding, trzsz transfers, lightweight editing, local shell, and OxideSens AI.
 
 Built with **Tauri 2.0** (Rust backend) and **React 19** (TypeScript frontend), OxideTerm ships as a lightweight 25–40 MB native binary with **zero Electron**, **zero OpenSSL**, **zero telemetry**, **zero core app subscription**, and **pure Rust SSH**.
 
-OxideTerm is not a cloud AI platform, hosted agent service, generic remote-protocol toolbox, or a terminal-rendering benchmark project. Many modern terminals are evolving around local shells, AI panels, or cloud agent platforms; OxideTerm focuses on the local-first SSH workspace.
+OxideTerm is not a cloud AI platform, hosted agent service, generic remote-protocol toolbox, or a terminal-rendering benchmark project. Many modern terminals are evolving around local shells, AI panels, or cloud agent platforms; OxideTerm focuses on local-first work on real remote servers over SSH.
 
 ## Why OxideTerm?
 
 | Pain Point | OxideTerm's Answer |
 |---|---|
-| SSH workspace, not just a shell | **Remote node workspace**: terminal, SFTP, port forwarding, trzsz, lightweight IDE, monitoring, and AI context live under the same node |
+| Remote server work is split across too many tools | **AI-native remote-server workspace**: terminal, SFTP, port forwarding, trzsz, lightweight IDE, monitoring, and OxideSens AI live under the same node |
 | You still need a local shell | **Integrated local shell**: zsh/bash/fish/pwsh/WSL2 beside SSH sessions, so local and remote tasks share one UI |
 | Reconnect = lose everything | **Grace Period reconnect**: probes old connection 30s before killing it — your vim/htop/yazi survive when the TCP stream recovers |
 | Remote file editing needs VS Code Remote | **Lightweight IDE**: CodeMirror 6 over SFTP with 24 languages, optional ~1 MB remote agent on Linux |
@@ -21,7 +21,7 @@ OxideTerm is not a cloud AI platform, hosted agent service, generic remote-proto
 | SSH libraries depend on OpenSSL | **russh 0.59**: pure Rust SSH compiled against `ring` — zero C dependencies |
 | 100+ MB Electron apps | **Tauri 2.0**: native Rust backend, system WebView, 25–40 MB binary |
 | You do not want telemetry or app subscriptions | **Zero tracking, zero core app subscription**: SSH/SFTP/port forwarding/local shell need no OxideTerm account or subscription; Cloud Sync is opt-in via plugin |
-| You want AI without a platform account | **BYOK-first OxideSens**: target-first workspace AI for saved connections, live SSH sessions, terminal buffers, SFTP paths, settings, and knowledge base entries |
+| You want AI without a platform account | **BYOK-first OxideSens AI**: inspect saved connections, live SSH sessions, terminal buffers, SFTP paths, settings, and knowledge base entries, then perform approved workspace actions |
 
 ## Architecture at a Glance
 
@@ -76,7 +76,7 @@ Each SSH session gets its own WebSocket port with single-use, time-limited token
 | **SFTP** | Dual-pane browser, drag-and-drop, smart preview, transfer queue, bookmarks, archive extraction, directory transfer controls |
 | **IDE Mode** | CodeMirror 6 editing, file tree + Git status, multi-tab workflow, conflict detection, optional remote agent |
 | **Port Forwarding** | Local (-L), Remote (-R), Dynamic SOCKS5 (-D), auto-restore on reconnect, status and process visibility |
-| **AI (OxideSens)** | Target-first BYOK assistant. It sees saved connections, live SSH sessions, terminal buffers, SFTP paths, settings, and knowledge base entries as workspace targets; it can diagnose remote output, run approved commands, inspect files, and explain failures without requiring an OxideTerm account |
+| **AI (OxideSens)** | Target-first BYOK AI. It sees saved connections, live SSH sessions, terminal buffers, SFTP paths, settings, and knowledge base entries as workspace targets; it can diagnose remote output, run approved commands, inspect files, and explain failures without requiring an OxideTerm account |
 | **Plugins** | Runtime ESM loading, PluginContext APIs, sidebar/status/tab contributions, official optional workflows |
 | **Security** | OS keychain, encrypted local config at rest, encrypted `.oxide` exports, Touch ID gate on macOS, host key TOFU, sensitive memory zeroization |
 | **i18n** | 11 languages: EN, 简体中文, 繁體中文, 日本語, 한국어, FR, DE, ES, IT, PT-BR, VI |
@@ -106,7 +106,7 @@ OxideTerm's core SSH workflow does not require an OxideTerm account or subscript
 - [SFTP](/docs/features/sftp/) — file management over SSH
 - [IDE Mode](/docs/features/ide/) — remote code editing
 - [Port Forwarding](/docs/features/forwarding/) — SSH tunnels
-- [OxideSens AI](/docs/features/ai/) — target-first BYOK AI for the SSH workspace
+- [OxideSens AI](/docs/features/ai/) — target-first BYOK AI for remote-server work
 - [Connections](/docs/features/connections/) — auth methods, ProxyJump, SSH config import, encrypted presets
 - [Plugins](/docs/features/plugins/) — official plugins and the runtime extension model
 - [Security](/docs/security/) — encryption and credential management

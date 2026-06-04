@@ -1,9 +1,9 @@
 ---
 title: OxideSens AI
-description: 面向本地优先 SSH 工作区的 target-first BYOK AI。
+description: 面向远程服务器工作的 target-first BYOK AI。
 ---
 
-**OxideSens** 是 OxideTerm 内置的 SSH 工作区 AI 助手。它采用 **target-first** 设计：保存连接、活动 SSH 会话、终端缓冲区、SFTP 路径、设置和知识库条目，都会被视为工作区目标，而不是让模型直接面对一堆底层函数。
+**OxideSens** 是 OxideTerm 内置的远程服务器工作 AI 助手。它采用 **target-first** 设计：保存连接、活动 SSH 会话、终端缓冲区、SFTP 路径、设置和知识库条目，都会被视为工作区目标，而不是让模型直接面对一堆底层函数。
 
 它可以帮助诊断远程输出、运行已批准命令、检查文件、解释失败、搜索知识库，并打开正确的 OxideTerm 界面；这些都不需要 OxideTerm 账号。
 
@@ -53,9 +53,9 @@ OxideSens 使用能力级审批，而不是巨大的逐函数白名单。
 
 每次工具调用都会记录在对话中，包括目标、风险、审批模式、耗时、摘要和可展开的原始细节。
 
-## 侧边栏聊天
+## 工作区对话
 
-侧边栏聊天是完整的 OxideSens 工作区助手：
+主对话视图是完整的 OxideSens 工作区助手：
 
 - 询问远程错误、日志、命令、脚本和系统管理问题。
 - 使用当前终端、选中文本、最近缓冲区、最近错误或知识库查询等上下文 chip。
@@ -71,7 +71,7 @@ OxideSens 使用能力级审批，而不是巨大的逐函数白名单。
 - 通过 bracketed paste 插入建议。
 - 在你明确选择时执行建议命令。
 
-多步骤、需要 target 绑定的操作建议使用侧边栏聊天。
+多步骤、需要 target 绑定的操作建议使用主对话视图。
 
 ## 知识库与 RAG
 

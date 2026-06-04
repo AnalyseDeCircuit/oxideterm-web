@@ -1,12 +1,12 @@
 {
   "meta": {
     "lang": "de",
-    "title": "OxideTerm — Local-first SSH Workspace",
-    "description": "Ein local-first SSH-Workspace für Remote-Knoten: Shell, SFTP, Port-Forwarding, trzsz, leichtes Editing, lokale Shell und BYOK-KI. Zero Electron, zero OpenSSL, zero Telemetry."
+    "title": "OxideTerm — AI-native Workspace für Remote-Server",
+    "description": "Ein AI-native Workspace für Remote-Server: SSH-Terminals, SFTP, Port-Forwarding, trzsz, leichtes Editing, lokale Shell und OxideSens AI. Zero Electron, zero OpenSSL, zero Telemetry."
   },
   "hero": {
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "Ein local-first SSH-Workspace: Remote-Knoten einmal öffnen, dann Shell, SFTP, Port-Forwarding, trzsz, leichtes Editing, lokale Shell und BYOK-first OxideSens KI nutzen.",
+    "subtitle": "Verbinden Sie sich per SSH mit Ihren Servern und arbeiten Sie dann mit Terminals, SFTP, Port-Forwarding, trzsz, leichtem Editing, lokaler Shell und OxideSens AI in einer local-first App.",
     "cta_download": "Herunterladen",
     "cta_docs": "Dokumentation",
     "version_prefix": "v",
@@ -36,7 +36,7 @@
     "label_problem": "Das Problem",
     "label_solution": "OxideTerms Antwort",
     "pain_1": "SSH-Workspace, nicht nur Shell",
-    "answer_1": "<strong>Remote-Knoten-Workspace</strong> — Terminals, SFTP, Port-Forwarding, trzsz, leichtes IDE, Monitoring und KI-Kontext unter einem Knoten",
+    "answer_1": "<strong>AI-native Remote-Server-Workspace</strong> — Terminals, SFTP, Port-Forwarding, trzsz, leichtes IDE, Monitoring und OxideSens AI unter einem Knoten",
     "pain_2": "Du brauchst weiterhin eine lokale Shell",
     "answer_2": "<strong>Integrierte lokale Shell</strong> — zsh/bash/fish/pwsh/WSL2 neben SSH-Sessions, lokale und entfernte Aufgaben in einer UI",
     "pain_3": "Remote-Dateibearbeitung braucht VS Code Remote",
@@ -52,7 +52,7 @@
     "pain_8": "Anmeldedaten im Klartext in Konfigurationsdateien",
     "answer_8": "<strong>Verschlüsselt gespeichert</strong> — OS-Schlüsselbund für Passwörter, ChaCha20-Poly1305 + Argon2id für .oxide-Exporte. Nichts im Klartext",
     "pain_9": "KI ohne Plattformkonto",
-    "answer_9": "<strong>BYOK-first OxideSens</strong> — target-first Workspace-KI für gespeicherte Verbindungen, Live-SSH-Sessions, Terminal-Buffer, SFTP-Pfade, Einstellungen und Wissensbasis"
+    "answer_9": "<strong>BYOK-first OxideSens AI</strong> — prüft gespeicherte Verbindungen, Live-SSH-Sessions, Terminal-Buffer, SFTP-Pfade, Einstellungen und Wissensbasis und führt genehmigte Workspace-Aktionen aus"
   },
   "showcase": {
     "title": "Funktionen im Überblick",
@@ -65,7 +65,7 @@
     "sftp_desc": "Dual-Panel-Dateibrowser. Drag-and-Drop-Transfer, Smart-Preview für Bilder/Video/Code/PDF/Hex, Transfer-Queue mit Fortschritt.",
     "ide_desc": "CodeMirror 6 Editor. 24 Sprachmodi, Dateibaum mit Git-Status, Konfliktlösung, integriertes Terminal.",
     "forwarding_desc": "Lokale (-L), Remote (-R) und dynamische SOCKS5 (-D) Weiterleitung. Lock-freies I/O, Auto-Wiederherstellung bei Neuverbindung, Fehlerberichte.",
-    "ai_desc": "OxideSens ist target-first: gespeicherte Verbindungen, Live-SSH-Sessions, Terminal-Buffer, SFTP-Pfade, Einstellungen und Wissensbasis-Einträge werden zu Workspace-Zielen. BYOK, kein OxideTerm-Konto erforderlich."
+    "ai_desc": "OxideSens ist BYOK AI für Ihren Remote-Server-Workspace. Gespeicherte Verbindungen, Live-SSH-Sessions, Terminal-Buffer, SFTP-Pfade, Einstellungen und Wissensbasis-Einträge werden zu Zielen; genehmigte Aktionen laufen ohne OxideTerm-Konto."
   },
   "tech": {
     "badge": "ARCHITEKTUR",
@@ -115,7 +115,7 @@
   "demo": {
     "badge": "LIVE-DEMO",
     "title": "In Aktion sehen",
-    "subtitle": "OxideSens AI kann Live-Terminals und Workspace-Werkzeuge über einen Assistenten steuern.",
+    "subtitle": "OxideSens AI kann Live-Terminals prüfen und genehmigte Workspace-Werkzeuge über einen Assistenten nutzen.",
     "fallback": "Ihr Browser unterstützt keine Videowiedergabe."
   },
   "details": {
@@ -144,7 +144,7 @@
     "ide_5": "Suchen & Ersetzen mit Regex über Remote-Dateien",
     "ide_6": "Syntaxhervorhebung für 24 Sprachen: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell und mehr",
     "ai_title": "OxideSens AI",
-    "ai_1": "Inline-Panel (⌘I) + Seitenleisten-Chat",
+    "ai_1": "Inline-Panel (⌘I) + Chat",
     "ai_2": "Target-first Workspace-Tools statt riesiger Tool-Liste",
     "ai_3": "RAG-Wissensbasis mit Keyword- und Vektorsuche",
     "ai_4": "Remote-Ausgaben diagnostizieren, genehmigte Befehle ausführen, Dateien prüfen und Fehler erklären",

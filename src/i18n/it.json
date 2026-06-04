@@ -1,12 +1,12 @@
 {
   "meta": {
     "lang": "it",
-    "title": "OxideTerm — Workspace SSH local-first",
-    "description": "Un workspace SSH local-first per nodi remoti: shell, SFTP, port forwarding, trzsz, editing leggero, shell locale e IA BYOK. Zero Electron, zero OpenSSL, zero telemetria."
+    "title": "OxideTerm — Workspace AI-native per server remoti",
+    "description": "Un workspace AI-native per server remoti: terminali SSH, SFTP, port forwarding, trzsz, editing leggero, shell locale e OxideSens AI. Zero Electron, zero OpenSSL, zero telemetria."
   },
   "hero": {
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "Un workspace SSH local-first: apri una volta un nodo remoto e lavora con shell, SFTP, porte, trzsz, editing leggero, shell locale e OxideSens AI BYOK-first.",
+    "subtitle": "Connettiti ai tuoi server via SSH e lavora con terminali, SFTP, porte, trzsz, editing leggero, shell locale e OxideSens AI in un'app local-first.",
     "cta_download": "Scarica",
     "cta_docs": "Documentazione",
     "version_prefix": "v",
@@ -35,7 +35,7 @@
     "subtitle": "Non solo terminale: un workspace local-first per nodi remoti.",
     "label_problem": "Il problema",
     "label_solution": "La risposta di OxideTerm",
-    "pain_1": "Workspace SSH, non solo shell",
+    "pain_1": "Il lavoro sui server remoti è diviso tra troppi strumenti",
     "answer_1": "<strong>Workspace per nodo remoto</strong> — terminali, SFTP, port forwarding, trzsz, IDE leggero, monitoraggio e contesto IA sotto un unico nodo",
     "pain_2": "Serve anche una shell locale",
     "answer_2": "<strong>Shell locale integrata</strong> — zsh/bash/fish/pwsh/WSL2 accanto alle sessioni SSH, con attività locali e remote nella stessa UI",
@@ -52,7 +52,7 @@
     "pain_8": "Credenziali salvate in chiaro nei file di configurazione",
     "answer_8": "<strong>Crittografato a riposo</strong> — portachiavi OS per le password, ChaCha20-Poly1305 + Argon2id per le esportazioni .oxide. Nulla in chiaro",
     "pain_9": "Vuoi IA senza account piattaforma",
-    "answer_9": "<strong>OxideSens BYOK-first</strong> — IA target-first per connessioni salvate, sessioni SSH live, buffer terminale, percorsi SFTP, impostazioni e knowledge base"
+    "answer_9": "<strong>OxideSens AI BYOK</strong> — ispeziona connessioni salvate, sessioni SSH live, buffer terminale, percorsi SFTP, impostazioni e knowledge base, poi esegue azioni workspace approvate"
   },
   "showcase": {
     "title": "Funzionalità",
@@ -65,7 +65,7 @@
     "sftp_desc": "Browser file a doppio pannello. Trasferimento drag-and-drop, anteprima smart immagini/video/codice/PDF/hex, coda trasferimenti con progresso.",
     "ide_desc": "Editor CodeMirror 6. 24 modalità linguaggio, albero file con stato Git, risoluzione conflitti, terminale integrato.",
     "forwarding_desc": "Forwarding locale (-L), remoto (-R) e dinamico SOCKS5 (-D). I/O lock-free, ripristino auto alla riconnessione, report errori.",
-    "ai_desc": "OxideSens è target-first: tratta connessioni salvate, sessioni SSH live, buffer terminale, percorsi SFTP, impostazioni e knowledge base come target del workspace. BYOK, nessun account OxideTerm richiesto."
+    "ai_desc": "OxideSens è l'AI BYOK per il tuo workspace di server remoti. Tratta connessioni salvate, sessioni SSH live, buffer terminale, percorsi SFTP, impostazioni e knowledge base come target, poi esegue azioni approvate senza account OxideTerm."
   },
   "tech": {
     "badge": "ARCHITETTURA",
@@ -115,7 +115,7 @@
   "demo": {
     "badge": "DEMO DAL VIVO",
     "title": "Guardalo in azione",
-    "subtitle": "OxideSens AI può controllare terminali live e strumenti del workspace da un unico assistente.",
+    "subtitle": "OxideSens AI può ispezionare terminali live e usare strumenti workspace approvati da un unico assistente.",
     "fallback": "Il tuo browser non supporta la riproduzione video."
   },
   "details": {
@@ -144,8 +144,8 @@
     "ide_5": "Cerca e sostituisci con regex su file remoti",
     "ide_6": "Evidenziazione sintassi per 24 linguaggi: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell e altro",
     "ai_title": "OxideSens AI",
-    "ai_1": "Pannello inline (⌘I) + chat nella barra laterale",
-    "ai_2": "Strumenti workspace target-first, non una lista enorme",
+    "ai_1": "Pannello inline (⌘I) + chat",
+    "ai_2": "Strumenti workspace target-first",
     "ai_3": "Knowledge base RAG con ricerca keyword + vettoriale",
     "ai_4": "Diagnosi output remoto, comandi approvati, ispezione file e spiegazione errori",
     "ai_5": "Porta la tua chiave: OpenAI, Anthropic, Google, DeepSeek, Ollama o endpoint compatibili",
@@ -246,7 +246,7 @@
     "q4": "Posso usare OxideTerm offline?",
     "a4": "Sì. OxideTerm è local-first. I workflow SSH principali — SSH, SFTP, port forwarding, shell locale, connessioni salvate e impostazioni — non richiedono account o abbonamento OxideTerm. L’IA usa il provider configurato solo quando la utilizzi.",
     "q5": "Cosa serve per le funzionalità IA?",
-    "a5": "Bring your own API key (BYOK). OxideTerm supporta OpenAI, Anthropic, Google, DeepSeek, Ollama ed endpoint compatibili OpenAI. I costi del provider restano tra te e il provider; OxideTerm non richiede abbonamenti per il workspace SSH core.",
+    "a5": "Bring your own API key (BYOK). OxideTerm supporta OpenAI, Anthropic, Google, DeepSeek, Ollama ed endpoint compatibili OpenAI. I costi del provider restano tra te e il provider; OxideTerm non richiede abbonamenti per i workflow SSH principali o per OxideSens AI.",
     "q6": "Perché OxideTerm non usa libssh2 o OpenSSL?",
     "a6": "Tre motivi. Primo, sicurezza della memoria: la base di codice C di OpenSSL ha prodotto CVE critici come Heartbleed — il modello di ownership di Rust elimina completamente questa classe di bug. Secondo, zero attrito nel deployment: libssh2 richiede gli header di sviluppo C per ogni piattaforma target e una versione di sistema OpenSSL corrispondente (le ABI di 1.0, 1.1 e 3.0 sono incompatibili); russh è fornito come sorgente Rust puro e Cargo gestisce tutto. Terzo, prestazioni asincrone native: libssh2 è una API C bloccante che richiede un wrapper per Tokio; russh è async-nativo senza frontiera FFI nel percorso critico. Il risultato: un singolo binario Rust che compila per oltre 10 architetture Linux senza toolchain C, con uno stack crittografico realmente verificabile."
   },

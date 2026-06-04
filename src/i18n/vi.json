@@ -1,12 +1,12 @@
 {
   "meta": {
     "lang": "vi",
-    "title": "OxideTerm — Không gian SSH local-first",
-    "description": "Không gian SSH local-first cho node từ xa: shell, SFTP, chuyển tiếp cổng, trzsz, chỉnh sửa nhẹ, shell cục bộ và AI BYOK. Không Electron, không OpenSSL, không telemetry."
+    "title": "OxideTerm — Workspace AI-native cho máy chủ từ xa",
+    "description": "Workspace AI-native cho máy chủ từ xa: SSH terminal, SFTP, chuyển tiếp cổng, trzsz, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI. Không Electron, không OpenSSL, không telemetry."
   },
   "hero": {
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "Không gian SSH local-first: mở một node từ xa một lần, rồi làm việc với shell, SFTP, port forwarding, trzsz, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI BYOK-first.",
+    "subtitle": "Kết nối tới server của bạn qua SSH, rồi làm việc với terminal, SFTP, port forwarding, trzsz, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI trong một app local-first.",
     "cta_download": "Tải xuống",
     "cta_docs": "Tài liệu",
     "version_prefix": "v",
@@ -35,8 +35,8 @@
     "subtitle": "Không chỉ là terminal: đây là workspace local-first cho node từ xa.",
     "label_problem": "Vấn đề",
     "label_solution": "Giải pháp của OxideTerm",
-    "pain_1": "Workspace SSH, không chỉ shell",
-    "answer_1": "<strong>Workspace node từ xa</strong> — terminal, SFTP, chuyển tiếp cổng, trzsz, IDE nhẹ, giám sát và ngữ cảnh AI dưới cùng một node",
+    "pain_1": "Công việc trên server từ xa bị chia nhỏ qua quá nhiều công cụ",
+    "answer_1": "<strong>Workspace AI-native cho server từ xa</strong> — terminal, SFTP, chuyển tiếp cổng, trzsz, IDE nhẹ, giám sát và OxideSens AI dưới cùng một node",
     "pain_2": "Bạn vẫn cần shell cục bộ",
     "answer_2": "<strong>Shell cục bộ tích hợp</strong> — zsh/bash/fish/pwsh/WSL2 cạnh phiên SSH, để tác vụ local và remote dùng chung một UI",
     "pain_3": "Chỉnh sửa file từ xa cần VS Code Remote",
@@ -52,7 +52,7 @@
     "pain_8": "Thông tin đăng nhập lưu dạng văn bản thuần trong file cấu hình",
     "answer_8": "<strong>Mã hóa khi lưu trữ</strong> — keychain hệ điều hành cho mật khẩu, ChaCha20-Poly1305 + Argon2id cho xuất khẩu .oxide. Không có gì ở dạng văn bản thuần",
     "pain_9": "Muốn AI không cần tài khoản nền tảng",
-    "answer_9": "<strong>OxideSens BYOK-first</strong> — AI target-first cho kết nối đã lưu, phiên SSH đang chạy, buffer terminal, đường dẫn SFTP, cài đặt và knowledge base"
+    "answer_9": "<strong>OxideSens AI BYOK</strong> — kiểm tra kết nối đã lưu, phiên SSH đang chạy, buffer terminal, đường dẫn SFTP, cài đặt và knowledge base, rồi chạy workspace action đã phê duyệt"
   },
   "showcase": {
     "title": "Tính năng chính",
@@ -65,7 +65,7 @@
     "sftp_desc": "Trình duyệt file hai panel. Truyền kéo-thả, xem trước thông minh ảnh/video/code/PDF/hex, hàng đợi truyền với tiến trình.",
     "ide_desc": "Trình soạn thảo CodeMirror 6. 24 chế độ ngôn ngữ, cây file với trạng thái Git, giải quyết xung đột, terminal tích hợp.",
     "forwarding_desc": "Chuyển tiếp cục bộ (-L), từ xa (-R) và SOCKS5 động (-D). I/O không khóa, tự phục hồi khi kết nối lại, báo cáo lỗi.",
-    "ai_desc": "OxideSens là AI workspace target-first: coi kết nối đã lưu, phiên SSH đang chạy, buffer terminal, đường dẫn SFTP, cài đặt và knowledge base là các target thao tác. BYOK, không cần tài khoản OxideTerm."
+    "ai_desc": "OxideSens là AI BYOK cho workspace máy chủ từ xa. Nó coi kết nối đã lưu, phiên SSH đang chạy, buffer terminal, đường dẫn SFTP, cài đặt và knowledge base là target, rồi chạy action đã phê duyệt mà không cần tài khoản OxideTerm."
   },
   "tech": {
     "badge": "KIẾN TRÚC",
@@ -115,7 +115,7 @@
   "demo": {
     "badge": "DEMO TRỰC TIẾP",
     "title": "Xem thực tế",
-    "subtitle": "OxideSens AI có thể điều khiển terminal đang chạy và công cụ workspace từ một trợ lý duy nhất.",
+    "subtitle": "OxideSens AI có thể kiểm tra terminal đang chạy và dùng công cụ workspace đã phê duyệt từ một trợ lý duy nhất.",
     "fallback": "Trình duyệt của bạn không hỗ trợ phát video."
   },
   "details": {
@@ -144,8 +144,8 @@
     "ide_5": "Tìm và thay thế bằng regex trên file từ xa",
     "ide_6": "Tô sáng cú pháp cho 24 ngôn ngữ: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell và hơn thế",
     "ai_title": "OxideSens AI",
-    "ai_1": "Panel inline (⌘I) + chat thanh bên",
-    "ai_2": "Công cụ workspace target-first, không phải danh sách công cụ khổng lồ",
+    "ai_1": "Panel inline (⌘I) + chat",
+    "ai_2": "Công cụ workspace target-first",
     "ai_3": "Knowledge base RAG với tìm kiếm từ khóa + vector",
     "ai_4": "Chẩn đoán output remote, chạy lệnh đã duyệt, kiểm tra file và giải thích lỗi",
     "ai_5": "Dùng khóa của bạn: OpenAI, Anthropic, Google, DeepSeek, Ollama hoặc endpoint tương thích",
@@ -246,7 +246,7 @@
     "q4": "Có thể sử dụng OxideTerm ngoại tuyến không?",
     "a4": "Có. OxideTerm là local-first. Các workflow SSH cốt lõi — SSH, SFTP, port forwarding, local shell, kết nối đã lưu và cài đặt — không cần tài khoản hoặc thuê bao OxideTerm. AI chỉ kết nối provider API bạn cấu hình khi bạn chọn dùng.",
     "q5": "Cần gì cho tính năng AI?",
-    "a5": "BYOK: dùng API key của bạn. OxideTerm hỗ trợ OpenAI, Anthropic, Google, DeepSeek, Ollama và endpoint tương thích OpenAI. Chi phí provider là giữa bạn và provider đó; core SSH workspace của OxideTerm không yêu cầu thuê bao ứng dụng.",
+    "a5": "BYOK: dùng API key của bạn. OxideTerm hỗ trợ OpenAI, Anthropic, Google, DeepSeek, Ollama và endpoint tương thích OpenAI. Chi phí provider là giữa bạn và provider đó; workflow SSH chính và OxideSens AI không yêu cầu thuê bao ứng dụng.",
     "q6": "Tại sao OxideTerm không dùng libssh2 hay OpenSSL?",
     "a6": "Ba lý do. Thứ nhất, an toàn bộ nhớ: codebase C của OpenSSL đã tạo ra các CVE nghiêm trọng như Heartbleed — mô hình ownership của Rust loại bỏ hoàn toàn lớp lỗi đó. Thứ hai, không ma sát khi triển khai: libssh2 yêu cầu C dev headers cho từng nền tảng đích và phiên bản OpenSSL hệ thống khớp (ABI của 1.0, 1.1 và 3.0 không tương thích); russh được cung cấp dưới dạng Rust source thuần và Cargo xử lý tất cả. Thứ ba, hiệu năng async gốc: libssh2 là C API blocking cần wrapper để tích hợp Tokio; russh async-native, không có FFI boundary trên đường nóng. Kết quả: một binary Rust duy nhất biên dịch cho hơn 10 kiến trúc Linux mà không cần C toolchain — và một crypto stack có thể kiểm toán thực sự."
   },

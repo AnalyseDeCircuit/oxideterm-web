@@ -1,12 +1,12 @@
 {
   "meta": {
     "lang": "ko",
-    "title": "OxideTerm — 로컬 우선 SSH 워크스페이스",
-    "description": "원격 노드 중심의 로컬 우선 SSH 워크스페이스. Shell, SFTP, 포트 포워딩, trzsz, 가벼운 편집, 로컬 Shell, BYOK AI. Electron/OpenSSL/텔레메트리 없음."
+    "title": "OxideTerm — 원격 서버를 위한 AI-native 워크스페이스",
+    "description": "원격 서버를 위한 AI-native 워크스페이스. SSH terminal, SFTP, 포트 포워딩, trzsz, 가벼운 편집, 로컬 Shell, OxideSens AI. Electron/OpenSSL/텔레메트리 없음."
   },
   "hero": {
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "로컬 우선 SSH 워크스페이스: 원격 노드를 한 번 열고 Shell, SFTP, 포트 포워딩, trzsz, 가벼운 편집, 로컬 Shell, BYOK 우선 OxideSens AI를 함께 사용합니다.",
+    "subtitle": "SSH로 서버에 연결한 뒤 terminal, SFTP, 포트 포워딩, trzsz, 가벼운 편집, 로컬 Shell, OxideSens AI를 하나의 local-first 앱에서 다룹니다.",
     "cta_download": "다운로드",
     "cta_docs": "문서",
     "version_prefix": "v",
@@ -35,8 +35,8 @@
     "subtitle": "단순한 터미널이 아니라 로컬 우선 원격 노드 워크스페이스입니다.",
     "label_problem": "문제점",
     "label_solution": "OxideTerm의 해답",
-    "pain_1": "Shell만이 아닌 SSH 워크스페이스",
-    "answer_1": "<strong>원격 노드 워크스페이스</strong> — 하나의 노드 아래 터미널, SFTP, 포트 포워딩, trzsz, 경량 IDE, 모니터링, AI 컨텍스트를 통합",
+    "pain_1": "원격 서버 작업이 너무 많은 도구로 흩어짐",
+    "answer_1": "<strong>AI-native 원격 서버 워크스페이스</strong> — 하나의 노드 아래 터미널, SFTP, 포트 포워딩, trzsz, 경량 IDE, 모니터링, OxideSens AI를 통합",
     "pain_2": "로컬 Shell도 필요합니다",
     "answer_2": "<strong>통합 로컬 Shell</strong> — zsh/bash/fish/pwsh/WSL2를 SSH 세션 옆에서 사용해 로컬/원격 작업을 같은 UI에서 처리",
     "pain_3": "원격 파일 편집에 VS Code Remote 필요",
@@ -52,7 +52,7 @@
     "pain_8": "자격 증명이 설정 파일에 평문으로 저장됨",
     "answer_8": "<strong>저장 시 암호화</strong> — 비밀번호는 OS 키체인에 저장, .oxide 내보내기는 ChaCha20-Poly1305 + Argon2id로 암호화. 평문 저장 없음",
     "pain_9": "플랫폼 계정 없이 AI를 쓰고 싶습니다",
-    "answer_9": "<strong>BYOK 우선 OxideSens</strong> — 저장된 연결, live SSH 세션, 터미널 버퍼, SFTP 경로, 설정, 지식 베이스를 작업 대상으로 보는 워크스페이스 AI"
+    "answer_9": "<strong>BYOK-first OxideSens AI</strong> — 저장된 연결, live SSH 세션, 터미널 버퍼, SFTP 경로, 설정, 지식 베이스를 확인하고 승인된 workspace action을 실행합니다"
   },
   "showcase": {
     "title": "주요 기능",
@@ -65,7 +65,7 @@
     "sftp_desc": "듀얼 패널 파일 브라우저. 드래그 앤 드롭 전송, 이미지/영상/코드/PDF/Hex 스마트 미리보기, 진행률 전송 큐.",
     "ide_desc": "CodeMirror 6 에디터. 24 언어 모드, 파일 트리 Git 상태, 충돌 해결, 통합 터미널.",
     "forwarding_desc": "로컬(-L), 리모트(-R), 다이나믹 SOCKS5(-D) 포워딩. 락프리 I/O, 재접속 시 자동 복원, 장애 보고.",
-    "ai_desc": "OxideSens는 target-first 워크스페이스 AI입니다. 저장된 연결, live SSH 세션, 터미널 버퍼, SFTP 경로, 설정, 지식 베이스 항목을 작업 대상으로 다룹니다. BYOK, OxideTerm 계정 불필요."
+    "ai_desc": "OxideSens는 원격 서버 워크스페이스를 위한 BYOK AI입니다. 저장된 연결, live SSH 세션, 터미널 버퍼, SFTP 경로, 설정, 지식 베이스 항목을 대상으로 보고, OxideTerm 계정 없이 승인된 action을 실행합니다."
   },
   "tech": {
     "badge": "아키텍처",
@@ -115,7 +115,7 @@
   "demo": {
     "badge": "라이브 데모",
     "title": "OxideTerm 실행 영상",
-    "subtitle": "OxideSens AI는 하나의 어시스턴트에서 라이브 터미널과 워크스페이스 도구를 제어할 수 있습니다.",
+    "subtitle": "OxideSens AI는 하나의 어시스턴트에서 라이브 터미널을 확인하고 승인된 워크스페이스 도구를 사용할 수 있습니다.",
     "fallback": "브라우저가 동영상 재생을 지원하지 않습니다."
   },
   "details": {
@@ -144,7 +144,7 @@
     "ide_5": "정규식을 사용한 원격 파일 전체 검색 및 치환",
     "ide_6": "24 언어 구문 강조: Rust, Python, JS/TS, Go, C/C++, Java, YAML, JSON, TOML, Markdown, Shell 등",
     "ai_title": "OxideSens AI",
-    "ai_1": "인라인 패널 (⌘I) + 사이드바 채팅",
+    "ai_1": "인라인 패널 (⌘I) + 채팅",
     "ai_2": "거대한 도구 목록이 아닌 target-first 워크스페이스 도구",
     "ai_3": "키워드 + 벡터 검색을 지원하는 RAG 지식 베이스",
     "ai_4": "원격 출력 진단, 승인된 명령 실행, 파일 검사, 실패 설명",
@@ -246,7 +246,7 @@
     "q4": "오프라인에서 사용할 수 있나요?",
     "a4": "네. OxideTerm은 로컬 우선 앱입니다. SSH, SFTP, 포트 포워딩, 로컬 Shell, 저장된 연결, 설정 같은 핵심 SSH 워크플로에는 OxideTerm 계정이나 구독이 필요 없습니다. AI는 사용자가 설정한 provider API를 사용할 때만 연결됩니다.",
     "q5": "AI 기능에는 무엇이 필요하나요?",
-    "a5": "BYOK(자신의 API 키 사용) 방식입니다. OpenAI, Anthropic, Google, DeepSeek, Ollama 및 OpenAI 호환 엔드포인트를 지원합니다. Provider 비용은 해당 provider와 사용자 사이의 문제이며, OxideTerm 핵심 SSH 워크스페이스에는 앱 구독이 필요 없습니다.",
+    "a5": "BYOK(자신의 API 키 사용) 방식입니다. OpenAI, Anthropic, Google, DeepSeek, Ollama 및 OpenAI 호환 엔드포인트를 지원합니다. Provider 비용은 해당 provider와 사용자 사이의 문제이며, OxideTerm 핵심 SSH workflow와 OxideSens AI에는 앱 구독이 필요 없습니다.",
     "q6": "왜 OxideTerm은 libssh2나 OpenSSL을 사용하지 않나요?",
     "a6": "세 가지 이유가 있습니다. 첫째, 메모리 안전성: OpenSSL의 C 코드베이스는 Heartbleed 같은 심각한 CVE를 낳아 왔습니다. Rust의 소유권 모델은 그 범주의 버그를 근본적으로 제거합니다. 둘째, 제로 배포 마찰: libssh2는 각 대상 플랫폼에 C 개발 헤더와 버전이 일치하는 시스템 OpenSSL을 요구합니다(1.0/1.1/3.0은 ABI 비호환). russh는 순수 Rust 소스로 제공되며 Cargo가 모든 것을 처리합니다. 셋째, 네이티브 비동기 성능: libssh2는 Tokio 통합에 래퍼가 필요한 블로킹 C API인 반면, russh는 비동기 네이티브로 핫 패스에 FFI 경계가 없습니다. 결과적으로, C 툴체인 없이 10개 이상의 Linux 아키텍처로 컴파일되는 단일 바이너리와 실제로 감사 가능한 암호화 스택을 실현했습니다."
   },
