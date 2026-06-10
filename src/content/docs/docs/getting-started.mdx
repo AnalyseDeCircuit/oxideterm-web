@@ -18,7 +18,7 @@ OxideTerm is not a cloud AI platform, hosted agent service, generic remote-proto
 | Reconnect = lose everything | **Grace Period reconnect**: probes old connection 30s before killing it — your vim/htop/yazi survive when the TCP stream recovers |
 | Remote file editing needs VS Code Remote | **Lightweight IDE**: CodeMirror 6 over SFTP with 24 languages, optional ~1 MB remote agent on Linux |
 | No SSH connection reuse | **Multiplexing**: terminal, SFTP, forwards, and IDE share one SSH connection via a reference-counted pool |
-| SSH libraries depend on OpenSSL | **russh 0.59**: pure Rust SSH compiled against `ring` — zero C dependencies |
+| SSH libraries depend on OpenSSL | **russh 0.61**: pure Rust SSH compiled against `ring` — zero C dependencies |
 | 100+ MB Electron apps | **Tauri 2.0**: native Rust backend, system WebView, 25–40 MB binary |
 | You do not want telemetry or app subscriptions | **Zero tracking, zero core app subscription**: SSH/SFTP/port forwarding/local shell need no OxideTerm account or subscription; Cloud Sync is opt-in via plugin |
 | You want AI without a platform account | **BYOK-first OxideSens AI**: inspect saved connections, live SSH sessions, terminal buffers, SFTP paths, settings, and knowledge base entries, then perform approved workspace actions |
@@ -55,7 +55,7 @@ Each SSH session gets its own WebSocket port with single-use, time-limited token
 |---|---|---|
 | **Framework** | Tauri 2.0 | Native binary, 25–40 MB |
 | **Runtime** | Tokio + DashMap | Async backend and concurrent registries |
-| **SSH** | russh 0.59 (`ring`) | Pure Rust, zero OpenSSL, SSH Agent |
+| **SSH** | russh 0.61 (`ring`) | Pure Rust, zero OpenSSL, SSH Agent |
 | **Local PTY** | portable-pty | ConPTY on Windows, local zsh/bash/fish/pwsh/WSL2 workflows |
 | **Frontend** | React 19 + TypeScript | Vite, Tailwind CSS |
 | **State** | Zustand | Specialized stores for terminal, SSH, SFTP, plugins, AI, settings |

@@ -5,14 +5,22 @@
     "description": "面向远程服务器的 AI-native 工作区：SSH 终端、SFTP、端口转发、trzsz、轻量编辑、本地 Shell 和 OxideSens AI。零 Electron、零 OpenSSL、零遥测。"
   },
   "hero": {
+    "headline": "一个面向 SSH 服务器的 AI-native 工作区",
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "通过 SSH 连接你的服务器，然后在一个本地优先应用里使用终端、SFTP、端口转发、trzsz、轻量编辑、本地 Shell 和 OxideSens AI。",
+    "subtitle": "通过 SSH 连接一次服务器，然后在一个本地优先桌面应用里处理终端、SFTP、端口转发、文件传输、轻量编辑、本地 Shell 和 OxideSens AI。",
     "cta_download": "下载",
     "cta_docs": "文档",
     "version_prefix": "v",
     "stable_badge": "稳定版",
     "cta_star": "GitHub",
-    "source_badge": "开源 · GPL-3.0 · BYOK 优先"
+    "source_badge": "开源 · GPL-3.0 · BYOK 优先",
+    "mock_title": "OxideTerm 工作区 — prod-server",
+    "mock_connected": "SSH 终端就绪 · Ed25519 · ChaCha20-Poly1305",
+    "mock_sftp": "SFTP 正在浏览 /srv/models",
+    "mock_forwards": "端口转发 :7860 → 远程 WebUI",
+    "mock_editor": "轻量编辑器已打开 config.yaml",
+    "mock_ai": "OxideSens 可看到终端、文件和服务器上下文",
+    "mock_attach": "工作区已连接：prod-server"
   },
   "features": {
     "title": "与众不同",
@@ -44,7 +52,7 @@
     "pain_4": "每个功能单独建立 SSH 连接",
     "answer_4": "<strong>连接复用</strong> — 终端、SFTP、端口转发、IDE 共享同一条 SSH 连接",
     "pain_5": "SSH 库依赖 OpenSSL",
-    "answer_5": "<strong>russh 0.59</strong> — 纯 Rust SSH，基于 ring 加密后端。零 C 依赖",
+    "answer_5": "<strong>russh 0.61</strong> — 纯 Rust SSH，基于 ring 加密后端。零 C 依赖",
     "pain_6": "100+ MB 的 Electron 应用",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB 二进制文件。非套壳——Rust 后端的真正原生应用",
     "pain_7": "不想要遥测或应用订阅",
@@ -165,7 +173,7 @@
     "keychain_title": "系统钥匙串集成",
     "keychain_desc": "密码和 API 密钥存储在 macOS 钥匙串、Windows 凭据管理器或 Linux Secret Service 中。绝不写入配置文件。",
     "ssh_title": "纯 Rust 加密",
-    "ssh_desc": "russh 0.59 + ring 加密后端。支持 Ed25519、RSA、ECDSA 密钥。ChaCha20-Poly1305 和 AES-GCM 套件。",
+    "ssh_desc": "russh 0.61 + ring 加密后端。支持 Ed25519、RSA、ECDSA 密钥。ChaCha20-Poly1305 和 AES-GCM 套件。",
     "biometric_title": "生物识别与 TOFU",
     "biometric_desc": "macOS 通过 Touch ID 门控钥匙串访问。主机密钥信任首次使用（TOFU）验证。敏感内存即时清零。",
     "zeroize_title": "内存清零",

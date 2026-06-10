@@ -5,14 +5,22 @@
     "description": "원격 서버를 위한 AI-native 워크스페이스. SSH terminal, SFTP, 포트 포워딩, trzsz, 가벼운 편집, 로컬 Shell, OxideSens AI. Electron/OpenSSL/텔레메트리 없음."
   },
   "hero": {
+    "headline": "SSH 서버를 위한 AI-native 워크스페이스",
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "SSH로 서버에 연결한 뒤 terminal, SFTP, 포트 포워딩, trzsz, 가벼운 편집, 로컬 Shell, OxideSens AI를 하나의 local-first 앱에서 다룹니다.",
+    "subtitle": "SSH로 한 번 연결한 뒤 터미널, SFTP, 포트 포워딩, 파일 전송, 가벼운 편집, 로컬 shell, OxideSens AI를 하나의 local-first 데스크톱 앱에서 다룹니다.",
     "cta_download": "다운로드",
     "cta_docs": "문서",
     "version_prefix": "v",
     "stable_badge": "안정 버전",
     "cta_star": "GitHub",
-    "source_badge": "오픈소스 · GPL-3.0 · BYOK 우선"
+    "source_badge": "오픈소스 · GPL-3.0 · BYOK 우선",
+    "mock_title": "OxideTerm workspace — prod-server",
+    "mock_connected": "SSH terminal ready · Ed25519 · ChaCha20-Poly1305",
+    "mock_sftp": "SFTP browsing /srv/models",
+    "mock_forwards": "Port forward :7860 → remote WebUI",
+    "mock_editor": "Lightweight editor opened config.yaml",
+    "mock_ai": "OxideSens sees terminal, files, and server context",
+    "mock_attach": "Workspace attached: prod-server"
   },
   "features": {
     "title": "차원이 다릅니다",
@@ -44,7 +52,7 @@
     "pain_4": "SSH 연결 재사용 불가",
     "answer_4": "<strong>다중화</strong> — 터미널, SFTP, 포워딩, IDE가 하나의 SSH 연결을 공유",
     "pain_5": "SSH 라이브러리가 OpenSSL에 의존",
-    "answer_5": "<strong>russh 0.59</strong> — ring 기반 순수 Rust SSH. C 의존성 제로",
+    "answer_5": "<strong>russh 0.61</strong> — ring 기반 순수 Rust SSH. C 의존성 제로",
     "pain_6": "100+ MB Electron 앱",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB 바이너리. 래퍼가 아닌 Rust 백엔드의 진정한 네이티브 앱",
     "pain_7": "텔레메트리나 앱 구독은 원하지 않습니다",
@@ -165,7 +173,7 @@
     "keychain_title": "OS 키체인 통합",
     "keychain_desc": "비밀번호와 API 키는 macOS 키체인, Windows 자격 증명 관리자, Linux Secret Service에 저장. 설정 파일에는 절대 저장하지 않습니다.",
     "ssh_title": "순수 Rust 암호화",
-    "ssh_desc": "russh 0.59 + ring 암호 백엔드. Ed25519, RSA, ECDSA 키 지원. ChaCha20-Poly1305 및 AES-GCM 스위트.",
+    "ssh_desc": "russh 0.61 + ring 암호 백엔드. Ed25519, RSA, ECDSA 키 지원. ChaCha20-Poly1305 및 AES-GCM 스위트.",
     "biometric_title": "생체 인증 및 TOFU",
     "biometric_desc": "macOS에서 Touch ID로 키체인 액세스 게이트. 호스트 키 Trust-On-First-Use (TOFU) 검증. 민감 메모리 즉시 제로 클리어.",
     "zeroize_title": "메모리 제로화",

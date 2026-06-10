@@ -25,16 +25,16 @@ const stars = await getGitHubStars();
           <span class="text-xs text-[var(--ot-text-muted)]">macOS · Windows · Linux</span>
         </div>
 
-        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
-          <span class="text-[var(--ot-text-primary)]">Oxide</span><span class="text-[var(--ot-accent)]">Term</span>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight max-w-2xl">
+          {i.hero.headline}
         </h1>
 
-        <p class="text-lg md:text-xl text-[var(--ot-text-secondary)] mb-3 leading-relaxed" style={`font-family: var(--font-mono); font-size: 0.95rem;`}>
-          {i.hero.tagline}
+        <p class="text-base md:text-lg text-[var(--ot-text-muted)] mb-5 leading-relaxed max-w-xl">
+          {i.hero.subtitle}
         </p>
 
-        <p class="text-base text-[var(--ot-text-muted)] mb-8 leading-relaxed max-w-lg">
-          {i.hero.subtitle}
+        <p class="text-[11px] md:text-xs text-[var(--ot-text-secondary)] mb-8 leading-relaxed max-w-xl" style={`font-family: var(--font-mono);`}>
+          {i.hero.tagline}
         </p>
 
         <!-- CTA Buttons -->
@@ -80,18 +80,20 @@ const stars = await getGitHubStars();
           <span class="terminal-dot terminal-dot-red"></span>
           <span class="terminal-dot terminal-dot-yellow"></span>
           <span class="terminal-dot terminal-dot-green"></span>
-          <span class="terminal-titlebar-text">OxideTerm — prod-server</span>
+          <span class="terminal-titlebar-text">{i.hero.mock_title}</span>
         </div>
         <div class="terminal-body">
-          <div><span class="terminal-prompt">$</span> ssh prod-server</div>
-          <div class="terminal-success">&#10003; Connected (Ed25519 · ChaCha20-Poly1305)</div>
-          <div class="terminal-info">Multiplexing: terminal + SFTP + 2 forwards</div>
-          <div class="terminal-info">Grace Period: enabled (30s)</div>
+          <div><span class="terminal-prompt">status</span> {i.hero.mock_attach}</div>
+          <div class="terminal-success">&#10003; {i.hero.mock_connected}</div>
+          <div class="terminal-info">&#10003; {i.hero.mock_sftp}</div>
+          <div class="terminal-info">&#10003; {i.hero.mock_forwards}</div>
+          <div class="terminal-info">&#10003; {i.hero.mock_editor}</div>
+          <div class="terminal-info">&#10003; {i.hero.mock_ai}</div>
           <div>&nbsp;</div>
-          <div><span class="terminal-prompt">root@prod-server:~$</span> uptime</div>
-          <div class="terminal-dim"> 14:23:01 up 127 days, 3:42, 1 user, load average: <span class="terminal-success">0.12</span>, 0.08, 0.05</div>
+          <div><span class="terminal-prompt">root@prod-server:/srv/models$</span> ./run-inference.sh</div>
+          <div class="terminal-dim"> loading model shards... <span class="terminal-success">ready</span></div>
           <div>&nbsp;</div>
-          <div><span class="terminal-prompt">root@prod-server:~$</span> <span class="cursor-blink">&#9608;</span></div>
+          <div><span class="terminal-prompt">root@prod-server:/srv/models$</span> <span class="cursor-blink">&#9608;</span></div>
         </div>
       </div>
     </div>

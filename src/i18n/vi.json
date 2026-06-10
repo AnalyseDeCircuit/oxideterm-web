@@ -5,14 +5,22 @@
     "description": "Workspace AI-native cho máy chủ từ xa: SSH terminal, SFTP, chuyển tiếp cổng, trzsz, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI. Không Electron, không OpenSSL, không telemetry."
   },
   "hero": {
+    "headline": "Workspace AI-native cho máy chủ SSH",
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "Kết nối tới server của bạn qua SSH, rồi làm việc với terminal, SFTP, port forwarding, trzsz, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI trong một app local-first.",
+    "subtitle": "Kết nối qua SSH một lần, rồi giữ terminal, SFTP, chuyển tiếp cổng, truyền tệp, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI trong một app desktop local-first.",
     "cta_download": "Tải xuống",
     "cta_docs": "Tài liệu",
     "version_prefix": "v",
     "stable_badge": "Ổn định",
     "cta_star": "GitHub",
-    "source_badge": "Mã nguồn mở · GPL-3.0 · BYOK-first"
+    "source_badge": "Mã nguồn mở · GPL-3.0 · BYOK-first",
+    "mock_title": "OxideTerm workspace — prod-server",
+    "mock_connected": "SSH terminal ready · Ed25519 · ChaCha20-Poly1305",
+    "mock_sftp": "SFTP browsing /srv/models",
+    "mock_forwards": "Port forward :7860 → remote WebUI",
+    "mock_editor": "Lightweight editor opened config.yaml",
+    "mock_ai": "OxideSens sees terminal, files, and server context",
+    "mock_attach": "Workspace attached: prod-server"
   },
   "features": {
     "title": "Thiết kế khác biệt",
@@ -44,7 +52,7 @@
     "pain_4": "Không tái sử dụng kết nối SSH",
     "answer_4": "<strong>Ghép kênh</strong> — một kết nối SSH chia sẻ giữa terminal, SFTP, chuyển tiếp và IDE",
     "pain_5": "Thư viện SSH phụ thuộc OpenSSL",
-    "answer_5": "<strong>russh 0.59</strong> — SSH thuần Rust biên dịch với ring. Không phụ thuộc C",
+    "answer_5": "<strong>russh 0.61</strong> — SSH thuần Rust biên dịch với ring. Không phụ thuộc C",
     "pain_6": "Ứng dụng Electron 100+ MB",
     "answer_6": "<strong>Tauri 2.0</strong> — binary 25–40 MB. Không phải wrapper — ứng dụng gốc thực sự với backend Rust",
     "pain_7": "Không muốn telemetry hay thuê bao ứng dụng",
@@ -165,7 +173,7 @@
     "keychain_title": "Tích hợp keychain hệ điều hành",
     "keychain_desc": "Mật khẩu và khóa API lưu trong keychain macOS, Windows Credential Manager hoặc Linux Secret Service. Không bao giờ lưu trong file cấu hình.",
     "ssh_title": "Mã hóa thuần Rust",
-    "ssh_desc": "russh 0.59 + backend mã hóa ring. Khóa Ed25519, RSA, ECDSA. Bộ mã ChaCha20-Poly1305 và AES-GCM.",
+    "ssh_desc": "russh 0.61 + backend mã hóa ring. Khóa Ed25519, RSA, ECDSA. Bộ mã ChaCha20-Poly1305 và AES-GCM.",
     "biometric_title": "Sinh trắc học và TOFU",
     "biometric_desc": "Touch ID kiểm soát truy cập keychain trên macOS. Xác minh khóa máy chủ bằng Trust-On-First-Use (TOFU). Bộ nhớ nhạy cảm được xóa ngay.",
     "zeroize_title": "Xóa sạch bộ nhớ",

@@ -5,14 +5,22 @@
     "description": "面向遠端伺服器的 AI-native 工作區：SSH 終端、SFTP、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 OxideSens AI。零 Electron、零 OpenSSL、零遙測。"
   },
   "hero": {
+    "headline": "一個面向 SSH 伺服器的 AI-native 工作區",
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "透過 SSH 連接你的伺服器，然後在一個本地優先應用裡使用終端、SFTP、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 OxideSens AI。",
+    "subtitle": "透過 SSH 連接一次伺服器，然後在一個本地優先桌面應用裡處理終端、SFTP、連接埠轉發、檔案傳輸、輕量編輯、本地 Shell 和 OxideSens AI。",
     "cta_download": "下載",
     "cta_docs": "文件",
     "version_prefix": "v",
     "stable_badge": "穩定版",
     "cta_star": "GitHub",
-    "source_badge": "開源 · GPL-3.0 · BYOK 優先"
+    "source_badge": "開源 · GPL-3.0 · BYOK 優先",
+    "mock_title": "OxideTerm 工作區 — prod-server",
+    "mock_connected": "SSH 終端就緒 · Ed25519 · ChaCha20-Poly1305",
+    "mock_sftp": "SFTP 正在瀏覽 /srv/models",
+    "mock_forwards": "連接埠轉發 :7860 → 遠端 WebUI",
+    "mock_editor": "輕量編輯器已開啟 config.yaml",
+    "mock_ai": "OxideSens 可看到終端、檔案和伺服器上下文",
+    "mock_attach": "工作區已連線：prod-server"
   },
   "features": {
     "title": "與眾不同",
@@ -44,7 +52,7 @@
     "pain_4": "每個功能單獨建立 SSH 連線",
     "answer_4": "<strong>連線複用</strong> — 終端、SFTP、連接埠轉發、IDE 共享同一條 SSH 連線",
     "pain_5": "SSH 函式庫依賴 OpenSSL",
-    "answer_5": "<strong>russh 0.59</strong> — 純 Rust SSH，基於 ring 加密後端。零 C 依賴",
+    "answer_5": "<strong>russh 0.61</strong> — 純 Rust SSH，基於 ring 加密後端。零 C 依賴",
     "pain_6": "100+ MB 的 Electron 應用",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB 二進位檔案。非外殼——Rust 後端的真正原生應用",
     "pain_7": "不想要遙測或應用訂閱",
@@ -165,7 +173,7 @@
     "keychain_title": "系統鑰匙圈整合",
     "keychain_desc": "密碼和 API 金鑰儲存在 macOS 鑰匙圈、Windows 認證管理員或 Linux Secret Service 中。絕不寫入設定檔。",
     "ssh_title": "純 Rust 加密",
-    "ssh_desc": "russh 0.59 + ring 加密後端。支援 Ed25519、RSA、ECDSA 金鑰。ChaCha20-Poly1305 和 AES-GCM 套件。",
+    "ssh_desc": "russh 0.61 + ring 加密後端。支援 Ed25519、RSA、ECDSA 金鑰。ChaCha20-Poly1305 和 AES-GCM 套件。",
     "biometric_title": "生物辨識與 TOFU",
     "biometric_desc": "macOS 透過 Touch ID 門控鑰匙圈存取。主機金鑰信任首次使用（TOFU）驗證。敏感記憶體即時清零。",
     "zeroize_title": "記憶體清零",

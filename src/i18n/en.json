@@ -5,14 +5,22 @@
     "description": "An AI-native workspace for remote servers: SSH terminals, SFTP, port forwarding, trzsz, lightweight editing, local shell, and OxideSens AI. Zero Electron, zero OpenSSL, zero telemetry."
   },
   "hero": {
+    "headline": "One AI-native workspace for SSH servers",
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "Connect to your servers over SSH, then work with terminals, SFTP, port forwarding, trzsz, lightweight editing, local shell, and OxideSens AI in one local-first app.",
+    "subtitle": "Connect over SSH once, then keep terminals, SFTP, port forwarding, transfers, lightweight editing, local shells, and OxideSens AI in one local-first desktop app.",
     "cta_download": "Download",
     "cta_docs": "Documentation",
     "version_prefix": "v",
     "stable_badge": "Stable",
     "cta_star": "GitHub",
-    "source_badge": "Open Source · GPL-3.0 · BYOK-first"
+    "source_badge": "Open Source · GPL-3.0 · BYOK-first",
+    "mock_title": "OxideTerm workspace — prod-server",
+    "mock_connected": "SSH terminal ready · Ed25519 · ChaCha20-Poly1305",
+    "mock_sftp": "SFTP browsing /srv/models",
+    "mock_forwards": "Port forward :7860 → remote WebUI",
+    "mock_editor": "Lightweight editor opened config.yaml",
+    "mock_ai": "OxideSens sees terminal, files, and server context",
+    "mock_attach": "Workspace attached: prod-server"
   },
   "features": {
     "title": "Built Different",
@@ -44,7 +52,7 @@
     "pain_4": "No SSH connection reuse",
     "answer_4": "<strong>Multiplexing</strong> — one SSH connection shared across terminal, SFTP, forwarding, and IDE",
     "pain_5": "SSH libraries depend on OpenSSL",
-    "answer_5": "<strong>russh 0.59</strong> — pure Rust SSH compiled against ring. Zero C dependencies",
+    "answer_5": "<strong>russh 0.61</strong> — pure Rust SSH compiled against ring. Zero C dependencies",
     "pain_6": "100+ MB Electron apps",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB binary. Not a wrapper — genuine native app with Rust backend",
     "pain_7": "You do not want telemetry or app subscriptions",
@@ -165,7 +173,7 @@
     "keychain_title": "OS Keychain Integration",
     "keychain_desc": "Passwords and API keys stored in macOS Keychain, Windows Credential Manager, or Linux Secret Service. Never in config files.",
     "ssh_title": "Pure Rust Cryptography",
-    "ssh_desc": "russh 0.59 with ring crypto backend. Ed25519, RSA, ECDSA keys. ChaCha20-Poly1305 and AES-GCM cipher suites.",
+    "ssh_desc": "russh 0.61 with ring crypto backend. Ed25519, RSA, ECDSA keys. ChaCha20-Poly1305 and AES-GCM cipher suites.",
     "biometric_title": "Biometric & TOFU",
     "biometric_desc": "Touch ID gates keychain access on macOS. Host key verification with Trust-On-First-Use (TOFU). Sensitive memory zeroized on drop.",
     "zeroize_title": "Memory Zeroization",

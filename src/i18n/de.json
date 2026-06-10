@@ -5,14 +5,22 @@
     "description": "Ein AI-native Workspace für Remote-Server: SSH-Terminals, SFTP, Port-Forwarding, trzsz, leichtes Editing, lokale Shell und OxideSens AI. Zero Electron, zero OpenSSL, zero Telemetry."
   },
   "hero": {
+    "headline": "Ein AI-native Workspace für SSH-Server",
     "tagline": "Zero Electron. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
-    "subtitle": "Verbinden Sie sich per SSH mit Ihren Servern und arbeiten Sie dann mit Terminals, SFTP, Port-Forwarding, trzsz, leichtem Editing, lokaler Shell und OxideSens AI in einer local-first App.",
+    "subtitle": "Verbinden Sie sich einmal per SSH und behalten Sie Terminals, SFTP, Port-Forwarding, Transfers, leichtes Editing, lokale Shells und OxideSens AI in einer local-first Desktop-App.",
     "cta_download": "Herunterladen",
     "cta_docs": "Dokumentation",
     "version_prefix": "v",
     "stable_badge": "Stabil",
     "cta_star": "GitHub",
-    "source_badge": "Open Source · GPL-3.0 · BYOK-first"
+    "source_badge": "Open Source · GPL-3.0 · BYOK-first",
+    "mock_title": "OxideTerm Workspace — prod-server",
+    "mock_connected": "SSH-Terminal bereit · Ed25519 · ChaCha20-Poly1305",
+    "mock_sftp": "SFTP durchsucht /srv/models",
+    "mock_forwards": "Port-Forward :7860 → Remote-WebUI",
+    "mock_editor": "Leichter Editor öffnet config.yaml",
+    "mock_ai": "OxideSens sieht Terminal, Dateien und Serverkontext",
+    "mock_attach": "Workspace verbunden: prod-server"
   },
   "features": {
     "title": "Anders konstruiert",
@@ -44,7 +52,7 @@
     "pain_4": "Keine Wiederverwendung von SSH-Verbindungen",
     "answer_4": "<strong>Multiplexing</strong> — eine SSH-Verbindung geteilt zwischen Terminal, SFTP, Weiterleitung und IDE",
     "pain_5": "SSH-Bibliotheken hängen von OpenSSL ab",
-    "answer_5": "<strong>russh 0.59</strong> — reines Rust SSH kompiliert mit ring. Null C-Abhängigkeiten",
+    "answer_5": "<strong>russh 0.61</strong> — reines Rust SSH kompiliert mit ring. Null C-Abhängigkeiten",
     "pain_6": "100+ MB Electron-Apps",
     "answer_6": "<strong>Tauri 2.0</strong> — 25–40 MB Binärdatei. Kein Wrapper — echte native App mit Rust-Backend",
     "pain_7": "Keine Telemetrie oder App-Abos",
@@ -165,7 +173,7 @@
     "keychain_title": "OS-Schlüsselbund-Integration",
     "keychain_desc": "Passwörter und API-Schlüssel im macOS-Schlüsselbund, Windows-Anmeldeinformationsverwaltung oder Linux Secret Service. Niemals in Konfigurationsdateien.",
     "ssh_title": "Reine Rust-Kryptographie",
-    "ssh_desc": "russh 0.59 + ring Krypto-Backend. Ed25519-, RSA-, ECDSA-Schlüssel. ChaCha20-Poly1305 und AES-GCM Cipher Suites.",
+    "ssh_desc": "russh 0.61 + ring Krypto-Backend. Ed25519-, RSA-, ECDSA-Schlüssel. ChaCha20-Poly1305 und AES-GCM Cipher Suites.",
     "biometric_title": "Biometrie und TOFU",
     "biometric_desc": "Touch ID schützt den Schlüsselbund-Zugriff auf macOS. Host-Key-Verifizierung mit Trust-On-First-Use (TOFU). Sensible Speicherbereiche sofort gelöscht.",
     "zeroize_title": "Speicher-Nullung",

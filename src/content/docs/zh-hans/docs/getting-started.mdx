@@ -18,7 +18,7 @@ OxideTerm 不是云端 AI 平台、托管 Agent 服务、泛远程协议工具�
 | 重连 = 丢失一切 | **优雅期重连**：先探测旧连接 30 秒再杀掉它；如果 TCP 流恢复，vim/htop/yazi 可以继续幸存 |
 | 远程编辑总要 VS Code Remote | **轻量 IDE**：通过 SFTP 使用 CodeMirror 6，支持 24 种语言，Linux 上可选约 1 MB 远程 Agent |
 | SSH 连接不能复用 | **连接复用**：终端、SFTP、端口转发和 IDE 共享同一个引用计数 SSH 连接 |
-| SSH 库依赖 OpenSSL | **russh 0.59**：纯 Rust SSH，基于 `ring`，零 C 依赖 |
+| SSH 库依赖 OpenSSL | **russh 0.61**：纯 Rust SSH，基于 `ring`，零 C 依赖 |
 | 100+ MB Electron 应用 | **Tauri 2.0**：Rust 原生后端，系统 WebView，25–40 MB 二进制 |
 | 不想要遥测或应用订阅 | **零追踪，核心 SSH 工作流零应用订阅**：SSH/SFTP/端口转发/本地 Shell 不需要 OxideTerm 账号或订阅；云同步通过插件按需启用 |
 | 想要 AI，但不想绑定平台账号 | **BYOK 优先的 OxideSens AI**：可检查保存连接、活动 SSH、终端缓冲区、SFTP 路径、设置和知识库，并执行已批准的工作区操作 |
@@ -55,7 +55,7 @@ OxideTerm 使用**双平面架构**，将低延迟终端 I/O 与管理命令分�
 |---|---|---|
 | **框架** | Tauri 2.0 | 原生应用，25–40 MB |
 | **运行时** | Tokio + DashMap | 异步后端与并发 registry |
-| **SSH** | russh 0.59 (`ring`) | 纯 Rust，零 OpenSSL，支持 SSH Agent |
+| **SSH** | russh 0.61 (`ring`) | 纯 Rust，零 OpenSSL，支持 SSH Agent |
 | **本地 PTY** | portable-pty | Windows ConPTY，本地 zsh/bash/fish/pwsh/WSL2 工作流 |
 | **前端** | React 19 + TypeScript | Vite、Tailwind CSS |
 | **状态管理** | Zustand | 终端、SSH、SFTP、插件、AI、设置等专用 store |
