@@ -33,7 +33,6 @@ Preview files directly without downloading:
 - **Images** — inline preview with zoom support
 - **Video / Audio** — media playback with controls
 - **Code** — syntax-highlighted preview for source files
-- **PDF** — document rendering
 - **Hex** — binary file viewer with offset addressing
 - **Fonts** — font specimen preview with sample text
 - **Metadata** — EXIF data for images, audio tags (ID3, Vorbis, FLAC)
@@ -61,14 +60,14 @@ Drag files between the local and remote panes to initiate transfers. You can als
 ## Context Menu
 
 Right-click any file or directory for a context menu with all available operations:
-- Open in IDE mode (for text files — opens in the CodeMirror editor)
+- Open text files in the native GPUI editor
 - Copy path (absolute remote or local path)
 - Download / Upload
 - Properties (size, permissions, timestamps, owner/group)
 
 ## Node-Based Routing
 
-All SFTP operations are addressed by `nodeId` and resolved atomically by the backend `NodeRouter`. This means:
+All SFTP operations are addressed by `nodeId` and resolved atomically by the Rust `NodeRouter`. This means:
 - SSH reconnect (which changes the internal `connectionId`) does **not** break your SFTP session
 - SFTP, terminal, and port forwards are fully independent — closing a terminal tab doesn't disconnect SFTP
 

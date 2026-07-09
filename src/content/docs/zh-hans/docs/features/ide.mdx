@@ -1,24 +1,23 @@
 ---
 title: IDE 模式
-description: 基于 CodeMirror 6 的远程文件编辑，支持语法高亮和文件树导航。
+description: 基于 GPUI 和 tree-sitter 的原生远程文件编辑，支持语法高亮和文件树导航。
 ---
 
 IDE 模式让你直接在 OxideTerm 中编辑远程文件——无需下载、本地编辑再重新上传。所有操作通过现有 SSH 连接完成。
 
-## CodeMirror 6 编辑器
+## 原生编辑器
 
-编辑器由 **CodeMirror 6** 驱动，支持：
-- **24 语言**的语法高亮（14 种原生 CodeMirror + 通过 `@codemirror/legacy-modes` 提供的 legacy 模式）
+编辑器由 Rust 与 GPUI 实现，并使用 **tree-sitter** 提供结构化语法能力，支持：
+- **36 种语言**的语法高亮
 - 行号和代码折叠
 - 支持正则表达式的查找和替换
 - 括号匹配和自动闭合
 - 缩进参考线
-- 多光标和多选区编辑
-- 文件概览 Minimap
+- 自动换行与原生选择、复制和撤销操作
 
 ### 支持的语言
 
-原生 CodeMirror 6 模式包括：JavaScript、TypeScript、Python、Rust、Go、C/C++、Java、HTML、CSS、JSON、Markdown、SQL、XML、YAML、TOML、Shell/Bash。更多语言通过 legacy 模式支持。
+当前 tree-sitter 语法包括 Bash、C/C++、C#、CMake、CSS、Diff、Dockerfile、Elixir、Fish、Go、HTML、Java、JavaScript/TypeScript/TSX、JSON、Lisp、Lua、Make、Markdown、Objective-C、Perl、PHP、PowerShell、Python、R、Ruby、Rust、Scala、SQL、Swift、TOML、YAML、Zsh 和 Zig。
 
 ## 文件树
 
@@ -46,14 +45,14 @@ IDE 模式让你直接在 OxideTerm 中编辑远程文件——无需下载、�
 
 ## 远程 Agent（可选）
 
-为增强 IDE 功能，OxideTerm 可将约 **1 MB 的 Rust 二进制文件**部署到远程服务器。Agent 通过 SSH 通道上的 JSON-RPC 通信。
+为增强 IDE 功能，OxideTerm 内置 Linux `x86_64` 和 `aarch64` 两个远程 Agent，并可将匹配的 Rust 二进制文件部署到远程服务器。Agent 作为远程进程运行在现有 SSH 会话中，通过按行编码的请求与响应交换数据，不会监听额外网络端口。
 
 ### Agent 提供的功能
 
 - **更快的文件树操作** — 目录列表、文件搜索和符号解析在远程主机上原生运行
 - **实时文件监控** — 外部变更（来自其他编辑器或进程）立即反映
 - **符号搜索** — 跨项目查找定义和引用
-- **43 个 JSON-RPC 方法** — 全面的文件、目录和项目操作
+- **受版本约束的请求协议** — 提供文件、目录、Git、监控和符号相关操作
 
 ### 部署
 

@@ -1,180 +1,88 @@
 ---
 title: Themes
-description: Customize OxideTerm's appearance with 31+ built-in themes, a visual editor, and CSS variables.
+description: Customize OxideTerm's native GPUI colors with 31 built-in themes, a visual editor, derived UI palettes, and portable theme files.
 ---
 
-OxideTerm includes a comprehensive theme engine that lets you customize every aspect of the application's appearance — from terminal ANSI colors to the entire UI surface.
+OxideTerm's theme engine produces Rust color tokens for both the terminal painter and native GPUI controls. Selecting a theme updates the workspace without restarting the application.
 
 ## Built-in Themes
 
-OxideTerm ships with **31+ built-in themes** optimized for terminal readability. The default dark theme is designed for extended terminal sessions with carefully chosen contrast ratios.
+OxideTerm ships 31 built-in themes. They include dark and light palettes and familiar terminal styles such as Dracula, Solarized, Monokai, Nord, One Dark, Gruvbox, and Tokyo Night.
 
-Themes cover a wide range of styles: classic dark/light, Dracula, Solarized, Monokai, Nord, One Dark, Gruvbox, Tokyo Night, and more.
+Open **Settings → Appearance** and select a color theme to apply it. The preview shows terminal colors and representative UI accents before you continue working.
 
 ## Custom Themes
 
-Create your own themes using the **visual editor with live preview**. Changes are visible instantly — no restart required.
+The native theme editor can create a theme from the current or another built-in palette. A custom theme contains:
 
-### Terminal Colors (20 Fields)
+- 20 terminal colors
+- 23 application UI colors
+- A display name and stable `custom:` identifier
 
-Customize all 16 ANSI colors plus 4 extra fields:
+Custom themes are stored with OxideTerm settings and can be edited, deleted, imported, or exported.
 
-| Field | Description |
-|-------|-------------|
-| **ANSI 0–7** | Standard colors (black, red, green, yellow, blue, magenta, cyan, white) |
-| **ANSI 8–15** | Bright/bold variants |
-| **Foreground** | Default text color |
-| **Background** | Terminal background |
-| **Cursor** | Cursor color |
-| **Selection** | Text selection highlight |
+### Terminal Colors
 
-### CSS Variables (23 Variables)
+| Group | Fields |
+|---|---|
+| Base | Background, foreground, cursor, selection |
+| ANSI | Black, red, green, yellow, blue, magenta, cyan, white |
+| Bright ANSI | Bright variants of the eight ANSI colors |
 
-Customize the entire application UI through CSS custom properties:
+The terminal painter reads these values directly when it builds GPUI draw output.
 
-#### Background Layer (7 variables)
+### Application Colors
 
-| Variable | Purpose |
-|----------|---------|
-| `--theme-bg` | Main background |
-| `--theme-bg-panel` | Panel/sidebar background |
-| `--theme-bg-hover` | Hover state background |
-| `--theme-bg-active` | Active/pressed state |
-| `--theme-bg-secondary` | Secondary background areas |
-| `--theme-bg-elevated` | Elevated surface (dialogs, menus) |
-| `--theme-bg-sunken` | Recessed surface (input fields, wells) |
+| Group | Examples |
+|---|---|
+| Backgrounds | Main, panel, card, hover, active, secondary, elevated, sunken |
+| Text | Primary, muted, secondary, heading |
+| Borders | Standard, strong, divider |
+| Accent | Accent, hover, accent text, secondary accent |
+| Status | Success, warning, error, info |
 
-#### Text Layer (4 variables)
+These tokens style native tabs, panels, dialogs, menus, controls, status indicators, and editor surfaces.
 
-| Variable | Purpose |
-|----------|---------|
-| `--theme-text` | Primary text color |
-| `--theme-text-muted` | Muted/secondary text |
-| `--theme-text-secondary` | Tertiary text (timestamps, hints) |
-| `--theme-text-heading` | Heading text color |
+## Derive UI Colors
 
-#### Border Layer (3 variables)
+The editor can derive a complete application palette from terminal colors. The derivation uses the terminal background, foreground, cursor, and ANSI colors to produce related surfaces, borders, accents, and semantic status colors.
 
-| Variable | Purpose |
-|----------|---------|
-| `--theme-border` | Standard borders |
-| `--theme-border-strong` | Emphasized borders |
-| `--theme-divider` | Section divider lines |
+1. Choose or edit the terminal palette.
+2. Use **Auto from Terminal** in the UI color section.
+3. Review the generated application colors in the preview.
+4. Adjust individual colors as needed, then save.
 
-#### Accent Layer (4 variables)
-
-| Variable | Purpose |
-|----------|---------|
-| `--theme-accent` | Primary accent color (buttons, links) |
-| `--theme-accent-hover` | Accent hover state |
-| `--theme-accent-text` | Text on accent background |
-| `--theme-accent-secondary` | Secondary accent elements |
-
-#### Semantic Layer (5 variables)
-
-| Variable | Purpose |
-|----------|---------|
-| `--theme-success` | Success indicators |
-| `--theme-warning` | Warning indicators |
-| `--theme-error` | Error indicators |
-| `--theme-info` | Info indicators |
-| `--theme-selection` | Non-terminal selection color |
-
-### Font Customization
-
-- **Font family** — terminal monospace font
-- **Font size** — in pixels
-- **Line height** — spacing between lines
-
-## Auto-Derive
-
-The theme engine can automatically **generate UI colors from the terminal ANSI palette**:
-
-1. Set your preferred terminal ANSI colors (the 16 standard colors)
-2. Click **Auto-Derive** in the theme editor
-3. OxideTerm analyzes the palette's hue, saturation, and lightness
-4. It generates a consistent set of background, text, border, and accent colors that harmonize with your terminal palette
-
-This means you can start from any terminal color scheme and get a matching full-app theme with one click.
-
-### Derivation Rules
-
-The auto-derive algorithm maps terminal colors to UI colors:
-
-| Terminal Source | Generated UI Colors |
-|----------------|-------------------|
-| `background` | `bg`, `bgPanel` (+15), `bgHover` (+30), `bgActive` (+40), `bgSecondary` (+10) |
-| `foreground` | `text` |
-| `brightBlack` | `textMuted`; blended with foreground → `textSecondary` |
-| `background` | `border` (+30), `divider` (+20) |
-| `cursor` | `accent`, `accentHover` (−20); blended with background → `accentText` |
-| `brightBlack` | `accentSecondary` |
-| `green` | `success` |
-| `yellow` | `warning` |
-| `red` | `error` |
-| `blue` | `info` |
-
-The `+N` notation means a fixed delta is added to each RGB channel (clamped 0–255). Users can always manually override any derived color.
+Derivation is a starting point, not a lock. Every generated field remains editable.
 
 ## Theme Editor
 
-The visual theme editor modal provides:
+The native editor includes:
 
-- **Theme name** input — free text; auto-generates a slug for the theme ID
-- **Based On** dropdown — duplicate from any built-in theme when creating new
-- **Live preview** — mini terminal simulation with colored prompt, git output, and blinking cursor; UI chrome bar showing accent button, hover state, panel, and semantic status dots
-- **Terminal Colors tab** — 4-column grid of 20 color swatches, each with a native color picker and hex input (`#RRGGBB`)
-- **UI Colors tab** — five grouped sections (Background, Text, Borders, Accent, Status) with "Auto from Terminal" button to re-derive
-- **Save** — persists to localStorage and applies immediately
-- **Delete** — removes custom theme (edit mode only)
+- Theme name
+- Base-theme selector for new themes
+- Separate Terminal and UI color sections
+- Color swatches and normalized hex values
+- Live preview
+- Save and delete actions
 
-## Applying Themes
+Saving selects the custom theme immediately. Deleting the active custom theme returns the application to a valid built-in fallback.
 
-1. Open **Settings** → **Appearance**
-2. Browse built-in themes with instant preview
-3. Select a theme to apply — changes take effect immediately, no restart required
-4. Create a custom theme by clicking **New Theme** and using the visual editor
+## Import and Export
 
-### How Built-in Themes Work
+Use the Appearance page to export a custom theme to a portable JSON document or import a previously exported theme. Import validates the document version, required terminal fields, required UI fields, and color values before changing settings.
 
-Built-in themes define their UI variables in CSS `[data-theme="..."]` blocks. When you select a built-in theme, the `data-theme` attribute on `<html>` is updated and xterm.js receives the corresponding color scheme.
+Theme files carry color data only. Terminal font family, font size, line height, application font, density, animation, render profile, and background image settings remain ordinary application settings so the same theme can be used with different layout preferences.
 
-### How Custom Themes Work
+## Fonts and Appearance
 
-Custom themes bypass `data-theme` entirely. Instead, inline `style.setProperty()` calls set all 19+ CSS variables directly on the `<html>` element, taking CSS specificity precedence over any built-in theme block.
+Related native appearance controls include:
 
-## Storage Format
+- Terminal font family, size, and line height
+- Application UI font family
+- UI density and border radius
+- Animation speed
+- Auto, Quality, Low Power, and Compatibility render profiles
+- Background image, opacity, blur, fit, and per-tab visibility
+- Platform vibrancy options when supported by the render policy
 
-Custom themes are stored in `localStorage` under the key `oxide-custom-themes`:
-
-```json
-{
-  "custom:my-neon": {
-    "name": "My Neon",
-    "terminalColors": {
-      "background": "#0a0a0f",
-      "foreground": "#e0e0ff",
-      "cursor": "#ff00ff",
-      "black": "#1a1a2e",
-      "red": "#ff3366"
-    },
-    "uiColors": {
-      "bg": "#0a0a0f",
-      "bgPanel": "#14142a",
-      "accent": "#ff00ff",
-      "success": "#00ff88",
-      "warning": "#ffcc00",
-      "error": "#ff3366",
-      "info": "#3388ff"
-    }
-  }
-}
-```
-
-Theme IDs follow the pattern `custom:{slug}` where the slug is derived from the display name (lowercase, non-alphanumeric replaced with hyphens, CJK characters preserved).
-
-## Sharing Themes
-
-- **Export**: save your custom theme as a JSON file
-- **Import**: load a JSON theme file from the Settings panel
-- Theme JSON files contain all terminal colors, CSS variables, and font settings in a single portable format
+The Compatibility profile can disable expensive effects independently of the selected colors, which helps distinguish a rendering constraint from a theme problem.

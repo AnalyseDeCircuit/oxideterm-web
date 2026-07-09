@@ -89,4 +89,4 @@ Configure auto-disconnect behavior in **Settings → Connections**:
 | Keepalive interval | 15 seconds (SSH `ServerAliveInterval`) |
 | Keepalive attempts | 3 (SSH `ServerAliveCountMax`) |
 
-A connection that exceeds the idle timeout emits a `connection_status_changed` event, which the frontend uses to update the sidebar and notify other consumers.
+A connection that exceeds the idle timeout updates native node state. The GPUI workspace consumes that state change directly to refresh the sidebar, event log, and dependent node surfaces.

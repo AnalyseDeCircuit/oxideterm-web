@@ -1,162 +1,40 @@
 ---
 title: Plugins
-description: Extend OxideTerm with runtime ESM plugins, a frozen PluginContext API, and host-wired UI extension points.
+description: Extend OxideTerm with native process and Wasm plugins.
 ---
 
-OxideTerm ships with a runtime plugin system that lets third-party extensions add tabs, sidebar panels, terminal hooks, commands, SFTP workflows, and lightweight UI integrations without patching the core application.
+OxideTerm's native plugin host discovers packages from the active configuration directory. A plugin declares its identity and contributions in `plugin.json`; it does not load JavaScript into a browser surface.
 
-This page covers both the user-facing plugin model and the developer-facing runtime API.
+## Runtime model
 
-## Official Plugins
+Supported runtime kinds are:
 
-OxideTerm keeps the core app local-first and optional by design. Official plugins extend that baseline with focused workflows:
+- `process` for an executable managed by the host over versioned JSON Lines.
+- `wasm` for a Wasm module managed by the integrated runtime.
+- `manifest-only` for contributions that need no executable runtime.
 
-- **Cloud Sync** — encrypted self-hosted sync and backup for `.oxide` snapshots via WebDAV, HTTP JSON, Dropbox, Git, or S3
-- **Telnet Client** — native Telnet client for routers, switches, and legacy devices
+Legacy JavaScript entries are not executed by the native application.
 
-Official plugins are optional. You do not need an account to use OxideTerm, and cloud-backed workflows stay opt-in.
+## Installing and managing plugins
 
-## Installing Plugins
-
-A plugin becomes available when its manifest and entry file are present under `~/.oxideterm/plugins/{plugin-id}/`.
-
-- Download or clone the plugin into the plugins directory
-- Keep the `plugin.json` manifest and ESM entry point together
-- If a plugin does not appear immediately, restart OxideTerm after adding it
-
-## Runtime Model
-
-Plugins are loaded from `~/.oxideterm/plugins/{plugin-id}/` and activated dynamically at runtime.
+Use the desktop Plugin Manager to browse, install, enable, disable, update, and configure plugins. For local development, place a package under the active configuration directory:
 
 ```text
-~/.oxideterm/plugins/my-plugin/
+<config-dir>/plugins/<plugin-id>/
 ├── plugin.json
-├── main.js
-├── locales/
-└── assets/
+└── plugin.wasm or bin/<executable>
 ```
 
-The host validates the manifest, builds a frozen `PluginContext`, then calls `activate(ctx)` from the plugin's ESM entry.
+Run `oxideterm paths --json` to inspect the active configuration directory. The CLI can list, enable, disable, and inspect plugin settings; installation and updates belong to the desktop manager.
 
-## Manifest Shape
+## Contributions
 
-```json
-{
-  "id": "my-plugin",
-  "name": "My Plugin",
-  "version": "1.0.0",
-  "main": "./main.js",
-  "engines": {
-    "oxideterm": ">=1.6.0"
-  },
-  "contributes": {
-    "tabs": [
-      {
-        "id": "dashboard",
-        "title": "Dashboard",
-        "icon": "LayoutDashboard"
-      }
-    ],
-    "sidebarPanels": [
-      {
-        "id": "overview",
-        "title": "Overview",
-        "icon": "PanelLeft",
-        "position": "top"
-      }
-    ],
-    "apiCommands": ["list_connections"]
-  }
-}
-```
+Plugins can declare tabs, sidebar panels, settings, commands, keybindings, context menus, status items, terminal hooks, event subscriptions, AI tools, and supported transports. Tabs and panels provide declarative schemas; GPUI owns rendering and interaction.
 
-There is no standalone `permissions` field in the current plugin runtime. Backend command access is declared through `contributes.apiCommands`, while higher-level capabilities are exposed through dedicated namespaces like `ctx.sftp`, `ctx.forward`, and `ctx.terminal`.
+## Security
 
-## PluginContext API
+The host validates manifests and paths, passes the effective capabilities and allowed host APIs during activation, and keeps plugin diagnostics separate from protocol output. Review a plugin's identity, permissions, settings, and declared surfaces before enabling it.
 
-Plugins receive a frozen `PluginContext` with a top-level `pluginId` field plus **18 API namespaces**:
+## Next step
 
-- `connections`
-- `events`
-- `ui`
-- `terminal`
-- `settings`
-- `i18n`
-- `storage`
-- `api`
-- `assets`
-- `sftp`
-- `forward`
-- `sessions`
-- `transfers`
-- `profiler`
-- `eventLog`
-- `ide`
-- `ai`
-- `app`
-
-The UI namespace now includes fully host-wired extension points:
-
-- `ctx.ui.registerContextMenu()` for `terminal`, `sftp`, `tab`, and `sidebar`
-- `ctx.ui.registerStatusBarItem()` for the main bottom status bar
-- `ctx.ui.registerKeybinding()` for global shortcuts
-- `ctx.ui.showProgress()` for a top-right progress HUD
-
-## Shared Modules
-
-Plugins use host-provided shared modules through `window.__OXIDE__`:
-
-- `React`
-- `ReactDOM`
-- `zustand`
-- `lucideIcons`
-- `lucideReact`
-- `ui`
-- `version`
-- `pluginApiVersion`
-
-This keeps plugins small and avoids duplicate React instances.
-
-## Security Model
-
-The current plugin runtime uses layered containment rather than a true browser sandbox:
-
-- Frozen membrane: `PluginContext` objects are built with `Object.freeze()` to prevent mutation of host API objects.
-- Manifest validation: tabs, sidebar panels, terminal hooks, and backend command access must be declared before use.
-- Advisory backend whitelist: `ctx.api.invoke()` can only call commands listed in `contributes.apiCommands`.
-- Path safety: plugin file loading rejects traversal outside the plugin directory.
-- Circuit breaker: plugins that throw repeatedly are auto-disabled.
-- Terminal fail-open: input/output hooks fall back to the original data when a plugin throws.
-
-## Minimal Example
-
-```javascript
-const { React } = window.__OXIDE__;
-const { createElement: h } = React;
-
-function DashboardTab({ pluginId, tabId }) {
-  return h('div', { className: 'p-6' }, `Hello from ${pluginId}:${tabId}`);
-}
-
-export function activate(ctx) {
-  ctx.ui.registerTabView('dashboard', DashboardTab);
-
-  ctx.ui.registerCommand(
-    'hello.open-dashboard',
-    { label: 'Open Dashboard', icon: 'LayoutDashboard' },
-    () => ctx.ui.openTab('dashboard'),
-  );
-
-  ctx.events.onConnect((connection) => {
-    ctx.ui.showNotification({
-      title: 'Connection active',
-      body: `${connection.username}@${connection.host}`,
-      severity: 'info',
-    });
-  });
-}
-```
-
-## Next Step
-
-For the full API reference, manifest fields, shared module details, and TypeScript definitions, continue to the plugin development guide.
+Read the [Plugin Development Guide](../plugin-development/) for a native manifest and runtime walkthrough.

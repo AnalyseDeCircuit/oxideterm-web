@@ -1,138 +1,111 @@
 ---
 title: Security
-description: OxideTerm's security model — encryption, key storage, SSH security, and plugin sandboxing.
+description: OxideTerm's native security model for credentials, SSH, encrypted exports, plugins, AI context, and diagnostics.
 ---
 
-Security is a core priority in OxideTerm's design. The entire SSH stack is pure Rust (`russh` + `ring`), eliminating C memory safety vulnerabilities. This page describes the security measures in place.
+OxideTerm keeps its desktop UI, terminal state, and core services in one Rust process. GPUI renders native state directly, so normal desktop operations do not cross a browser or UI serialization boundary.
 
-## Pure Rust Cryptography
+## Rust SSH and Cryptography
 
-OxideTerm uses `russh 0.61` compiled against the **`ring`** crypto backend:
+OxideTerm uses `russh` with the `ring` cryptography backend:
 
-- **Zero C/OpenSSL dependencies** — the full crypto stack is Rust. No "which OpenSSL version?" debugging.
-- Full SSH2 protocol: key exchange, channels, SFTP subsystem, port forwarding
-- ChaCha20-Poly1305 and AES-GCM cipher suites
-- This eliminates an entire class of vulnerabilities associated with C memory safety issues (buffer overflows, use-after-free, etc.)
+- No OpenSSL or libssh2 dependency in the SSH stack
+- SSH key exchange, channels, SFTP, forwarding, and supported modern ciphers
+- Ed25519, ECDSA, RSA, SSH certificates, and system SSH Agent support
+- Sensitive owned buffers wrapped with `zeroize`/`Zeroizing` where they cross credential boundaries
 
-Sensitive data in memory is cleared after use via the `zeroize` crate.
+Rust memory safety reduces classes of memory corruption bugs, but it does not replace protocol review, dependency updates, host-key verification, or careful secret handling.
 
 ## Credential Storage
 
-### OS Keychain
-
-All sensitive credentials are stored in the **operating system's native keychain**:
+Passwords, private-key passphrases, API keys, and supported plugin or sync secrets are stored through the operating system keychain:
 
 | Platform | Keychain |
-|----------|----------|
+|---|---|
 | **macOS** | Keychain Access |
 | **Windows** | Windows Credential Manager |
-| **Linux** | Secret Service API (GNOME Keyring / KWallet) |
+| **Linux** | Secret Service provider, such as GNOME Keyring or KWallet |
 
-Passwords, private key passphrases, and API keys are **never** stored in configuration files, databases, or plaintext.
+Secret-bearing Rust types use redacted debug output. Secret values must not be included in logs, diagnostics, reports, error messages, or command-line arguments.
 
-### Encrypted Local Config
+### Encrypted Local State
 
-Not every important field belongs in the OS keychain, so OxideTerm also encrypts saved local configuration at rest.
+Saved connection metadata and related local state are protected separately from credentials:
 
-- The on-disk local config is stored as an encrypted document, not plaintext JSON
-- A dedicated local config key is kept in the OS keychain
-- Connection metadata, jump routes, labels, and related saved state are sealed locally with ChaCha20-Poly1305
-- Older plaintext configs are migrated to encrypted storage on startup
+- Credential values remain in the OS keychain.
+- The saved connection document is encrypted with ChaCha20-Poly1305.
+- Its local encryption key is stored in the keychain layer.
+- Older supported plaintext data is migrated into protected storage.
 
-In practice: secrets stay in the system keychain, while the rest of your saved connection state is still protected on disk.
+Use `oxideterm paths --json` to inspect active file locations without exposing credentials.
 
-### AI API Keys
+## `.oxide` Bundle Encryption
 
-OxideSens AI API keys are stored under the `com.oxideterm.ai` service in the OS keychain, separate from SSH credentials.
+Portable `.oxide` exports use:
 
-On macOS, key reads are gated behind **Touch ID** via `LAContext`:
-- No entitlements or code-signing required
-- Cached after first auth per session — you only need to authenticate once
-- Provides hardware-backed access control without additional setup
+- **ChaCha20-Poly1305** authenticated encryption
+- **Argon2id** password derivation with a 256 MB memory cost and four iterations
+- Integrity checks before import or apply
+- Optional inclusion of portable secrets inside the encrypted payload
 
-## Connection Export Encryption
+Preview an import before applying it:
 
-The `.oxide` export format for sharing connection configurations uses:
+```sh
+oxideterm oxide validate ./profile.oxide
+oxideterm oxide preview-import ./profile.oxide --password-stdin --json
+```
 
-- **ChaCha20-Poly1305** — AEAD (Authenticated Encryption with Associated Data)
-- **Argon2id** — memory-hard KDF (Key Derivation Function)
-  - 256 MB memory cost
-  - 4 iterations
-  - Resistant to GPU/ASIC brute-force attacks
-- **SHA-256** integrity checksum
+Supply passwords through standard input or an environment variable so they do not appear in shell history or process listings.
 
-### Export Features
+## SSH Host Trust
 
-- Sensitive fields are encrypted individually
-- Non-sensitive metadata (hostnames, labels) can optionally remain in plaintext for organization
-- **Optional key embedding** — private keys can be base64-encoded into the encrypted payload
-- **Pre-flight analysis** — before export, OxideTerm analyzes auth types and detects missing keys, so you know exactly what will be exported
+OxideTerm implements Trust On First Use with OpenSSH-compatible known-host behavior:
 
-Memory containing sensitive data uses `zeroize` for secure clearing after use.
+- A first connection can store the presented host key.
+- Later connections verify the key against the stored value.
+- Unexpected key changes are rejected and require explicit investigation.
+- ProxyJump hops retain their own authentication and trust decisions.
 
-## SSH Security
+SSH Agent access uses `SSH_AUTH_SOCK` on macOS/Linux and the OpenSSH agent named pipe on Windows. Agent Forwarding is optional and should be enabled only for hosts you trust.
 
-### Host Key Verification
+## Native Process Boundaries
 
-OxideTerm implements **TOFU (Trust On First Use)**:
-- First connection: accept and store the host key
-- Subsequent connections: verify against stored key
-- **Reject host key changes** — protects against MITM attacks
-- Uses `~/.ssh/known_hosts` with OpenSSH-compatible behavior
+Terminal bytes flow from Rust session backends into Rust-owned `TerminalState`, then into the GPUI painter. Desktop management actions call domain services in process. There is no localhost terminal bridge or desktop management protocol to authenticate and expose.
 
-### Supported Key Types
+The optional remote IDE agent is different: it runs on a selected remote host and communicates through a channel inside the existing authenticated SSH connection. It does not open an external listening port, and IDE mode can fall back to SFTP when the agent is unavailable.
 
-- **Ed25519** (recommended — fastest, smallest keys)
-- **ECDSA** (P-256, P-384)
-- **RSA** (2048-bit minimum)
-- **SSH Certificates** — full certificate-based authentication support
+## Plugin Security
 
-### SSH Agent Integration
+Native plugin packages are validated before activation. For WASM plugins:
 
-OxideTerm supports system SSH Agent for key management:
+| Layer | Protection |
+|---|---|
+| **Runtime** | wasmtime executes the guest module outside native application memory |
+| **Manifest** | Entry types and contributions must match the supported native schema |
+| **Capabilities** | Filesystem, SFTP, forwarding, and other effects require declared permissions |
+| **Host API** | Rust handlers validate permissions again before executing effects |
+| **Secret boundary** | Host projections omit provider keys and other secret values |
 
-| Platform | Agent |
-|----------|-------|
-| **macOS/Linux** | `SSH_AUTH_SOCK` Unix socket |
-| **Windows** | `\\.\pipe\openssh-ssh-agent` Named Pipe |
+Declared process plugins are native executables and therefore have a different trust boundary from WASM guests. Review the publisher, manifest, requested capabilities, and executable before enabling one.
 
-Features:
-- Agent auth replayed automatically on reconnect
-- Each ProxyJump hop can independently use Agent auth
-- Custom `AgentSigner` implementation wraps the system Agent and satisfies `russh`'s `Signer` trait
+## CLI Safety
 
-## WebSocket Security
+The `oxideterm` CLI links directly to domain crates and does not require a running desktop app. Its safety model includes:
 
-Internal WebSocket connections (between the frontend and Rust backend) are secured with:
-- **Token-based authentication** required on the first frame
-- **Single-use tokens** with time limits — tokens cannot be reused
-- Connections are local only (localhost binding)
-- Server heartbeat every 30 seconds; 5-minute timeout tolerates macOS App Nap and browser JS throttling
+- `--dry-run` plans and `--yes` confirmation for most writes
+- Rollback backups for supported state-changing operations
+- `--strict` modes for CI health checks
+- Stable machine-readable error codes through `oxideterm errors --json`
+- Redacted diagnostics, reports, and support bundles
+- Standard-input or environment-variable secret ingestion instead of plaintext secret arguments
 
-## Plugin Sandboxing
+Review support bundles before sharing them even though the report pipeline is designed to redact credential-like values.
 
-The plugin system uses multiple security layers:
+## AI Context and Privacy
 
-| Layer | Mechanism |
-|-------|-----------|
-| **Frozen API** | `Object.freeze()` on all PluginContext objects — plugins cannot modify or monkey-patch the API |
-| **Proxy ACL** | Each namespace access validated against declared permissions |
-| **IPC Whitelist** | Plugins can only invoke whitelisted Tauri commands |
-| **Circuit Breaker** | Auto-disable after repeated runtime errors |
-| **Error Boundaries** | React error boundaries isolate plugin UI crashes |
-
-Plugins run in the renderer process with limited system access — no direct file system or network access outside the PluginContext API.
-
-## Content Security Policy
-
-The Tauri application uses a null CSP. No external web content is loaded — all UI is served from the local binary. Any new web content exposure should be carefully reviewed.
-
-## Data Privacy
-
-- **No telemetry** — OxideTerm does not collect or transmit usage data
-- **Local-first by default** — no mandatory account, no required cloud service
-- **Local-first** — bring your own API keys for AI features
-- **Opt-in cloud workflows** — Cloud Sync is available as an official plugin, not a core requirement
-- **Explicit data send** — terminal buffer data is only sent to AI providers when you click the Context button and send a message
-- **Local AI** — use Ollama for fully offline AI assistance with zero network traffic
-- **redb storage** — all persistent data (sessions, settings, chat history) stored locally in an embedded key-value database
+- OxideTerm does not collect usage telemetry.
+- Core SSH and local workflows do not require an OxideTerm account.
+- OxideSens uses the provider you configure, including local Ollama endpoints.
+- Credentials are redacted before workspace context is constructed for a model or tool.
+- Terminal buffers, files, configuration, and diagnostic details should be sent only when they are relevant to the action you approve.
+- Cloud Sync is optional and uses the backend you configure.

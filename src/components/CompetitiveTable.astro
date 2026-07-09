@@ -13,22 +13,25 @@ const c = i.competitive;
 const Y = c.yes;
 const N = c.no;
 const P = c.partial;
+const V = c.varies;
 
-// Each row: [label, oxideterm, electron, traditional]
-// Values: true = ✓, false = —, string = custom text
-const rows: { label: string; ot: string; el: string; tr: string; highlight?: boolean }[] = [
-  { label: c.row_binary_size, ot: c.val_binary_ot, el: c.val_binary_el, tr: c.val_binary_tr, highlight: false },
-  { label: c.row_ssh_impl, ot: c.val_ssh_ot, el: c.val_ssh_el, tr: c.val_ssh_tr, highlight: false },
-  { label: c.row_local_terminal, ot: Y, el: P, tr: N },
-  { label: c.row_builtin_sftp, ot: Y, el: P, tr: P },
-  { label: c.row_builtin_ide, ot: Y, el: N, tr: N },
-  { label: c.row_ai, ot: Y, el: N, tr: N },
-  { label: c.row_reconnect, ot: Y, el: N, tr: N },
-  { label: c.row_multiplex, ot: Y, el: N, tr: P },
-  { label: c.row_plugin, ot: Y, el: N, tr: P },
-  { label: c.row_i18n, ot: Y, el: P, tr: P },
-  { label: c.row_open_source, ot: Y, el: c.varies, tr: N },
-  { label: c.row_free, ot: Y, el: c.varies, tr: c.varies },
+// Product categories are intentionally generic because individual tools vary.
+const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: string; ide: string }[] = [
+  { label: c.row_binary_size, ot: c.val_binary_ot, cross: V, ssh: V, toolbox: V, ide: V },
+  { label: c.row_ui_runtime, ot: c.val_runtime_ot, cross: c.val_runtime_browser, ssh: c.val_runtime_native, toolbox: c.val_runtime_native, ide: c.val_runtime_browser },
+  { label: c.row_ssh_impl, ot: c.val_ssh_ot, cross: c.val_ssh_builtin, ssh: c.val_ssh_builtin, toolbox: c.val_ssh_builtin, ide: c.val_ssh_system },
+  { label: c.row_local_terminal, ot: Y, cross: Y, ssh: Y, toolbox: Y, ide: Y },
+  { label: c.row_builtin_sftp, ot: Y, cross: Y, ssh: P, toolbox: Y, ide: N },
+  { label: c.row_forwarding, ot: Y, cross: Y, ssh: Y, toolbox: Y, ide: Y },
+  { label: c.row_builtin_ide, ot: Y, cross: N, ssh: N, toolbox: P, ide: Y },
+  { label: c.row_remote_desktop, ot: Y, cross: N, ssh: N, toolbox: Y, ide: N },
+  { label: c.row_ai, ot: Y, cross: N, ssh: N, toolbox: N, ide: Y },
+  { label: c.row_reconnect, ot: Y, cross: N, ssh: N, toolbox: N, ide: P },
+  { label: c.row_multiplex, ot: Y, cross: V, ssh: V, toolbox: V, ide: P },
+  { label: c.row_plugin, ot: Y, cross: Y, ssh: N, toolbox: Y, ide: Y },
+  { label: c.row_i18n, ot: Y, cross: Y, ssh: Y, toolbox: Y, ide: Y },
+  { label: c.row_open_source, ot: Y, cross: Y, ssh: N, toolbox: N, ide: P },
+  { label: c.row_free, ot: Y, cross: Y, ssh: P, toolbox: P, ide: Y },
 ];
 ---
 
@@ -55,10 +58,16 @@ const rows: { label: string; ot: string; el: string; tr: string; highlight?: boo
               {c.col_oxideterm}
             </th>
             <th class="text-center px-5 py-4 font-medium text-[var(--ot-text-secondary)] min-w-[140px]">
-              {c.col_electron}
+              {c.col_cross_platform_terminal}
             </th>
             <th class="text-center px-5 py-4 font-medium text-[var(--ot-text-secondary)] min-w-[140px]">
-              {c.col_traditional}
+              {c.col_professional_ssh}
+            </th>
+            <th class="text-center px-5 py-4 font-medium text-[var(--ot-text-secondary)] min-w-[140px]">
+              {c.col_remote_toolbox}
+            </th>
+            <th class="text-center px-5 py-4 font-medium text-[var(--ot-text-secondary)] min-w-[140px]">
+              {c.col_remote_ide}
             </th>
           </tr>
         </thead>
@@ -79,19 +88,35 @@ const rows: { label: string; ot: string; el: string; tr: string; highlight?: boo
               </td>
               <td class:list={[
                 "px-5 py-3.5 text-center",
-                row.el === Y ? "text-[var(--ot-green)] font-bold text-base"
-                  : row.el === N ? "text-[var(--ot-text-muted)]"
+                row.cross === Y ? "text-[var(--ot-green)] font-bold text-base"
+                  : row.cross === N ? "text-[var(--ot-text-muted)]"
                   : "text-[var(--ot-text-secondary)] text-xs"
               ]}>
-                {row.el}
+                {row.cross}
               </td>
               <td class:list={[
                 "px-5 py-3.5 text-center",
-                row.tr === Y ? "text-[var(--ot-green)] font-bold text-base"
-                  : row.tr === N ? "text-[var(--ot-text-muted)]"
+                row.ssh === Y ? "text-[var(--ot-green)] font-bold text-base"
+                  : row.ssh === N ? "text-[var(--ot-text-muted)]"
                   : "text-[var(--ot-text-secondary)] text-xs"
               ]}>
-                {row.tr}
+                {row.ssh}
+              </td>
+              <td class:list={[
+                "px-5 py-3.5 text-center",
+                row.toolbox === Y ? "text-[var(--ot-green)] font-bold text-base"
+                  : row.toolbox === N ? "text-[var(--ot-text-muted)]"
+                  : "text-[var(--ot-text-secondary)] text-xs"
+              ]}>
+                {row.toolbox}
+              </td>
+              <td class:list={[
+                "px-5 py-3.5 text-center",
+                row.ide === Y ? "text-[var(--ot-green)] font-bold text-base"
+                  : row.ide === N ? "text-[var(--ot-text-muted)]"
+                  : "text-[var(--ot-text-secondary)] text-xs"
+              ]}>
+                {row.ide}
               </td>
             </tr>
           ))}

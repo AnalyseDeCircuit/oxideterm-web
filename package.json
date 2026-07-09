@@ -6,9 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "docs:sync-plugin": "node ../OxideTerm/scripts/sync-plugin-development-docs.cjs",
-    "docs:check-plugin": "node ../OxideTerm/scripts/sync-plugin-development-docs.cjs --check"
+    "preview": "astro preview"
   },
   "license": "ISC",
   "packageManager": "pnpm@10.27.0",

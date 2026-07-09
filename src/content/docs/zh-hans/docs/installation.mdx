@@ -5,110 +5,78 @@ description: 如何在 macOS、Windows 和 Linux 上下载安装 OxideTerm。
 
 ## 系统要求
 
-| 平台 | 最低版本 | 架构 |
-|------|---------|------|
-| **macOS** | 11.0 (Big Sur) | Apple Silicon (M1+)、Intel x64 |
-| **Windows** | 10 (1803+) | x64、ARM64 |
-| **Linux** | Ubuntu 22.04+ / Fedora 38+ | x64、ARM64 |
+OxideTerm 是 GPU 加速的原生桌面应用。请使用带有可用图形驱动的桌面环境；应用不依赖 WebView，也不需要单独安装浏览器运行时。
 
-## 运行时依赖
+| 平台 | 架构 | 发布形式 |
+|---|---|---|
+| **macOS** | Apple Silicon、Intel x64 | `.dmg`、`.app.zip`、便携压缩包 |
+| **Windows** | x64、ARM64 | NSIS `.exe`、便携 `.zip` |
+| **Linux** | x64、ARM64 | AppImage、`.deb`、便携 `.tar.gz` |
 
-OxideTerm 使用操作系统提供的原生 WebView 运行时。大多数用户的系统已经预装；只有在应用无法启动，或处于离线/内网环境时，才需要手动安装。
-
-| 平台 | 运行时依赖 |
-|------|------------|
-| **Windows** | [WebView2 运行时](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) — 已预装于 Windows 10（1803+）和 Windows 11。离线或内网环境可使用 Evergreen 独立安装程序，或通过组策略部署固定版本运行时。 |
-| **macOS** | 无（使用系统原生 WebKit） |
-| **Linux** | `libwebkit2gtk-4.1`（现代桌面环境通常已预装） |
+安装包通常约为 **50–70 MB**，具体大小会随平台和版本变化。
 
 ## 下载
 
-从 [GitHub Releases](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) 下载最新版本。
+从 [GitHub Releases](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest) 下载与你的操作系统和处理器架构匹配的文件。
 
 ### macOS
 
-| 版本 | 文件 |
-|------|------|
-| Apple Silicon (M 系列) | `OxideTerm_x.x.x_aarch64.dmg` |
-| Intel | `OxideTerm_x.x.x_x64.dmg` |
-
-1. 下载对应架构的 `.dmg` 文件
-2. 打开磁盘映像，将 **OxideTerm** 拖入 **应用程序** 文件夹
-3. 首次启动时，打开终端运行 `xattr -cr /Applications/OxideTerm.app` 移除隔离标记，然后正常启动
+1. 打开下载的 `.dmg`，将 **OxideTerm** 拖入“应用程序”。
+2. 首次启动如果被 Gatekeeper 阻止，请在“系统设置 → 隐私与安全性”中确认打开。
+3. 对于未经公证的预览构建，可以在确认下载来源后运行 `xattr -cr /Applications/OxideTerm.app` 移除隔离标记。
 
 ### Windows
 
-| 版本 | 文件 |
-|------|------|
-| x64 | `OxideTerm_x.x.x_x64-setup.exe` |
-| ARM64 | `OxideTerm_x.x.x_arm64-setup.exe` |
-
-1. 下载 `.exe` 安装程序
-2. 运行安装程序并按提示操作
-3. 安装完成后可在开始菜单中找到 OxideTerm
+运行对应架构的 NSIS `.exe` 安装程序，或解压便携版后直接启动 `OxideTerm.exe`。
 
 ### Linux
 
-| 版本 | 文件 |
-|------|------|
-| x64 (Debian/Ubuntu) | `OxideTerm_x.x.x_amd64.deb` |
-| x64 (AppImage) | `OxideTerm_x.x.x_amd64.AppImage` |
-| ARM64 (Debian/Ubuntu) | `OxideTerm_x.x.x_arm64.deb` |
-| ARM64 (AppImage) | `OxideTerm_x.x.x_arm64.AppImage` |
+Debian/Ubuntu 可以安装 `.deb`：
 
-**Debian/Ubuntu：**
 ```bash
-sudo dpkg -i OxideTerm_x.x.x_amd64.deb
+sudo dpkg -i OxideTerm_*.deb
 ```
 
-**AppImage：**
+AppImage 需要添加执行权限：
+
 ```bash
-chmod +x OxideTerm_x.x.x_amd64.AppImage
-./OxideTerm_x.x.x_amd64.AppImage
+chmod +x OxideTerm_*.AppImage
+./OxideTerm_*.AppImage
 ```
 
-## 从源码构建
+如果程序无法创建图形表面，请先更新 GPU 驱动，并在设置中选择兼容渲染配置。从源码排查时，也可以使用 `OXIDETERM_RENDER_PROFILE=compatibility cargo run` 启动。
 
-### 前置条件
+## 从源码运行
 
-- **Rust** 1.85+（通过 [rustup](https://rustup.rs/) 安装）
-- **Node.js** 18+
-- **pnpm**（通过 `npm install -g pnpm` 安装）
-- 平台特定构建工具：
-  - macOS：Xcode Command Line Tools
-  - Windows：Visual Studio Build Tools 2019+
-  - Linux：`build-essential`、`libwebkit2gtk-4.1-dev`、`libssl-dev`
-
-### 构建步骤
+仓库使用 Rust 2024 Edition。发布流水线当前使用 Rust 1.94.1；建议通过 `rustup` 安装相同或更新的稳定工具链。
 
 ```bash
-# 克隆仓库
 git clone https://github.com/AnalyseDeCircuit/oxideterm.git
 cd oxideterm
-
-# 安装依赖
-pnpm install
-
-# 开发模式（热重载）
-pnpm tauri dev
-
-# 生产构建
-pnpm tauri build
+cargo run
 ```
 
-构建产物位于 `src-tauri/target/release/bundle/`。
+Linux 还需要 GPUI、音频、字体、窗口系统和媒体相关的系统开发包。仓库提供统一安装脚本：
 
-## 更新
+```bash
+./scripts/install-linux-deps.sh
+```
 
-OxideTerm 内置自动更新机制。当有新版本可用时，应用内会显示更新通知。你也可以在设置中手动检查更新。
+构建优化后的桌面二进制和无头 CLI：
 
-## 卸载
+```bash
+cargo build --release -p oxideterm-gpui-app
+./scripts/build-cli.sh
+```
 
-- **macOS**：将 OxideTerm 从应用程序拖到废纸篓
-- **Windows**：在设置中使用添加/删除程序
-- **Linux**：`sudo dpkg -r oxideterm` 或删除 AppImage 文件
+桌面二进制位于 `target/release/`，CLI 会同时暂存到应用资源目录，供原生安装包包含。
 
-配置数据存储在：
-- macOS：`~/Library/Application Support/com.oxideterm.app/`
-- Windows：`%APPDATA%\com.oxideterm.app\`
-- Linux：`~/.config/com.oxideterm.app/`
+## 配置与卸载
+
+卸载应用前，可以用 CLI 查看当前配置和数据路径：
+
+```bash
+oxideterm paths --json
+```
+
+删除应用不会自动删除这些用户数据或系统凭据管理器中的凭据。需要完全清理时，请先确认 `paths` 输出，再删除对应目录和凭据管理器中的 OxideTerm 条目。

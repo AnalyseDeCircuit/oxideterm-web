@@ -89,4 +89,4 @@ connecting → active → idle → link_down → reconnecting → active
 | Keepalive 间隔 | 15 秒（SSH `ServerAliveInterval`） |
 | Keepalive 尝试次数 | 3 次（SSH `ServerAliveCountMax`） |
 
-超过空闲超时的连接会发出 `connection_status_changed` 事件，前端用于更新侧边栏并通知其他消费者。
+超过空闲超时的连接会发出 `connection_status_changed` 事件，原生工作区据此更新侧边栏并通知其他消费者。
