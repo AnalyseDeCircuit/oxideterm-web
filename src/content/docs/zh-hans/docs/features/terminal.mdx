@@ -99,14 +99,7 @@ OxideTerm 还支持桌面平台的本地终端会话（PTY），基于 `portable
 - **macOS/Linux**：`zsh`、`bash`、`fish`、`pwsh`
 - **Windows**：PowerShell 7、Git Bash、WSL2、CMD（原生 ConPTY——完整支持 TrueColor 和 ANSI，无传统 WinPTY）
 
-:::note
-本地终端是一个功能门控特性（`local-terminal`）。可通过 `cargo build --no-default-features` 禁用，用于移动端/轻量级构建。
-:::
 
-## 资源分析器
+## 资源与主机工具
 
-对于活跃的 SSH 连接，OxideTerm 显示实时资源分析器：
-- 通过持久 SSH 通道读取 `/proc/stat` 获取 **CPU** 和**内存**使用率
-- 基于增量计算的精确 CPU 百分比
-- 在非 Linux 系统上自动降级为仅 RTT 指标
-- **智能端口检测** — 自动发现远程主机上的监听服务
+活动 SSH 节点可以向原生监控和[主机工具](/zh-hans/docs/features/host-tools/)提供延迟、进程、服务、容器、端口、文件系统、软件包、日志及其他采样状态。它们与终端共享节点身份和重连状态，而不是打开一个无关的工作区。

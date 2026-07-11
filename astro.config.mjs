@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import mermaid from "astro-mermaid";
 import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -8,6 +9,8 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   integrations: [
+    // Mermaid must transform fenced diagrams before Starlight processes docs content.
+    mermaid({ autoTheme: true, enableLog: false }),
     starlight({
       title: "OxideTerm",
       logo: {
@@ -94,6 +97,11 @@ export default defineConfig({
               label: "SFTP",
             },
             {
+              slug: "docs/features/remote-desktop",
+              label: "Remote Desktop",
+              translations: { "zh-CN": "远程桌面" },
+            },
+            {
               slug: "docs/features/ide",
               label: "IDE Mode",
               translations: { "zh-CN": "IDE 模式" },
@@ -105,23 +113,18 @@ export default defineConfig({
             },
             {
               slug: "docs/features/connections",
-              label: "Connections",
-              translations: { "zh-CN": "连接管理" },
-            },
-            {
-              slug: "docs/features/session-manager",
-              label: "Session Manager",
-              translations: { "zh-CN": "Session Manager" },
+              label: "Connections & Sessions",
+              translations: { "zh-CN": "连接与会话" },
             },
             {
               slug: "docs/features/connection-monitor",
-              label: "Connection Monitor",
-              translations: { "zh-CN": "连接监控" },
+              label: "Runtime",
+              translations: { "zh-CN": "运行时" },
             },
             {
-              slug: "docs/features/topology",
-              label: "Connection Matrix",
-              translations: { "zh-CN": "连接拓扑" },
+              slug: "docs/features/host-tools",
+              label: "Host Tools",
+              translations: { "zh-CN": "主机工具" },
             },
             {
               slug: "docs/features/file-manager",

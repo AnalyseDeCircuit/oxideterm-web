@@ -2,11 +2,11 @@
   "meta": {
     "lang": "en",
     "title": "OxideTerm — AI-native workspace for remote servers",
-    "description": "An AI-native workspace for remote servers: SSH terminals, SFTP, remote desktop, port forwarding, trzsz, lightweight editing, local shell, and OxideSens AI. Zero Electron, zero OpenSSL, zero telemetry."
+    "description": "An AI-native workspace for remote servers: SSH terminals, SFTP, remote desktop, port forwarding, trzsz, lightweight editing, local shell, and OxideSens AI. No bundled Electron, no telemetry, and pure-Rust SSH without OpenSSL/libssh2."
   },
   "hero": {
     "headline": "One AI-native workspace for remote servers",
-    "tagline": "Native GPUI. No WebView. Zero OpenSSL. Zero Telemetry. Zero Subscription. BYOK-first. Pure Rust SSH.",
+    "tagline": "Native GPUI. No bundled WebView. No telemetry. No subscription. BYOK-first. Pure-Rust SSH without OpenSSL/libssh2.",
     "subtitle": "Connect once, then keep terminals, SFTP, remote desktops, port forwarding, transfers, lightweight editing, local shells, and OxideSens AI in one local-first desktop app.",
     "cta_download": "Download",
     "cta_docs": "Documentation",
@@ -25,7 +25,7 @@
   "features": {
     "title": "Built Different",
     "rust_ssh_title": "Pure Rust SSH",
-    "rust_ssh_desc": "Built on russh with ring crypto backend. Zero C dependencies, zero OpenSSL. Compiled entirely in safe, auditable Rust.",
+    "rust_ssh_desc": "Built on russh with the ring crypto backend. The SSH stack has no C, OpenSSL, or libssh2 dependency and is compiled entirely in auditable Rust.",
     "native_title": "Native Performance",
     "native_desc": "A 50–70 MB native GPUI desktop package built in Rust. No Electron wrapper and no system WebView runtime; the terminal is rendered directly by the GPU-backed native UI.",
     "allinone_title": "All-in-One Workspace",
@@ -205,6 +205,8 @@
     "col_professional_ssh": "Professional SSH Client",
     "col_remote_toolbox": "Integrated Remote Toolbox",
     "col_remote_ide": "Remote Development IDE",
+    "row_cross_platform": "Cross-Platform Availability",
+    "val_platform_ot": "macOS · Windows · Linux",
     "row_binary_size": "Package Size",
     "val_binary_ot": "50–70 MB",
     "row_ui_runtime": "Desktop UI Runtime",
@@ -242,8 +244,8 @@
     "network_desc": "OxideTerm is a professional remote server management and terminal emulation tool. This software is intended solely for compliant system administration, network management, software development, and academic research. Users must strictly comply with all applicable laws and regulations when using SSH tunneling or port forwarding features. Any use of this software for unauthorized access to restricted resources or violation of cybersecurity regulations is strictly prohibited.",
     "ai_title": "AI Service Disclaimer",
     "ai_desc": "The AI-assisted features provided by OxideTerm (such as command completion and log analysis) function as technical integration tools. AI conversation history is stored locally on the user's device using encrypted storage and is never uploaded to any server. The software does not distribute AI-generated content to third parties. Users are responsible for configuring their own third-party AI service API credentials and bear ultimate legal responsibility for the resulting interactions. We recommend using these features in compliance with all applicable AI governance regulations in your jurisdiction.",
-    "data_title": "Data Security & Privacy",
-    "data_desc": "We understand the sensitivity of operational data. OxideTerm adopts a Local-First architecture. All server credentials, keys, and configuration files are encrypted and stored exclusively on the user's local device using high-strength encryption algorithms. This software does not collect, upload, or disclose any sensitive connection data to third parties.",
+    "data_title": "Local-first. Cloud on your terms.",
+    "data_desc": "Core work stays local and needs no OxideTerm account. Credentials stay in your system keychain; Cloud Sync and AI connect only when you choose and configure a provider.",
     "license_title": "License",
     "license_desc": "This software is distributed under the GNU General Public License v3.0 (GPL-3.0). OxideTerm previously used PolyForm Noncommercial and moved to GPL-3.0 to avoid source-available traps, noncommercial ambiguity, and no-competition riders. Public code is not automatically open source: no-redistribution, no-repackaging, no-competing-products, or platform-approval riders turn it into source-available branding. OxideTerm adds none of those riders.",
     "disclaimer": "This page is provided for informational purposes only and does not constitute legal advice. Users are responsible for ensuring their use of OxideTerm complies with all applicable local and international laws."
@@ -256,13 +258,13 @@
     "q2": "Which SSH authentication methods are supported?",
     "a2": "Password, private key (Ed25519, RSA, ECDSA), keyboard-interactive 2FA, agent forwarding, certificates, and SSH Agent.",
     "q3": "Where is my data stored?",
-    "a3": "Everything stays on your device. Credentials are stored in your OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service). Exported configs use ChaCha20-Poly1305 encryption. Nothing is uploaded to any server.",
+    "a3": "OxideTerm is local-first: core SSH workflows work without an OxideTerm account. Credentials stay in your OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service), and exported configs use ChaCha20-Poly1305 encryption. Cloud Sync and AI contact only the providers you choose after configuring them.",
     "q4": "Can I use OxideTerm offline?",
     "a4": "Yes. OxideTerm is local-first. Core SSH workflows — SSH, SFTP, port forwarding, local shell, saved connections, and settings — do not require an OxideTerm account or subscription. AI needs your configured provider API when you choose to use it.",
     "q5": "What do I need for AI features?",
     "a5": "Bring your own API key (BYOK). OxideTerm supports OpenAI, Anthropic, Google, DeepSeek, Ollama, and OpenAI-compatible endpoints. Provider usage fees are between you and that provider; OxideTerm does not require an app subscription for core SSH workflows or OxideSens AI.",
-    "q6": "Why doesn't OxideTerm use libssh2 or OpenSSL?",
-    "a6": "Three reasons. First, memory safety: OpenSSL's C codebase has produced critical CVEs like Heartbleed — Rust's ownership model eliminates that entire class of bug. Second, zero deployment friction: libssh2 requires each target platform to have C dev headers and the system OpenSSL matching in version (1.0 vs 1.1 vs 3.0 have incompatible ABIs); russh ships as pure Rust source and Cargo handles everything. Third, async-native performance: libssh2 is a blocking C API that needs wrapper glue for Tokio; russh is async-first with zero FFI boundary in the hot path. The result: a single Rust binary that compiles to 9 Linux architectures without a C toolchain — and a crypto stack you can actually audit."
+    "q6": "Why doesn't OxideTerm's SSH stack use libssh2 or OpenSSL?",
+    "a6": "Three reasons. First, memory safety: OpenSSL's C codebase has produced critical CVEs like Heartbleed — Rust's ownership model eliminates that entire class of bug. Second, zero deployment friction: libssh2 requires each target platform to have C dev headers and the system OpenSSL matching in version (1.0 vs 1.1 vs 3.0 have incompatible ABIs); russh ships as pure Rust source and Cargo handles everything. Third, async-native performance: libssh2 is a blocking C API that needs wrapper glue for Tokio; russh is async-first with zero FFI boundary in the hot path. The result is a Rust-native SSH stack without an OpenSSL runtime dependency and with a cryptographic implementation that remains practical to audit."
   },
   "testimonial": {
     "badge": "FROM THE CREATOR",

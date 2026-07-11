@@ -17,6 +17,7 @@ const V = c.varies;
 
 // Product categories are intentionally generic because individual tools vary.
 const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: string; ide: string }[] = [
+  { label: c.row_cross_platform, ot: c.val_platform_ot, cross: V, ssh: V, toolbox: V, ide: V },
   { label: c.row_binary_size, ot: c.val_binary_ot, cross: V, ssh: V, toolbox: V, ide: V },
   { label: c.row_ui_runtime, ot: c.val_runtime_ot, cross: c.val_runtime_browser, ssh: c.val_runtime_native, toolbox: c.val_runtime_native, ide: c.val_runtime_browser },
   { label: c.row_ssh_impl, ot: c.val_ssh_ot, cross: c.val_ssh_builtin, ssh: c.val_ssh_builtin, toolbox: c.val_ssh_builtin, ide: c.val_ssh_system },

@@ -95,7 +95,7 @@ The optional lightweight Rust agent enhances IDE mode on remote Linux hosts:
 
 - File watching and native Git status
 - Atomic writes with hash-based conflict detection
-- Auto-deployment on bundled x86_64 and arm64 Linux targets
+- User-confirmed deployment on bundled x86_64 and arm64 Linux targets
 - A line-oriented request channel carried inside the existing SSH connection, with no externally listening service
 - Complete SFTP fallback when the agent is disabled or unavailable
 
@@ -137,7 +137,7 @@ If Gatekeeper blocks an unsigned preview, use **Open** from the Finder context m
 
 - Check network stability and the remote server's SSH logs.
 - Review keepalive and idle-timeout settings for the connection.
-- Inspect reconnect and health state in the connection monitor.
+- Inspect reconnect and health state in Runtime.
 - Run `oxideterm diagnose --json` and `oxideterm doctor --strict` for a redacted local snapshot.
 
 ### Terminal rendering is slow or the app cannot open a window

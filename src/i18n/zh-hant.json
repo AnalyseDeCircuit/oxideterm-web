@@ -2,11 +2,11 @@
   "meta": {
     "lang": "zh-TW",
     "title": "OxideTerm — 面向遠端伺服器的 AI-native 工作區",
-    "description": "面向遠端伺服器的 AI-native 工作區：SSH 終端、SFTP、遠端桌面、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 OxideSens AI。零 Electron、零 OpenSSL、零遙測。"
+    "description": "面向遠端伺服器的 AI 原生工作區：SSH 終端、SFTP、遠端桌面、連接埠轉發、trzsz、輕量編輯、本地 Shell 和 OxideSens AI。不捆綁 Electron，不蒐集遙測，純 Rust SSH 堆疊不依賴 OpenSSL/libssh2。"
   },
   "hero": {
     "headline": "一個面向遠端伺服器的 AI-native 工作區",
-    "tagline": "原生 GPUI。無需 WebView。零 OpenSSL。零遙測。零訂閱。BYOK 優先。純 Rust SSH。",
+    "tagline": "原生 GPUI。不捆綁 WebView。不蒐集遙測。無需訂閱。BYOK 優先。純 Rust SSH，不依賴 OpenSSL/libssh2。",
     "subtitle": "連接一次伺服器，然後在一個本地優先桌面應用裡處理終端、SFTP、遠端桌面、連接埠轉發、檔案傳輸、輕量編輯、本地 Shell 和 OxideSens AI。",
     "cta_download": "下載",
     "cta_docs": "文件",
@@ -25,7 +25,7 @@
   "features": {
     "title": "與眾不同",
     "rust_ssh_title": "純 Rust SSH",
-    "rust_ssh_desc": "基於 russh 和 ring 加密後端構建。零 C 依賴，零 OpenSSL。完全使用安全、可審計的 Rust 編譯。",
+    "rust_ssh_desc": "基於 russh 和 ring 加密後端構建。SSH 堆疊不依賴 C、OpenSSL 或 libssh2，完全使用可稽核的 Rust 編譯。",
     "native_title": "原生效能",
     "native_desc": "以 Rust 建構的 50–70 MB 原生 GPUI 桌面安裝包。無需 Electron 外殼或系統 WebView；終端由 GPU 支援的原生介面直接渲染。",
     "allinone_title": "All-in-One 工作站",
@@ -205,6 +205,8 @@
     "col_professional_ssh": "專業 SSH 用戶端",
     "col_remote_toolbox": "整合遠端工具箱",
     "col_remote_ide": "遠端開發 IDE",
+    "row_cross_platform": "跨平台可用性",
+    "val_platform_ot": "macOS · Windows · Linux",
     "row_binary_size": "安裝包大小",
     "val_binary_ot": "50–70 MB",
     "row_ui_runtime": "桌面介面執行階段",
@@ -242,8 +244,8 @@
     "network_desc": "OxideTerm 是一款專業的遠端伺服器管理與終端模擬工具。本軟體僅限用於合規的系統維運、網路管理、軟體開發及學術研究。使用者在使用本軟體提供的 SSH 隧道或連接埠轉發功能時，須嚴格遵守所在地及伺服器所在地的法律法規。嚴禁利用本軟體從事任何違反網路安全法、破壞網路監管或非法存取受限資源的行為。",
     "ai_title": "生成式 AI 服務說明",
     "ai_desc": "OxideTerm 提供的 AI 輔助功能（如命令補全、日誌分析）屬於技術連接工具。AI 對話歷史經加密儲存於使用者本地裝置中，不會上傳至任何伺服器，亦不會向第三方分發 AI 生成內容。使用者需自行配置第三方 AI 服務的 API 憑據，並對其產生的互動內容承擔最終法律責任。我們建議使用者在遵守相關 AI 治理法規的前提下使用該功能。",
-    "data_title": "資料安全與隱私保障",
-    "data_desc": "我們深知維運資料的敏感性。OxideTerm 採用「本地優先」架構，所有伺服器存取憑據、金鑰及設定檔均經由高強度加密演算法儲存於使用者的本地裝置中。本軟體不會主動蒲集、上傳或向第三方洩露使用者的任何敏感連線資料。",
+    "data_title": "本地優先，雲端由您決定。",
+    "data_desc": "核心工作流程無需 OxideTerm 帳號，始終在本地完成。憑據保留在系統鑰匙圈中；只有當您選擇並設定服務時，Cloud Sync 和 AI 才會連線。",
     "license_title": "授權條款",
     "license_desc": "本軟體採用 GNU General Public License v3.0 (GPL-3.0) 發布。OxideTerm 曾使用 PolyForm Noncommercial，後來轉為 GPL-3.0，是為了避免 source-available 陷阱、非商用歧義和競業禁止附加條款。公開程式碼不等於開源：禁止再分發、禁止再打包、禁止競爭產品或平台審批條款都會把專案變成 source-available 品牌。OxideTerm 不添加這些附加限制。",
     "disclaimer": "本頁面僅供參考，不構成法律建議。使用者有責任確保其使用 OxideTerm 符合所有適用的當地及國際法律法規。"
@@ -256,13 +258,13 @@
     "q2": "支援哪些 SSH 認證方式？",
     "a2": "密碼認證、私鑰（Ed25519、RSA、ECDSA）、鍵盤互動 2FA、Agent 轉發、憑證認證，以及 SSH Agent。",
     "q3": "資料儲存在哪裡？",
-    "a3": "所有資料都保留在您的裝置上。憑證儲存在作業系統鑰匙圈中（macOS 鑰匙圈、Windows 認證管理員、Linux Secret Service）。匯出設定使用 ChaCha20-Poly1305 加密。不會向任何伺服器上傳資料。",
+    "a3": "OxideTerm 預設本地優先：核心 SSH 工作流程無需 OxideTerm 帳號。憑據保留在作業系統鑰匙圈中（macOS 鑰匙圈、Windows 認證管理員、Linux Secret Service），匯出設定使用 ChaCha20-Poly1305 加密。Cloud Sync 和 AI 僅會在您選擇並設定服務後連線到相應提供方。",
     "q4": "可以離線使用嗎？",
     "a4": "可以。OxideTerm 是本地優先應用。核心 SSH 工作流——SSH、SFTP、連接埠轉發、本地 Shell、儲存連線和設定——不需要 OxideTerm 帳號或訂閱。AI 只在你選擇使用時連接你設定的 provider API。",
     "q5": "AI 功能需要什麼？",
     "a5": "自帶 API Key（BYOK）。OxideTerm 支援 OpenAI、Anthropic、Google、DeepSeek、Ollama 和 OpenAI 相容端點。Provider 費用由你和對應 provider 決定；OxideTerm 的核心 SSH 工作區不需要應用訂閱。",
-    "q6": "為什麼 OxideTerm 不使用 libssh2 或 OpenSSL？",
-    "a6": "三個原因。其一，記憶體安全：OpenSSL 的 C 程式碼已產生 Heartbleed 等嚴重 CVE，Rust 的所有權模型從根本上消除了這整類漏洞。其二，零部署摩擦：libssh2 要求每個目標平台都有 C 開發標頭檔，且系統 OpenSSL 版本必須匹配（1.0/1.1/3.0 ABI 不相容）；russh 是純 Rust 原始碼，Cargo 全權處理。其三，原生非同步效能：libssh2 是阻塞式 C API，需要膠水程式碼才能接入 Tokio；russh 天生非同步，熱路徑無 FFI 開銷。結果是：一個 Rust 二進位檔無需 C 工具鏈即可編譯到 10 餘種 Linux 架構——加密堆疊也是可以真正稽核的。"
+    "q6": "為什麼 OxideTerm 的 SSH 堆疊不使用 libssh2 或 OpenSSL？",
+    "a6": "三個原因。其一，記憶體安全：OpenSSL 的 C 程式碼已產生 Heartbleed 等嚴重 CVE，Rust 的所有權模型從根本上消除了這整類漏洞。其二，零部署摩擦：libssh2 要求每個目標平台都有 C 開發標頭檔，且系統 OpenSSL 版本必須匹配（1.0/1.1/3.0 ABI 不相容）；russh 是純 Rust 原始碼，Cargo 全權處理。其三，原生非同步效能：libssh2 是阻塞式 C API，需要膠水程式碼才能接入 Tokio；russh 天生非同步，熱路徑無 FFI 開銷。結果是：一套不依賴 OpenSSL 執行階段、且便於稽核的 Rust 原生 SSH 堆疊。"
   },
   "testimonial": {
     "badge": "創作者寄語",

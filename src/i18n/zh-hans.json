@@ -2,11 +2,11 @@
   "meta": {
     "lang": "zh-CN",
     "title": "OxideTerm — 面向远程服务器的 AI-native 工作区",
-    "description": "面向远程服务器的 AI-native 工作区：SSH 终端、SFTP、远程桌面、端口转发、trzsz、轻量编辑、本地 Shell 和 OxideSens AI。零 Electron、零 OpenSSL、零遥测。"
+    "description": "面向远程服务器的 AI 原生工作区：SSH 终端、SFTP、远程桌面、端口转发、trzsz、轻量编辑、本地 Shell 和 OxideSens AI。不捆绑 Electron，不采集遥测，纯 Rust SSH 栈不依赖 OpenSSL/libssh2。"
   },
   "hero": {
     "headline": "一个面向远程服务器的 AI-native 工作区",
-    "tagline": "原生 GPUI。无需 WebView。零 OpenSSL。零遥测。零订阅。BYOK 优先。纯 Rust SSH。",
+    "tagline": "原生 GPUI。不捆绑 WebView。不采集遥测。无需订阅。BYOK 优先。纯 Rust SSH，不依赖 OpenSSL/libssh2。",
     "subtitle": "连接一次服务器，然后在一个本地优先桌面应用里处理终端、SFTP、远程桌面、端口转发、文件传输、轻量编辑、本地 Shell 和 OxideSens AI。",
     "cta_download": "下载",
     "cta_docs": "文档",
@@ -25,7 +25,7 @@
   "features": {
     "title": "与众不同",
     "rust_ssh_title": "纯 Rust SSH",
-    "rust_ssh_desc": "基于 russh 和 ring 加密后端构建。零 C 依赖，零 OpenSSL。完全使用安全、可审计的 Rust 编译。",
+    "rust_ssh_desc": "基于 russh 和 ring 加密后端构建。SSH 栈不依赖 C、OpenSSL 或 libssh2，完全使用可审计的 Rust 编译。",
     "native_title": "原生性能",
     "native_desc": "基于 Rust 构建的 50–70 MB 原生 GPUI 桌面安装包。无需 Electron 套壳，也不依赖系统 WebView；终端由 GPU 支持的原生界面直接渲染。",
     "allinone_title": "All-in-One 工作站",
@@ -205,6 +205,8 @@
     "col_professional_ssh": "专业 SSH 客户端",
     "col_remote_toolbox": "集成远程工具箱",
     "col_remote_ide": "远程开发 IDE",
+    "row_cross_platform": "跨平台可用性",
+    "val_platform_ot": "macOS · Windows · Linux",
     "row_binary_size": "安装包体积",
     "val_binary_ot": "50–70 MB",
     "row_ui_runtime": "桌面界面运行时",
@@ -242,8 +244,8 @@
     "network_desc": "OxideTerm 是一款专业的远程服务器管理与终端仿真工具。本软件仅限用于合规的系统运维、网络管理、软件开发及学术研究。用户在使用本软件提供的 SSH 隧道或端口转发功能时，须严格遵守所在地及服务器所在地的法律法规。严禁利用本软件从事任何违反网络安全法、破坏网络监管或非法访问受限资源的行为。",
     "ai_title": "生成式 AI 服务说明",
     "ai_desc": "OxideTerm 提供的 AI 辅助功能（如命令补全、日志分析）属于技术连接工具。AI 对话历史经加密存储于用户本地设备中，不会上传至任何服务器，亦不会向第三方分发 AI 生成内容。用户需自行配置第三方 AI 服务的 API 凭据，并对其产生的交互内容承担最终法律责任。我们建议用户在遵守《生成式人工智能服务管理暂行办法》等相关法规的前提下使用该功能。",
-    "data_title": "数据安全与隐私保障",
-    "data_desc": "我们深知运维数据的敏感性。OxideTerm 采用「本地优先」架构，所有服务器访问凭据、密钥及配置文件均经由高强度加密算法存储于用户的本地设备中。本软件不会主动采集、上传或向第三方泄露用户的任何敏感连接数据。",
+    "data_title": "本地优先，云端由你决定。",
+    "data_desc": "核心工作流无需 OxideTerm 账号，始终在本地完成。凭据保留在系统钥匙串中；只有当你选择并配置服务时，Cloud Sync 和 AI 才会连接。",
     "license_title": "许可协议",
     "license_desc": "本软件采用 GNU General Public License v3.0 (GPL-3.0) 发布。OxideTerm 曾使用 PolyForm Noncommercial，后来转为 GPL-3.0，是为了避免 source-available 陷阱、非商用歧义和竞业禁止附加条款。公开代码不等于开源：禁止再分发、禁止再打包、禁止竞争产品或平台审批条款都会把项目变成 source-available 品牌。OxideTerm 不添加这些附加限制。",
     "disclaimer": "本页面仅供参考，不构成法律建议。用户有责任确保其使用 OxideTerm 符合所有适用的本地及国际法律法规。"
@@ -256,13 +258,13 @@
     "q2": "支持哪些 SSH 认证方式？",
     "a2": "密码认证、私钥（Ed25519、RSA、ECDSA）、键盘交互 2FA、Agent 转发、证书认证，以及 SSH Agent。",
     "q3": "数据存储在哪里？",
-    "a3": "所有数据都保存在你的设备上。凭证存储在操作系统钥匙链中（macOS 钥匙串、Windows 凭据管理器、Linux Secret Service）。导出配置使用 ChaCha20-Poly1305 加密。不向任何服务器上传数据。",
+    "a3": "OxideTerm 默认本地优先：核心 SSH 工作流无需 OxideTerm 账号。凭据保留在操作系统钥匙串中（macOS 钥匙串、Windows 凭据管理器、Linux Secret Service），导出配置使用 ChaCha20-Poly1305 加密。Cloud Sync 和 AI 仅会在你选择并配置服务后连接到相应提供方。",
     "q4": "可以离线使用吗？",
     "a4": "可以。OxideTerm 是本地优先应用。核心 SSH 工作流——SSH、SFTP、端口转发、本地 Shell、保存连接和设置——不需要 OxideTerm 账号或订阅。AI 只在你选择使用时连接你配置的 provider API。",
     "q5": "AI 功能需要什么？",
     "a5": "自带 API Key（BYOK）。OxideTerm 支持 OpenAI、Anthropic、Google、DeepSeek、Ollama 和 OpenAI 兼容端点。Provider 费用由你和对应 provider 决定；OxideTerm 的核心 SSH 工作区不需要应用订阅。",
-    "q6": "为什么 OxideTerm 不使用 libssh2 或 OpenSSL？",
-    "a6": "三个原因。其一，内存安全：OpenSSL 的 C 代码库已产生 Heartbleed 等严重 CVE，Rust 的所有权模型从根本上消除了这整类漏洞。其二，零部署摩擦：libssh2 要求每个目标平台都有 C 开发头文件，且系统 OpenSSL 版本必须匹配（1.0/1.1/3.0 ABI 不兼容）；russh 是纯 Rust 源码，Cargo 全权处理。其三，原生异步性能：libssh2 是阻塞式 C API，需要胶水代码才能接入 Tokio；russh 天生异步，热路径无 FFI 开销。结果是：一个 Rust 二进制文件无需 C 工具链即可编译到 10 余种 Linux 架构——加密栈也是可以真正审计的。"
+    "q6": "为什么 OxideTerm 的 SSH 栈不使用 libssh2 或 OpenSSL？",
+    "a6": "三个原因。其一，内存安全：OpenSSL 的 C 代码库已产生 Heartbleed 等严重 CVE，Rust 的所有权模型从根本上消除了这整类漏洞。其二，零部署摩擦：libssh2 要求每个目标平台都有 C 开发头文件，且系统 OpenSSL 版本必须匹配（1.0/1.1/3.0 ABI 不兼容）；russh 是纯 Rust 源码，Cargo 全权处理。其三，原生异步性能：libssh2 是阻塞式 C API，需要胶水代码才能接入 Tokio；russh 天生异步，热路径无 FFI 开销。结果是：一套不依赖 OpenSSL 运行时、且便于审计的 Rust 原生 SSH 栈。"
   },
   "testimonial": {
     "badge": "创作者寄语",

@@ -2,11 +2,11 @@
   "meta": {
     "lang": "ko",
     "title": "OxideTerm — 원격 서버를 위한 AI-native 워크스페이스",
-    "description": "원격 서버를 위한 AI-native 워크스페이스. SSH terminal, SFTP, 원격 데스크톱, 포트 포워딩, trzsz, 가벼운 편집, 로컬 Shell, OxideSens AI. Electron/OpenSSL/텔레메트리 없음."
+    "description": "원격 서버를 위한 AI 네이티브 작업 공간. SSH 터미널, SFTP, 원격 데스크톱, 포트 포워딩, trzsz, 가벼운 편집, 로컬 셸, OxideSens AI. Electron 번들과 텔레메트리가 없으며 SSH 스택은 OpenSSL/libssh2에 의존하지 않습니다."
   },
   "hero": {
     "headline": "원격 서버를 위한 AI-native 워크스페이스",
-    "tagline": "네이티브 GPUI. WebView 없음. OpenSSL, 텔레메트리, 구독 없음. BYOK 우선. 순수 Rust SSH.",
+    "tagline": "네이티브 GPUI. WebView 번들 없음. 텔레메트리 없음. 구독 없음. BYOK 우선. OpenSSL/libssh2 없는 순수 Rust SSH.",
     "subtitle": "한 번 연결한 뒤 터미널, SFTP, 원격 데스크톱, 포트 포워딩, 파일 전송, 가벼운 편집, 로컬 shell, OxideSens AI를 하나의 local-first 데스크톱 앱에서 다룹니다.",
     "cta_download": "다운로드",
     "cta_docs": "문서",
@@ -25,7 +25,7 @@
   "features": {
     "title": "차원이 다릅니다",
     "rust_ssh_title": "순수 Rust SSH",
-    "rust_ssh_desc": "russh와 ring 암호화 백엔드로 구축. C 의존성 제로, OpenSSL 제로. 안전하고 감사 가능한 Rust로 완전 컴파일.",
+    "rust_ssh_desc": "russh와 ring 암호화 백엔드로 구축했습니다. SSH 스택은 C, OpenSSL, libssh2에 의존하지 않으며 감사 가능한 Rust로 완전히 컴파일됩니다.",
     "native_title": "네이티브 성능",
     "native_desc": "Rust로 만든 50–70 MB 네이티브 GPUI 데스크톱 패키지입니다. Electron 래퍼나 시스템 WebView 없이 GPU 기반 네이티브 UI가 터미널을 직접 렌더링합니다.",
     "allinone_title": "올인원 워크스페이스",
@@ -205,6 +205,8 @@
     "col_professional_ssh": "전문 SSH 클라이언트",
     "col_remote_toolbox": "통합 원격 도구 모음",
     "col_remote_ide": "원격 개발 IDE",
+    "row_cross_platform": "지원 플랫폼",
+    "val_platform_ot": "macOS · Windows · Linux",
     "row_binary_size": "패키지 크기",
     "val_binary_ot": "50–70 MB",
     "row_ui_runtime": "데스크톱 UI 런타임",
@@ -242,8 +244,8 @@
     "network_desc": "OxideTerm은 전문 원격 서버 관리 및 터미널 에뮬레이션 도구입니다. 본 소프트웨어는 합법적인 시스템 관리, 네트워크 관리, 소프트웨어 개발 및 학술 연구 목적으로만 사용해야 합니다. SSH 터널링 또는 포트 포워딩 기능 사용 시 적용 가능한 모든 법률 및 규정을 엄격히 준수해야 합니다. 제한된 리소스에 대한 무단 접근이나 사이버 보안 규정 위반은 엄격히 금지됩니다.",
     "ai_title": "AI 서비스 면책 조항",
     "ai_desc": "OxideTerm이 제공하는 AI 지원 기능(명령어 자동 완성, 로그 분석 등)은 기술 통합 도구입니다. AI 대화 기록은 암호화되어 사용자의 로컬 장치에 저장되며 서버에 업로드되지 않습니다. AI 생성 콘텐츠를 제3자에게 배포하지 않습니다. 사용자는 타사 AI 서비스 API 자격 증명을 직접 구성하고 해당 상호작용에 대한 최종 법적 책임을 집니다. 관련 AI 거버넌스 규정을 준수하여 사용하시기 바랍니다.",
-    "data_title": "데이터 보안 및 개인정보 보호",
-    "data_desc": "운영 데이터의 민감성을 충분히 이해하고 있습니다. OxideTerm은 로컬 우선 아키텍처를 채택하여 모든 서버 자격 증명, 키 및 구성 파일을 고강도 암호화 알고리즘으로 사용자의 로컬 장치에만 저장합니다. 본 소프트웨어는 민감한 연결 데이터를 수집, 업로드하거나 제3자에게 공개하지 않습니다.",
+    "data_title": "로컬 우선. 클라우드는 내가 선택합니다.",
+    "data_desc": "핵심 워크플로에는 OxideTerm 계정이 필요 없으며 로컬에서 처리됩니다. 자격 증명은 시스템 키체인에 보관되고, Cloud Sync와 AI는 선택하고 구성한 제공자에만 연결됩니다.",
     "license_title": "라이선스",
     "license_desc": "이 소프트웨어는 GNU General Public License v3.0 (GPL-3.0)로 배포됩니다. OxideTerm은 이전에 PolyForm Noncommercial을 사용했지만 source-available 함정, 비상업 조건의 모호함, 경쟁 금지 조항을 피하기 위해 GPL-3.0으로 전환했습니다. 공개 코드는 자동으로 오픈소스가 아닙니다. 재배포 금지, 재패키징 금지, 경쟁 제품 금지, 플랫폼 승인 조항은 프로젝트를 source-available 브랜딩으로 만듭니다. OxideTerm은 그런 추가 제한을 두지 않습니다.",
     "disclaimer": "이 페이지는 정보 제공 목적으로만 제공되며 법률 자문을 구성하지 않습니다. OxideTerm 사용이 적용 가능한 모든 법률을 준수하는지 확인할 책임은 사용자에게 있습니다."
@@ -256,13 +258,13 @@
     "q2": "어떤 SSH 인증 방식을 지원하나요?",
     "a2": "비밀번호, 개인키(Ed25519, RSA, ECDSA), 키보드 대화형 2FA, 에이전트 전달, 인증서, SSH Agent를 지원합니다.",
     "q3": "데이터는 어디에 저장되나요?",
-    "a3": "모든 데이터는 사용자의 기기에 보관됩니다. 인증 정보는 OS 키체인(macOS 키체인, Windows 자격 증명 관리자, Linux Secret Service)에 저장됩니다. 내보낸 설정은 ChaCha20-Poly1305로 암호화됩니다. 어떤 서버에도 업로드되지 않습니다.",
+    "a3": "OxideTerm은 로컬 우선입니다. 핵심 SSH 워크플로에는 OxideTerm 계정이 필요하지 않습니다. 자격 증명은 OS 키체인(macOS 키체인, Windows 자격 증명 관리자, Linux Secret Service)에 보관되며 내보낸 설정은 ChaCha20-Poly1305로 암호화됩니다. Cloud Sync와 AI는 선택하고 구성한 제공자에만 연결됩니다.",
     "q4": "오프라인에서 사용할 수 있나요?",
     "a4": "네. OxideTerm은 로컬 우선 앱입니다. SSH, SFTP, 포트 포워딩, 로컬 Shell, 저장된 연결, 설정 같은 핵심 SSH 워크플로에는 OxideTerm 계정이나 구독이 필요 없습니다. AI는 사용자가 설정한 provider API를 사용할 때만 연결됩니다.",
     "q5": "AI 기능에는 무엇이 필요하나요?",
     "a5": "BYOK(자신의 API 키 사용) 방식입니다. OpenAI, Anthropic, Google, DeepSeek, Ollama 및 OpenAI 호환 엔드포인트를 지원합니다. Provider 비용은 해당 provider와 사용자 사이의 문제이며, OxideTerm 핵심 SSH workflow와 OxideSens AI에는 앱 구독이 필요 없습니다.",
-    "q6": "왜 OxideTerm은 libssh2나 OpenSSL을 사용하지 않나요?",
-    "a6": "세 가지 이유가 있습니다. 첫째, 메모리 안전성: OpenSSL의 C 코드베이스는 Heartbleed 같은 심각한 CVE를 낳아 왔습니다. Rust의 소유권 모델은 그 범주의 버그를 근본적으로 제거합니다. 둘째, 제로 배포 마찰: libssh2는 각 대상 플랫폼에 C 개발 헤더와 버전이 일치하는 시스템 OpenSSL을 요구합니다(1.0/1.1/3.0은 ABI 비호환). russh는 순수 Rust 소스로 제공되며 Cargo가 모든 것을 처리합니다. 셋째, 네이티브 비동기 성능: libssh2는 Tokio 통합에 래퍼가 필요한 블로킹 C API인 반면, russh는 비동기 네이티브로 핫 패스에 FFI 경계가 없습니다. 결과적으로, C 툴체인 없이 10개 이상의 Linux 아키텍처로 컴파일되는 단일 바이너리와 실제로 감사 가능한 암호화 스택을 실현했습니다."
+    "q6": "왜 OxideTerm의 SSH 스택은 libssh2나 OpenSSL을 사용하지 않나요?",
+    "a6": "세 가지 이유가 있습니다. 첫째, 메모리 안전성: OpenSSL의 C 코드베이스는 Heartbleed 같은 심각한 CVE를 낳아 왔습니다. Rust의 소유권 모델은 그 범주의 버그를 근본적으로 제거합니다. 둘째, 제로 배포 마찰: libssh2는 각 대상 플랫폼에 C 개발 헤더와 버전이 일치하는 시스템 OpenSSL을 요구합니다(1.0/1.1/3.0은 ABI 비호환). russh는 순수 Rust 소스로 제공되며 Cargo가 모든 것을 처리합니다. 셋째, 네이티브 비동기 성능: libssh2는 Tokio 통합에 래퍼가 필요한 블로킹 C API인 반면, russh는 비동기 네이티브로 핫 패스에 FFI 경계가 없습니다. 결과적으로 OpenSSL 런타임에 의존하지 않으며, 실용적으로 감사할 수 있는 Rust 네이티브 SSH 스택을 제공합니다."
   },
   "testimonial": {
     "badge": "제작자의 말",

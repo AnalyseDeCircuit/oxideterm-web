@@ -9,7 +9,7 @@ description: OxideTerm 的安全模型——加密、密钥存储、SSH 安全�
 
 OxideTerm 使用 `russh 0.61` 配合 **`ring`** 加密后端：
 
-- **零 C/OpenSSL 依赖** — 完整加密栈均为 Rust 实现。不再有 "哪个 OpenSSL 版本？" 的调试烦恼
+- **SSH 栈不依赖 C/OpenSSL/libssh2** — SSH 密码学能力由 Rust 实现，不再受系统 OpenSSL 版本差异影响
 - 完整 SSH2 协议：密钥交换、通道、SFTP 子系统、端口转发
 - ChaCha20-Poly1305 和 AES-GCM 密码套件
 - 这消除了与 C 内存安全问题相关的一整类漏洞（缓冲区溢出、释放后使用等）

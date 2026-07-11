@@ -2,11 +2,11 @@
   "meta": {
     "lang": "vi",
     "title": "OxideTerm — Workspace AI-native cho máy chủ từ xa",
-    "description": "Workspace AI-native cho máy chủ từ xa: SSH terminal, SFTP, máy tính từ xa, chuyển tiếp cổng, trzsz, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI. Không Electron, không OpenSSL, không telemetry."
+    "description": "Không gian làm việc AI gốc cho máy chủ từ xa: terminal SSH, SFTP, máy tính từ xa, chuyển tiếp cổng, trzsz, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI. Không đóng gói Electron, không thu thập dữ liệu đo từ xa và ngăn xếp SSH thuần Rust không dùng OpenSSL/libssh2."
   },
   "hero": {
     "headline": "Workspace AI-native cho máy chủ từ xa",
-    "tagline": "GPUI gốc. Không WebView. Không OpenSSL. Không đo từ xa. Không thuê bao. Ưu tiên BYOK. SSH Rust thuần.",
+    "tagline": "GPUI gốc. Không đóng gói WebView. Không thu thập dữ liệu đo từ xa. Không thuê bao. Ưu tiên BYOK. SSH thuần Rust không dùng OpenSSL/libssh2.",
     "subtitle": "Kết nối một lần, rồi giữ terminal, SFTP, máy tính từ xa, chuyển tiếp cổng, truyền tệp, chỉnh sửa nhẹ, shell cục bộ và OxideSens AI trong một app desktop local-first.",
     "cta_download": "Tải xuống",
     "cta_docs": "Tài liệu",
@@ -25,7 +25,7 @@
   "features": {
     "title": "Thiết kế khác biệt",
     "rust_ssh_title": "SSH thuần Rust",
-    "rust_ssh_desc": "Xây dựng trên russh với backend mã hóa ring. Không phụ thuộc C, không OpenSSL. Biên dịch hoàn toàn bằng Rust an toàn và có thể kiểm tra.",
+    "rust_ssh_desc": "Xây dựng trên russh với phần nền mã hóa ring. Ngăn xếp SSH không phụ thuộc C, OpenSSL hoặc libssh2 và được biên dịch hoàn toàn bằng Rust có thể kiểm tra.",
     "native_title": "Hiệu năng gốc",
     "native_desc": "Gói ứng dụng desktop GPUI gốc 50–70 MB được xây dựng bằng Rust. Không có wrapper Electron hay WebView hệ thống; giao diện gốc hỗ trợ GPU kết xuất terminal trực tiếp.",
     "allinone_title": "Không gian làm việc tất cả trong một",
@@ -205,6 +205,8 @@
     "col_professional_ssh": "Ứng dụng SSH chuyên nghiệp",
     "col_remote_toolbox": "Bộ công cụ từ xa tích hợp",
     "col_remote_ide": "IDE phát triển từ xa",
+    "row_cross_platform": "Khả năng đa nền tảng",
+    "val_platform_ot": "macOS · Windows · Linux",
     "row_binary_size": "Kích thước gói",
     "val_binary_ot": "50–70 MB",
     "row_ui_runtime": "Runtime giao diện desktop",
@@ -242,8 +244,8 @@
     "network_desc": "OxideTerm là công cụ quản lý máy chủ từ xa và giả lập terminal chuyên nghiệp. Phần mềm này chỉ được sử dụng cho mục đích quản trị hệ thống hợp pháp, quản lý mạng, phát triển phần mềm và nghiên cứu học thuật. Người dùng phải tuân thủ nghiêm ngặt tất cả luật pháp và quy định hiện hành khi sử dụng tính năng đường hầm SSH hoặc chuyển tiếp cổng. Nghiêm cấm sử dụng phần mềm này để truy cập trái phép vào tài nguyên bị hạn chế hoặc vi phạm quy định an ninh mạng.",
     "ai_title": "Miễn trừ trách nhiệm dịch vụ AI",
     "ai_desc": "Các tính năng hỗ trợ AI do OxideTerm cung cấp (hoàn thành lệnh, phân tích nhật ký) hoạt động như công cụ tích hợp kỹ thuật. Lịch sử trò chuyện AI được lưu trữ cục bộ trên thiết bị của người dùng dưới dạng mã hóa và không bao giờ được tải lên bất kỳ máy chủ nào. Phần mềm không phân phối nội dung do AI tạo ra cho bên thứ ba. Người dùng chịu trách nhiệm cấu hình thông tin xác thực API dịch vụ AI bên thứ ba và chịu trách nhiệm pháp lý cuối cùng cho các tương tác phát sinh. Chúng tôi khuyến nghị sử dụng các tính năng này tuân thủ tất cả quy định quản trị AI hiện hành.",
-    "data_title": "Bảo mật dữ liệu và quyền riêng tư",
-    "data_desc": "Chúng tôi hiểu tính nhạy cảm của dữ liệu vận hành. OxideTerm áp dụng kiến trúc Local-First. Tất cả thông tin xác thực máy chủ, khóa và tệp cấu hình được mã hóa và lưu trữ độc quyền trên thiết bị cục bộ của người dùng bằng thuật toán mã hóa bảo mật cao. Phần mềm này không thu thập, tải lên hoặc tiết lộ bất kỳ dữ liệu kết nối nhạy cảm nào cho bên thứ ba.",
+    "data_title": "Ưu tiên cục bộ. Đám mây theo lựa chọn của bạn.",
+    "data_desc": "Các quy trình cốt lõi vẫn ở cục bộ và không cần tài khoản OxideTerm. Thông tin xác thực ở lại trong keychain hệ thống; Cloud Sync và AI chỉ kết nối với nhà cung cấp bạn chọn và cấu hình.",
     "license_title": "Giấy phép",
     "license_desc": "Phần mềm này được phân phối theo GNU General Public License v3.0 (GPL-3.0). OxideTerm trước đây dùng PolyForm Noncommercial và đã chuyển sang GPL-3.0 để tránh bẫy source-available, sự mơ hồ phi thương mại và điều khoản cấm cạnh tranh. Mã công khai không tự động là open source: cấm phân phối lại, đóng gói lại, sản phẩm cạnh tranh hoặc yêu cầu phê duyệt nền tảng đều biến nó thành source-available branding. OxideTerm không thêm các hạn chế đó.",
     "disclaimer": "Trang này chỉ được cung cấp cho mục đích thông tin và không cấu thành tư vấn pháp lý. Người dùng có trách nhiệm đảm bảo việc sử dụng OxideTerm tuân thủ tất cả luật pháp địa phương và quốc tế hiện hành."
@@ -256,13 +258,13 @@
     "q2": "Hỗ trợ những phương thức xác thực SSH nào?",
     "a2": "Mật khẩu, khóa riêng (Ed25519, RSA, ECDSA), xác thực tương tác bàn phím 2FA, chuyển tiếp agent, chứng chỉ và SSH Agent.",
     "q3": "Dữ liệu được lưu ở đâu?",
-    "a3": "Mọi thứ đều nằm trên thiết bị của bạn. Thông tin đăng nhập được lưu trong keychain hệ điều hành (macOS Keychain, Windows Credential Manager, Linux Secret Service). Cấu hình xuất ra được mã hóa bằng ChaCha20-Poly1305. Không có gì được tải lên bất kỳ máy chủ nào.",
+    "a3": "OxideTerm ưu tiên cục bộ: các quy trình SSH cốt lõi hoạt động mà không cần tài khoản OxideTerm. Thông tin xác thực ở lại trong keychain hệ điều hành (macOS Keychain, Windows Credential Manager, Linux Secret Service), và cấu hình xuất ra được mã hóa bằng ChaCha20-Poly1305. Cloud Sync và AI chỉ kết nối với nhà cung cấp bạn chọn sau khi cấu hình.",
     "q4": "Có thể sử dụng OxideTerm ngoại tuyến không?",
     "a4": "Có. OxideTerm là local-first. Các workflow SSH cốt lõi — SSH, SFTP, port forwarding, local shell, kết nối đã lưu và cài đặt — không cần tài khoản hoặc thuê bao OxideTerm. AI chỉ kết nối provider API bạn cấu hình khi bạn chọn dùng.",
     "q5": "Cần gì cho tính năng AI?",
     "a5": "BYOK: dùng API key của bạn. OxideTerm hỗ trợ OpenAI, Anthropic, Google, DeepSeek, Ollama và endpoint tương thích OpenAI. Chi phí provider là giữa bạn và provider đó; workflow SSH chính và OxideSens AI không yêu cầu thuê bao ứng dụng.",
-    "q6": "Tại sao OxideTerm không dùng libssh2 hay OpenSSL?",
-    "a6": "Ba lý do. Thứ nhất, an toàn bộ nhớ: codebase C của OpenSSL đã tạo ra các CVE nghiêm trọng như Heartbleed — mô hình ownership của Rust loại bỏ hoàn toàn lớp lỗi đó. Thứ hai, không ma sát khi triển khai: libssh2 yêu cầu C dev headers cho từng nền tảng đích và phiên bản OpenSSL hệ thống khớp (ABI của 1.0, 1.1 và 3.0 không tương thích); russh được cung cấp dưới dạng Rust source thuần và Cargo xử lý tất cả. Thứ ba, hiệu năng async gốc: libssh2 là C API blocking cần wrapper để tích hợp Tokio; russh async-native, không có FFI boundary trên đường nóng. Kết quả: một binary Rust duy nhất biên dịch cho hơn 10 kiến trúc Linux mà không cần C toolchain — và một crypto stack có thể kiểm toán thực sự."
+    "q6": "Tại sao ngăn xếp SSH của OxideTerm không dùng libssh2 hay OpenSSL?",
+    "a6": "Ba lý do. Thứ nhất, an toàn bộ nhớ: codebase C của OpenSSL đã tạo ra các CVE nghiêm trọng như Heartbleed — mô hình ownership của Rust loại bỏ hoàn toàn lớp lỗi đó. Thứ hai, không ma sát khi triển khai: libssh2 yêu cầu C dev headers cho từng nền tảng đích và phiên bản OpenSSL hệ thống khớp (ABI của 1.0, 1.1 và 3.0 không tương thích); russh được cung cấp dưới dạng Rust source thuần và Cargo xử lý tất cả. Thứ ba, hiệu năng async gốc: libssh2 là C API blocking cần wrapper để tích hợp Tokio; russh async-native, không có FFI boundary trên đường nóng. Kết quả là một SSH stack Rust gốc không phụ thuộc runtime OpenSSL và vẫn thực tế để kiểm toán."
   },
   "testimonial": {
     "badge": "TỪ TÁC GIẢ",

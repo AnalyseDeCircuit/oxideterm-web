@@ -2,11 +2,11 @@
   "meta": {
     "lang": "de",
     "title": "OxideTerm — AI-native Workspace für Remote-Server",
-    "description": "Ein AI-native Workspace für Remote-Server: SSH-Terminals, SFTP, Remote-Desktop, Port-Forwarding, trzsz, leichtes Editing, lokale Shell und OxideSens AI. Zero Electron, zero OpenSSL, zero Telemetry."
+    "description": "Ein KI-nativer Workspace für Remote-Server: SSH-Terminals, SFTP, Remote-Desktop, Portweiterleitung, trzsz, leichtes Editing, lokale Shell und OxideSens AI. Kein gebündeltes Electron, keine Telemetrie und reines Rust-SSH ohne OpenSSL/libssh2."
   },
   "hero": {
     "headline": "Ein AI-native Workspace für Remote-Server",
-    "tagline": "Natives GPUI. Keine WebView. Kein OpenSSL. Keine Telemetrie. Kein Abonnement. BYOK-first. Reines Rust-SSH.",
+    "tagline": "Natives GPUI. Kein gebündeltes WebView. Keine Telemetrie. Kein Abonnement. BYOK zuerst. Reines Rust-SSH ohne OpenSSL/libssh2.",
     "subtitle": "Verbinden Sie sich einmal und behalten Sie Terminals, SFTP, Remote-Desktops, Port-Forwarding, Transfers, leichtes Editing, lokale Shells und OxideSens AI in einer local-first Desktop-App.",
     "cta_download": "Herunterladen",
     "cta_docs": "Dokumentation",
@@ -25,7 +25,7 @@
   "features": {
     "title": "Anders konstruiert",
     "rust_ssh_title": "Reines Rust SSH",
-    "rust_ssh_desc": "Gebaut auf russh mit ring-Krypto-Backend. Null C-Abhängigkeiten, null OpenSSL. Vollständig in sicherem, prüfbarem Rust kompiliert.",
+    "rust_ssh_desc": "Gebaut auf russh mit dem ring-Krypto-Backend. Der SSH-Stack hat keine C-, OpenSSL- oder libssh2-Abhängigkeit und wird vollständig in prüfbarem Rust kompiliert.",
     "native_title": "Native Leistung",
     "native_desc": "Ein 50–70 MB großes natives GPUI-Desktop-Paket aus Rust ohne Electron-Wrapper oder System-WebView. Das Terminal wird direkt von der GPU-gestützten nativen Oberfläche gerendert.",
     "allinone_title": "All-in-One Arbeitsplatz",
@@ -205,6 +205,8 @@
     "col_professional_ssh": "Professioneller SSH-Client",
     "col_remote_toolbox": "Integrierte Remote-Toolbox",
     "col_remote_ide": "Remote-Entwicklungs-IDE",
+    "row_cross_platform": "Plattformübergreifende Verfügbarkeit",
+    "val_platform_ot": "macOS · Windows · Linux",
     "row_binary_size": "Paketgröße",
     "val_binary_ot": "50–70 MB",
     "row_ui_runtime": "Desktop-UI-Laufzeit",
@@ -242,8 +244,8 @@
     "network_desc": "OxideTerm ist ein professionelles Remote-Server-Management- und Terminalemulations-Tool. Diese Software ist ausschließlich für die vorschriftsmäßige Systemadministration, Netzwerkverwaltung, Softwareentwicklung und akademische Forschung bestimmt. Benutzer müssen alle geltenden Gesetze und Vorschriften bei der Nutzung von SSH-Tunneling oder Port-Forwarding-Funktionen strikt einhalten. Jede Nutzung dieser Software für unbefugten Zugriff auf eingeschränkte Ressourcen oder Verstöße gegen Cybersicherheitsvorschriften ist strengstens untersagt.",
     "ai_title": "KI-Service-Haftungsausschluss",
     "ai_desc": "Die von OxideTerm bereitgestellten KI-unterstützten Funktionen (Befehlsvervollständigung, Protokollanalyse) dienen als technische Integrationswerkzeuge. Der KI-Chatverlauf wird verschlüsselt auf dem lokalen Gerät des Benutzers gespeichert und niemals auf einen Server hochgeladen. Die Software verteilt keine KI-generierten Inhalte an Dritte. Benutzer sind für die Konfiguration ihrer eigenen API-Zugangsdaten für KI-Dienste Dritter verantwortlich und tragen die endgültige rechtliche Verantwortung für die daraus resultierenden Interaktionen. Wir empfehlen die Nutzung in Übereinstimmung mit allen geltenden KI-Governance-Vorschriften.",
-    "data_title": "Datensicherheit und Datenschutz",
-    "data_desc": "Wir verstehen die Sensibilität von Betriebsdaten. OxideTerm verwendet eine Local-First-Architektur. Alle Serverzugangsdaten, Schlüssel und Konfigurationsdateien werden mit hochsicheren Verschlüsselungsalgorithmen ausschließlich auf dem lokalen Gerät des Benutzers gespeichert. Diese Software sammelt, lädt hoch oder gibt keine sensiblen Verbindungsdaten an Dritte weiter.",
+    "data_title": "Lokal zuerst. Cloud nach Ihren Regeln.",
+    "data_desc": "Kern-Workflows bleiben lokal und benötigen kein OxideTerm-Konto. Zugangsdaten bleiben im System-Schlüsselbund; Cloud Sync und KI verbinden sich nur mit Anbietern, die Sie auswählen und einrichten.",
     "license_title": "Lizenz",
     "license_desc": "Diese Software wird unter der GNU General Public License v3.0 (GPL-3.0) verteilt. OxideTerm nutzte zuvor PolyForm Noncommercial und wechselte zu GPL-3.0, um source-available-Fallen, Noncommercial-Mehrdeutigkeit und No-Competition-Klauseln zu vermeiden. Öffentlicher Code ist nicht automatisch Open Source: Verbote von Weiterverteilung, Repackaging, Konkurrenzprodukten oder Plattformfreigaben machen daraus source-available Branding. OxideTerm fügt keine solchen Zusatzbeschränkungen hinzu.",
     "disclaimer": "Diese Seite dient nur zu Informationszwecken und stellt keine Rechtsberatung dar. Die Benutzer sind dafür verantwortlich sicherzustellen, dass ihre Nutzung von OxideTerm allen geltenden lokalen und internationalen Gesetzen entspricht."
@@ -256,13 +258,13 @@
     "q2": "Welche SSH-Authentifizierungsmethoden werden unterstützt?",
     "a2": "Passwort, privater Schlüssel (Ed25519, RSA, ECDSA), Keyboard-Interactive 2FA, Agent-Forwarding, Zertifikate und SSH Agent.",
     "q3": "Wo werden meine Daten gespeichert?",
-    "a3": "Alles bleibt auf Ihrem Gerät. Anmeldedaten werden im Schlüsselbund des Betriebssystems gespeichert (macOS Schlüsselbund, Windows Anmeldeinformationsverwaltung, Linux Secret Service). Exportierte Konfigurationen sind mit ChaCha20-Poly1305 verschlüsselt. Nichts wird auf einen Server hochgeladen.",
+    "a3": "OxideTerm ist lokal zuerst: Die Kern-SSH-Workflows funktionieren ohne OxideTerm-Konto. Zugangsdaten bleiben im Schlüsselbund des Betriebssystems (macOS Schlüsselbund, Windows Anmeldeinformationsverwaltung, Linux Secret Service), und exportierte Konfigurationen sind mit ChaCha20-Poly1305 verschlüsselt. Cloud Sync und KI verbinden sich nur mit Anbietern, die Sie auswählen und nach der Einrichtung verwenden.",
     "q4": "Kann ich OxideTerm offline nutzen?",
     "a4": "Ja. OxideTerm ist local-first. Die zentralen SSH-Workflows — SSH, SFTP, Port-Forwarding, lokale Shell, gespeicherte Verbindungen und Einstellungen — benötigen kein OxideTerm-Konto oder Abo. KI verbindet sich nur bei Nutzung mit deinem konfigurierten Provider.",
     "q5": "Was brauche ich für die KI-Funktionen?",
     "a5": "Bring your own API key (BYOK). OxideTerm unterstützt OpenAI, Anthropic, Google, DeepSeek, Ollama und OpenAI-kompatible Endpunkte. Providerkosten liegen beim jeweiligen Provider; für den Kern-SSH-Workspace verlangt OxideTerm kein App-Abo.",
-    "q6": "Warum verwendet OxideTerm kein libssh2 oder OpenSSL?",
-    "a6": "Drei Gründe. Erstens, Speichersicherheit: Die C-Codebasis von OpenSSL hat kritische CVEs wie Heartbleed hervorgebracht — Rusts Eigentümerschaftsmodell eliminiert diese ganze Fehlerklasse. Zweitens, null Deployment-Reibung: libssh2 erfordert C-Entwicklungsheader für jede Zielplattform und eine passende System-OpenSSL-Version (1.0, 1.1 und 3.0 haben inkompatible ABIs); russh wird als reiner Rust-Quellcode geliefert und Cargo erledigt alles. Drittens, native Async-Performance: libssh2 ist eine blockierende C-API, die für Tokio einen Wrapper benötigt; russh ist async-nativ ohne FFI-Grenze im Hot-Path. Das Ergebnis: ein einziges Rust-Binary, das ohne C-Toolchain für über 10 Linux-Architekturen kompiliert — mit einem Crypto-Stack, den man tatsächlich prüfen kann."
+    "q6": "Warum verwendet OxideTerms SSH-Stack weder libssh2 noch OpenSSL?",
+    "a6": "Drei Gründe. Erstens, Speichersicherheit: Die C-Codebasis von OpenSSL hat kritische CVEs wie Heartbleed hervorgebracht — Rusts Eigentümerschaftsmodell eliminiert diese ganze Fehlerklasse. Zweitens, null Deployment-Reibung: libssh2 erfordert C-Entwicklungsheader für jede Zielplattform und eine passende System-OpenSSL-Version (1.0, 1.1 und 3.0 haben inkompatible ABIs); russh wird als reiner Rust-Quellcode geliefert und Cargo erledigt alles. Drittens, native Async-Performance: libssh2 ist eine blockierende C-API, die für Tokio einen Wrapper benötigt; russh ist async-nativ ohne FFI-Grenze im Hot-Path. Das Ergebnis ist ein Rust-nativer SSH-Stack ohne OpenSSL-Laufzeitabhängigkeit, der sich praktisch prüfen lässt."
   },
   "testimonial": {
     "badge": "VOM ENTWICKLER",
