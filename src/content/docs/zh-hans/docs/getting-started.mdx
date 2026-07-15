@@ -3,7 +3,7 @@ title: 简介
 description: OxideTerm — 基于 Rust、GPUI 和纯 Rust SSH 构建的原生远程服务器工作区。
 ---
 
-**OxideTerm** 是一个面向远程服务器的原生工作区。连接服务器后，你可以围绕同一节点使用 SSH 终端、SFTP、端口转发、远程桌面、轻量编辑、主机监控、trzsz 传输和 OxideSens AI；本地 Shell、串口以及 Raw TCP/UDP 会话也可以在同一界面中管理。
+**OxideTerm** 是一个面向远程服务器的原生工作区。连接服务器后，你可以围绕同一节点使用 SSH 终端、SFTP、端口转发、远程桌面、轻量编辑、主机监控、trzsz 传输和 OxideSens AI；本地 Shell 和串口会话也可以在同一界面中管理。
 
 桌面应用使用 **Rust + GPUI** 构建。GPUI 直接在 GPU 表面绘制界面，终端状态、连接状态和各项工具都留在同一 Rust 进程中，不依赖浏览器、WebView、JavaScript 或前后端桥接。当前安装包通常约为 **50–70 MB**。
 
@@ -54,7 +54,7 @@ SSH 或本地 PTY 的字节直接更新 Rust 中的 `TerminalState`，GPUI 再�
 
 | 分类 | 功能 |
 |---|---|
-| **终端** | 本地 PTY、SSH、Telnet、串口、Raw TCP/UDP、分屏、广播、录制/回放、Sixel/Kitty 图形 |
+| **终端** | 本地 PTY、SSH、Telnet、串口、分屏、广播、录制/回放、Sixel/Kitty 图形 |
 | **SSH 与认证** | 连接池、ProxyJump、优雅期重连、Agent Forwarding、密码/密钥/证书/SSH Agent、主机密钥 TOFU |
 | **SFTP** | 双面板浏览、预览、传输队列、书签、并发与限速控制 |
 | **IDE** | 原生编辑器、远程文件树、多标签、脏状态、冲突处理和可选远程 Agent |

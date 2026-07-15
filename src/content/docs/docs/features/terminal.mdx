@@ -1,6 +1,6 @@
 ---
 title: Terminal
-description: Native GPUI terminal for SSH, local shells, Telnet, serial, and raw sockets, with split panes, search, broadcast, graphics, and recording.
+description: Native GPUI terminal for SSH, local shells, Telnet, and serial sessions, with split panes, search, broadcast, graphics, and recording.
 ---
 
 OxideTerm's terminal is a Rust-native pipeline. Session bytes update `alacritty_terminal` state, OxideTerm builds terminal snapshots, and a GPUI painter draws text, selection, cursor, decorations, Sixel images, and Kitty graphics directly on the GPU surface.
@@ -25,7 +25,6 @@ The application also supports Quality, Low Power, Compatibility, and Auto render
 - SSH terminals
 - Telnet terminals
 - Serial terminals
-- Raw TCP and Raw UDP terminals
 - Recorded-session playback
 
 All session types use the same native terminal view and interaction model while their backends own protocol-specific connection and lifecycle behavior.
