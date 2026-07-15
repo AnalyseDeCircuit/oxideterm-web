@@ -1,0 +1,39 @@
+---
+title: Host Tools
+description: Inspect and operate on the live host behind an SSH connection without leaving the workspace.
+---
+
+**Host Tools** is the companion panel for live SSH connections. It stays beside the workspace rather than becoming another Runtime section, so you can inspect the remote host while keeping a terminal, SFTP view, or remote desktop in focus.
+
+Open **Host Tools** from the activity bar. Select a live SSH connection from the panel's connection switcher, then choose a tool from the horizontal strip. The strip scrolls when the panel is narrow.
+
+## Shared Connection Context
+
+Host Tools works with the same managed SSH connection used by the rest of the workspace. Switching the selected connection changes the host being sampled; it does not open a second, unrelated management channel.
+
+Most tools need a live connection and the relevant commands or services on the remote host. Data availability therefore varies by operating system, permissions, and installed software. Runtime remains the place for aggregate pool state, health history, and the connection matrix.
+
+## Available Tools
+
+| Tool | What it provides |
+| --- | --- |
+| Monitor | Resource and connection-health information for the selected host. |
+| Processes | Searchable, filterable process list with process details and supported control actions. |
+| Services | Service inventory, status, logs, and supported lifecycle actions. |
+| Logs | Remote log snapshots, filtering, and terminal-based follow or diagnostic actions. |
+| tmux | tmux sessions, windows, and panes, with attach and supported management actions. |
+| Docker | Container state, details, logs, terminal commands, and supported lifecycle actions. |
+| Ports | Discovered listening ports, filters, details, and diagnostic terminal actions. |
+| Schedules | Scheduled-task inventory, status, logs, and supported run or enable actions. |
+| Disks | Filesystem snapshots, capacity details, filters, and diagnostic terminal actions. |
+| Packages | Installed-package inventory, filters, details, and package inspection in a terminal. |
+
+## Remote Actions
+
+State-changing operations run on the selected remote host through its current SSH connection. OxideTerm presents a confirmation dialog before destructive or lifecycle actions such as stopping a process, changing a service or container state, removing tmux resources, or changing a scheduled task.
+
+Commands can still fail when the account lacks permission, a host does not provide the underlying utility, or the connection is lost. Host Tools reports the result in its own panel; use a terminal when you need to inspect command output or perform an operation outside the supported controls.
+
+## Working Alongside Runtime
+
+Use **Runtime** to answer questions about the connection pool and current SSH topology. Use Host Tools to investigate the selected host itself. During an incident, open both: Runtime and the [Event Log](/docs/features/event-log/) explain connection lifecycle, while Host Tools exposes the processes, services, logs, ports, and other remote state that may explain the workload impact.

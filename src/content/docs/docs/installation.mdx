@@ -5,110 +5,113 @@ description: How to download and install OxideTerm on macOS, Windows, and Linux.
 
 ## System Requirements
 
-| Platform | Minimum Version | Architecture |
-|----------|----------------|--------------|
-| **macOS** | 11.0 (Big Sur) | Apple Silicon (M1+), Intel x64 |
-| **Windows** | 10 (1803+) | x64, ARM64 |
-| **Linux** | Ubuntu 22.04+ / Fedora 38+ | x64, ARM64 |
+OxideTerm is a GPU-rendered desktop application. Use a GPU-capable desktop with current graphics drivers.
 
-## Runtime Dependencies
+| Platform | Architectures | Release Formats |
+|---|---|---|
+| **macOS 13+** | arm64, x64 | `.dmg`, `.app.zip`, portable `.tar.gz` |
+| **Windows** | arm64, x64 | NSIS `.exe`, portable `.zip` |
+| **Linux** | arm64, x64 | `.AppImage`, `.deb`, portable `.tar.gz` |
 
-OxideTerm uses the native WebView runtime provided by the operating system. Most users already have it installed; install these manually only if the app fails to launch or your environment is air-gapped.
-
-| Platform | Runtime Dependency |
-|----------|--------------------|
-| **Windows** | [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) — pre-installed on Windows 10 (1803+) and Windows 11. For air-gapped or intranet environments, use the Evergreen Standalone Installer or deploy the Fixed Version runtime via group policy. |
-| **macOS** | None (uses native WebKit) |
-| **Linux** | `libwebkit2gtk-4.1` (usually pre-installed on modern desktops) |
+Release packages are typically **50–70 MB**. OxideTerm does not use a WebView and does not require Chromium, WebView2, WebKitGTK, Node.js, or a JavaScript runtime to launch.
 
 ## Download
 
-Download the latest release from [GitHub Releases](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest).
+Download the latest release from [GitHub Releases](https://github.com/AnalyseDeCircuit/oxideterm/releases/latest). Choose the file matching your operating system and CPU architecture.
 
 ### macOS
 
-| Variant | File |
-|---------|------|
-| Apple Silicon (M-series) | `OxideTerm_x.x.x_aarch64.dmg` |
-| Intel | `OxideTerm_x.x.x_x64.dmg` |
+| Architecture | Installer |
+|---|---|
+| Apple Silicon | `OxideTerm_x.x.x_macos_arm64.dmg` |
+| Intel | `OxideTerm_x.x.x_macos_x64.dmg` |
 
-1. Download the `.dmg` file for your architecture
-2. Open the disk image and drag **OxideTerm** to your **Applications** folder
-3. On first launch, open Terminal and run `xattr -cr /Applications/OxideTerm.app` to remove the quarantine flag, then launch normally
+1. Open the downloaded disk image.
+2. Drag **OxideTerm** to **Applications**.
+3. Launch OxideTerm from Applications.
+
+If macOS blocks an unsigned preview build, open **System Settings → Privacy & Security** and explicitly allow it only after verifying the download source.
 
 ### Windows
 
-| Variant | File |
-|---------|------|
-| x64 | `OxideTerm_x.x.x_x64-setup.exe` |
-| ARM64 | `OxideTerm_x.x.x_arm64-setup.exe` |
+| Architecture | Installer |
+|---|---|
+| x64 | `OxideTerm_x.x.x_windows_x64-setup.exe` |
+| arm64 | `OxideTerm_x.x.x_windows_arm64-setup.exe` |
 
-1. Download the `.exe` installer
-2. Run the installer and follow the prompts
-3. OxideTerm will be available in the Start Menu
+Run the installer and follow the prompts. Portable `.zip` packages are also published for installations that should not modify the system.
 
 ### Linux
 
-| Variant | File |
-|---------|------|
-| x64 (Debian/Ubuntu) | `OxideTerm_x.x.x_amd64.deb` |
-| x64 (AppImage) | `OxideTerm_x.x.x_amd64.AppImage` |
-| ARM64 (Debian/Ubuntu) | `OxideTerm_x.x.x_arm64.deb` |
-| ARM64 (AppImage) | `OxideTerm_x.x.x_arm64.AppImage` |
+| Architecture | AppImage | Debian Package |
+|---|---|---|
+| x64 | `OxideTerm_x.x.x_linux_x64.AppImage` | `OxideTerm_x.x.x_linux_x64.deb` |
+| arm64 | `OxideTerm_x.x.x_linux_arm64.AppImage` | `OxideTerm_x.x.x_linux_arm64.deb` |
 
-**Debian/Ubuntu:**
+Install a Debian package with your package manager:
+
 ```bash
-sudo dpkg -i OxideTerm_x.x.x_amd64.deb
+sudo apt install ./OxideTerm_x.x.x_linux_x64.deb
 ```
 
-**AppImage:**
+Or run the AppImage directly:
+
 ```bash
-chmod +x OxideTerm_x.x.x_amd64.AppImage
-./OxideTerm_x.x.x_amd64.AppImage
+chmod +x OxideTerm_x.x.x_linux_x64.AppImage
+./OxideTerm_x.x.x_linux_x64.AppImage
 ```
 
 ## Building from Source
 
 ### Prerequisites
 
-- **Rust** 1.85+ (install via [rustup](https://rustup.rs/))
-- **Node.js** 18+
-- **pnpm** (install via `npm install -g pnpm`)
-- Platform-specific build tools:
+- A current stable Rust toolchain installed with [rustup](https://rustup.rs/)
+- Git
+- Platform build tools:
   - macOS: Xcode Command Line Tools
-  - Windows: Visual Studio Build Tools 2019+
-  - Linux: `build-essential`, `libwebkit2gtk-4.1-dev`, `libssl-dev`
+  - Windows: Visual Studio Build Tools with the MSVC C++ workload
+  - Linux: the native dependencies installed by `scripts/install-linux-deps.sh`
 
 ### Build Steps
 
 ```bash
-# Clone the repository
 git clone https://github.com/AnalyseDeCircuit/oxideterm.git
 cd oxideterm
 
-# Install dependencies
-pnpm install
+# Linux only: install the repository's native desktop dependencies.
+./scripts/install-linux-deps.sh
 
-# Development mode (hot reload)
-pnpm tauri dev
-
-# Production build
-pnpm tauri build
+cargo build --release -p oxideterm-gpui-app
 ```
 
-The built application will be in `src-tauri/target/release/bundle/`.
+The desktop executable is written to `target/release/oxideterm-native` (`oxideterm-native.exe` on Windows). The standalone CLI can be built with:
+
+```bash
+cargo build --release -p oxideterm-cli
+```
+
+Repository maintainers can create the platform package formats with `scripts/package_native.py`; the release workflow builds all six macOS, Windows, and Linux architecture targets.
+
+## CLI Installation
+
+Release bundles include the `oxideterm` CLI. Open **Settings → General → CLI Companion** to install or update it. The app installs it to `~/.local/bin/oxideterm` on macOS/Linux or `%LOCALAPPDATA%\OxideTerm\bin\oxideterm.exe` on Windows.
+
+See the [CLI guide](/docs/features/cli/) for headless management and shell completion.
 
 ## Updating
 
-OxideTerm includes a built-in auto-update mechanism. When a new version is available, you'll see an update notification in the app. You can also manually check for updates in Settings.
+Install a newer release package over the current application. Reinstall the CLI from **Settings → General → CLI Companion** when the settings page reports that the bundled and installed versions differ.
 
 ## Uninstalling
 
-- **macOS**: Drag OxideTerm from Applications to Trash
-- **Windows**: Use Add/Remove Programs in Settings
-- **Linux**: `sudo dpkg -r oxideterm` or delete the AppImage file
+- **macOS**: remove OxideTerm from Applications.
+- **Windows**: uninstall OxideTerm from Installed Apps, or delete the portable directory.
+- **Linux**: remove the Debian package with your package manager, or delete the AppImage/portable directory.
 
-Configuration data is stored in:
-- macOS: `~/Library/Application Support/com.oxideterm.app/`
-- Windows: `%APPDATA%\com.oxideterm.app\`
-- Linux: `~/.config/com.oxideterm.app/`
+Before removing application data, inspect the active paths because profiles and custom data directories can change their location:
+
+```bash
+oxideterm paths --json
+```
+
+Delete only the paths reported for the profile you intend to remove. Keychain entries are managed separately by the operating system.

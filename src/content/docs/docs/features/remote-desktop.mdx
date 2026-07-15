@@ -1,0 +1,36 @@
+---
+title: Remote Desktop
+description: Open native RDP and VNC tabs alongside terminals, files, and forwarded services.
+---
+
+OxideTerm opens **RDP** and **VNC** sessions as native remote desktop tabs. They are separate connection types, not SSH sessions: SFTP, ProxyJump, SSH agent forwarding, and SSH port forwarding do not apply to them.
+
+## Create a Connection
+
+Open **New Connection**, then select **RDP** or **VNC** from the connection-type list.
+
+| Protocol | Default port | Required connection details |
+| --- | --- | --- |
+| **RDP** | `3389` | Host, port, username, and password |
+| **VNC** | `5900` | Host and port; the server requests authentication when needed |
+
+You can save either connection type with a descriptive name and reopen it from the connection tree. Changing the selected protocol updates an untouched default port, but preserves a port you entered yourself.
+
+Temporary connections are also available from the command palette with `rdp://host` or `vnc://host`. Include a port when the target does not use the protocol default.
+
+## During a Session
+
+Remote desktop tabs forward keyboard and pointer input to the selected host. They also handle:
+
+- Clipboard text, with richer clipboard formats when the remote provider supports them
+- Remote cursor updates
+- Viewport resize requests when the remote provider supports resizing
+- Manual reconnect after a disconnected or failed session
+
+Use the tab controls to reconnect or close the desktop. A reconnect starts a new protocol session when the prior helper has already exited.
+
+## Security and Network Scope
+
+RDP and VNC connect directly to the endpoint you enter. They do not inherit an SSH connection's trust, authentication, or forwarding settings. Confirm that the target, route, firewall policy, and remote desktop server are authorized for your environment.
+
+For Windows Subsystem for Linux GUI workloads, see [WSL Graphics](/docs/features/graphics/). WSL Graphics is a separate Windows-only workflow that starts a local VNC-backed session for a WSL distribution.

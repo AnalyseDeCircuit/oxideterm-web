@@ -1,92 +1,66 @@
 ---
-title: Connection Monitor
-description: Real-time SSH connection pool dashboard, per-connection statistics, system health monitoring, and keepalive configuration.
+title: Runtime
+description: Inspect live SSH connections, host health, topology, and remote host tools from one operational workspace.
 ---
 
-OxideTerm provides three interconnected monitoring panels that give you full visibility into active SSH connections: **Connection Pool**, **Connection Monitor**, and **System Health**.
+**Runtime** is OxideTerm's operational view for live SSH work. It consolidates the former connection-pool, connection-monitor, and system-health pages into one reusable tab with three sections: **Overview**, **System Health**, and **Connection Matrix**. The adjacent **Host Tools** companion panel uses the same live connection context for host-level inspection and supported remote operations.
 
-## Connection Pool Panel
+Open **Runtime** from the activity bar or Command Palette. Opening it again reuses the existing Runtime tab and refreshes its current state.
 
-The Connection Pool panel (sidebar) shows every live SSH connection with quick-glance stats:
+## Overview
 
-```
-● prod-server-1          Active
-  3 Terminals  1 SFTP  2 Forwards
-  Created: 2m ago   Keep Alive ♾
+Overview summarizes the managed SSH connection pool while Runtime is visible:
 
-● bastion.example.com    Idle
-  1 Terminal   0 SFTP  0 Forwards
-  Disconnect in 13m
-```
+- Connection counts by **Active**, **Idle**, **Reconnecting**, and **Link Down** state.
+- Total terminal, SFTP, and port-forward consumers sharing managed SSH connections.
+- Pool summary information, including its idle-timeout and capacity state.
 
-Each connection card shows:
-- **Connection state** — Active, Idle, Reconnecting, Link Down
-- **Consumer ref counts** — number of active terminals, SFTP sessions, and port forward rules sharing this connection
-- **Age** — when the connection was established
-- **Idle timer** — countdown to auto-disconnect (if keep-alive disabled)
-- **Keep Alive toggle** — pin the connection to never auto-disconnect
-
-### Keep Alive
-
-Toggle the keep-alive pin per-connection:
-- **Enabled (∞)** — connection stays alive indefinitely, ignoring the global idle timeout
-- **Disabled** — uses the global idle timeout setting (5m / 15m / 30m / 1h)
-
-## Connection Monitor Tab
-
-Open the Connection Monitor tab for a richer dashboard view:
-
-| Metric | Description |
-|--------|-------------|
-| **Total connections** | Count of active connections in the pool |
-| **By state** | Active / Idle / Reconnecting / Link Down breakdown |
-| **Terminals** | Total terminal channel refs across all connections |
-| **SFTP** | Total SFTP session refs |
-| **Forwards** | Total port forward rule refs |
-| **Summary** | "Total: N connections • Refs: N" aggregate line |
-
-The monitor header shows a live "●LIVE" indicator and auto-refreshes every second.
-
-## Connection State Machine
-
-Each SSH connection in the pool follows a strict state machine:
-
-```
-connecting → active → idle → link_down → reconnecting → active
-                  ↓
-             disconnected
-```
-
-| State | Meaning |
-|-------|---------|
-| `connecting` | TCP + SSH handshake in progress |
-| `active` | At least one consumer (terminal/SFTP/forward) actively using the connection |
-| `idle` | Connected but no active consumers; idle timer is counting down |
-| `link_down` | Connection lost; reconnect orchestrator triggered |
-| `reconnecting` | Grace period probing or SSH reconnect in progress |
-
-When a jump host (bastion) enters `link_down`, all downstream nodes it proxies are **automatically** marked `link_down` — cascade propagation ensures the entire topology stays consistent.
+The page deliberately shows aggregate state rather than a separate card for every connection. Configure connection behavior from connection settings and the relevant connection workflow; use Runtime to see the result across the current workspace.
 
 ## System Health
 
-The **System Health** sidebar entry shows per-connection resource metrics powered by OxideTerm's built-in profiler:
+System Health samples one live SSH connection at a time. Select a connection from the picker to inspect the metrics that host actually supports.
 
-- CPU usage of the SSH process
-- Memory consumption
-- Bytes sent / received (I/O throughput)
-- Active channel count
-- Latency (round-trip ping time)
+When resource sampling is available, Runtime can show CPU, memory, swap, disks, network traffic, GPU information, load averages, top processes, and SSH round-trip time. Availability depends on the remote operating system, permissions, and supported probes. If detailed sampling is unavailable, Runtime falls back to SSH round-trip measurement instead of presenting invented host metrics.
 
-Metrics update live and are color-coded: green (normal) → yellow (elevated) → red (critical).
+Sampling begins for the selected live connection and can be stopped or retried from the panel. Historical sparklines are available while the full Runtime view is open.
 
-## Idle Timeout Configuration
+## Connection Matrix
 
-Configure auto-disconnect behavior in **Settings → Connections**:
+Connection Matrix visualizes the live SSH routes currently managed by OxideTerm. A direct live connection is a root node; a connection opened through a managed jump host appears beneath that parent.
 
-| Option | Value |
-|--------|-------|
-| Idle timeout | 5 min / 15 min / 30 min / 1 hour / Never |
-| Keepalive interval | 15 seconds (SSH `ServerAliveInterval`) |
-| Keepalive attempts | 3 (SSH `ServerAliveCountMax`) |
+```text
+[ alice@bastion.example ]
+              |
+              v
+[ alice@internal-db ]
+```
 
-A connection that exceeds the idle timeout emits a `connection_status_changed` event, which the frontend uses to update the sidebar and notify other consumers.
+The matrix comes from the current connection registry, not from every saved connection. Nodes show the account and host, and lines represent parent-child SSH routes such as a ProxyJump hop. Only active, idle, connecting, and reconnecting connections are included; disconnected and failed routes are not retained as historical nodes.
+
+### Matrix Interaction
+
+| Interaction | Result |
+| --- | --- |
+| Scroll | Zoom around the pointer. |
+| Drag empty canvas | Pan the matrix. |
+| Double-click a node | Open its action menu. |
+| Click outside a menu | Close it. |
+
+The canvas reduces visible state to **Connected** for active or idle connections and **Connecting** for establishing or re-establishing connections. A route is emphasized when both endpoints are connected. It does not independently test reachability or preserve a failure history.
+
+Every node menu can navigate to that node's active session. Connected nodes also offer a new terminal and SFTP. These actions reuse the current live connection; they do not create another route configuration surface.
+
+## Host Tools Companion
+
+Host Tools is an independent right-side activity-bar panel, not a Runtime section. It shares the selected live SSH connection, so it complements Runtime during investigation: Runtime explains connection-wide state while Host Tools inspects the remote host itself. See [Host Tools](/docs/features/host-tools/) for its available modules and remote-action boundaries.
+
+## Reconnect Investigation
+
+Runtime shows the current state, while the **Event Log** records the lifecycle timeline. When a connection drops:
+
+1. Use Overview to identify the affected pool state and consumers.
+2. Check System Health or [Host Tools](/docs/features/host-tools/) for the selected host's available context.
+3. Inspect [Event Log](/docs/features/event-log/) for reconnect phases and failure details.
+
+Connection Matrix is useful for confirming the live jump-host route before or after recovery, but it is not a history of disconnected nodes.

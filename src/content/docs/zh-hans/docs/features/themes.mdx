@@ -1,6 +1,6 @@
 ---
 title: 主题
-description: 通过 31+ 内置主题、可视化编辑器和 CSS 变量自定义 OxideTerm 的外观。
+description: 通过 31+ 内置主题、可视化编辑器和原生颜色令牌自定义 OxideTerm 的外观。
 ---
 
 OxideTerm 包含一个全面的主题引擎，让你可以自定义应用外观的方方面面——从终端 ANSI 颜色到整个 UI 界面。
@@ -28,57 +28,57 @@ OxideTerm 附带 **31+ 内置主题**，均针对终端可读性优化。默认�
 | **光标色** | 光标颜色 |
 | **选区色** | 文本选择高亮 |
 
-### CSS 变量（23 个变量）
+### UI 颜色令牌（23 个字段）
 
-通过 CSS 自定义属性自定义整个应用 UI：
+通过结构化颜色字段自定义整个原生应用界面：
 
-#### 背景层（7 个变量）
+#### 背景层（8 个字段）
 
 | 变量 | 用途 |
 |------|------|
-| `--theme-bg` | 主背景 |
-| `--theme-bg-panel` | 面板/侧边栏背景 |
-| `--theme-bg-hover` | 悬停状态背景 |
-| `--theme-bg-active` | 激活/按下状态 |
-| `--theme-bg-secondary` | 次要背景区域 |
-| `--theme-bg-elevated` | 浮起表面（对话框、菜单） |
-| `--theme-bg-sunken` | 凹陷表面（输入框、凹槽） |
+| `bg` | 主背景 |
+| `bgPanel` | 面板/侧边栏背景 |
+| `bgCard` | 卡片背景 |
+| `bgHover` | 悬停状态背景 |
+| `bgActive` | 激活/按下状态 |
+| `bgSecondary` | 次要背景区域 |
+| `bgElevated` | 浮起表面（对话框、菜单） |
+| `bgSunken` | 凹陷表面（输入框、凹槽） |
 
 #### 文本层（4 个变量）
 
 | 变量 | 用途 |
 |------|------|
-| `--theme-text` | 主文本颜色 |
-| `--theme-text-muted` | 柔和/次要文本 |
-| `--theme-text-secondary` | 第三级文本（时间戳、提示） |
-| `--theme-text-heading` | 标题文本颜色 |
+| `text` | 主文本颜色 |
+| `textMuted` | 柔和/次要文本 |
+| `textSecondary` | 第三级文本（时间戳、提示） |
+| `textHeading` | 标题文本颜色 |
 
 #### 边框层（3 个变量）
 
 | 变量 | 用途 |
 |------|------|
-| `--theme-border` | 标准边框 |
-| `--theme-border-strong` | 强调边框 |
-| `--theme-divider` | 分隔线 |
+| `border` | 标准边框 |
+| `borderStrong` | 强调边框 |
+| `divider` | 分隔线 |
 
 #### 强调色层（4 个变量）
 
 | 变量 | 用途 |
 |------|------|
-| `--theme-accent` | 主强调色（按钮、链接） |
-| `--theme-accent-hover` | 强调色悬停状态 |
-| `--theme-accent-text` | 强调色背景上的文本 |
-| `--theme-accent-secondary` | 次要强调色元素 |
+| `accent` | 主强调色（按钮、链接） |
+| `accentHover` | 强调色悬停状态 |
+| `accentText` | 强调色背景上的文本 |
+| `accentSecondary` | 次要强调色元素 |
 
-#### 语义层（5 个变量）
+#### 语义层（4 个字段）
 
 | 变量 | 用途 |
 |------|------|
-| `--theme-success` | 成功指示器 |
-| `--theme-warning` | 警告指示器 |
-| `--theme-error` | 错误指示器 |
-| `--theme-info` | 信息指示器 |
-| `--theme-selection` | 非终端选区颜色 |
+| `success` | 成功指示器 |
+| `warning` | 警告指示器 |
+| `error` | 错误指示器 |
+| `info` | 信息指示器 |
 
 ### 字体自定义
 
@@ -125,7 +125,7 @@ OxideTerm 附带 **31+ 内置主题**，均针对终端可读性优化。默认�
 - **实时预览** — 迷你终端模拟，带彩色提示符、git 输出和闪烁光标；UI 镀铬条显示强调色按钮、悬停状态、面板和语义状态点
 - **终端颜色标签** — 4 列 20 个色块网格，每个带原生取色器和十六进制输入（`#RRGGBB`）
 - **UI 颜色标签** — 五个分组区域（背景、文本、边框、强调色、状态色），带"从终端自动衍生"按钮
-- **保存** — 持久化到 localStorage 并立即生效
+- **保存** — 写入 OxideTerm 设置并立即生效
 - **删除** — 移除自定义主题（仅编辑模式）
 
 ## 应用主题
@@ -137,15 +137,15 @@ OxideTerm 附带 **31+ 内置主题**，均针对终端可读性优化。默认�
 
 ### 内置主题工作原理
 
-内置主题在 CSS `[data-theme="..."]` 块中定义 UI 变量。选择内置主题时，`<html>` 元素的 `data-theme` 属性被更新，xterm.js 接收对应的配色方案。
+内置主题由 `oxideterm-theme` crate 提供终端颜色和 UI 颜色令牌。选择主题后，工作区生成新的 `ThemeTokens`，GPUI 控件与原生终端在下一次绘制时使用同一套配色。
 
 ### 自定义主题工作原理
 
-自定义主题完全绕过 `data-theme`。通过 `style.setProperty()` 在 `<html>` 元素上直接设置所有 19+ CSS 变量，利用 CSS 优先级覆盖内置主题块。
+自定义主题保存完整的终端颜色与 UI 颜色字段。运行时优先从当前自定义主题生成 `ThemeTokens`，无需网页样式覆盖层。
 
 ## 存储格式
 
-自定义主题存储在 `localStorage` 的 `oxide-custom-themes` 键下：
+自定义主题存储在 OxideTerm 设置的 `custom_themes` 映射中：
 
 ```json
 {
@@ -177,4 +177,4 @@ OxideTerm 附带 **31+ 内置主题**，均针对终端可读性优化。默认�
 
 - **导出**：将自定义主题保存为 JSON 文件
 - **导入**：从设置面板加载 JSON 主题文件
-- 主题 JSON 文件包含所有终端颜色、CSS 变量和字体设置，单个文件即可移植
+- 主题 JSON 文件包含所有终端颜色、UI 颜色令牌和字体设置，单个文件即可移植

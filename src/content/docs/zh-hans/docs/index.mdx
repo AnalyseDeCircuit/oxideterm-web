@@ -23,15 +23,19 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
     [了解更多 →](/zh-hans/docs/getting-started/)
   </Card>
   <Card title="终端" icon="laptop">
-    多标签、分屏终端，支持 WebGL 渲染、广播输入和会话录制。
+    多标签、分屏原生终端，支持 GPU 加速绘制、广播输入和会话录制。
     [了解更多 →](/zh-hans/docs/features/terminal/)
   </Card>
   <Card title="SFTP" icon="document">
     双面板文件浏览器，支持拖放、智能预览和传输队列。
     [了解更多 →](/zh-hans/docs/features/sftp/)
   </Card>
+  <Card title="远程桌面" icon="desktop">
+    原生 RDP 和 VNC 标签页，支持键鼠、剪贴板、视口适配和重连处理。
+    [了解更多 →](/zh-hans/docs/features/remote-desktop/)
+  </Card>
   <Card title="IDE 模式" icon="pencil">
-    CodeMirror 6 远程代码编辑，支持 24 语言、Git 状态和可选远程 Agent。
+    原生远程代码编辑，支持 tree-sitter 语法分析、Git 状态和可选远程 Agent。
     [了解更多 →](/zh-hans/docs/features/ide/)
   </Card>
   <Card title="端口转发" icon="random">
@@ -43,7 +47,7 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
     [了解更多 →](/zh-hans/docs/features/ai/)
   </Card>
   <Card title="插件系统" icon="puzzle">
-    官方插件如 Cloud Sync、Telnet Client，以及运行时 ESM 扩展系统。
+    基于 WASM 沙箱、类型化 Host API 和声明式原生界面的扩展系统。
     [了解更多 →](/zh-hans/docs/features/plugins/)
   </Card>
   <Card title="安全" icon="approve-check-circle">

@@ -1,87 +1,85 @@
 ---
 title: IDE Mode
-description: Remote file editing with CodeMirror 6, syntax highlighting, and file tree navigation.
+description: Native GPUI remote editing with syntax highlighting, file navigation, project search, and an optional Linux agent.
 ---
 
-IDE Mode lets you edit remote files directly within OxideTerm — no need to download, edit locally, and re-upload. All operations happen over the existing SSH connection.
+IDE Mode lets you browse and edit remote files inside the OxideTerm workspace. The editor, file tree, tabs, search panels, and dialogs are native GPUI views written in Rust.
 
-## CodeMirror 6 Editor
+Remote file access resolves through the active node and its managed SSH connection. IDE mode can use either the optional remote agent or an SFTP fallback, so basic editing does not depend on deploying extra software.
 
-The editor is powered by **CodeMirror 6** with:
-- Syntax highlighting for **24 languages** (14 native CodeMirror + legacy modes via `@codemirror/legacy-modes`)
-- Line numbers and code folding
-- Find and replace with regex support
-- Bracket matching and auto-closing pairs
-- Indentation guides
+## Native Editor
+
+The GPUI editor supports the workflows needed for focused remote changes:
+
+- Syntax highlighting through OxideTerm's Rust syntax layer
+- Line numbers, indentation guides, folding, and bracket-aware editing
+- Find and replace, including replace current and replace all
 - Multiple cursors and selections
-- Minimap for file overview
+- Undo and redo history
+- Dirty-state tracking and save shortcuts
+- Theme and font settings shared with the native application
 
-### Supported Languages
+The editor keeps text, selections, highlights, folds, and viewport state in Rust. It does not embed a browser editor component.
 
-Native CodeMirror 6 modes include: JavaScript, TypeScript, Python, Rust, Go, C/C++, Java, HTML, CSS, JSON, Markdown, SQL, XML, YAML, TOML, Shell/Bash. Additional languages are available via legacy modes.
+## Remote File Tree
 
-## File Tree
+The IDE sidebar provides a remote project tree with:
 
-A sidebar file tree provides navigation through the remote file system:
-- **Lazy-loaded directories** — only loads directory contents when expanded, for performance on large remote filesystems
-- **Git status indicators** — files show modified (M), untracked (?), added (A) status with color coding
-- **Event-driven refresh** — the file tree auto-refreshes on save, create, delete, rename, and terminal `Enter` keypress
-- Click to open files in the editor
-- Create, rename, and delete files and directories via context menu
-- File type icons for quick identification based on extension
+- Lazy directory expansion
+- File and folder creation, rename, delete, and copy operations
+- File-type icons and selected-file state
+- Folder switching with an unsaved-change guard
+- Git status when the active backend provides it
+- Project-wide search results grouped by file
 
-## Save & Sync
+Selecting a file opens it in an editor tab. Multiple files can remain open, and unsaved buffers are protected from automatic tab eviction.
 
-- Files are saved back to the remote server over SFTP
-- **Optimistic mtime locking** — before overwriting, OxideTerm checks if the remote file's modification time has changed since it was loaded. If it has, a conflict dialog appears letting you choose to overwrite, reload the remote version, or diff the changes.
-- Unsaved changes are indicated with a dot on the tab
-- `Ctrl+S` / `⌘+S` to save
+## Save and Conflict Handling
 
-## Multi-Tab Editing
+Remote reads include content metadata such as size, modification time, and content hash where the backend supports it. When a save detects that the remote file changed after it was opened, OxideTerm presents a conflict instead of silently overwriting the newer version.
 
-Open multiple files in tabs with **LRU (Least Recently Used) tab management**:
-- Switch between tabs without losing editor state (cursor position, scroll position, undo history)
-- When the maximum tab count is reached, the least recently used tab is automatically closed
-- Unsaved files are never auto-closed — they are protected from LRU eviction
+Agent-backed writes use staged atomic replacement and hash expectations. The SFTP fallback preserves the same user-facing save and conflict workflow where the transport permits it.
 
-## Remote Agent (Optional)
+Use `Ctrl+S` or `⌘S` to save the active file.
 
-For enhanced IDE capabilities, OxideTerm can deploy a **~1 MB Rust binary** to the remote server. The agent communicates via JSON-RPC over the SSH channel.
+## Optional Remote Agent
 
-### What the Agent Provides
+After you choose **Enable Agent** in the confirmation dialog, OxideTerm can deploy a lightweight Rust agent to supported Linux hosts. Bundled agent builds target x86_64 and aarch64 Linux.
 
-- **Faster file tree operations** — directory listing, file search, and symbol resolution run natively on the remote host
-- **Real-time file watching** — external changes (from other editors or processes) are reflected immediately
-- **Symbol search** — find definitions and references across the project
-- **43 JSON-RPC methods** — comprehensive file, directory, and project operations
+The agent adds:
 
-### Deployment
+- Recursive file-tree operations
+- Project text search
+- Git status
+- File watching notifications
+- Symbol indexing, completion, and definition lookup
+- Atomic writes with hash-based conflict detection
 
-- **Auto-deploys** on x86_64 and aarch64 Linux when you enable the agent
-- For other architectures, build the agent from source yourself and upload it manually to the remote host
-- Agent binaries are stored on the remote server and survive reconnects
-- Can be removed with one click from the IDE panel
+The desktop app starts the agent through an SSH exec channel. Requests and notifications are line-delimited messages carried inside the existing authenticated SSH connection; the agent does not listen on a network port.
 
-### Without the Agent
+## Agent Lifecycle
 
-IDE mode works **completely without the remote agent**. Without it, file tree operations use SFTP (slightly slower) and file watching is not available. For most use cases, the agentless mode is sufficient.
+OxideTerm checks the remote agent version and compatibility level before use. A missing compatible agent can be installed from the IDE surface, while an incompatible build is reported instead of being used silently.
 
-## Integration with Terminal
+The remote binary remains on the selected host for later sessions and can be removed from the agent controls. Agent diagnostics are redacted before logging.
 
-IDE Mode runs alongside the terminal — switch between terminal and editor tabs seamlessly. The same SSH connection is shared via the connection pool, so there's no additional connection overhead or authentication prompt.
+## SFTP Fallback
+
+IDE mode remains available without the agent:
+
+- Directory and file operations use the managed SFTP session
+- Files open and save through the same node identity
+- The native editor and conflict UI remain available
+- Agent-only capabilities such as live file watching and symbol indexing are unavailable
+
+For ordinary configuration and script edits, SFTP mode is often sufficient.
 
 ## Reconnect Behavior
 
-IDE mode participates in the reconnect orchestrator pipeline:
-- On disconnect, the orchestrator snapshots open file tabs and project path
-- After SSH reconnect, IDE files are automatically reopened
-- File contents are re-fetched from the remote server (not from stale cache)
-- **User intent detection**: if you've manually closed the IDE or switched projects during disconnect, the orchestrator respects your decision and doesn't force-reopen
+IDE consumers share node identity with terminal, SFTP, and forwarding surfaces. When SSH reconnect replaces the underlying connection, the IDE can reacquire its remote filesystem session without changing the visible node or project path.
 
-## State Gating
-
-All IDE I/O operations are blocked when the connection state is not `active`. The editor becomes read-only during reconnect, and re-enables automatically once the connection is restored.
+Open buffers and dirty state remain in the native workspace. Remote I/O is gated while the node is unavailable and resumes only after a valid remote filesystem session is restored.
 
 :::tip
-IDE Mode is designed for quick edits on remote servers. For larger projects requiring indexing, debugging, or extensions, consider using a full-featured IDE with remote extensions.
+IDE Mode is intended for focused remote edits and project inspection. Use a full development environment when you need a large extension ecosystem, debugger integration, or heavyweight language services.
 :::

@@ -154,16 +154,6 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 | 上一标签 | `⌘ {` | `Ctrl+Shift+Tab` |
 | 清屏 | `⌘ K` | `Ctrl+L` |
 
-## 性能
-
-| 指标 | 典型值 |
-|------|--------|
-| 每终端内存 | ~10 MB |
-| CPU（空闲） | ~0–1% |
-| 启动时间 | < 100 ms |
-| I/O 延迟 | < 1 ms |
-| 缓冲区读取 | 8 KB |
-
 ## 与传统终端对比
 
 | 功能 | OxideTerm 本地终端 | iTerm2 / Alacritty | Windows Terminal |
@@ -180,7 +170,7 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 检查 Shell 二进制文件是否存在且可执行。使用 `which zsh`（Unix）或 `where pwsh`（Windows）验证。在 macOS/Linux 上，把 Shell 路径加入 `/etc/shells` 通常可以让扫描器发现它。
 
 **终端无法启动？**
-打开开发者控制台（`⌘⌥I` / `Ctrl+Shift+I`）查看错误日志。确保 OxideTerm 有权限执行 Shell 二进制文件。尝试换一个 Shell。
+确认所选 Shell 二进制文件仍然存在且可执行。选择另一个已发现的 Shell 后重试。
 
 **输出乱码？**
 使用 `echo $LANG` 检查 Shell 编码 — 应包含 `UTF-8`。如有需要设置 `TERM=xterm-256color`。如果图标字形损坏，安装 Nerd Font 字体。
@@ -190,7 +180,3 @@ PowerShell 启动时加载 `$PROFILE`。优化你的 profile 或使用 `-NoProfi
 
 **WSL 连接问题？**
 运行 `wsl --list --verbose` 检查 WSL 状态。确保已安装 WSL 2 并设置默认发行版（`wsl --set-default Ubuntu`）。
-
-:::note
-本地终端是一个 feature-gated 功能（`local-terminal`）。可通过 `cargo build --no-default-features` 禁用，适用于移动端/轻量构建。
-:::

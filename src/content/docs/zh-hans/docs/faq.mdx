@@ -7,7 +7,7 @@ description: OxideTerm 常见问题解答。
 
 ### OxideTerm 是什么？
 
-OxideTerm 是一个基于 Tauri 2.0（Rust）和 React 19（TypeScript）构建的**面向远程服务器的 AI-native 工作区**。它把 SSH 终端、本地 Shell、SFTP、IDE 模式、端口转发、trzsz 传输、OxideSens AI、插件系统、主题和 11 种语言整合在一个原生应用里。
+OxideTerm 是一个使用 Rust 和 GPUI 构建的**面向远程服务器的原生工作区**。它把 SSH 终端、本地 Shell、SFTP、IDE、端口转发、远程桌面、trzsz 传输、OxideSens AI、插件系统和主题整合在同一个 GPU 加速桌面应用中。
 
 ### OxideTerm 免费吗？
 
@@ -27,14 +27,14 @@ macOS（Apple Silicon 和 Intel）、Windows（x64 和 ARM64）、Linux（x64 �
 
 ### OxideTerm 和基于 Electron 的终端有什么区别？
 
-OxideTerm 使用 **Tauri 2.0**，利用系统原生 WebView 而不是捆绑 Chromium：
+OxideTerm 使用 **GPUI** 直接绘制原生桌面界面，不捆绑 Chromium，也不依赖系统 WebView：
 
-| 对比项 | Electron | Tauri (OxideTerm) |
-|--------|----------|-------------------|
-| 二进制体积 | ~150 MB | 25–40 MB |
-| 内存占用 | ~300 MB | ~50 MB |
-| 安全模型 | Chromium | Rust 内存安全 + 沙箱 |
-| SSH 实现 | Node.js 绑定（ssh2） | 纯 Rust（russh） |
+| 对比项 | 基于浏览器的桌面应用 | OxideTerm |
+|--------|----------------------|-----------|
+| 界面渲染 | 浏览器运行时与 DOM | GPUI GPU 表面 |
+| 安装包 | 通常包含浏览器运行时 | 通常约 50–70 MB |
+| 终端数据流 | 常经过脚本层和进程桥接 | Rust 终端状态进程内更新 |
+| SSH 实现 | 依实现而定 | 纯 Rust `russh` |
 
 ## 连接与安全
 
@@ -100,9 +100,9 @@ OxideSens 不再把大量底层工具直接摊给模型，而是把保存连接�
 
 远程 Agent 是一个可选的小型 Rust 二进制，用于增强 IDE 模式，例如更快的文件树、符号搜索和文件监听。IDE 模式在没有 Agent 的情况下也可以工作。
 
-### 什么是 CLI 伴侣工具（`oxt`）？
+### 什么是 CLI 伴侣工具（`oxideterm`）？
 
-`oxt` 是用于从命令行控制 OxideTerm 的伴侣工具，通过 Unix Socket（macOS/Linux）或 Named Pipe（Windows）使用 JSON-RPC 2.0 通信。
+`oxideterm` 是可独立运行的无头管理工具，用于检查和修改设置、连接、转发、备份、云同步与诊断数据。它直接调用 Rust 领域 crate，不要求桌面应用运行，也不通过本地套接字或 RPC 服务控制 GUI。
 
 ### 可以录制终端会话吗？
 
@@ -110,30 +110,25 @@ OxideSens 不再把大量底层工具直接摊给模型，而是把保存连接�
 
 ### 广播输入是怎么工作的？
 
-开启广播模式后，相同按键会发送到选中的多个分屏面板，适合管理多台服务器或同时运行相同命令。
+先选择要加入广播的终端面板，再从终端命令栏提交命令。原生工作区会把这条命令发送给当前面板和每个选中的目标。直接在终端画面中键入的内容不会逐键镜像；广播会立即执行，因此请仔细检查破坏性命令。
 
 ## 插件
 
-### 有官方插件吗？
+### 原生插件如何工作？
 
-有。官方插件提供可选工作流，而不是强制账号体系：
-
-- **Cloud Sync**：通过 WebDAV、HTTP JSON、Dropbox、Git 或 S3 同步加密 `.oxide` 快照。
-- **Telnet Client**：面向旧路由器、交换机和设备的原生 Telnet 客户端。
-
-插件是按需启用的。核心应用仍然是本地优先，不要求云账号。
+插件从当前配置目录中发现。每个插件包都包含 `plugin.json` 清单，并使用受支持的原生入口，例如 Wasm 模块、进程入口或仅清单贡献。原生应用不会执行旧版 JavaScript 入口，也不会把脚本加载到界面中。
 
 ### 插件安装在哪里？
 
-插件存储在 `~/.oxideterm/plugins/{plugin-id}/`。每个插件包含 `plugin.json` 清单和 ESM 入口文件。
+插件位于当前 OxideTerm 配置目录下的 `plugins/{plugin-id}/`。运行 `oxideterm paths --json` 可以查看实际目录，也可以在插件管理器中直接打开它。
 
 ### 插件是沙箱化的吗？
 
-是。插件运行在多层安全机制下：冻结 API surface、Proxy 权限 ACL、IPC 命令白名单、熔断器和 React 错误边界。
+Wasm 插件运行在 wasmtime 沙箱中，只能调用清单声明且由宿主授权的类型化能力。进程插件由宿主管理生命周期和协议边界，但不是 Wasm 沙箱；启用前仍应检查插件身份、权限和声明的功能。插件界面由宿主使用 GPUI 原生控件渲染，不会执行网页界面代码。
 
 ### 插件可以直接访问文件系统吗？
 
-不能直接访问。插件通过 PluginContext API 中的 SFTP、storage 等命名空间访问允许的能力。
+不能任意访问。插件只能通过类型化 Host API 使用已声明并获授权的文件、SFTP、存储或网络能力。
 
 ## 故障排查
 
@@ -147,27 +142,28 @@ OxideSens 不再把大量底层工具直接摊给模型，而是把保存连接�
 - OxideTerm 的优雅期重连会先尝试恢复旧连接。
 - 在连接配置中调整 keepalive。
 - 默认 SSH keepalive 间隔为 15 秒。
+- 在运行时查看当前连接和系统健康状态，在事件日志中查看重连阶段与失败详情。
 
 ### 终端渲染缓慢
 
-- 确保系统启用了 WebGL。
-- 如果 WebGL 实际走软件渲染，OxideTerm 会在 auto 模式下回退 Canvas。
-- 检查 GPU 驱动是否正常。
-- 可尝试减小字体大小或切换渲染器。
+- 检查 GPU 驱动和系统图形栈是否正常。
+- 在设置中选择兼容渲染配置，或使用 `OXIDETERM_RENDER_PROFILE=compatibility` 重新启动。
+- 暂时关闭背景图、模糊等高成本视觉效果。
+- 如果只有大输出时变慢，请同时检查终端滚动缓冲大小和远端输出速率。
 
 ### 配置文件存储在哪里？
 
-| 平台 | 路径 |
-|------|------|
-| macOS | `~/Library/Application Support/com.oxideterm.app/` |
-| Windows | `%APPDATA%\com.oxideterm.app\` |
-| Linux | `~/.config/com.oxideterm.app/` |
+实际路径取决于操作系统、安装模式、可选的 `OXIDETERM_CONFIG_DIR` 和当前命名配置。请让 CLI 返回解析后的路径：
 
-数据存储在该目录中的本地 **redb** 嵌入式键值数据库中。
+```sh
+oxideterm paths --json
+```
+
+设置、连接和其他配置使用 JSON 或加密文档存储；部分历史、索引和运行时状态使用本地 redb 数据库。不要假设所有数据都位于同一个数据库文件中。
 
 ### 如何完全卸载 OxideTerm？
 
-1. 删除应用（拖入废纸篓 / 卸载 / 删除 AppImage）。
-2. 删除配置目录（见上方路径）。
-3. 删除钥匙串条目：在系统钥匙串管理器中搜索 `com.oxideterm`。
-4. （可选）删除插件：删除 `~/.oxideterm/`。
+1. 删除已安装的应用或便携目录。
+2. 在卸载前运行 `oxideterm paths --json`，只删除你确实不再需要的数据目录。
+3. 如果还要删除已保存的凭据，请在操作系统的凭据管理器中移除 OxideTerm 条目。
+4. 如果不想保留已安装插件，请删除 `oxideterm paths` 返回的当前插件目录。

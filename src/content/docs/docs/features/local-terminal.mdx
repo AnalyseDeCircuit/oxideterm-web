@@ -154,16 +154,6 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 | Previous Tab | `⌘ {` | `Ctrl+Shift+Tab` |
 | Clear Screen | `⌘ K` | `Ctrl+L` |
 
-## Performance
-
-| Metric | Typical Value |
-|--------|--------------|
-| Memory per terminal | ~10 MB |
-| CPU (idle) | ~0–1% |
-| Startup time | < 100 ms |
-| I/O latency | < 1 ms |
-| Buffer read size | 8 KB |
-
 ## Comparison with Traditional Terminals
 
 | Feature | OxideTerm Local | iTerm2 / Alacritty | Windows Terminal |
@@ -180,7 +170,7 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 Check that the shell binary exists and is executable. Verify with `which zsh` (Unix) or `where pwsh` (Windows). On macOS/Linux, adding the shell path to `/etc/shells` can make it discoverable by the scanner.
 
 **Terminal won't start?**
-Check the developer console (`⌘⌥I` / `Ctrl+Shift+I`) for error logs. Make sure OxideTerm has permission to execute the shell binary. Try a different shell.
+Confirm that the selected shell binary still exists and is executable. Choose a different discovered shell and try again.
 
 **Garbled output?**
 Verify your shell's encoding with `echo $LANG` — it should include `UTF-8`. Set `TERM=xterm-256color` if needed. Install a Nerd Font if icon glyphs are broken.
@@ -190,7 +180,3 @@ PowerShell loads `$PROFILE` on launch. Optimize your profile or launch with `-No
 
 **WSL connection issues?**
 Run `wsl --list --verbose` to check WSL status. Ensure WSL 2 is installed and a default distribution is set (`wsl --set-default Ubuntu`).
-
-:::note
-Local terminal is a feature-gated capability (`local-terminal`). It can be disabled with `cargo build --no-default-features` for mobile/lightweight builds.
-:::

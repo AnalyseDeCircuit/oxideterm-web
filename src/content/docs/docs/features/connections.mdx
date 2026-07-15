@@ -1,15 +1,22 @@
 ---
-title: Connection Management
-description: SSH connection presets, encrypted .oxide export/import, connection groups, auth methods, ProxyJump, and Known Hosts management.
+title: Connections & Sessions
+description: Configure saved SSH connections and manage them from the Session Manager.
 ---
 
-OxideTerm's **Saved Connections** panel and **Session Manager** give you a complete workspace for organizing, securing, and reusing SSH connections — from single servers to complex multi-hop proxy chains.
+This guide covers two related but distinct surfaces:
 
-## Creating Connections
+- **Saved connections** are reusable connection profiles: host, authentication, ProxyJump route, group, tags, and related configuration.
+- **Session Manager** is the table-based workspace for finding, organizing, editing, importing, exporting, and opening those saved profiles.
 
-Open the **New Connection** dialog from the sidebar (`+` button) or Session Manager toolbar.
+Neither is the same as **Active Sessions**, which is the live connection tree shown while work is in progress.
 
-### Authentication Methods
+## Connection Configuration
+
+### Creating Connections
+
+Open the **New Connection** dialog from the sidebar (`+` button) or the Session Manager toolbar.
+
+#### Authentication Methods
 
 | Method | Description |
 |--------|-------------|
@@ -23,72 +30,61 @@ OxideTerm auto-detects the `~/.ssh/` directory and imports keys without configur
 
 For direct connections, password auth can also fall back into keyboard-interactive prompts when the server requires it. For ProxyJump chains, explicit `KeyboardInteractive` auth is still limited today, so password/key/agent/certificate auth is the safer choice per hop.
 
-### Connection Options
+#### Connection Options
 
 - **Host / Port / Username** — standard connection parameters
 - **Color** — per-connection accent color for visual identification in the sidebar
-- **Group** — organize into folders in the sidebar and Session Manager
+- **Group** — organize into folders in the Session Manager
 - **Tags** — freeform labels for filtering and searching
 - **ProxyJump (Jump Host)** — chain through one or more bastion hosts
 - **Agent Forwarding** — optionally forward your local SSH Agent to the remote host
 
-## ProxyJump: Multi-Hop SSH
+### ProxyJump: Multi-Hop SSH
 
 OxideTerm resolves jump chains using a **Dijkstra shortest-path algorithm** across your saved connection tree. You can chain through unlimited intermediate hosts:
 
-```
+```text
 Local Machine ──► Bastion A ──► Bastion B ──► Target Server
 ```
 
-- Intermediate sessions are opened automatically
-- Each hop is tracked individually in the Connection Pool
-- If any intermediate hop drops, its children are marked `link_down` and cascade-reconnected
+- Intermediate sessions are opened automatically.
+- Each hop is tracked individually in the Connection Pool.
+- If any intermediate hop drops, its children are marked `link_down` and cascade-reconnected.
 
-### Per-Hop Auth Notes
+#### Per-Hop Auth Notes
 
-- Direct connections support password, key, certificate, SSH Agent, and keyboard-interactive prompts
-- ProxyJump hops work best with password, key, certificate, or SSH Agent auth
-- Explicit `KeyboardInteractive` auth over proxy chains remains limited today
-- Imported `ProxyJump` chains from `~/.ssh/config` keep their route structure when brought into OxideTerm
+- Direct connections support password, key, certificate, SSH Agent, and keyboard-interactive prompts.
+- ProxyJump hops work best with password, key, certificate, or SSH Agent auth.
+- Explicit `KeyboardInteractive` auth over proxy chains remains limited today.
+- Imported `ProxyJump` chains from `~/.ssh/config` keep their route structure when brought into OxideTerm.
 
-## Connection Groups
+### SSH Config Import
 
-Organize connections into **nested folder groups** in the Session Manager:
+OxideTerm reads your existing `~/.ssh/config` file and imports defined `Host` blocks as OxideTerm connections, preserving `ProxyJump`, `User`, `IdentityFile`, `Port`, and other directives.
 
-- Drag-and-drop connections between groups
-- Rename, create, or delete groups
-- Subgroups supported for deep hierarchies
-- Filter the connection table by selected group
-
-## SSH Config Import
-
-OxideTerm reads your existing `~/.ssh/config` file and imports defined `Host` blocks as OxideTerm connections — preserving `ProxyJump`, `User`, `IdentityFile`, `Port`, and other directives.
-
-## Known Hosts & TOFU
+### Known Hosts & TOFU
 
 On first connection to a new host, OxideTerm uses **Trust On First Use (TOFU)**:
 
-1. The host's public key fingerprint is shown in a confirmation dialog
-2. On acceptance, the key is appended to `~/.ssh/known_hosts` using OpenSSH-compatible semantics
-3. On subsequent connects, the stored fingerprint is verified automatically
-4. Key-mismatch warnings are shown prominently — never silently ignored
+1. The host's public key fingerprint is shown in a confirmation dialog.
+2. On acceptance, the key is appended to `~/.ssh/known_hosts` using OpenSSH-compatible semantics.
+3. On subsequent connects, the stored fingerprint is verified automatically.
+4. Key-mismatch warnings are shown prominently — never silently ignored.
 
-## Saved Connections at Rest
+### Saved Connections at Rest
 
 OxideTerm encrypts saved connection metadata on disk instead of leaving it as plaintext JSON.
 
-- **Passwords / key passphrases / API keys** stay in the OS keychain
-- **Saved connection metadata** is sealed locally with ChaCha20-Poly1305
-- **Local config key** lives in the OS keychain and unlocks the encrypted config document at startup
-- **Legacy plaintext configs** are migrated to encrypted storage on startup
+- **Passwords / key passphrases / API keys** stay in the OS keychain.
+- **Saved connection metadata** is sealed locally with ChaCha20-Poly1305.
+- **Local config key** lives in the OS keychain and unlocks the encrypted config document at startup.
+- **Legacy plaintext configs** are migrated to encrypted storage on startup.
 
 This means hosts, labels, auth metadata, jump routes, and related saved-connection state are protected at rest even before you export anything.
 
-## Encrypted Export / Import (.oxide)
+### Encrypted Export / Import (.oxide)
 
-Connection presets (including credentials) can be exported to a portable `.oxide` file for backup or transfer between machines.
-
-### Encryption Spec
+Connection presets, including credentials, can be exported to a portable `.oxide` file for backup or transfer between machines.
 
 | Property | Value |
 |----------|-------|
@@ -104,17 +100,55 @@ The `.oxide` format uses a passphrase you provide — OxideTerm never stores the
 `.oxide` files contain credentials. Store them securely and share only over encrypted channels.
 :::
 
-## Sidebar: Active Sessions View
+## Session Manager
 
-The **Active Sessions** sidebar panel has two modes:
+Session Manager is the spreadsheet-style view of saved SSH connections. Open it from the sidebar or Command Palette (`⌘K`). It complements the saved-connection tree when you need to work across many profiles at once.
 
-- **Tree View** — hierarchical view showing jump host relationships, child nodes indented under parents
-- **Focus View** — flat list of only the currently active / connected sessions
+### Connection Table
 
-Right-click any node for quick actions: Connect, Disconnect, New Terminal, Open SFTP, Open IDE Mode, Port Forwarding, Drill Down (navigate into the host), Save as Preset.
+The table shows all saved connections with sortable columns:
 
-## Auto-Route
+| Column | Description |
+|--------|-------------|
+| **Name** | Connection display name |
+| **Host** | Hostname or IP address |
+| **Port** | SSH port, normally 22 |
+| **Username** | Login username |
+| **Auth** | Authentication type: password, key, or agent |
+| **Group** | Group folder |
+| **Tags** | Freeform tag labels |
+| **Last Used** | Relative timestamp of the last connection |
+| **Actions** | Connect, Edit, Duplicate, Delete |
 
-The **Auto-Route** feature automatically selects the optimal ProxyJump path to a target host by analyzing the current active session tree.
+Click a column header to sort. Hold `Shift` to multi-sort.
 
-Combined with the topology graph, this gives you a route-aware connection model instead of a flat host list: jump nodes can be reused, downstream failures cascade visibly, and reconnect logic can rebuild the tree from the parent hop outward.
+### Search, Tags, and Groups
+
+The toolbar performs real-time fuzzy search across name, host, username, and tags. The folder tree filters by **All Connections**, **Ungrouped**, **Recent**, or a named group and its subgroups.
+
+Tags are freeform labels for ad-hoc organization. Add or remove them from a row, see them as colored chips in the table, and include them in search. Typical tags include `prod`, `staging`, `dev`, `datacenter-eu`, and `team-backend`.
+
+Use the folder tree to create subgroups, rename groups, or delete a group after moving its connections to Ungrouped. Drag rows into a group to reassign them.
+
+### Batch and Edit Actions
+
+Select multiple connections with the row checkboxes. The toolbar exposes these bulk actions after selection:
+
+| Batch Action | Description |
+|-------------|-------------|
+| **Delete Selected** | Remove multiple connections at once |
+| **Move to Group** | Reassign multiple connections to a group |
+| **Add Tags** | Apply tags to all selected connections |
+
+Bulk operations ask for confirmation. The row **Edit** action opens the connection editor, where you can change connection properties, authentication method, key path, and group assignment. The toolbar also imports and exports encrypted `.oxide` files.
+
+The **Auto-Route** action analyzes existing sessions to suggest an appropriate ProxyJump path for a new connection.
+
+## Active Sessions
+
+The **Active Sessions** sidebar is a live view, not another saved-profile manager. It has two modes:
+
+- **Tree View** — shows jump-host relationships with child nodes indented below parents.
+- **Focus View** — shows a flat list of the currently active or connected sessions.
+
+Node actions include connecting, disconnecting, opening a terminal, SFTP, IDE Mode, or port forwarding, drilling into the host, and saving a live connection as a preset.
