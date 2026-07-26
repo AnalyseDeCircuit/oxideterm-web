@@ -1,0 +1,14 @@
+---
+import DefaultPageFrame from "@astrojs/starlight/components/PageFrame.astro";
+import DocsSidebarResizers from "./DocsSidebarResizers.astro";
+
+const { hasSidebar, toc } = Astro.locals.starlightRoute;
+---
+
+<DefaultPageFrame>
+  <slot name="header" slot="header" />
+  <slot name="sidebar" slot="sidebar" />
+  <slot />
+</DefaultPageFrame>
+
+<DocsSidebarResizers showLeft={hasSidebar} showRight={Boolean(toc)} />

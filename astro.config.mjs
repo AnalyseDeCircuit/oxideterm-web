@@ -18,6 +18,7 @@ export default defineConfig({
       },
       customCss: ["./src/styles/global.css"],
       components: {
+        PageFrame: "./src/overrides/PageFrame.astro",
         SiteTitle: "./src/overrides/SiteTitle.astro",
       },
       head: [
@@ -40,7 +41,7 @@ export default defineConfig({
           tag: "link",
           attrs: {
             rel: "stylesheet",
-            href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500&display=swap",
+            href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap",
           },
         },
       ],

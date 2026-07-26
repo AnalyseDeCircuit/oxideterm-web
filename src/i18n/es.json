@@ -5,7 +5,7 @@
     "description": "Un espacio de trabajo con IA nativa para servidores remotos: terminales SSH, SFTP, escritorio remoto, reenvío de puertos, trzsz, edición ligera, shell local y OxideSens AI. Sin Electron integrado, sin telemetría y con SSH puro en Rust sin OpenSSL/libssh2."
   },
   "hero": {
-    "headline": "Un workspace AI-native para servidores remotos",
+    "headline": "Workspace AI-native para servidores remotos",
     "tagline": "GPUI nativo. Sin WebView integrado. Sin telemetría. Sin suscripción. BYOK primero. SSH puro en Rust sin OpenSSL/libssh2.",
     "subtitle": "Conéctate una vez y mantén terminales, SFTP, escritorios remotos, reenvío de puertos, transferencias, edición ligera, shells locales y OxideSens AI en una app de escritorio local-first.",
     "cta_download": "Descargar",
@@ -40,7 +40,7 @@
   "comparison": {
     "badge": "LA DIFERENCIA",
     "title": "¿Por qué OxideTerm?",
-    "subtitle": "No es solo una terminal: es un workspace local-first para nodos remotos.",
+    "subtitle": "No es solo una terminal: es un workspace local‑first para nodos remotos.",
     "label_problem": "El problema",
     "label_solution": "La respuesta de OxideTerm",
     "pain_1": "El trabajo en servidores remotos se reparte entre demasiadas herramientas",

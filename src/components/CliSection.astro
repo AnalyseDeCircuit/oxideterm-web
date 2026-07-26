@@ -23,34 +23,29 @@ const lines = [
 ];
 ---
 
-<section class="py-20 px-6 border-t border-[var(--ot-border)]">
-  <div class="max-w-4xl mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<section class="site-section cli-workbench">
+  <div class="section-shell section-shell--reading">
+    <div class="cli-workbench__grid">
       <!-- Text -->
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] mb-3">
+      <div class="cli-workbench__copy">
+        <p class="section-head__label">
           {i.cli.badge}
         </p>
-        <h2 class="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
+        <h2>
           {i.cli.title}
         </h2>
-        <p class="text-lg text-[var(--ot-text-secondary)] mb-4" style={`font-family: var(--font-mono); font-size: 0.95rem;`}>
+        <p class="cli-workbench__subtitle">
           {i.cli.subtitle}
         </p>
-        <p class="text-sm text-[var(--ot-text-muted)] leading-relaxed">
+        <p class="cli-workbench__description">
           {i.cli.desc}
         </p>
       </div>
 
-      <!-- Terminal mockup -->
-      <div class="terminal-mockup">
-        <div class="terminal-titlebar" aria-hidden="true">
-          <span class="terminal-dot terminal-dot-red"></span>
-          <span class="terminal-dot terminal-dot-yellow"></span>
-          <span class="terminal-dot terminal-dot-green"></span>
-          <span class="terminal-titlebar-text">oxideterm</span>
-        </div>
-        <div class="terminal-body text-[13px]">
+      <!-- A typographic transcript replaces decorative operating-system chrome. -->
+      <div class="terminal-transcript">
+        <div class="terminal-transcript__label">oxideterm</div>
+        <div class="terminal-body">
           {lines.map((line) => {
             if (line.type === "blank") return <div>&nbsp;</div>;
             if (line.type === "prompt") return <div><span class="terminal-prompt">{line.text}</span></div>;

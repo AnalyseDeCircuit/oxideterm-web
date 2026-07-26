@@ -5,7 +5,7 @@
     "description": "面向远程服务器的 AI 原生工作区：SSH 终端、SFTP、远程桌面、端口转发、trzsz、轻量编辑、本地 Shell 和 OxideSens AI。不捆绑 Electron，不采集遥测，纯 Rust SSH 栈不依赖 OpenSSL/libssh2。"
   },
   "hero": {
-    "headline": "一个面向远程服务器的 AI-native 工作区",
+    "headline": "面向远程服务器的 AI-native 工作区",
     "tagline": "原生 GPUI。不捆绑 WebView。不采集遥测。无需订阅。BYOK 优先。纯 Rust SSH，不依赖 OpenSSL/libssh2。",
     "subtitle": "连接一次服务器，然后在一个本地优先桌面应用里处理终端、SFTP、远程桌面、端口转发、文件传输、轻量编辑、本地 Shell 和 OxideSens AI。",
     "cta_download": "下载",

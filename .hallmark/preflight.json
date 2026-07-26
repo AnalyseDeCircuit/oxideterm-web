@@ -1,0 +1,14 @@
+{
+  "scanned_at": "2026-07-26",
+  "framework": "Astro 6 with Tailwind CSS 4 and Starlight",
+  "fonts": [
+    "Source Serif 4",
+    "Inter",
+    "JetBrains Mono"
+  ],
+  "palette": "Warm paper neutrals with an oxide-red accent",
+  "motion": "CSS-only; no motion library",
+  "spacing": "Tailwind utilities without a project-level named spacing scale",
+  "design_memory": "No previous Hallmark stamp or log",
+  "scope": "Localised landing pages and English/Simplified Chinese Starlight documentation"
+}

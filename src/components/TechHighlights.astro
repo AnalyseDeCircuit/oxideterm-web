@@ -21,23 +21,25 @@ const highlights = [
 ];
 ---
 
-<section class="py-20 px-6 bg-[var(--ot-bg-deep)] border-t border-[var(--ot-border)]">
-  <div class="max-w-6xl mx-auto">
-    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] text-center mb-3">
+<section class="site-section tech-ledger">
+  <div class="section-shell">
+    <div class="section-head">
+    <p class="section-head__label">
       {i.tech.badge}
     </p>
-    <h2 class="text-3xl md:text-4xl font-bold text-center mb-14 tracking-tight">
+    <h2>
       {i.tech.title}
     </h2>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+    <div class="tech-ledger__grid">
       {highlights.map((item) => (
-        <div class="group">
-          <div class="mb-3" aria-hidden="true" set:html={item.icon} />
-          <h3 class="text-lg font-semibold mb-2 text-[var(--ot-text-primary)] group-hover:text-[var(--ot-accent)] transition-colors">
+        <div class="tech-ledger__item">
+          <div class="tech-ledger__icon" aria-hidden="true" set:html={item.icon} />
+          <h3>
             {item.title}
           </h3>
-          <p class="text-sm text-[var(--ot-text-secondary)] leading-relaxed">
+          <p>
             {item.desc}
           </p>
         </div>

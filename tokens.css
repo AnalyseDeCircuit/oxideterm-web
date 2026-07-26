@@ -1,0 +1,118 @@
+/* Hallmark · tokens: Oxide technical field manual · design-system: design.md */
+:root {
+  --color-paper: oklch(97.5% 0.006 45);
+  --color-paper-2: oklch(94% 0.008 45);
+  --color-paper-3: oklch(90% 0.009 45);
+  --color-ink: oklch(19% 0.010 40);
+  --color-ink-2: oklch(32% 0.012 40);
+  --color-muted: oklch(48% 0.012 42);
+  --color-neutral: oklch(58% 0.011 44);
+  --color-rule: oklch(79% 0.012 45);
+  --color-rule-2: oklch(87% 0.010 45);
+  --color-accent: oklch(52% 0.180 35);
+  --color-accent-hover: oklch(44% 0.165 35);
+  --color-accent-soft: oklch(92% 0.035 35);
+  --color-accent-ink: oklch(97.5% 0.006 45);
+  --color-focus: oklch(60% 0.210 35);
+  --color-success: oklch(48% 0.120 145);
+  --color-danger: oklch(48% 0.150 25);
+  --color-info: oklch(48% 0.105 230);
+  --color-terminal-paper: oklch(17% 0.012 45);
+  --color-terminal-paper-2: oklch(21% 0.014 45);
+  --color-terminal-ink: oklch(92% 0.010 55);
+  --color-terminal-muted: oklch(67% 0.012 50);
+  --color-terminal-success: oklch(74% 0.140 145);
+  --color-docs-dark-paper: oklch(16% 0.010 40);
+  --color-docs-dark-paper-2: oklch(20% 0.012 40);
+  --color-docs-dark-paper-3: oklch(24% 0.012 40);
+  --color-docs-dark-ink: oklch(93% 0.008 50);
+  --color-docs-dark-ink-2: oklch(76% 0.010 48);
+  --color-docs-dark-muted: oklch(62% 0.010 46);
+  --color-docs-dark-rule: oklch(31% 0.012 42);
+  --color-docs-dark-accent: oklch(66% 0.155 35);
+  --color-docs-dark-accent-soft: oklch(25% 0.035 35);
+
+  --font-display: "Space Grotesk", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+  --font-body: "IBM Plex Sans", "Noto Sans SC", "Source Han Sans SC", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Cascadia Code", monospace;
+
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.5625rem;
+  --text-xl: 1.953rem;
+  --text-2xl: 2.441rem;
+  --text-3xl: 3.052rem;
+  --text-display-s: clamp(2.25rem, 3.5vw + 0.25rem, 3.5rem);
+  --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --rule-hair: 1px;
+  --radius-control: 0.375rem;
+  --radius-card: 0.5rem;
+  --radius-media: 0.625rem;
+  --radius-pill: 999px;
+
+  --page-max: 76rem;
+  --page-reading: 68rem;
+  --page-media: 48rem;
+  --feature-tour-media-max: 36rem;
+  --page-gutter: clamp(1rem, 4vw, 3rem);
+  --nav-height: 4rem;
+  --docs-sidebar-left-width: 18.75rem;
+  --docs-sidebar-right-width: 18.75rem;
+
+  --shadow-whisper: 0 1px 2px oklch(19% 0.010 40 / 0.08);
+  --shadow-media: 0 1.5rem 4rem oklch(19% 0.010 40 / 0.12);
+
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* Compatibility aliases keep existing components and Starlight overrides token-driven. */
+  --ot-bg-page: var(--color-paper);
+  --ot-bg-deep: var(--color-paper-2);
+  --ot-bg-base: var(--color-paper);
+  --ot-bg-surface: var(--color-paper-2);
+  --ot-bg-elevated: var(--color-paper-3);
+  --ot-border: var(--color-rule);
+  --ot-border-subtle: var(--color-rule-2);
+  --ot-text-primary: var(--color-ink);
+  --ot-text-secondary: var(--color-ink-2);
+  --ot-text-muted: var(--color-muted);
+  --ot-accent: var(--color-accent);
+  --ot-accent-hover: var(--color-accent-hover);
+  --ot-accent-glow: oklch(52% 0.180 35 / 0.08);
+  --ot-green: var(--color-success);
+  --ot-cyan: var(--color-info);
+  --ot-orange: var(--color-accent);
+  --ot-red: var(--color-danger);
+  --ot-terminal-bg: var(--color-terminal-paper);
+  --ot-terminal-text: var(--color-terminal-ink);
+  --ot-terminal-green: var(--color-terminal-success);
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-body);
+}

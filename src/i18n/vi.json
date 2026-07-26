@@ -40,7 +40,7 @@
   "comparison": {
     "badge": "SỰ KHÁC BIỆT",
     "title": "Tại sao chọn OxideTerm?",
-    "subtitle": "Không chỉ là terminal: đây là workspace local-first cho node từ xa.",
+    "subtitle": "Không chỉ là terminal: đây là workspace local‑first cho node từ xa.",
     "label_problem": "Vấn đề",
     "label_solution": "Giải pháp của OxideTerm",
     "pain_1": "Công việc trên server từ xa bị chia nhỏ qua quá nhiều công cụ",

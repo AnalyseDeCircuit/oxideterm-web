@@ -5,7 +5,7 @@
     "description": "Ein KI-nativer Workspace für Remote-Server: SSH-Terminals, SFTP, Remote-Desktop, Portweiterleitung, trzsz, leichtes Editing, lokale Shell und OxideSens AI. Kein gebündeltes Electron, keine Telemetrie und reines Rust-SSH ohne OpenSSL/libssh2."
   },
   "hero": {
-    "headline": "Ein AI-native Workspace für Remote-Server",
+    "headline": "AI-native Workspace für Remote-Server",
     "tagline": "Natives GPUI. Kein gebündeltes WebView. Keine Telemetrie. Kein Abonnement. BYOK zuerst. Reines Rust-SSH ohne OpenSSL/libssh2.",
     "subtitle": "Verbinden Sie sich einmal und behalten Sie Terminals, SFTP, Remote-Desktops, Port-Forwarding, Transfers, leichtes Editing, lokale Shells und OxideSens AI in einer local-first Desktop-App.",
     "cta_download": "Herunterladen",
@@ -40,7 +40,7 @@
   "comparison": {
     "badge": "DER UNTERSCHIED",
     "title": "Warum OxideTerm?",
-    "subtitle": "Nicht nur ein Terminal, sondern ein local-first Workspace für Remote-Knoten.",
+    "subtitle": "Nicht nur ein Terminal, sondern ein local‑first Workspace für Remote-Knoten.",
     "label_problem": "Das Problem",
     "label_solution": "OxideTerms Antwort",
     "pain_1": "SSH-Workspace, nicht nur Shell",

@@ -22,17 +22,19 @@ const rows = [
 ];
 ---
 
-<section class="py-20 px-6 border-t border-[var(--ot-border)]">
-  <div class="max-w-4xl mx-auto">
-    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] text-center mb-3">
+<section class="site-section problem-matrix">
+  <div class="section-shell section-shell--reading">
+    <div class="section-head">
+    <p class="section-head__label">
       {i.comparison.badge}
     </p>
-    <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 tracking-tight">
+    <h2>
       {i.comparison.title}
     </h2>
-    <p class="text-center text-[var(--ot-text-muted)] mb-12 max-w-xl mx-auto">
+    <p>
       {i.comparison.subtitle}
     </p>
+    </div>
 
     <!-- Semantic comparison table -->
     <table class="comparison-table">
@@ -49,13 +51,13 @@ const rows = [
       <tbody>
         {rows.map((row) => (
           <tr>
-            <td>
+            <td data-label={i.comparison.label_problem}>
               <div class="flex items-baseline gap-3">
                 <span class="text-[var(--ot-red)] font-bold text-sm shrink-0" aria-hidden="true">&#10005;</span>
                 <span class="text-[var(--ot-text-muted)]">{row.pain}</span>
               </div>
             </td>
-            <td>
+            <td data-label={i.comparison.label_solution}>
               <div class="flex items-baseline gap-3">
                 <span class="text-[var(--ot-green)] font-bold text-sm shrink-0" aria-hidden="true">&#10003;</span>
                 <span class="text-[var(--ot-text-primary)]" set:html={row.answer} />

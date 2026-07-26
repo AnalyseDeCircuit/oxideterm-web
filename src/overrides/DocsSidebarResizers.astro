@@ -1,0 +1,181 @@
+---
+interface Props {
+  showLeft: boolean;
+  showRight: boolean;
+}
+
+const { showLeft, showRight } = Astro.props;
+const isChinese = Astro.locals.starlightRoute.lang.toLowerCase().startsWith("zh");
+const labels = isChinese
+  ? {
+      left: "调整左侧导航宽度",
+      right: "调整右侧目录宽度",
+    }
+  : {
+      left: "Resize left navigation",
+      right: "Resize right table of contents",
+    };
+---
+
+{
+  showLeft && (
+    <div
+      class="docs-sidebar-resizer docs-sidebar-resizer--left print:hidden"
+      data-docs-sidebar-resizer="left"
+      role="separator"
+      aria-label={labels.left}
+      aria-orientation="vertical"
+      aria-valuemin="224"
+      aria-valuemax="480"
+      aria-valuenow="300"
+      tabindex="0"
+    />
+  )
+}
+
+{
+  showRight && (
+    <div
+      class="docs-sidebar-resizer docs-sidebar-resizer--right print:hidden"
+      data-docs-sidebar-resizer="right"
+      role="separator"
+      aria-label={labels.right}
+      aria-orientation="vertical"
+      aria-valuemin="224"
+      aria-valuemax="480"
+      aria-valuenow="300"
+      tabindex="0"
+    />
+  )
+}
+
+<script>
+  type SidebarSide = "left" | "right";
+
+  const sidebarLimits = {
+    minimum: 224,
+    maximum: 480,
+    defaultWidth: 300,
+    keyboardStep: 16,
+    minimumContentWidth: 480,
+  } as const;
+
+  const storageKeys: Record<SidebarSide, string> = {
+    left: "oxideterm.docs.leftSidebarWidth",
+    right: "oxideterm.docs.rightSidebarWidth",
+  };
+
+  const cssVariables: Record<SidebarSide, string> = {
+    left: "--docs-sidebar-left-width",
+    right: "--docs-sidebar-right-width",
+  };
+
+  const clamp = (value: number, minimum: number, maximum: number) =>
+    Math.min(Math.max(value, minimum), maximum);
+
+  const readStoredWidth = (side: SidebarSide) => {
+    const storedValue = Number.parseInt(localStorage.getItem(storageKeys[side]) ?? "", 10);
+    return Number.isFinite(storedValue) ? storedValue : sidebarLimits.defaultWidth;
+  };
+
+  const getCurrentWidth = (side: SidebarSide) => {
+    const rawValue = getComputedStyle(document.documentElement).getPropertyValue(cssVariables[side]);
+    const parsedValue = Number.parseFloat(rawValue);
+    return Number.isFinite(parsedValue) ? parsedValue : sidebarLimits.defaultWidth;
+  };
+
+  const isSidebarVisible = (side: SidebarSide) => {
+    const handle = document.querySelector<HTMLElement>(`[data-docs-sidebar-resizer="${side}"]`);
+    return handle !== null && getComputedStyle(handle).display !== "none";
+  };
+
+  const getMaximumWidth = (side: SidebarSide) => {
+    const oppositeSide: SidebarSide = side === "left" ? "right" : "left";
+    // Hidden mobile and tablet panels must not consume the desktop content budget.
+    const oppositeWidth = isSidebarVisible(oppositeSide) ? getCurrentWidth(oppositeSide) : 0;
+    return Math.min(
+      sidebarLimits.maximum,
+      window.innerWidth - oppositeWidth - sidebarLimits.minimumContentWidth,
+    );
+  };
+
+  const setSidebarWidth = (side: SidebarSide, requestedWidth: number, persist = false) => {
+    const availableMaximum = Math.max(sidebarLimits.minimum, getMaximumWidth(side));
+    const width = clamp(requestedWidth, sidebarLimits.minimum, availableMaximum);
+    document.documentElement.style.setProperty(cssVariables[side], `${width}px`);
+
+    const handle = document.querySelector<HTMLElement>(`[data-docs-sidebar-resizer="${side}"]`);
+    handle?.setAttribute("aria-valuenow", String(Math.round(width)));
+
+    if (persist) {
+      localStorage.setItem(storageKeys[side], String(Math.round(width)));
+    }
+  };
+
+  const restoreSidebarWidths = () => {
+    setSidebarWidth("left", readStoredWidth("left"));
+    setSidebarWidth("right", readStoredWidth("right"));
+  };
+
+  const initializeResizer = (handle: HTMLElement) => {
+    const side = handle.dataset.docsSidebarResizer as SidebarSide;
+
+    handle.addEventListener("pointerdown", (event) => {
+      if (!event.isPrimary || event.button > 0) return;
+
+      event.preventDefault();
+      handle.setPointerCapture(event.pointerId);
+      handle.dataset.dragging = "true";
+      document.documentElement.classList.add("is-resizing-docs-sidebar");
+
+      // Track the pointer at window level so fast drags cannot outrun the narrow handle.
+      const updateFromPointer = (pointerEvent: PointerEvent) => {
+        const requestedWidth =
+          side === "left" ? pointerEvent.clientX : window.innerWidth - pointerEvent.clientX;
+        setSidebarWidth(side, requestedWidth);
+      };
+
+      const finishResize = (pointerEvent: PointerEvent) => {
+        updateFromPointer(pointerEvent);
+        if (handle.hasPointerCapture(pointerEvent.pointerId)) {
+          handle.releasePointerCapture(pointerEvent.pointerId);
+        }
+        handle.removeAttribute("data-dragging");
+        document.documentElement.classList.remove("is-resizing-docs-sidebar");
+        setSidebarWidth(side, getCurrentWidth(side), true);
+        window.removeEventListener("pointermove", updateFromPointer);
+        window.removeEventListener("pointerup", finishResize);
+        window.removeEventListener("pointercancel", finishResize);
+      };
+
+      window.addEventListener("pointermove", updateFromPointer);
+      window.addEventListener("pointerup", finishResize);
+      window.addEventListener("pointercancel", finishResize);
+    });
+
+    handle.addEventListener("keydown", (event) => {
+      const increaseKey = side === "left" ? "ArrowRight" : "ArrowLeft";
+      const decreaseKey = side === "left" ? "ArrowLeft" : "ArrowRight";
+      let nextWidth: number | undefined;
+
+      if (event.key === increaseKey) {
+        nextWidth = getCurrentWidth(side) + sidebarLimits.keyboardStep;
+      } else if (event.key === decreaseKey) {
+        nextWidth = getCurrentWidth(side) - sidebarLimits.keyboardStep;
+      } else if (event.key === "Home") {
+        nextWidth = sidebarLimits.minimum;
+      } else if (event.key === "End") {
+        nextWidth = getMaximumWidth(side);
+      }
+
+      if (nextWidth === undefined) return;
+      event.preventDefault();
+      setSidebarWidth(side, nextWidth, true);
+    });
+  };
+
+  restoreSidebarWidths();
+  document.querySelectorAll<HTMLElement>("[data-docs-sidebar-resizer]").forEach(initializeResizer);
+
+  window.addEventListener("resize", restoreSidebarWidths);
+</script>

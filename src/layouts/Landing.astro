@@ -15,7 +15,7 @@ const i = t(lang);
 <html lang={i.meta.lang}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>{i.meta.title}</title>
     <meta name="description" content={i.meta.description} />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -27,92 +27,110 @@ const i = t(lang);
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body class="bg-[var(--ot-bg-page)] text-[var(--ot-text-primary)] antialiased" style={`font-family: var(--font-serif);`}>
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 border-b border-[var(--ot-border)]" style="background: rgba(248,244,235,0.92); backdrop-filter: blur(8px);">
-      <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <a href={langPath(lang)} class="text-xl font-bold tracking-tight" style={`font-family: var(--font-serif);`}>
-          <span class="text-[var(--ot-text-primary)]">Oxide</span><span class="text-[var(--ot-accent)]">Term</span>
+  <body class="site-body">
+    <!-- The edge-aligned navigation matches the small set of real destinations. -->
+    <nav class="site-nav">
+      <div class="site-nav__inner">
+        <a href={langPath(lang)} class="site-wordmark">
+          <span>Oxide</span><span class="site-wordmark__signal">Term</span>
         </a>
-        <div class="hidden sm:flex items-center gap-6">
-          <a href={docsPath(lang)} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors">
-            {i.footer.docs}
-          </a>
-          <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors">
-            GitHub
-          </a>
-          <!-- Language selector -->
-          <div class="relative" id="lang-selector">
-            <button id="lang-btn" class="flex items-center gap-1 text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] transition-colors" aria-label={i.footer.language}>
+
+        <div class="site-nav__links">
+          <a href={docsPath(lang)} class="site-nav__link">{i.footer.docs}</a>
+          <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="site-nav__link">GitHub</a>
+
+          <div class="site-language" id="lang-selector">
+            <button
+              id="lang-btn"
+              class="site-language__trigger"
+              aria-label={i.footer.language}
+              aria-expanded="false"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </button>
-            <div id="lang-menu" class="lang-dropdown hidden absolute right-0 top-full mt-2 py-2 bg-[var(--ot-bg-surface)] border border-[var(--ot-border)] rounded-lg shadow-lg z-50">
-              {languages.map((l) => (
+            <div id="lang-menu" class="site-language__menu hidden">
+              {languages.map((language) => (
                 <a
-                  href={langPath(l.key)}
+                  href={langPath(language.key)}
                   class:list={[
-                    "block px-4 py-1.5 text-sm transition-colors",
-                    l.key === lang
-                      ? "text-[var(--ot-accent)]"
-                      : "text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] hover:bg-[var(--ot-bg-elevated)]",
+                    "site-language__option",
+                    language.key === lang && "site-language__option--active",
                   ]}
                 >
-                  {l.label}
+                  {language.label}
                 </a>
               ))}
             </div>
           </div>
-          <a href="#download" class="text-sm px-4 py-1.5 rounded-lg cta-primary font-medium">
-            {i.hero.cta_download}
-          </a>
+
+          <a href="#download" class="site-nav__cta">{i.hero.cta_download}</a>
         </div>
-        <button id="mobile-menu-btn" class="sm:hidden p-2 text-[var(--ot-text-secondary)]" aria-label="Menu">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+
+        <button
+          id="mobile-menu-btn"
+          class="site-nav__menu-button"
+          aria-label="Menu"
+          aria-expanded="false"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
         </button>
       </div>
-      <!-- Mobile menu -->
-      <div id="mobile-menu" class="sm:hidden hidden border-t border-[var(--ot-border)] px-6 py-4" style="background: rgba(248,244,235,0.98);">
-        <div class="flex flex-col gap-3">
-          <a href={docsPath(lang)} class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)]">{i.footer.docs}</a>
-          <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)]">GitHub</a>
-          <details class="text-sm">
-            <summary class="text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] cursor-pointer">{i.footer.language}</summary>
-            <div class="pl-4 pt-2 flex flex-col gap-1">
-              {languages.map((l) => (
+
+      <div id="mobile-menu" class="site-mobile-nav hidden">
+        <div class="site-mobile-nav__inner">
+          <a href={docsPath(lang)} class="site-mobile-nav__link">{i.footer.docs}</a>
+          <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="site-mobile-nav__link">GitHub</a>
+          <details class="site-mobile-nav__languages">
+            <summary>{i.footer.language}</summary>
+            <div class="site-mobile-nav__language-list">
+              {languages.map((language) => (
                 <a
-                  href={langPath(l.key)}
+                  href={langPath(language.key)}
                   class:list={[
-                    "text-sm py-1 transition-colors",
-                    l.key === lang
-                      ? "text-[var(--ot-accent)]"
-                      : "text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)]",
+                    "site-mobile-nav__link",
+                    language.key === lang && "site-mobile-nav__link--active",
                   ]}
                 >
-                  {l.label}
+                  {language.label}
                 </a>
               ))}
             </div>
           </details>
-          <a href="#download" class="text-sm px-4 py-1.5 rounded-lg cta-primary font-medium text-center">{i.hero.cta_download}</a>
+          <a href="#download" class="site-nav__cta">{i.hero.cta_download}</a>
         </div>
       </div>
     </nav>
+
     <script>
-      document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
-        document.getElementById('mobile-menu')?.classList.toggle('hidden');
+      const mobileButton = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+      const languageButton = document.getElementById("lang-btn");
+      const languageMenu = document.getElementById("lang-menu");
+
+      mobileButton?.addEventListener("click", () => {
+        const nowHidden = mobileMenu?.classList.toggle("hidden") ?? true;
+        mobileButton.setAttribute("aria-expanded", String(!nowHidden));
       });
-      document.getElementById('lang-btn')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('lang-menu')?.classList.toggle('hidden');
+
+      languageButton?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const nowHidden = languageMenu?.classList.toggle("hidden") ?? true;
+        languageButton.setAttribute("aria-expanded", String(!nowHidden));
       });
-      document.addEventListener('click', () => {
-        document.getElementById('lang-menu')?.classList.add('hidden');
+
+      document.addEventListener("click", () => {
+        languageMenu?.classList.add("hidden");
+        languageButton?.setAttribute("aria-expanded", "false");
       });
     </script>
-    <div class="pt-14">
+
+    <main class="site-main">
       <slot />
-    </div>
+    </main>
   </body>
 </html>

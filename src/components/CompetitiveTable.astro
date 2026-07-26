@@ -36,19 +36,21 @@ const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: st
 ];
 ---
 
-<section class="py-20 px-6 border-t border-[var(--ot-border)]">
-  <div class="max-w-4xl mx-auto">
-    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] text-center mb-3">
+<section class="site-section competitive-ledger">
+  <div class="section-shell section-shell--reading">
+    <div class="section-head">
+    <p class="section-head__label">
       {c.badge}
     </p>
-    <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 tracking-tight">
+    <h2>
       {c.title}
     </h2>
-    <p class="text-center text-[var(--ot-text-muted)] mb-14 max-w-xl mx-auto">
+    <p>
       {c.subtitle}
     </p>
+    </div>
 
-    <div class="overflow-x-auto rounded-xl border border-[var(--ot-border)]">
+    <div class="competitive-ledger__table">
       <table class="w-full text-sm border-collapse">
         <thead>
           <tr class="bg-[var(--ot-bg-elevated)]">
@@ -78,16 +80,16 @@ const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: st
               "border-t border-[var(--ot-border-subtle)]",
               idx % 2 === 0 ? "bg-[var(--ot-bg-base)]" : "bg-[var(--ot-bg-surface)]"
             ]}>
-              <td class="px-5 py-3.5 font-medium text-[var(--ot-text-primary)]">
+              <td data-label={c.col_feature} class="px-5 py-3.5 font-medium text-[var(--ot-text-primary)]">
                 {row.label}
               </td>
-              <td class:list={[
+              <td data-label={c.col_oxideterm} class:list={[
                 "px-5 py-3.5 text-center",
                 row.ot === Y ? "text-[var(--ot-green)] font-bold text-base" : "text-[var(--ot-text-secondary)] text-xs"
               ]}>
                 {row.ot}
               </td>
-              <td class:list={[
+              <td data-label={c.col_cross_platform_terminal} class:list={[
                 "px-5 py-3.5 text-center",
                 row.cross === Y ? "text-[var(--ot-green)] font-bold text-base"
                   : row.cross === N ? "text-[var(--ot-text-muted)]"
@@ -95,7 +97,7 @@ const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: st
               ]}>
                 {row.cross}
               </td>
-              <td class:list={[
+              <td data-label={c.col_professional_ssh} class:list={[
                 "px-5 py-3.5 text-center",
                 row.ssh === Y ? "text-[var(--ot-green)] font-bold text-base"
                   : row.ssh === N ? "text-[var(--ot-text-muted)]"
@@ -103,7 +105,7 @@ const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: st
               ]}>
                 {row.ssh}
               </td>
-              <td class:list={[
+              <td data-label={c.col_remote_toolbox} class:list={[
                 "px-5 py-3.5 text-center",
                 row.toolbox === Y ? "text-[var(--ot-green)] font-bold text-base"
                   : row.toolbox === N ? "text-[var(--ot-text-muted)]"
@@ -111,7 +113,7 @@ const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: st
               ]}>
                 {row.toolbox}
               </td>
-              <td class:list={[
+              <td data-label={c.col_remote_ide} class:list={[
                 "px-5 py-3.5 text-center",
                 row.ide === Y ? "text-[var(--ot-green)] font-bold text-base"
                   : row.ide === N ? "text-[var(--ot-text-muted)]"

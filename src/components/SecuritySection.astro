@@ -22,26 +22,30 @@ const cards = [
 ];
 ---
 
-<section class="py-20 px-6 bg-[var(--ot-bg-deep)] border-t border-[var(--ot-border)]">
-  <div class="max-w-6xl mx-auto">
-    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] text-center mb-3">
+<section class="site-section security-spec">
+  <div class="section-shell">
+    <div class="section-head section-head--split">
+    <p class="section-head__label">
       {i.security.badge}
     </p>
-    <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 tracking-tight">
+    <div>
+    <h2>
       {i.security.title}
     </h2>
-    <p class="text-center text-[var(--ot-text-muted)] mb-14 max-w-xl mx-auto">
+    <p>
       {i.security.subtitle}
     </p>
+    </div>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="security-spec__grid">
       {cards.map((card) => (
-        <div class="card rounded-xl p-8">
-          <div class="mb-4" aria-hidden="true" set:html={card.icon} />
-          <h3 class="text-lg font-semibold mb-2 text-[var(--ot-text-primary)]">
+        <div class="security-spec__item">
+          <div class="security-spec__icon" aria-hidden="true" set:html={card.icon} />
+          <h3>
             {card.title}
           </h3>
-          <p class="text-sm text-[var(--ot-text-secondary)] leading-relaxed">
+          <p>
             {card.desc}
           </p>
         </div>

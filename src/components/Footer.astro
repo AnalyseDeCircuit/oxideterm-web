@@ -10,82 +10,49 @@ const { lang } = Astro.props;
 const i = t(lang);
 ---
 
-<footer class="border-t border-[var(--ot-border)] py-12 px-6 bg-[var(--ot-bg-deep)]">
-  <div class="max-w-6xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-      <!-- Brand -->
-      <div>
-        <div class="text-xl font-bold mb-3">
-          <span class="text-[var(--ot-text-primary)]">Oxide</span><span class="text-[var(--ot-accent)]">Term</span>
+<footer class="site-footer">
+  <div class="section-shell">
+    <div class="site-footer__primary">
+      <div class="site-footer__brand">
+        <div class="site-wordmark">
+          <span>Oxide</span><span class="site-wordmark__signal">Term</span>
         </div>
-        <p class="text-sm text-[var(--ot-text-muted)]">
-          {i.hero.tagline}
-        </p>
+        <p>{i.hero.tagline}</p>
       </div>
 
-      <!-- Links -->
-      <div>
-        <h4 class="text-sm font-semibold text-[var(--ot-text-secondary)] mb-3 uppercase tracking-wider">{i.footer.links}</h4>
-        <ul class="space-y-2 text-sm">
-          <li>
-            <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
-              {i.footer.source}
-            </a>
-          </li>
-          <li>
-            <a href={docsPath(lang)} class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
-              {i.footer.docs}
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/AnalyseDeCircuit/oxideterm/releases" class="text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)] transition-colors">
-              {i.footer.releases}
-            </a>
-          </li>
-        </ul>
+      <div class="site-footer__group">
+        <h4>{i.footer.links}</h4>
+        <nav class="site-footer__links">
+          <a href="https://github.com/AnalyseDeCircuit/oxideterm">{i.footer.source}</a>
+          <a href={docsPath(lang)}>{i.footer.docs}</a>
+          <a href="https://github.com/AnalyseDeCircuit/oxideterm/releases">{i.footer.releases}</a>
+        </nav>
       </div>
 
-      <!-- Language -->
-      <div>
-        <h4 class="text-sm font-semibold text-[var(--ot-text-secondary)] mb-3 uppercase tracking-wider">{i.footer.language}</h4>
-        <ul class="space-y-1 text-sm max-h-48 overflow-y-auto">
-          {languages.map((l) => (
-            <li>
-              <a
-                href={langPath(l.key)}
-                class:list={[
-                  "transition-colors",
-                  l.key === lang
-                    ? "text-[var(--ot-accent)]"
-                    : "text-[var(--ot-text-muted)] hover:text-[var(--ot-text-primary)]",
-                ]}
-              >
-                {l.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <!-- Legal -->
-      <div>
-        <h4 class="text-sm font-semibold text-[var(--ot-text-secondary)] mb-3 uppercase tracking-wider">{i.footer.legal}</h4>
-        <p class="text-xs text-[var(--ot-text-muted)] leading-relaxed">
-          {i.footer.license}
-        </p>
-        <a
-          href="https://www.gnu.org/licenses/gpl-3.0.html"
-          class="text-xs text-[var(--ot-text-muted)] hover:text-[var(--ot-accent)] transition-colors mt-1 inline-block"
-        >
-          {i.footer.license_link}
-        </a>
+      <div class="site-footer__legal">
+        <h4>{i.footer.legal}</h4>
+        <p>{i.footer.license}</p>
+        <a href="https://www.gnu.org/licenses/gpl-3.0.html">{i.footer.license_link}</a>
       </div>
     </div>
 
-    <!-- Bottom bar -->
-    <div class="pt-6 border-t border-[var(--ot-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--ot-text-muted)]">
+    <div class="site-footer__group site-footer__group--languages">
+      <h4>{i.footer.language}</h4>
+      <nav class="site-footer__languages">
+        {languages.map((language) => (
+          <a
+            href={langPath(language.key)}
+            class:list={[language.key === lang && "site-footer__language--active"]}
+          >
+            {language.label}
+          </a>
+        ))}
+      </nav>
+    </div>
+
+    <div class="site-footer__meta">
       <span>© {new Date().getFullYear()} OxideTerm</span>
-      <span class="font-mono">{i.footer.built_with}</span>
+      <span>{i.footer.built_with}</span>
     </div>
   </div>
 </footer>

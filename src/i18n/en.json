@@ -5,7 +5,7 @@
     "description": "An AI-native workspace for remote servers: SSH terminals, SFTP, remote desktop, port forwarding, trzsz, lightweight editing, local shell, and OxideSens AI. No bundled Electron, no telemetry, and pure-Rust SSH without OpenSSL/libssh2."
   },
   "hero": {
-    "headline": "One AI-native workspace for remote servers",
+    "headline": "AI-native workspace for remote servers",
     "tagline": "Native GPUI. No bundled WebView. No telemetry. No subscription. BYOK-first. Pure-Rust SSH without OpenSSL/libssh2.",
     "subtitle": "Connect once, then keep terminals, SFTP, remote desktops, port forwarding, transfers, lightweight editing, local shells, and OxideSens AI in one local-first desktop app.",
     "cta_download": "Download",
@@ -40,7 +40,7 @@
   "comparison": {
     "badge": "THE DIFFERENCE",
     "title": "Why OxideTerm?",
-    "subtitle": "Not just a terminal. An AI-native workspace for remote servers that stays local-first.",
+    "subtitle": "Not just a terminal. An AI-native workspace for remote servers that stays local‑first.",
     "label_problem": "The Problem",
     "label_solution": "OxideTerm's Answer",
     "pain_1": "Remote server work is split across too many tools",

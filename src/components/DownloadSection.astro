@@ -38,31 +38,33 @@ const platforms = [
 ];
 ---
 
-<section id="download" class="py-20 px-6 border-t border-[var(--ot-border)]">
-  <div class="max-w-4xl mx-auto text-center">
-    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--ot-accent)] mb-3">
+<section id="download" class="site-section download-workbench">
+  <div class="section-shell section-shell--reading">
+    <div class="section-head section-head--compact">
+    <p class="section-head__label">
       {i.download.badge}
     </p>
-    <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+    <h2>
       {i.download.title}
     </h2>
-    <p class="text-[var(--ot-text-secondary)] mb-4">
+    <p>
       {i.download.subtitle}
     </p>
-    <p class="text-xs text-[var(--ot-text-muted)] mb-12" style={`font-family: var(--font-mono);`}>
+    <p class="download-workbench__requirements">
       {i.download.requirements}
     </p>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="download-workbench__grid">
       {platforms.map((platform) => (
-        <div class="card rounded-xl p-6 text-center">
-          <div class="flex justify-center mb-4 text-[var(--ot-text-secondary)]" set:html={platform.icon} />
-          <h3 class="text-lg font-semibold mb-4">{platform.name}</h3>
-          <div class="flex flex-col gap-2">
+        <div class="download-workbench__platform">
+          <div class="download-workbench__icon" set:html={platform.icon} />
+          <h3>{platform.name}</h3>
+          <div class="download-workbench__variants">
             {platform.variants.map((v) => (
               <a
                 href="https://github.com/AnalyseDeCircuit/oxideterm/releases/latest"
-                class="platform-btn inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--ot-bg-surface)] border border-[var(--ot-border)] text-sm text-[var(--ot-text-secondary)] hover:text-[var(--ot-text-primary)] hover:border-[var(--ot-accent)]"
+                class="platform-btn"
               >
                 {v.label}
               </a>
@@ -74,7 +76,7 @@ const platforms = [
 
     <a
       href="https://github.com/AnalyseDeCircuit/oxideterm/releases"
-      class="text-sm text-[var(--ot-text-muted)] hover:text-[var(--ot-accent)] transition-colors"
+      class="download-workbench__all-releases"
     >
       {i.download.all_releases} →
     </a>
