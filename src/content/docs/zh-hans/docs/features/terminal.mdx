@@ -36,9 +36,7 @@ SSH PTY 通道 → TerminalSession → TerminalState → GPUI 绘制
 
 ## 广播输入
 
-从终端命令栏向多个终端面板发送同一条命令，适用于管理集群或在多个会话中执行相同操作。
-
-在命令栏的广播菜单中选择目标，再提交命令。当前面板和选中的目标会收到这条命令；直接在终端画面中键入的内容不会逐键镜像。详见[广播输入](/zh-hans/docs/features/broadcast/)。
+广播会把终端键盘输入、粘贴文本和命令栏命令发送给选中的目标。目标可以位于其他标签或分屏中；目标组定义接收端，不会把组外终端隔离为独立发送端。切换到无关会话前应先关闭广播，详见[广播输入](/zh-hans/docs/features/broadcast/)。
 
 ## 终端搜索
 
@@ -95,7 +93,7 @@ SSH PTY 通道 → TerminalSession → TerminalState → GPUI 绘制
 
 ## 本地终端
 
-OxideTerm 还支持桌面平台的本地终端会话（PTY），基于 `portable-pty`。自动检测 Shell 类型：
+OxideTerm 还支持桌面平台的本地终端会话（PTY），基于 `alacritty_terminal::tty` PTY 后端。自动检测 Shell 类型：
 - **macOS/Linux**：`zsh`、`bash`、`fish`、`pwsh`
 - **Windows**：PowerShell 7、Git Bash、WSL2、CMD（原生 ConPTY——完整支持 TrueColor 和 ANSI，无传统 WinPTY）
 
@@ -103,3 +101,15 @@ OxideTerm 还支持桌面平台的本地终端会话（PTY），基于 `portable
 ## 资源与主机工具
 
 活动 SSH 节点可以向原生监控和[主机工具](/zh-hans/docs/features/host-tools/)提供延迟、进程、服务、容器、端口、文件系统、软件包、日志及其他采样状态。它们与终端共享节点身份和重连状态，而不是打开一个无关的工作区。
+
+## 选择与高亮控制
+
+终端设置提供**按住 Shift 才能选择文本**选项。启用后，普通拖拽保留给终端交互，Shift + 拖拽才开始文本选择。
+
+Shift + 点击可扩展已有选择；水平与垂直内边距可独立设置，默认均为 **1 px**；选中文本的相同项高亮同时提供全局设置，以及现有终端高亮面板中与 grep/rg 并列的控制入口。
+
+## 文件传输协议
+
+终端支持 trzsz，以及兼容 lrzsz 的 ZMODEM、XMODEM 和 YMODEM 工作流。协议数据先于显示转换和录制处理，检测到传输后通过传输界面完成或取消操作。
+
+传输检测会等待完整的 trzsz 握手行，并避免把普通输出被截断后的尾部误判为 X/YMODEM 命令。

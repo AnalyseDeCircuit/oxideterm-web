@@ -152,3 +152,17 @@ The **Active Sessions** sidebar is a live view, not another saved-profile manage
 - **Focus View** — shows a flat list of the currently active or connected sessions.
 
 Node actions include connecting, disconnecting, opening a terminal, SFTP, IDE Mode, or port forwarding, drilling into the host, and saving a live connection as a preset.
+
+## Other Saved Connection Types
+
+Session Manager also manages Serial, Telnet, Mosh, standalone SFTP, RDP, and VNC profiles. Each uses its own connection editor and protocol-specific settings. A saved profile is reusable configuration; an activity record represents an opened connection and can remain visible after disconnection.
+
+### Restore Activity Records After Restart
+
+Serial, Telnet, Mosh, RDP, and VNC activity records survive application restart, including temporary connections that were never saved as profiles. They restore as **disconnected**, and connect only when you choose to reconnect. Saved records resolve the current profile; temporary records retain non-secret connection parameters and request authentication again when required.
+
+Reconnecting reuses the existing activity record. Explicitly removed records stay removed. This restores the connection entry, not its terminal output or a running remote-desktop process. Records already lost by an older version must be opened once again before the new mechanism can retain them.
+
+### Optional Credential Sync
+
+Cloud Sync separates connection settings from the choice to include credentials. When explicitly selected, supported standalone SFTP and Mosh authentication, RDP/VNC passwords, and SOCKS5/HTTP upstream-proxy passwords are included in the encrypted synchronization payload. Synchronizing a profile's route or username alone does not enable password synchronization. Imported credentials use the destination device's protected credential store.

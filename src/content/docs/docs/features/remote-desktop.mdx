@@ -1,36 +1,37 @@
 ---
 title: Remote Desktop
-description: Open native RDP and VNC tabs alongside terminals, files, and forwarded services.
+description: Native RDP and VNC sessions, SSH gateways, and per-profile desktop settings.
 ---
 
-OxideTerm opens **RDP** and **VNC** sessions as native remote desktop tabs. They are separate connection types, not SSH sessions: SFTP, ProxyJump, SSH agent forwarding, and SSH port forwarding do not apply to them.
+OxideTerm opens **RDP** and **VNC** as native desktop tabs alongside terminals and files. The desktop protocol has its own login credentials; an optional saved SSH gateway provides the network route.
 
 ## Create a Connection
 
-Open **New Connection**, then select **RDP** or **VNC** from the connection-type list.
+Open **New Connection** and choose **RDP** or **VNC**.
 
-| Protocol | Default port | Required connection details |
+| Protocol | Default port | Connection details |
 | --- | --- | --- |
 | **RDP** | `3389` | Host, port, username, and password |
-| **VNC** | `5900` | Host and port; the server requests authentication when needed |
+| **VNC** | `5900` | Host and port; authentication depends on the server |
 
-You can save either connection type with a descriptive name and reopen it from the connection tree. Changing the selected protocol updates an untouched default port, but preserves a port you entered yourself.
+Save a profile to reopen or edit it in **Session Manager**, or connect temporarily. The command palette also accepts `rdp://host` and `vnc://host`, with an optional explicit port.
 
-Temporary connections are also available from the command palette with `rdp://host` or `vnc://host`. Include a port when the target does not use the protocol default.
+## SSH Gateway
+
+Choose a saved SSH connection as the gateway when the desktop host is reachable through it. OxideTerm establishes a managed tunnel to the desktop endpoint through that SSH connection. The selected gateway can use its configured jump-host chain and authentication.
+
+Gateway authentication and RDP/VNC authentication remain separate. The desktop tab retains the tunnel while it needs it; closing the tab releases that consumer without disconnecting other users of the shared SSH connection.
+
+## RDP SOCKS5 Proxy
+
+For an RDP connection without an SSH gateway, choose direct access, the global proxy, or a custom SOCKS5 proxy in the profile editor. Supported proxy settings include authentication, remote DNS, and bypass rules. HTTP CONNECT is not supported for this RDP route.
+
+When an SSH gateway is selected, the gateway's own route and proxy settings are used; the RDP proxy is not applied again to the local tunnel. Route settings are retained in Session Manager and supported cloud-synchronized profiles. Password synchronization is a separate opt-in choice; see [Connections & Sessions](/docs/features/connections/#optional-credential-sync).
 
 ## During a Session
 
-Remote desktop tabs forward keyboard and pointer input to the selected host. They also handle:
+Remote desktop tabs handle keyboard and pointer input, remote cursors, clipboard exchange, and viewport resizing where the server and provider support them. Per-profile options control supported redirection and display behavior.
 
-- Clipboard text, with richer clipboard formats when the remote provider supports them
-- Remote cursor updates
-- Viewport resize requests when the remote provider supports resizing
-- Manual reconnect after a disconnected or failed session
+Use the tab controls to reconnect or close the desktop. Reconnecting starts a fresh protocol session after the previous helper exits.
 
-Use the tab controls to reconnect or close the desktop. A reconnect starts a new protocol session when the prior helper has already exited.
-
-## Security and Network Scope
-
-RDP and VNC connect directly to the endpoint you enter. They do not inherit an SSH connection's trust, authentication, or forwarding settings. Confirm that the target, route, firewall policy, and remote desktop server are authorized for your environment.
-
-For Windows Subsystem for Linux GUI workloads, see [WSL Graphics](/docs/features/graphics/). WSL Graphics is a separate Windows-only workflow that starts a local VNC-backed session for a WSL distribution.
+For Linux GUI applications in a local Windows Subsystem for Linux distribution, see [WSL Graphics](/docs/features/graphics/). It is a separate Windows-only VNC-backed workflow.

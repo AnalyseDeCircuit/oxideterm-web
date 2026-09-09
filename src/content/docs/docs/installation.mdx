@@ -11,9 +11,9 @@ OxideTerm is a GPU-rendered desktop application. Use a GPU-capable desktop with 
 |---|---|---|
 | **macOS 13+** | arm64, x64 | `.dmg`, `.app.zip`, portable `.tar.gz` |
 | **Windows** | arm64, x64 | NSIS `.exe`, portable `.zip` |
-| **Linux** | arm64, x64 | `.AppImage`, `.deb`, portable `.tar.gz` |
+| **Linux** | arm64, x64 | `.AppImage`, `.deb`, `.rpm`, portable `.tar.gz` |
 
-Release packages are typically **50–70 MB**. OxideTerm does not use a WebView and does not require Chromium, WebView2, WebKitGTK, Node.js, or a JavaScript runtime to launch.
+Release packages are typically **60–95 MB**. OxideTerm does not use a WebView and does not require Chromium, WebView2, WebKitGTK, Node.js, or a JavaScript runtime to launch.
 
 ## Download
 
@@ -59,6 +59,12 @@ Or run the AppImage directly:
 ```bash
 chmod +x OxideTerm_x.x.x_linux_x64.AppImage
 ./OxideTerm_x.x.x_linux_x64.AppImage
+```
+
+### RPM
+
+```bash
+sudo dnf install ./OxideTerm_x.x.x_linux_x64.rpm
 ```
 
 ## Building from Source

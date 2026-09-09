@@ -39,9 +39,7 @@ All session types use the same native terminal view and interaction model while 
 
 ## Broadcast Input
 
-Broadcast sends a command submitted from the terminal command bar to the current pane and selected terminal targets. Targets may be local or remote and can live in different tabs or split positions. Typing directly into the terminal surface is not mirrored key by key.
-
-Broadcast is immediate. Review destructive commands before submitting them because each selected session receives the command independently.
+Broadcast forwards terminal keyboard input, pasted text, and command-bar commands to selected targets in other tabs or split panes. A group defines receivers; it does not isolate input from terminals outside that group. Disable broadcasting before switching to unrelated work. See [Broadcast Input](/docs/features/broadcast/) for the current behavior.
 
 ## Terminal Search
 
@@ -94,8 +92,20 @@ Shortcuts are configurable. The keybindings settings page shows the active bindi
 
 ## Local Shells
 
-Local terminals use `portable-pty`, including ConPTY on Windows. Shell discovery covers common installations such as zsh, bash, fish, PowerShell, Git Bash, WSL2, and CMD according to the current platform.
+Local terminals use the `alacritty_terminal::tty` PTY backend, including ConPTY on Windows. Shell discovery covers common installations such as zsh, bash, fish, PowerShell, Git Bash, WSL2, and CMD according to the current platform.
 
 ## Resource and Host Tools
 
 Active SSH nodes can feed native monitoring and [Host Tools](/docs/features/host-tools/) for latency, processes, services, containers, ports, filesystems, packages, logs, and other sampled state. These tools share node identity and reconnect state with the terminal rather than opening an unrelated workspace.
+
+## Selection and Highlighting Controls
+
+Terminal settings include a **hold Shift to select text** option. With it enabled, ordinary dragging remains available for terminal interaction; Shift-drag starts a text selection.
+
+Shift-click extends an existing selection; horizontal and vertical terminal padding are independently configurable, both defaulting to **1 px**; selection-match highlighting has a global setting and a control in the existing terminal highlights panel alongside grep/rg highlighting.
+
+## File-Transfer Protocols
+
+Terminal transfer detection supports trzsz and lrzsz-compatible ZMODEM, XMODEM, and YMODEM workflows. Protocol data is handled before display transforms and recording. Use the transfer UI to complete or cancel a detected transfer.
+
+Transfer detection waits for a complete trzsz handshake line and avoids treating a truncated tail of ordinary output as an X/YMODEM command.

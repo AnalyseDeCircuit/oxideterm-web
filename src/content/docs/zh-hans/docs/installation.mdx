@@ -13,7 +13,7 @@ OxideTerm 是 GPU 加速的原生桌面应用。请使用带有可用图形驱�
 | **Windows** | x64、ARM64 | NSIS `.exe`、便携 `.zip` |
 | **Linux** | x64、ARM64 | AppImage、`.deb`、便携 `.tar.gz` |
 
-安装包通常约为 **50–70 MB**，具体大小会随平台和版本变化。
+安装包通常约为 **60–95 MB**，具体大小会随平台和版本变化。
 
 ## 下载
 
@@ -45,6 +45,12 @@ chmod +x OxideTerm_*.AppImage
 ```
 
 如果程序无法创建图形表面，请先更新 GPU 驱动，并在设置中选择兼容渲染配置。从源码排查时，也可以使用 `OXIDETERM_RENDER_PROFILE=compatibility cargo run` 启动。
+
+### RPM
+
+```bash
+sudo dnf install ./OxideTerm_x.x.x_linux_x64.rpm
+```
 
 ## 从源码运行
 

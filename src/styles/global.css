@@ -1234,6 +1234,16 @@ summary::-webkit-details-marker {
 
 /* Starlight documentation */
 
+/* Landing-page colors must not override the documentation's selected theme. */
+body:not(.site-body) {
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+}
+
+body:not(.site-body) :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--sl-color-white);
+}
+
 :root {
   --sl-font: var(--font-body);
   --sl-font-mono: var(--font-mono);

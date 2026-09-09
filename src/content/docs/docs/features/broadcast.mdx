@@ -1,60 +1,28 @@
 ---
 title: Broadcast Input
-description: Send commands to multiple SSH and local terminal panes for parallel server management.
+description: Send terminal input and command-bar commands to selected terminal targets.
 ---
 
-**Broadcast Input** sends one command from the terminal command bar to multiple terminal panes. It is designed for tasks like deploying to a fleet of servers, running the same check across environments, or maintaining multiple nodes in sync.
+**Broadcast Input** forwards supported keyboard input, pasted text, and command-bar commands to selected terminal targets. Targets can be in different tabs or split panes.
 
-## Enabling Broadcast
+## Select Targets
 
-1. Click the **broadcast icon** in the terminal command bar, or use `⌘B` (macOS) / `Ctrl+B` (Windows/Linux)
-2. The **Broadcast targets** menu shows the other open terminal panes
-3. Select individual panes, or use **Select all**
-4. Submit a command from the command bar
+Open the broadcast control in the terminal command bar. Enable broadcasting and choose the destination sessions using the available target selector or a saved broadcast group. Review the displayed destinations before typing.
 
-The command bar shows the number of active broadcast targets.
+The selection defines **receivers**, not a closed group of senders. While broadcasting is enabled, input from the current terminal can reach the selected receivers even if the current terminal is outside that group. The source pane is excluded from duplicate delivery.
 
-## Target Selection
+## Working with Groups
 
-The target picker lists every open terminal:
-- SSH sessions (labeled with hostname)
-- Local terminal panes (labeled "Local Terminal")
-- **Select All** / **Deselect All** convenience buttons
-- Shows the current pane and active target count
-- The current pane always receives the submitted command
+The current implementation uses one active broadcast selection. Saved groups let you recall a set of targets; they do not create multiple independent synchronization channels. Do not assume that switching to another tab isolates its input, or that two shell panes on the same saved connection can always be selected independently through a connection-based group.
 
-:::note
-You can broadcast to a mix of supported local and remote terminal panes.
-:::
+For a one-host change, disable broadcasting before typing, then enable it again when all destinations are ready. Closing a pane removes it from the live target set.
 
-## How It Works
+## Terminal and Command Bar
 
-When broadcast is active:
-- The command bar sends the submitted command line to the current pane and each selected target
-- Each pane receives the command through its native terminal session object
-- Each target processes the command independently
-- Targets can be in different split positions or tabs
-
-Typing directly into the terminal surface is not mirrored key by key. Use the terminal command bar for broadcast commands.
-
-## Disabling Broadcast
-
-Open the broadcast target menu and deselect individual panes, or use **Deselect all**.
-
-Closing a target pane removes it from the live target set. There is no permanently assigned sender; the active pane that submits a command is the source for that command.
-
-## Use Cases
-
-- **Fleet deployments** — run `sudo systemctl restart myapp` on 10 servers at once
-- **Environment parity checks** — run `env | grep APP_` on dev, staging, and prod to compare
-- **Synchronized log tailing** — `tail -f /var/log/app.log` on multiple servers simultaneously
-- **Configuration rollouts** — edit the same config file path on multiple nodes
-- **Cluster maintenance** — run drain/cordon commands across Kubernetes nodes
+Direct terminal input is broadcast as well as command-bar submissions. Each destination receives input through its own terminal session and interprets it according to its current shell or application state. Different prompts, directories, or editor positions can produce different results from the same input.
 
 :::caution
-Broadcast sends a submitted command **immediately** to all targets. Be careful with destructive commands because there is no extra broadcast confirmation step.
+Broadcast input is delivered immediately. Disable it before typing into an unrelated session, entering credentials, or making a change intended for only one host. Selecting a group does not restrict which terminal can act as the sender.
 :::
 
-## Split Pane Integration
-
-Broadcast works naturally with [split panes](/docs/features/terminal). You can have a grid of SSH sessions receive the same submitted command while viewing all outputs simultaneously.
+Broadcast can be used with [split panes](/docs/features/terminal/) to watch each destination while running shared checks or deployment commands.

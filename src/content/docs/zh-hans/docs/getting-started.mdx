@@ -5,7 +5,7 @@ description: OxideTerm — 基于 Rust、GPUI 和纯 Rust SSH 构建的原生远
 
 **OxideTerm** 是一个面向远程服务器的原生工作区。连接服务器后，你可以围绕同一节点使用 SSH 终端、SFTP、端口转发、远程桌面、轻量编辑、主机监控、trzsz 传输和 OxideSens AI；本地 Shell 和串口会话也可以在同一界面中管理。
 
-桌面应用使用 **Rust + GPUI** 构建。GPUI 直接在 GPU 表面绘制界面，终端状态、连接状态和各项工具都留在同一 Rust 进程中，不依赖浏览器、WebView、JavaScript 或前后端桥接。当前安装包通常约为 **50–70 MB**。
+桌面应用使用 **Rust + GPUI** 构建。GPUI 直接在 GPU 表面绘制界面，终端状态、连接状态和各项工具都留在同一 Rust 进程中，不依赖浏览器、WebView、JavaScript 或前后端桥接。当前安装包通常约为 **60–95 MB**。
 
 ## 为什么选择 OxideTerm？
 
@@ -43,9 +43,9 @@ SSH 或本地 PTY 的字节直接更新 Rust 中的 `TerminalState`，GPUI 再�
 |---|---|---|
 | **桌面界面** | GPUI | GPU 加速的纯 Rust 原生界面 |
 | **异步运行时** | Tokio + DashMap | 后台任务与并发连接状态 |
-| **SSH** | russh + `ring` | 纯 Rust SSH，支持 SSH Agent、证书和 ProxyJump |
+| **SSH** | russh 0.63.0 + `aws-lc-rs` | 纯 Rust SSH，支持 SSH Agent、证书和 ProxyJump |
 | **终端** | `alacritty_terminal` | Rust 终端模拟、滚动缓冲、选择、搜索和图形协议 |
-| **本地 PTY** | `portable-pty` | macOS/Linux PTY 与 Windows ConPTY |
+| **本地 PTY** | `alacritty_terminal::tty` PTY 后端 | macOS/Linux PTY 与 Windows ConPTY |
 | **编辑器** | 原生 GPUI 编辑器 + tree-sitter | 语法高亮、折叠、搜索与远程文件编辑 |
 | **插件** | wasmtime + 类型化 Rust Host API | WASM 沙箱与声明式原生界面 |
 | **CLI** | `oxideterm` | 直接调用领域 crate 的无头管理工具 |

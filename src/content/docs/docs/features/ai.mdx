@@ -101,3 +101,13 @@ MCP tools are wrapped in OxideTerm's result envelope so they remain visible, aud
 - Terminal/context data is sent only when you choose to use AI with that context.
 - Core SSH workflows do not require an OxideTerm account or subscription.
 - Cloud Sync is optional, not a prerequisite for OxideSens or SSH workflows.
+
+## Queue, Steer, and Interrupt
+
+Sending a message while a reply is running adds it to the current conversation's queue. Pending messages can be edited, deleted, moved up, or sent now. Normal completion advances the queue in order; paused messages remain available to resume explicitly.
+
+- **Queue** keeps the message for a later turn.
+- **Steer** sends a supplement to a running agent when that agent supports it. If steering is unavailable, the draft is retained and the UI explains that it was not sent.
+- **Interrupt and send** cancels the current reply and gives the new draft priority over queued follow-ups, without deleting those follow-ups.
+
+Each conversation owns its pending messages; switching conversations does not redirect them to another target.

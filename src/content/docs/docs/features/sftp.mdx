@@ -29,7 +29,7 @@ OxideTerm remembers the current working directory for each session. On reconnect
 
 ## Smart Preview
 
-Preview files directly without downloading:
+Preview supported files without manually saving a local copy. Remote previews still read file data and follow the configured preview size limit:
 - **Images** — inline preview with zoom support
 - **Video / Audio** — media playback with controls
 - **Code** — syntax-highlighted preview for source files
@@ -55,7 +55,7 @@ For large directory uploads/downloads, OxideTerm can use a **tar-based transfer 
 
 ## Drag and Drop
 
-Drag files between the local and remote panes to initiate transfers. You can also drag files from your system's file manager (Finder, Explorer) into the local pane.
+Drag files between the local and remote panes to initiate transfers. You can also drag files from your system's file manager (Finder, Explorer) into the remote pane to queue uploads.
 
 ## Context Menu
 
@@ -74,3 +74,9 @@ All SFTP operations are addressed by `nodeId` and resolved atomically by the Rus
 ## State Gating
 
 SFTP operations are gated by connection state — the UI automatically locks when the connection enters `link_down` or `reconnecting` state, preventing operations on a dead connection. Once the connection recovers, the SFTP panel unlocks automatically.
+
+## Sidebar Follows the Active SSH Terminal
+
+The compact SFTP sidebar follows the active SSH tab, or the focused terminal in a split view. Pin a server with the toolbar control when you want to browse it independently. Each server retains its own browsing directory.
+
+Switching to a local terminal shows that no matching remote is selected. Existing transfers remain bound to their original server. If the destination changes while a system file picker is open, the pending upload is cancelled so that you can select files for the intended destination again.

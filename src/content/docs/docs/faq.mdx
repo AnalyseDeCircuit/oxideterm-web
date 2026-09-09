@@ -30,9 +30,9 @@ OxideTerm uses **GPUI** to draw its interface directly on a GPU surface. The UI,
 | Comparison | Browser-based desktop app | OxideTerm native |
 |---|---|---|
 | UI runtime | Bundled or system browser engine | GPUI GPU surface |
-| Desktop package | Often includes a browser runtime | Approximately 50–70 MB, depending on target |
+| Desktop package | Often includes a browser runtime | Approximately 60–95 MB, depending on target |
 | Terminal path | Bytes cross a script/UI boundary | Rust input mutates `TerminalState` directly |
-| SSH implementation | Varies | Pure Rust `russh` with `ring` |
+| SSH implementation | Varies | Pure Rust `russh 0.63.0` with `aws-lc-rs` |
 | Headless management | Often depends on a running app | Standalone `oxideterm` CLI links to domain crates |
 
 ## Connections
@@ -111,7 +111,7 @@ Yes. OxideTerm records asciicast v2 sessions with timestamps and provides variab
 
 ### How does broadcast input work?
 
-Select terminal panes as broadcast targets, then submit a command from the terminal command bar. The native workspace sends that command to the current pane and each selected target. Direct terminal typing is not mirrored key by key. Review destructive commands carefully because broadcast is immediate.
+Choose the receivers in the broadcast controls. Both direct terminal input and command-bar commands can be forwarded to those targets. A selected group does not isolate input from terminals outside it, so disable broadcasting before unrelated work. See [Broadcast Input](/docs/features/broadcast/).
 
 ## Plugins
 

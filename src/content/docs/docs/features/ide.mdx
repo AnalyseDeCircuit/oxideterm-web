@@ -83,3 +83,11 @@ Open buffers and dirty state remain in the native workspace. Remote I/O is gated
 :::tip
 IDE Mode is intended for focused remote edits and project inspection. Use a full development environment when you need a large extension ecosystem, debugger integration, or heavyweight language services.
 :::
+
+## File Size, Encoding, and Line Endings
+
+IDE editing has its own **100 MiB** file limit, independent of the SFTP preview limit. It applies to both agent-backed and SFTP-backed editing.
+
+Opening a file detects its encoding, byte-order mark (BOM), and line endings. The editor uses LF internally, including pasted text, and restores the selected encoding, BOM, and LF/CRLF/CR format when saving. The existing status bar exposes encoding and line-ending controls: inspect the detected format, reopen with a chosen encoding, or change the format used for the next save.
+
+Reopening replaces the buffer from disk; handle unsaved edits before choosing that action.

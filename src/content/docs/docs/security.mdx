@@ -7,9 +7,11 @@ OxideTerm keeps its desktop UI, terminal state, and core services in one Rust pr
 
 ## Rust SSH and Cryptography
 
-OxideTerm uses `russh` with the `ring` cryptography backend:
+OxideTerm 2.0.27 uses the vendored `russh 0.63.0` SSH library and `russh-sftp 2.3.0`. The SSH crate enables russh's default `aws-lc-rs` cryptographic backend:
 
-- No OpenSSL or libssh2 dependency in the SSH stack
+- [aws-lc-rs](https://github.com/aws/aws-lc-rs) calls the native [AWS-LC](https://github.com/aws/aws-lc) cryptographic library; this is not a dependency tree made entirely of Rust
+- No libssh2 or system OpenSSL runtime is required
+
 - SSH key exchange, channels, SFTP, forwarding, and supported modern ciphers
 - Ed25519, ECDSA, RSA, SSH certificates, and system SSH Agent support
 - Sensitive owned buffers wrapped with `zeroize`/`Zeroizing` where they cross credential boundaries
@@ -70,7 +72,7 @@ SSH Agent access uses `SSH_AUTH_SOCK` on macOS/Linux and the OpenSSH agent named
 
 ## Native Process Boundaries
 
-Terminal bytes flow from Rust session backends into Rust-owned `TerminalState`, then into the GPUI painter. Desktop management actions call domain services in process. There is no localhost terminal bridge or desktop management protocol to authenticate and expose.
+Terminal bytes flow from Rust session backends into Rust-owned `TerminalState`, then into the GPUI painter. Desktop management actions call domain services in process. Ordinary terminal rendering does not require a localhost WebSocket bridge. Separately enabled integrations, such as MCP, have their own access controls.
 
 The optional remote IDE agent is different: it runs on a selected remote host and communicates through a channel inside the existing authenticated SSH connection. It does not open an external listening port, and IDE mode can fall back to SFTP when the agent is unavailable.
 

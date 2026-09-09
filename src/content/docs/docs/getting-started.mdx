@@ -5,7 +5,7 @@ description: OxideTerm — an AI-native workspace for remote servers built as a 
 
 **OxideTerm** is an **AI-native workspace for remote servers**, not just a terminal. Connect to a server once, then work around it in one place: SSH shell, SFTP, port forwarding, trzsz transfers, lightweight editing, local shell, remote desktop, and OxideSens AI.
 
-OxideTerm is a pure Rust desktop application built with **GPUI**. GPUI draws the interface directly on a GPU surface; there is no browser runtime, DOM, JavaScript frontend, or system WebView. Release packages are typically **50–70 MB** and are available for macOS, Windows, and Linux on x64 and arm64.
+OxideTerm is a native desktop application written in Rust built with **GPUI**. GPUI draws the interface directly on a GPU surface; there is no browser runtime, DOM, JavaScript frontend, or system WebView. Release packages are typically **60–95 MB** and are available for macOS, Windows, and Linux on x64 and arm64.
 
 The core workspace is local-first: SSH, files, forwarding, local shells, saved connections, and settings do not require an OxideTerm account. OxideSens is BYOK, so requests go only to the provider you configure.
 
@@ -18,7 +18,7 @@ The core workspace is local-first: SSH, files, forwarding, local shells, saved c
 | Reconnect means losing active work | **Grace Period reconnect**: OxideTerm probes the old SSH connection before replacing it and restores dependent tools when a new connection is required |
 | Remote file editing needs a heavyweight remote IDE | **Native lightweight IDE**: a GPUI editor and SFTP-backed file tree, with an optional Linux remote agent for project search and file watching |
 | Every tool opens another SSH connection | **Shared connection registry**: terminal, SFTP, forwards, and IDE consumers reuse the node's managed SSH connection |
-| SSH libraries add OpenSSL deployment friction | **Pure Rust SSH**: `russh` with `ring`, without an OpenSSL runtime dependency |
+| SSH libraries add OpenSSL deployment friction | **Pure Rust SSH**: `russh 0.63.0` with `aws-lc-rs`, without an OpenSSL runtime dependency |
 | Browser-wrapped desktop apps add another runtime | **Native GPUI shell**: GPU-rendered Rust UI with no WebView |
 | Automation should not require the desktop app | **Standalone `oxideterm` CLI**: direct headless access to settings, connections, backups, cloud sync, diagnostics, and other persisted domains |
 
@@ -49,9 +49,9 @@ The standalone `oxideterm` CLI follows the same ownership model. It links the re
 |---|---|---|
 | **Desktop UI** | GPUI | Native windows, input, layout, and GPU rendering |
 | **Async runtime** | Tokio | SSH, transfers, forwarding, monitoring, and background work |
-| **SSH** | `russh` + `ring` | Pure Rust SSH, SFTP channels, agent support, and ProxyJump |
+| **SSH** | `russh 0.63.0` + `aws-lc-rs` | Pure Rust SSH, SFTP channels, agent support, and ProxyJump |
 | **Terminal state** | `alacritty_terminal` | VT parsing, grid, scrollback, selection, and search state in Rust |
-| **Local PTY** | `portable-pty` | Local shells and Windows ConPTY workflows |
+| **Local PTY** | `alacritty_terminal::tty` | Local shells and Windows ConPTY workflows |
 | **Editor** | Native GPUI editor | Remote editing, syntax highlighting, folding, search, and multi-cursor state |
 | **Encryption** | ChaCha20-Poly1305 + Argon2id | Encrypted `.oxide` exports and sealed local connection data |
 | **Storage** | JSON stores + redb | Settings, connections, runtime state, history, and indexes |
