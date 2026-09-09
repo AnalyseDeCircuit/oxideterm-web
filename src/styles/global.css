@@ -932,6 +932,15 @@ video {
   background: var(--color-paper);
 }
 
+.competitive-ledger__note {
+  /* Keep the comparison note aligned to the table instead of an arbitrary prose cap. */
+  margin-block-start: var(--space-lg);
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  text-align: center;
+}
+
 /* CLI */
 
 .cli-workbench {
@@ -1533,6 +1542,17 @@ header.header {
 }
 
 @media (min-width: 60rem) {
+  .download-workbench .section-head {
+    max-width: none;
+  }
+
+  .download-workbench .section-head p:not(.section-head__label),
+  .legal-ledger__subtitle,
+  .legal-ledger__disclaimer {
+    /* Short supporting statements should use the available reading column on desktop. */
+    max-width: none;
+  }
+
   .problem-matrix .section-head,
   .product-demo .section-head {
     max-width: none;
