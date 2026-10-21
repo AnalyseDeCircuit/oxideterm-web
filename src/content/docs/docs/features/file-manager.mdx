@@ -54,7 +54,7 @@ Press **Space** to Quick Look preview the selected file without opening an exter
 | **Images** | PNG, JPG, GIF, WebP, SVG, HEIC |
 | **Video** | MP4, WebM, MOV |
 | **Audio** | MP3, AAC, FLAC, WAV, OGG |
-| **Code / Text** | Any text file with syntax highlighting (100+ languages) |
+| **Code / Text** | Text files; highlighting depends on built-in language support or an enabled language plugin |
 | **Markdown** | Rendered markdown (with source toggle) |
 | **Hex** | Binary files shown as hex dump |
 | **Fonts** | TTF, OTF, WOFF — renders alphabet, numbers, ligatures, Nerd Font icons |
@@ -62,6 +62,20 @@ Press **Space** to Quick Look preview the selected file without opening an exter
 | **Office** | DOCX, XLSX, PPTX inline preview |
 
 In the preview panel, use `←` / `→` to navigate to the previous/next file. Press `i` to toggle the info panel (size, MIME type, timestamps, permissions, checksum).
+
+### Install Additional Preview Formats
+
+Open **Plugin Manager → Marketplace** and install and enable the matching preview plugin:
+
+| Format | Plugin | Preview |
+|---|---|---|
+| PDF | **PDF Preview** | Pages, page navigation, and zoom |
+| SQLite | **SQLite Preview** | Tables and read-only paginated data |
+| PEM / DER certificates | **Certificate Viewer** | Certificate details without displaying private keys |
+
+These plugins run on your computer. Install them on each device where you want to preview these formats. A missing or disabled preview plugin does not prevent ordinary file browsing or transfers.
+
+For code highlighting, see [Language Support](/docs/features/ide/#language-support).
 
 ## File Properties & Checksums
 

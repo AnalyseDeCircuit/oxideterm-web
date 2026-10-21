@@ -3,7 +3,7 @@ title: Native Plugin Development
 description: Build manifest-only, process, and Wasm plugins for the OxideTerm native host.
 ---
 
-This guide describes the OxideTerm Native plugin model. It is intentionally different from the Tauri/Web plugin model: native plugins do not run React components, do not inject CSS, and do not execute `main.js` through a WebView. A native plugin is discovered through `plugin.json`, then either contributes manifest-only metadata or runs through a host-owned process/WASM runtime bridge.
+This guide focuses on declarative UI and host API extensions using `process`, `wasm`, or `manifest-only` plugins. Native plugins are discovered through `plugin.json`; they do not run React components, inject CSS, or execute `main.js` through a WebView. The host also supports specialized `language`, `acp`, `remote-desktop`, `terminal-transport`, and `helper` packages. RDP and VNC use `remote-desktop` plugins from the marketplace, with the viewer and saved profiles managed by the host.
 
 ## Contents
 
@@ -586,6 +586,7 @@ flowchart TB
     RuntimePlan --> ManifestOnly["manifest-only"]
     RuntimePlan --> Process["process runtime"]
     RuntimePlan --> Wasm["wasm runtime"]
+    RuntimePlan --> Specialized["language · acp · remote-desktop · terminal-transport · helper"]
     RuntimePlan --> Legacy["legacy-js visible but not executable"]
 
     Process --> Protocol["JSON Lines Protocol"]
@@ -605,13 +606,13 @@ The host owns every durable and security-sensitive boundary:
 - Plugin settings, storage, and secrets.
 - UI rendering through native GPUI controls.
 
-The plugin never receives raw GPUI elements, DOM nodes, React instances, SSH transport handles, or direct filesystem access outside approved host APIs.
+The host API does not expose raw GPUI elements, DOM nodes, React instances, or SSH transport handles. Native process plugins run as executables with the user's operating-system permissions; host API permission checks do not sandbox their own filesystem or network access.
 
 ## Native Versus Tauri Plugins
 
 | Area | Tauri/Web Plugin | Native Plugin |
 |---|---|---|
-| Runtime | ESM `main.js` loaded through dynamic import | `runtime.kind` is `process`, `wasm`, or `manifest-only` |
+| Runtime | ESM `main.js` loaded through dynamic import | General extensions use `process`, `wasm`, or `manifest-only`; specialized packages use the runtime kinds listed above |
 | UI | React components and CSS | Declarative native UI schema rendered by GPUI |
 | Shared modules | `window.__OXIDE__` | Not available |
 | Styling | CSS and theme variables | Host-owned native controls only |
@@ -1004,7 +1005,7 @@ interface NativePluginManifest {
 }
 
 interface NativePluginRuntime {
-  kind: 'wasm' | 'process' | 'manifest-only';
+  kind: 'language' | 'wasm' | 'process' | 'acp' | 'remote-desktop' | 'terminal-transport' | 'helper' | 'manifest-only';
   entry: string;
 }
 

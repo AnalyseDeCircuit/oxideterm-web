@@ -21,6 +21,12 @@ The GPUI editor supports the workflows needed for focused remote changes:
 
 The editor keeps text, selections, highlights, folds, and viewport state in Rust. It does not embed a browser editor component.
 
+### Language Support
+
+Common shell and configuration languages are built in, including Bash, Zsh, Fish, PowerShell, Python, JSON, YAML, TOML, SQL, and Markdown. Other languages, such as Rust, Go, C/C++, JavaScript, and TypeScript, use language plugins.
+
+Open **Plugin Manager → Marketplace**, find the language you need, and install and enable its plugin on this device. A text file can still be opened and edited without its language plugin; syntax highlighting and grammar-based features such as folding require the matching grammar. Installing the remote agent does not install local language plugins.
+
 ## Remote File Tree
 
 The IDE sidebar provides a remote project tree with:

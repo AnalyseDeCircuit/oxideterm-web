@@ -76,7 +76,7 @@ sudo dnf install ./OxideTerm_x.x.x_linux_x64.rpm
 - Platform build tools:
   - macOS: Xcode Command Line Tools
   - Windows: Visual Studio Build Tools with the MSVC C++ workload
-  - Linux: the native dependencies installed by `scripts/install-linux-deps.sh`
+  - Linux: the native dependencies installed by `scripts/ci/install-linux-deps.sh`
 
 ### Build Steps
 
@@ -85,7 +85,7 @@ git clone https://github.com/AnalyseDeCircuit/oxideterm.git
 cd oxideterm
 
 # Linux only: install the repository's native desktop dependencies.
-./scripts/install-linux-deps.sh
+./scripts/ci/install-linux-deps.sh
 
 cargo build --release -p oxideterm-gpui-app
 ```
@@ -96,7 +96,7 @@ The desktop executable is written to `target/release/oxideterm-native` (`oxidete
 cargo build --release -p oxideterm-cli
 ```
 
-Repository maintainers can create the platform package formats with `scripts/package_native.py`; the release workflow builds all six macOS, Windows, and Linux architecture targets.
+Repository maintainers can create the platform package formats with `scripts/release/package_native.py`; the release workflow builds all six macOS, Windows, and Linux architecture targets.
 
 ## CLI Installation
 

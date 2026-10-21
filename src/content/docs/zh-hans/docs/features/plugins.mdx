@@ -3,15 +3,29 @@ title: 插件
 description: 通过原生进程和 Wasm 插件扩展 OxideTerm。
 ---
 
-OxideTerm 的原生插件宿主会从当前配置目录发现插件包。插件在 `plugin.json` 中声明身份和贡献项；原生应用不会把 JavaScript 加载到浏览器界面中执行。
+打开**插件管理器 → 插件市场**安装所需功能，然后在插件管理器中启用。**RDP** 和 **VNC** 远程桌面由独立插件提供，安装后仍通过**新建连接**或**会话管理**打开桌面。详见[远程桌面](/zh-hans/docs/features/remote-desktop/)。
+
+插件管理器也负责更新、设置、权限和卸载。每台需要这些功能的设备都应安装对应插件；同步连接配置不会自动安装插件。
+
+## 通过插件安装的功能
+
+| 功能 | 安装内容 | 使用入口 |
+|---|---|---|
+| Mosh 会话 | **Mosh** | 新建连接 → Mosh；远端还需安装 `mosh-server` |
+| 更多代码语言 | 对应语言插件 | IDE 和代码预览 |
+| PDF 页面 | **PDF Preview** | 文件管理器和 SFTP 预览 |
+| SQLite 数据表 | **SQLite Preview** | 只读文件预览 |
+| 证书检查 | **Certificate Viewer** | PEM / DER 证书预览 |
 
 ## 运行时模型
 
-支持三种运行时：
+支持以下运行时：
 
 - `process`：由宿主管理可执行文件，通过带版本的 JSON Lines 通信。
 - `wasm`：由集成运行时管理 Wasm 模块。
 - `manifest-only`：只声明贡献项，不需要可执行运行时。
+- `remote-desktop`：为原生 RDP/VNC 查看器提供受信任的协议进程。
+- `language`、`acp`、`terminal-transport` 和 `helper`：分别用于语言支持、AI 代理、终端传输和受管理的辅助程序。
 
 原生应用不会执行旧的 JavaScript 入口。
 
@@ -37,4 +51,4 @@ OxideTerm 的原生插件宿主会从当前配置目录发现插件包。插件�
 
 ## 下一步
 
-继续阅读[插件开发指南](../plugin-development/)，了解原生清单和运行时流程。
+继续阅读[插件开发指南](/zh-hans/docs/plugin-development/)，了解原生清单和运行时流程。

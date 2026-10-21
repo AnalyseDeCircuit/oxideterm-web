@@ -5,6 +5,10 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://oxideterm.app",
+  redirects: {
+    "/docs/features/launcher/": "/docs/features/local-terminal/",
+    "/zh-hans/docs/features/launcher/": "/zh-hans/docs/features/local-terminal/",
+  },
   vite: {
     plugins: [tailwindcss()],
   },
@@ -141,11 +145,6 @@ export default defineConfig({
               slug: "docs/features/recording",
               label: "Session Recording",
               translations: { "zh-CN": "会话录制" },
-            },
-            {
-              slug: "docs/features/launcher",
-              label: "Launcher",
-              translations: { "zh-CN": "启动台" },
             },
             {
               slug: "docs/features/event-log",

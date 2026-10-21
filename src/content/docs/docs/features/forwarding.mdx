@@ -3,7 +3,7 @@ title: Port Forwarding
 description: Local, remote, and dynamic port forwarding with smart remote port detection and auto-restore.
 ---
 
-OxideTerm supports all three types of SSH port forwarding, plus automatic detection of remote listening ports. All forwarding operations use a **lock-free message-passing architecture** for maximum throughput.
+OxideTerm supports local, remote, and dynamic SSH port forwarding, plus detection of remote listening ports. Start a rule from a connected host or save a standalone SSH tunnel in Session Manager.
 
 ## Forwarding Types
 
@@ -46,6 +46,20 @@ Local SOCKS5 Port ──SSH Tunnel──► (any remote destination)
 - Access multiple internal services without individual port forwards
 - Network debugging from the remote server's perspective
 
+## Standalone SSH Tunnels
+
+Use a standalone tunnel when you need a forwarded port without opening a terminal.
+
+1. Open **New Connection → Advanced Connections → SSH Tunnel**.
+2. Enter a name and optional group, then select the saved SSH host that will carry the tunnel.
+3. Choose **Local**, **Remote**, or **Dynamic (SOCKS5)**. Set the bind address and port; local and remote forwards also need a destination host and port.
+4. Choose **Save** for later use, or **Save and Start** to connect now.
+5. Enable **Connect on application startup** only if this tunnel should connect whenever OxideTerm starts. Authentication may still require your input.
+
+Manage saved tunnels from **Session Manager** and inspect running rules in **Port Forwarding**. A tunnel retains its own SSH connection usage, so closing an unrelated terminal does not stop it. Stop the tunnel explicitly when it is no longer needed. Exiting OxideTerm stops its tunnels; they do not run as an independent background service.
+
+Tunnel profiles participate in cloud sync and encrypted `.oxide` import/export. Running connections are not synchronized. After moving a profile to another device, check the associated SSH host, authentication, and local bind port before starting it.
+
 ## Smart Remote Port Detection
 
 OxideTerm automatically detects services listening on ports on the remote server. The **Remote Listening Ports** panel shows:
@@ -65,14 +79,12 @@ Pin frequently-used forwards as **Quick Forwards** for instant access. They appe
 - View all active forwards with **status**, **local/remote addresses**, and **real-time traffic stats** (bytes in/out)
 - **Start / stop** individual forwards
 - **Edit** forwarding rules (port, bind address, remote host)
-- **Death reporting** — forward tasks actively report exit reason (SSH disconnect, remote port close, timeout) for clear diagnostics instead of silent failures
-- **Idle timeout** — `FORWARD_IDLE_TIMEOUT` (300s) prevents zombie connections from accumulating
+- **Connection errors** — inspect the rule status and reported error before retrying
+- **Idle connections** — inactive forwarded data connections close after the default 300-second idle timeout; the forwarding listener can continue accepting new connections
 
-## Architecture
+## Connection Ownership
 
-Port forwarding uses a **message-passing architecture**: each SSH Channel is owned by a single `ssh_io` task. There is no `Arc<Mutex<Channel>>` — data flows through message channels, eliminating mutex contention entirely in the hot path.
-
-The `HandleController` dispatches forward requests via `channel_open_direct_tcpip()` (local forwards) or `tcpip_forward()` (remote forwards). Each forward task runs independently and communicates status back via events.
+Forwarding uses the managed SSH connection and has its own listener and connection tasks. Closing a terminal releases that terminal's use of SSH, not another active forward. Stopping a rule shuts down its forwarding tasks; explicitly disconnecting the owning SSH connection also interrupts its forwards.
 
 ## Reconnect Behavior
 

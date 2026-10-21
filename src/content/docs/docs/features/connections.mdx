@@ -155,7 +155,17 @@ Node actions include connecting, disconnecting, opening a terminal, SFTP, IDE Mo
 
 ## Other Saved Connection Types
 
+### Mosh
+
+Install and enable **Mosh** from **Plugin Manager → Marketplace** before opening a Mosh connection. The server still needs `mosh-server` and a reachable UDP port. Choose **New Connection → Mosh**, supply the SSH authentication used to start the server, and configure the UDP port or range when your firewall requires it.
+
+SSH jump hosts can help start the remote session, but do not carry the subsequent Mosh UDP traffic. Open a separate SSH connection for SFTP, IDE, or SSH port forwarding. A synchronized Mosh profile also requires the plugin on the destination device.
+
+### Saved Profiles
+
 Session Manager also manages Serial, Telnet, Mosh, standalone SFTP, RDP, and VNC profiles. Each uses its own connection editor and protocol-specific settings. A saved profile is reusable configuration; an activity record represents an opened connection and can remain visible after disconnection.
+
+For a saved forwarding connection without a terminal, see [Standalone SSH Tunnels](/docs/features/forwarding/#standalone-ssh-tunnels).
 
 ### Restore Activity Records After Restart
 

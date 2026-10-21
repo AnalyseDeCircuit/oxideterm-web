@@ -6,17 +6,17 @@ description: Run Linux GUI applications and full desktop environments from WSL d
 **WSL Graphics** enables running Linux GUI applications and full desktop environments from Windows Subsystem for Linux (WSL) distributions — displayed directly inside OxideTerm via VNC.
 
 :::note
-WSL Graphics is a **Windows-only** feature and requires the `wsl-graphics` build. It is not available in standard macOS or Linux builds.
+WSL Graphics is a **Windows-only** feature. It uses a separate built-in viewer, not the marketplace RDP/VNC plugins. It is not available on macOS or Linux.
 :::
 
 ## Opening WSL Graphics
 
-Open a new tab and select **WSL Graphics** from the tab type picker.
+Open **New Connection → WSL Graphics**.
 
 ## Selecting a Distribution
 
 OxideTerm auto-detects installed WSL distributions and lists them with their status:
-- **Running** — VNC server is active
+- **Running** — distribution is running
 - **Stopped** — distribution is not running
 
 Select a distribution from the dropdown to proceed.
@@ -48,7 +48,7 @@ sudo apt install openbox -y
 1. Select your distribution
 2. Click **Desktop Mode**
 3. OxideTerm starts TigerVNC and your desktop environment
-4. The desktop renders in the tab — scroll to zoom, drag to pan
+4. The desktop renders in the tab, with keyboard and pointer input sent to the session
 
 Use **Fullscreen** to expand the VNC view to fill the OxideTerm window.
 
@@ -76,15 +76,6 @@ App Mode uses Openbox as a minimal window manager. Some applications may require
 | **Fullscreen** | Toggle fullscreen VNC view |
 
 If the VNC server is not found, OxideTerm shows the install command. If D-Bus is missing, it shows the dbus-x11 install instruction.
-
-## Display Settings
-
-| Setting | Options |
-|---------|---------|
-| **Resolution** | 1024×768 / 1280×720 / 1920×1080 / Custom |
-| **Color Depth** | 24bpp (recommended) / 16bpp |
-| **Scaling** | Fit to window / 100% / 150% / 200% |
-| **Clipboard Sharing** | Share clipboard between Windows and WSL apps |
 
 ## WSLg Compatibility
 

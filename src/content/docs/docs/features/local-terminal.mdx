@@ -16,6 +16,8 @@ You can also:
 - Use **File → New Local Terminal** from the menu
 - Open the **Shell Selector** with `⌘⇧T` / `Ctrl+Shift+T` to pick a specific shell
 
+On Windows, the shell selector also lists detected WSL distributions. Select a distribution to open its terminal.
+
 ## Shell Detection
 
 OxideTerm automatically scans your system for available shells. Here's what it finds on each platform:
@@ -53,13 +55,13 @@ Shell scanning reads `/etc/shells` on macOS/Linux and probes common paths on Win
 ### Setting the Default Shell
 
 1. Open **Settings** (`⌘,` / `Ctrl+,`)
-2. Go to the **Local Terminal** tab
+2. Go to **Terminal → Local**
 3. Select your preferred shell from the dropdown
-4. Click **Save**
+4. Open a new local terminal to use the selection
 
 ### Shells Outside the Scanner
 
-OxideTerm does not currently read a `shells.json` file. If a shell is not listed, make sure the executable is installed in a standard location, available in `/etc/shells` on macOS/Linux, or discoverable from the platform-specific shell scanner. You can still configure the default shell, working directory, profile loading, Oh My Posh, and custom environment variables from **Settings → Local Terminal**.
+OxideTerm does not currently read a `shells.json` file. If a shell is not listed, make sure the executable is installed in a standard location, available in `/etc/shells` on macOS/Linux, or discoverable from the platform-specific shell scanner. Configure the default shell, working directory, profile loading, Oh My Posh, and custom environment variables in **Settings → Terminal → Local**.
 
 ## Windows Enhancements
 
@@ -116,7 +118,7 @@ When closing a tab that contains split panes, OxideTerm recursively cleans up al
 
 ### Startup Options
 
-OxideTerm chooses safe default startup arguments for detected shells. In **Settings → Local Terminal**, you can enable or disable shell profile loading, set a default working directory, configure Oh My Posh on Windows, and add custom environment variables for new local terminal sessions.
+OxideTerm chooses default startup arguments for detected shells. In **Settings → Terminal → Local**, you can enable or disable shell profile loading, set a default working directory, configure Oh My Posh on Windows, and add custom environment variables for new local terminal sessions.
 
 ### Shell-Specific Initialization
 
@@ -152,7 +154,7 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 | Close Tab | `⌘ W` | `Ctrl+W` |
 | Next Tab | `⌘ }` | `Ctrl+Tab` |
 | Previous Tab | `⌘ {` | `Ctrl+Shift+Tab` |
-| Clear Screen | `⌘ K` | `Ctrl+L` |
+| Clear Screen | `Ctrl+Shift+L` | `Ctrl+Shift+L` |
 
 ## Comparison with Traditional Terminals
 

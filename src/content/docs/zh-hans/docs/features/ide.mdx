@@ -8,7 +8,7 @@ IDE 模式让你直接在 OxideTerm 中编辑远程文件——无需下载、�
 ## 原生编辑器
 
 编辑器由 Rust 与 GPUI 实现，并使用 **tree-sitter** 提供结构化语法能力，支持：
-- **36 种语言**的语法高亮
+- 内置语言和已启用语言插件提供的语法高亮
 - 行号和代码折叠
 - 支持正则表达式的查找和替换
 - 括号匹配和自动闭合
@@ -17,7 +17,9 @@ IDE 模式让你直接在 OxideTerm 中编辑远程文件——无需下载、�
 
 ### 支持的语言
 
-当前 tree-sitter 语法包括 Bash、C/C++、C#、CMake、CSS、Diff、Dockerfile、Elixir、Fish、Go、HTML、Java、JavaScript/TypeScript/TSX、JSON、Lisp、Lua、Make、Markdown、Objective-C、Perl、PHP、PowerShell、Python、R、Ruby、Rust、Scala、SQL、Swift、TOML、YAML、Zsh 和 Zig。
+常用 Shell 和配置语言由应用内置，包括 Bash、Zsh、Fish、PowerShell、Python、JSON、YAML、TOML、SQL 和 Markdown。Rust、Go、C/C++、JavaScript、TypeScript 等语言通过语言插件提供。
+
+在**插件管理器 → 插件市场**中查找所需语言，安装并启用对应插件。没有语言插件时，文本文件仍可打开和编辑；语法高亮以及依赖语法分析的折叠等功能，需要对应语法支持。安装远程 Agent 不会安装本机语言插件。
 
 ## 文件树
 

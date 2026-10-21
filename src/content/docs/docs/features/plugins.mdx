@@ -3,15 +3,29 @@ title: Plugins
 description: Extend OxideTerm with native process and Wasm plugins.
 ---
 
-OxideTerm's native plugin host discovers packages from the active configuration directory. A plugin declares its identity and contributions in `plugin.json`; it does not load JavaScript into a browser surface.
+Open **Plugin Manager → Marketplace** to install the features you need, then enable them in the plugin manager. **RDP** and **VNC** remote desktop support is provided by separate plugins; after installation, use **New Connection** or **Session Manager** to open a desktop. See [Remote Desktop](/docs/features/remote-desktop/).
 
-## Runtime model
+The plugin manager also handles updates, settings, permissions, and removal. Install plugins on each device where you need them; synchronizing connection profiles does not install their plugins.
+
+## Features Available Through Plugins
+
+| Feature | What to install | Where to use it |
+|---|---|---|
+| Mosh sessions | **Mosh** | New Connection → Mosh; the server also needs `mosh-server` |
+| Additional code languages | The matching language plugin | IDE and code previews |
+| PDF pages | **PDF Preview** | File Manager and SFTP previews |
+| SQLite tables | **SQLite Preview** | Read-only file previews |
+| Certificate inspection | **Certificate Viewer** | PEM / DER certificate previews |
+
+## Runtime Model
 
 Supported runtime kinds are:
 
 - `process` for an executable managed by the host over versioned JSON Lines.
 - `wasm` for a Wasm module managed by the integrated runtime.
 - `manifest-only` for contributions that need no executable runtime.
+- `remote-desktop` for trusted protocol helpers used by the native RDP/VNC viewer.
+- `language`, `acp`, `terminal-transport`, and `helper` for language support, AI agents, terminal transports, and managed helper programs.
 
 Legacy JavaScript entries are not executed by the native application.
 
@@ -37,4 +51,4 @@ The host validates manifests and paths, passes the effective capabilities and al
 
 ## Next step
 
-Read the [Plugin Development Guide](../plugin-development/) for a native manifest and runtime walkthrough.
+Read the [Plugin Development Guide](/docs/plugin-development/) for a native manifest and runtime walkthrough.

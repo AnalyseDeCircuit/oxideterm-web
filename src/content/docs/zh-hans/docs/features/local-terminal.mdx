@@ -16,6 +16,8 @@ OxideTerm 同时也是一个本地终端模拟器，让你在 SSH 连接旁边�
 - 使用菜单 **File → New Local Terminal**
 - 使用 **Shell 选择器** `⌘⇧T` / `Ctrl+Shift+T` 选择特定 Shell
 
+在 Windows 上，Shell 选择器也会列出检测到的 WSL 发行版。选择发行版即可打开对应终端。
+
 ## Shell 检测
 
 OxideTerm 会自动扫描系统中可用的 Shell。各平台支持情况如下：
@@ -53,13 +55,13 @@ Shell 扫描在 macOS/Linux 上读取 `/etc/shells`，在 Windows 上探测常�
 ### 设置默认 Shell
 
 1. 打开 **设置** (`⌘,` / `Ctrl+,`)
-2. 切换到 **本地终端** 标签
+2. 进入**终端 → 本地**
 3. 从下拉菜单中选择首选 Shell
-4. 点击 **保存**
+4. 打开新的本地终端，使用刚选择的 Shell
 
 ### 未被扫描到的 Shell
 
-OxideTerm 目前不会读取 `shells.json`。如果某个 Shell 没有出现在列表中，请确认可执行文件安装在标准路径、macOS/Linux 上已写入 `/etc/shells`，或能被平台对应的 Shell 扫描器发现。你仍然可以在 **设置 → 本地终端** 中配置默认 Shell、默认工作目录、是否加载 Shell profile、Oh My Posh 和自定义环境变量。
+OxideTerm 目前不会读取 `shells.json`。如果某个 Shell 没有出现在列表中，请确认可执行文件安装在标准路径、macOS/Linux 上已写入 `/etc/shells`，或能被平台对应的 Shell 扫描器发现。在**设置 → 终端 → 本地**中可以配置默认 Shell、默认工作目录、是否加载 Shell profile、Oh My Posh 和自定义环境变量。
 
 ## Windows 增强功能
 
@@ -116,7 +118,7 @@ WSL 会话自动接收以下环境变量：
 
 ### 启动选项
 
-OxideTerm 会为已检测到的 Shell 使用安全的默认启动参数。在 **设置 → 本地终端** 中，你可以启用或禁用 Shell profile 加载、设置默认工作目录、配置 Windows 上的 Oh My Posh，并为新的本地终端会话添加自定义环境变量。
+OxideTerm 会为已检测到的 Shell 使用默认启动参数。在**设置 → 终端 → 本地**中，你可以启用或禁用 Shell profile 加载、设置默认工作目录、配置 Windows 上的 Oh My Posh，并为新的本地终端会话添加自定义环境变量。
 
 ### Shell 初始化脚本
 
@@ -152,7 +154,7 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 | 关闭标签 | `⌘ W` | `Ctrl+W` |
 | 下一标签 | `⌘ }` | `Ctrl+Tab` |
 | 上一标签 | `⌘ {` | `Ctrl+Shift+Tab` |
-| 清屏 | `⌘ K` | `Ctrl+L` |
+| 清屏 | `Ctrl+Shift+L` | `Ctrl+Shift+L` |
 
 ## 与传统终端对比
 

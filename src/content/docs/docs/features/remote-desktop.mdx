@@ -1,9 +1,15 @@
 ---
 title: Remote Desktop
-description: Native RDP and VNC sessions, SSH gateways, and per-profile desktop settings.
+description: Install the RDP or VNC plugin, then open remote desktops with saved profiles and optional SSH gateways.
 ---
 
 OxideTerm opens **RDP** and **VNC** as native desktop tabs alongside terminals and files. The desktop protocol has its own login credentials; an optional saved SSH gateway provides the network route.
+
+## Install the Protocol Plugin
+
+Open **Plugin Manager → Marketplace**, install **RDP** or **VNC**, and enable it. These are separate plugins; install only the protocols you need. Connection profiles and the viewer remain in OxideTerm, while the plugin provides the protocol engine.
+
+If the required plugin is missing or disabled, the connection form shows its status. Opening the connection provides a shortcut to the marketplace or plugin management. A saved or cloud-synchronized profile still needs the corresponding plugin installed on the current device before it can connect.
 
 ## Create a Connection
 

@@ -1,9 +1,9 @@
 ---
 title: 快捷键
-description: OxideTerm 完整快捷键参考 — 应用、终端、分屏和 SFTP 快捷键。
+description: 应用、终端、分屏和 SFTP 常用默认快捷键，以及自定义绑定的入口。
 ---
 
-OxideTerm 所有可用键盘快捷键的完整参考。
+以下列出常用操作的默认快捷键。打开**设置 → 快捷键**可查看和修改当前绑定，包括插件命令；自定义绑定优先于本页列出的默认值。
 
 ## 应用与窗口
 
@@ -28,8 +28,8 @@ OxideTerm 所有可用键盘快捷键的完整参考。
 
 | 操作 | macOS | Windows / Linux |
 |------|-------|-----------------|
-| 切换底部面板 | `⌘ J` | `Ctrl+J` |
-| 广播输入 | `⌘ B` | `Ctrl+B` |
+| 事件日志 | `⌘ J` | `Ctrl+J` |
+| 广播输入 | `⌘ B` | `Ctrl+Shift+B` |
 | AI 对话 | `⌘ ⇧A` | `Ctrl+Shift+A` |
 
 ## 终端内
@@ -38,14 +38,15 @@ OxideTerm 所有可用键盘快捷键的完整参考。
 
 | 操作 | macOS | Windows / Linux |
 |------|-------|-----------------|
-| 搜索 | `⌘ F` | `Ctrl+Shift+F` (Win) / `Ctrl+F` (Lin) |
+| 搜索 | `⌘ F` | `Ctrl+Shift+F` |
+| 清屏 | `Ctrl+Shift+L` | `Ctrl+Shift+L` |
 | 内联 AI 面板 | `⌘ I` | `Ctrl+Shift+I` |
 | 关闭面板 | `Esc` | `Esc` |
 | 复制 | `⌘ C` | `Ctrl+Shift+C`（或选中自动复制） |
 | 粘贴 | `⌘ V` | `Ctrl+Shift+V`（或右键） |
 
 :::note
-在 Linux 终端聚焦时，部分快捷键使用 `Super`（徽标键）而非 `Ctrl`，以避免与 Shell 快捷键冲突。如果 `Ctrl+Shift+F` 无响应，请检查应用内的实际键位绑定。
+`Ctrl+L` 留给 Shell 清屏并重绘提示符。应用自身的清屏操作在所有平台上均使用 `Ctrl+Shift+L`。
 :::
 
 ## 分屏
@@ -55,7 +56,7 @@ OxideTerm 所有可用键盘快捷键的完整参考。
 | 横向分屏 | `⌘ ⇧E` | `Ctrl+Shift+E` |
 | 纵向分屏 | `⌘ ⇧D` | `Ctrl+Shift+D` |
 | 关闭当前窗格 | `⌘ ⇧W` | `Ctrl+Shift+W` |
-| 在窗格间移动焦点 | `⌘ ⌥ 方向键` | `Ctrl+Alt+方向键` |
+| 上一 / 下一窗格 | `⌘ ⌥ ←` / `⌘ ⌥ →` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |
 
 ## SFTP
 
@@ -69,5 +70,5 @@ OxideTerm 所有可用键盘快捷键的完整参考。
 ## 小技巧
 
 - **命令面板**（`⌘K` / `Ctrl+K`）提供模糊搜索所有可用操作 — 忘记快捷键时使用它。
-- 快捷键绑定与应用内 **设置 → 帮助** 部分和源码中的 `getShortcutCategories` 定义一致。
+- **设置 → 快捷键**显示当前绑定及其生效范围。
 - 部分终端聚焦快捷键在不同平台有差异，因为 OxideTerm 避免拦截常用 Shell 键位（如 `Ctrl+C` 用于 SIGINT）。

@@ -3,7 +3,7 @@ title: Native 插件开发
 description: 为 OxideTerm 原生宿主构建仅清单、进程和 Wasm 插件。
 ---
 
-本文档介绍 OxideTerm Native 插件模型。它和 Tauri/Web 插件模型不同：Native 插件不运行 React 组件，不注入 CSS，也不会通过 WebView 执行 `main.js`。Native 插件通过 `plugin.json` 被发现，然后要么只提供清单声明的元数据，要么通过宿主拥有的进程/WASM 运行时桥接运行。
+本文档主要介绍使用 `process`、`wasm` 或 `manifest-only` 的声明式界面与宿主 API 扩展。原生插件通过 `plugin.json` 被发现，不运行 React 组件、不注入 CSS，也不通过 WebView 执行 `main.js`。宿主还支持 `language`、`acp`、`remote-desktop`、`terminal-transport` 和 `helper` 等专用插件包。RDP 和 VNC 通过插件市场中的 `remote-desktop` 插件提供，查看器和保存的连接配置仍由宿主管理。
 
 ## 目录
 
@@ -586,6 +586,7 @@ flowchart TB
     RuntimePlan --> ManifestOnly["manifest-only"]
     RuntimePlan --> Process["process 运行时"]
     RuntimePlan --> Wasm["wasm 运行时"]
+    RuntimePlan --> Specialized["language · acp · remote-desktop · terminal-transport · helper"]
     RuntimePlan --> Legacy["legacy-js 可见但不执行"]
 
     Process --> Protocol["JSON Lines 协议"]
@@ -605,13 +606,13 @@ flowchart TB
 - 插件设置、存储和凭据。
 - 通过 Native GPUI 控件渲染界面。
 
-插件不会拿到原始 GPUI 元素、DOM 节点、React 实例、SSH 传输句柄，或越过宿主 API 的直接文件系统访问。
+宿主 API 不暴露原始 GPUI 元素、DOM 节点、React 实例或 SSH 传输句柄。原生进程插件作为可执行程序运行，具有当前用户的操作系统权限；宿主 API 的权限检查不会限制插件自身的文件系统或网络访问。
 
 ## Native 插件与 Tauri 插件的区别
 
 | 区域 | Tauri/Web 插件 | Native 插件 |
 |---|---|---|
-| 运行时 | 通过动态导入加载 ESM `main.js` | `runtime.kind` 为 `process`、`wasm` 或 `manifest-only` |
+| 运行时 | 通过动态导入加载 ESM `main.js` | 通用扩展使用 `process`、`wasm` 或 `manifest-only`；专用插件使用上文列出的其他运行时 |
 | 界面 | React 组件和 CSS | GPUI 渲染的声明式 Native UI 结构 |
 | 共享模块 | `window.__OXIDE__` | 不可用 |
 | 样式 | CSS 和主题变量 | 只使用宿主拥有的 Native 控件 |
@@ -1004,7 +1005,7 @@ interface NativePluginManifest {
 }
 
 interface NativePluginRuntime {
-  kind: 'wasm' | 'process' | 'manifest-only';
+  kind: 'language' | 'wasm' | 'process' | 'acp' | 'remote-desktop' | 'terminal-transport' | 'helper' | 'manifest-only';
   entry: string;
 }
 

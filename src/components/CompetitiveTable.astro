@@ -25,7 +25,7 @@ const rows: { label: string; ot: string; cross: string; ssh: string; toolbox: st
   { label: c.row_builtin_sftp, ot: Y, cross: Y, ssh: P, toolbox: Y, ide: N },
   { label: c.row_forwarding, ot: Y, cross: Y, ssh: Y, toolbox: Y, ide: Y },
   { label: c.row_builtin_ide, ot: Y, cross: N, ssh: N, toolbox: P, ide: Y },
-  { label: c.row_remote_desktop, ot: Y, cross: N, ssh: N, toolbox: Y, ide: N },
+  { label: c.row_remote_desktop, ot: c.val_remote_desktop_ot, cross: N, ssh: N, toolbox: Y, ide: N },
   { label: c.row_ai, ot: Y, cross: N, ssh: N, toolbox: N, ide: Y },
   { label: c.row_reconnect, ot: Y, cross: N, ssh: N, toolbox: N, ide: P },
   { label: c.row_multiplex, ot: Y, cross: V, ssh: V, toolbox: V, ide: P },

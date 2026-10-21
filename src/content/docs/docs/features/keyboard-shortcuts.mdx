@@ -1,9 +1,9 @@
 ---
 title: Keyboard Shortcuts
-description: Complete keyboard shortcut reference for OxideTerm — application, terminal, split pane, and SFTP shortcuts.
+description: Default shortcuts for the application, terminal, split panes, and SFTP, with customization in Settings.
 ---
 
-A comprehensive reference of all keyboard shortcuts available in OxideTerm.
+These are the default shortcuts for common actions. Open **Settings → Keybindings** to inspect or change the current bindings, including plugin commands. Customized bindings take precedence over this reference.
 
 ## Application & Window
 
@@ -28,8 +28,8 @@ These actions are accessible from the command palette:
 
 | Action | macOS | Windows / Linux |
 |--------|-------|-----------------|
-| Toggle Bottom Panel | `⌘ J` | `Ctrl+J` |
-| Broadcast Input | `⌘ B` | `Ctrl+B` |
+| Event Log | `⌘ J` | `Ctrl+J` |
+| Broadcast Input | `⌘ B` | `Ctrl+Shift+B` |
 | AI Sidebar | `⌘ ⇧A` | `Ctrl+Shift+A` |
 
 ## Terminal (In-Terminal)
@@ -38,14 +38,15 @@ These shortcuts work when a terminal pane is focused:
 
 | Action | macOS | Windows / Linux |
 |--------|-------|-----------------|
-| Search | `⌘ F` | `Ctrl+Shift+F` (Win) / `Ctrl+F` (Lin) |
+| Search | `⌘ F` | `Ctrl+Shift+F` |
+| Clear Screen | `Ctrl+Shift+L` | `Ctrl+Shift+L` |
 | Inline AI Panel | `⌘ I` | `Ctrl+Shift+I` |
 | Close Panel | `Esc` | `Esc` |
 | Copy | `⌘ C` | `Ctrl+Shift+C` (or auto-copy on select) |
 | Paste | `⌘ V` | `Ctrl+Shift+V` (or right-click) |
 
 :::note
-On Linux with terminal focus, some shortcuts use `Super` (logo key) instead of `Ctrl` to avoid conflicts with shell shortcuts. Check the actual keybinding in the app if `Ctrl+Shift+F` doesn't respond.
+`Ctrl+L` remains available to the shell for clearing and redrawing its prompt. The application's Clear Screen action uses `Ctrl+Shift+L` on all platforms.
 :::
 
 ## Split Pane
@@ -55,7 +56,7 @@ On Linux with terminal focus, some shortcuts use `Super` (logo key) instead of `
 | Split Horizontally | `⌘ ⇧E` | `Ctrl+Shift+E` |
 | Split Vertically | `⌘ ⇧D` | `Ctrl+Shift+D` |
 | Close Current Pane | `⌘ ⇧W` | `Ctrl+Shift+W` |
-| Move Focus Between Panes | `⌘ ⌥ Arrow` | `Ctrl+Alt+Arrow` |
+| Previous / Next Pane | `⌘ ⌥ ←` / `⌘ ⌥ →` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |
 
 ## SFTP
 
@@ -69,5 +70,5 @@ On Linux with terminal focus, some shortcuts use `Super` (logo key) instead of `
 ## Tips
 
 - The **Command Palette** (`⌘K` / `Ctrl+K`) provides fuzzy search across all available actions — use it when you forget a shortcut.
-- Shortcut bindings are consistent with the app's **Settings → Help** section and the `getShortcutCategories` definition in the source.
+- **Settings → Keybindings** shows the current bindings and their action scopes.
 - Some terminal-focused shortcuts differ between platforms because OxideTerm avoids intercepting common shell keybindings (like `Ctrl+C` for SIGINT).

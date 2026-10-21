@@ -54,7 +54,7 @@ sudo dnf install ./OxideTerm_x.x.x_linux_x64.rpm
 
 ## 从源码运行
 
-仓库使用 Rust 2024 Edition。发布流水线当前使用 Rust 1.94.1；建议通过 `rustup` 安装相同或更新的稳定工具链。
+仓库使用 Rust 2024 Edition。请通过 `rustup` 安装工具链；进入仓库后会使用 `rust-toolchain.toml` 指定的 Rust 版本，与项目的持续集成检查保持一致。
 
 ```bash
 git clone https://github.com/AnalyseDeCircuit/oxideterm.git
@@ -65,14 +65,14 @@ cargo run
 Linux 还需要 GPUI、音频、字体、窗口系统和媒体相关的系统开发包。仓库提供统一安装脚本：
 
 ```bash
-./scripts/install-linux-deps.sh
+./scripts/ci/install-linux-deps.sh
 ```
 
 构建优化后的桌面二进制和无头 CLI：
 
 ```bash
 cargo build --release -p oxideterm-gpui-app
-./scripts/build-cli.sh
+./scripts/build/build-cli.sh
 ```
 
 桌面二进制位于 `target/release/`，CLI 会同时暂存到应用资源目录，供原生安装包包含。
