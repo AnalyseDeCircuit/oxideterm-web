@@ -95,7 +95,7 @@
     "badge": "立即開始",
     "title": "下載 OxideTerm",
     "subtitle": "支援 macOS、Windows 和 Linux",
-    "macos": "macOS",
+    "macos": "macOS 13.0+",
     "windows": "Windows",
     "linux": "Linux",
     "apple_silicon": "Apple Silicon",

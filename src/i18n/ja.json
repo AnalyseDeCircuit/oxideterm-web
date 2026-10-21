@@ -95,7 +95,7 @@
     "badge": "はじめよう",
     "title": "OxideTermをダウンロード",
     "subtitle": "macOS、Windows、Linuxに対応",
-    "macos": "macOS",
+    "macos": "macOS 13.0+",
     "windows": "Windows",
     "linux": "Linux",
     "apple_silicon": "Apple Silicon",
