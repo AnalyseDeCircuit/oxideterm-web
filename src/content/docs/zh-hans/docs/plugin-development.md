@@ -1,9 +1,11 @@
 ---
-title: Native 插件开发
-description: 为 OxideTerm 原生宿主构建仅清单、进程和 Wasm 插件。
+title: 原生插件开发
+description: 开发原生插件：连接类型、持续更新的工作台、宿主接口与权限边界。
 ---
 
-本文档主要介绍使用 `process`、`wasm` 或 `manifest-only` 的声明式界面与宿主 API 扩展。原生插件通过 `plugin.json` 被发现，不运行 React 组件、不注入 CSS，也不通过 WebView 执行 `main.js`。宿主还支持 `language`、`acp`、`remote-desktop`、`terminal-transport` 和 `helper` 等专用插件包。RDP 和 VNC 通过插件市场中的 `remote-desktop` 插件提供，查看器和保存的连接配置仍由宿主管理。
+本文档介绍 OxideTerm Native 插件模型。它和 Tauri/Web 插件模型不同：Native 插件不运行 React 组件，不注入 CSS，也不会通过 WebView 执行 `main.js`。Native 插件通过 `plugin.json` 被发现，然后要么只提供清单声明的元数据，要么通过宿主拥有的进程/WASM 运行时桥接运行。
+
+专用包还支持 `language`、`acp`、`remote-desktop`、`terminal-transport` 和 `helper` 运行时。RDP、VNC 引擎由插件市场分发，保存配置和查看器由宿主管理。进程连接插件可提供独立连接实例和持续更新的工作台。
 
 ## 目录
 
@@ -16,20 +18,23 @@ description: 为 OxideTerm 原生宿主构建仅清单、进程和 Wasm 插件�
 7. [Native 插件与 Tauri 插件的区别](#native-插件与-tauri-插件的区别)
 8. [插件目录](#插件目录)
 9. [最小清单插件](#最小清单插件)
-10. [进程运行时插件](#进程运行时插件)
-11. [协议帧](#协议帧)
-12. [运行时注册](#运行时注册)
-13. [声明式 Native 界面](#声明式-native-界面)
-14. [宿主 API 调用](#宿主-api-调用)
-15. [权限与能力](#权限与能力)
-16. [设置、存储与凭据](#设置存储与凭据)
-17. [终端、SFTP、转发、IDE 与 AI](#终端sftp转发ide-与-ai)
-18. [打包与安装](#打包与安装)
-19. [接口参考](#接口参考)
-20. [宿主 API 参考](#宿主-api-参考)
-21. [事件参考](#事件参考)
-22. [调试](#调试)
-23. [迁移说明](#迁移说明)
+10. [背景素材包](#背景素材包)
+11. [编辑器语言插件](#编辑器语言插件)
+12. [进程运行时插件](#进程运行时插件)
+13. [协议帧](#协议帧)
+14. [运行时注册](#运行时注册)
+15. [插件连接类型](#插件连接类型)
+16. [声明式 Native 界面](#声明式-native-界面)
+17. [宿主 API 调用](#宿主-api-调用)
+18. [权限与能力](#权限与能力)
+19. [设置、存储与凭据](#设置存储与凭据)
+20. [终端、SFTP、转发、IDE 与 AI](#终端sftp转发ide-与-ai)
+21. [打包与安装](#打包与安装)
+22. [接口参考](#接口参考)
+23. [宿主 API 参考](#宿主-api-参考)
+24. [事件参考](#事件参考)
+25. [调试](#调试)
+26. [迁移说明](#迁移说明)
 
 ---
 
@@ -63,6 +68,12 @@ chmod +x hello-native/bin/hello.js
   "runtime": {
     "kind": "process",
     "entry": "bin/hello.js"
+  },
+  "permissions": {
+    "capabilities": [
+      "legacy.invoke",
+      "ui.write"
+    ]
   },
   "contributes": {
     "sidebarPanels": [
@@ -260,6 +271,8 @@ readline.createInterface({
 - 运行时界面不是 React，而是通过 `sidebar-panel` 或 `tab` 注册的声明式结构。
 - 需要返回值的宿主调用用出站 `callHostApi` 帧发送；宿主会把结果写回插件的 stdin。
 
+如果需要完整的仓库示例，可参考 [Host Tools Dashboard](https://github.com/AnalyseDeCircuit/oxideterm-plugins/tree/main/plugins/host-tools-dashboard)。它会同时注册标签页和左侧活动栏面板，自动发现活动节点，并运行清单中声明的自定义 Host Tools 监控。
+
 ## 运行时通信过程
 
 进程运行时只有一条按行分隔的通信通道。
@@ -276,7 +289,7 @@ sequenceDiagram
     Plugin-->>Host: stdout 写出相同 requestId 的响应
 ```
 
-宿主发给插件的激活请求。这里缩短了 `manifest` 对象；真实请求会携带解析后的 `plugin.json`：
+宿主发给插件的激活请求。这里缩短了 `manifest` 和 `allowedHostApis`；真实请求会携带解析后的 `plugin.json` 和完整的最终生效白名单：
 
 ```json
 {
@@ -292,11 +305,18 @@ sequenceDiagram
         "version": "0.1.0"
       },
       "permissions": {
-        "capabilities": [],
+        "capabilities": [
+          "legacy.invoke",
+          "runtime.process.trusted",
+          "ui.write"
+        ],
         "allowedHostApis": [
           "api.invoke",
           "app.getVersion",
-          "settings.get"
+          "connections.getSummaries",
+          "settings.get",
+          "ui.registerSidebarPanel",
+          "ui.registerActivityBarItem"
         ]
       }
     },
@@ -379,10 +399,9 @@ sequenceDiagram
 
 ## 在插件代码里调用宿主
 
-宿主调用不是全局 JavaScript 函数，而是协议消息。一次调用必须同时满足两个条件：
+宿主调用不是全局 JavaScript 函数，而是协议消息。只有名称出现在最终生效的 `allowedHostApis` 中，调用才会被接受。默认提供的脱敏只读接口会自动加入；敏感读取和副作用接口会在对应清单能力获批后加入。
 
-- Host API 名称在插件权限集中被允许，可以是 `terminal.getActiveTarget` 这样的精确名称，也可以是 `terminal.*` 这样的命名空间通配。
-- 对 `api.invoke` 来说，`args.command` 还必须出现在 `contributes.apiCommands` 里。
+`api.invoke` 还有一道检查：`args.command` 必须同时出现在 `contributes.apiCommands` 中。
 
 读取插件设置：
 
@@ -398,14 +417,14 @@ sequenceDiagram
 }
 ```
 
-读取活跃终端目标：
+无需申请能力即可读取脱敏终端元数据：
 
 ```json
 {
   "type": "callHostApi",
   "requestId": "host-3",
   "namespace": "terminal",
-  "method": "getActiveTarget",
+  "method": "getMetadata",
   "args": {}
 }
 ```
@@ -424,6 +443,8 @@ sequenceDiagram
 }
 ```
 
+该写入操作需要 `terminal.write`。读取终端正文或活动目标需要 `terminal.content.read`。
+
 通过 SFTP 读取远程文件：
 
 ```json
@@ -439,7 +460,7 @@ sequenceDiagram
 }
 ```
 
-这个 SFTP 调用还需要 `filesystem.read` 能力。写入类操作需要 `filesystem.write`。端口转发变更需要 `network.forward`。
+这个 SFTP 调用还需要 `filesystem.read` 能力。写入类操作需要 `filesystem.write`。传统 SCP 传输沿用同一组能力，并且必须指定在线节点。端口转发变更需要 `network.forward`。
 
 导入 `.oxide` 包：
 
@@ -475,6 +496,7 @@ sequenceDiagram
     "metadata": {
       "tabId": "hello-tab",
       "schema": {
+        "componentVersion": 1,
         "kind": "form",
         "title": "Hello",
         "controls": [
@@ -566,6 +588,13 @@ sequenceDiagram
 - `metadata.schema.kind` 应该是 `form`。
 - `button`、`text`、`password`、`number`、`checkbox`、`select` 等可交互控件需要稳定的 `id`。
 
+如果独立活动栏动作没有出现或无法执行：
+
+- `contributes.activityBarItems` 必须声明动作 id、标题、图标、命令和位置。
+- 运行时必须使用 `kind: "activity-bar-item"` 和相同的 `itemId` 注册。
+- 插件必须请求 `ui.write`，并处理清单中声明的 `dispatchCommand` 值。
+- 运行时元数据不能覆盖清单声明的图标或命令。
+
 如果 Host API 调用失败：
 
 - 确认调用出现在 `allowedHostApis` 中。
@@ -586,7 +615,6 @@ flowchart TB
     RuntimePlan --> ManifestOnly["manifest-only"]
     RuntimePlan --> Process["process 运行时"]
     RuntimePlan --> Wasm["wasm 运行时"]
-    RuntimePlan --> Specialized["language · acp · remote-desktop · terminal-transport · helper"]
     RuntimePlan --> Legacy["legacy-js 可见但不执行"]
 
     Process --> Protocol["JSON Lines 协议"]
@@ -606,13 +634,13 @@ flowchart TB
 - 插件设置、存储和凭据。
 - 通过 Native GPUI 控件渲染界面。
 
-宿主 API 不暴露原始 GPUI 元素、DOM 节点、React 实例或 SSH 传输句柄。原生进程插件作为可执行程序运行，具有当前用户的操作系统权限；宿主 API 的权限检查不会限制插件自身的文件系统或网络访问。
+宿主接口不暴露原始 GPUI 元素、DOM 节点、React 实例或 SSH 传输句柄。原生进程插件拥有其用户的操作系统权限，宿主接口检查不会隔离可执行程序自身的文件与网络访问。
 
 ## Native 插件与 Tauri 插件的区别
 
 | 区域 | Tauri/Web 插件 | Native 插件 |
 |---|---|---|
-| 运行时 | 通过动态导入加载 ESM `main.js` | 通用扩展使用 `process`、`wasm` 或 `manifest-only`；专用插件使用上文列出的其他运行时 |
+| 运行时 | 通过动态导入加载 ESM `main.js` | 通用扩展使用 `process`、`wasm`、`manifest-only`，专用运行时见上文 |
 | 界面 | React 组件和 CSS | GPUI 渲染的声明式 Native UI 结构 |
 | 共享模块 | `window.__OXIDE__` | 不可用 |
 | 样式 | CSS 和主题变量 | 只使用宿主拥有的 Native 控件 |
@@ -648,10 +676,6 @@ flowchart TB
   "version": "0.1.0",
   "description": "Adds audit-related settings and tool metadata.",
   "author": "Example",
-  "runtime": {
-    "kind": "manifest-only",
-    "entry": ""
-  },
   "contributes": {
     "settings": [
       {
@@ -677,6 +701,46 @@ flowchart TB
 
 支持的设置类型是 `string`、`number`、`boolean` 和 `select`。`select` 设置必须提供 `options`，选项值必须是字符串或数字。
 
+## 背景素材包
+
+背景素材包复用现有安装器，只声明 `contributes.backgrounds`，列出素材相对于包根目录的路径：
+
+```json
+{
+  "id": "com.example.backgrounds",
+  "name": "背景素材",
+  "version": "1.0.0",
+  "engines": { "oxideterm": ">2.2.2" },
+  "tags": ["backgrounds"],
+  "contributes": { "backgrounds": ["assets/day.mp4", "assets/night.mp4"] }
+}
+```
+
+素材包不声明运行入口、权限或其他插件功能。已发布的 2.2.2 尚不支持此功能，需要后续包含背景素材包支持的主程序。
+安装时，素材复制到当前设置文件旁的 `backgrounds` 目录，便携版跟随自己的配置目录。
+安装不改变浅色或深色外观当前选择的背景；同版本重装复用已有副本，新版本添加独立素材。
+卸载素材包会保留已导入的文件，用户可以在外观素材库中删除。
+
+## 编辑器语言插件
+
+主程序保留 15 个内置语法条目：Bash、Zsh、Fish、PowerShell、JSON、YAML、TOML、Markdown、
+Dockerfile、Make、CMake、Diff、Python、Lua 和 SQL。
+另有 24 个语法条目通过语言插件提供：C、C++、C#、CSS、Common Lisp、Elixir、Go、HTML、Java、
+JavaScript、Objective-C、Perl、PHP、R、Ruby、Rust、Scala、Swift、TypeScript、TSX、Zig、Nginx、Terraform/HCL 和 Protobuf。
+Nginx 根据 `nginx.conf` 等专用文件名或 `.nginx` 扩展名识别，不覆盖通用 `.conf`。
+HCL 识别 `.tf`、`.tfvars` 和 `.hcl`，JSON 变体仍按 JSON 处理；Protobuf 识别 `.proto`。
+TypeScript 与 TSX 分别打包为独立插件。
+文件类型识别保留在主程序中。未安装或已禁用时，文档仍可编辑，并提供插件管理器入口。
+安装或启用后按需加载解析器；更新与禁用会刷新已打开文档的语法状态，保留文本和撤销历史。
+`.h` 头文件继续识别为 C++。
+
+语言包声明 `runtime.kind: "language"` 和 `contributes.language`，包含 Tree-sitter
+WebAssembly 解析器、高亮查询、各自的 SHA-256 校验值、宿主版本范围及上游许可证。
+它不使用通用 WASI 插件的宿主接口。市场仓库维护
+[固定版本的构建配方与发布流程](https://github.com/AnalyseDeCircuit/oxideterm-plugins/blob/main/docs/language-plugins.md)。
+每种语言在 `plugins/` 下有独立目录、版本和发布资产。
+语言插件自身采用 Apache-2.0，上游许可证单独保留；安装需要严格高于 2.2.0 且包含语言加载能力的主程序。
+
 ## 进程运行时插件
 
 进程插件是插件目录内的可执行文件。宿主通过 stdin/stdout 启动它，并交换换行分隔的 JSON 协议帧。
@@ -690,6 +754,13 @@ flowchart TB
     "kind": "process",
     "entry": "./bin/native-dashboard"
   },
+  "permissions": {
+    "capabilities": [
+      "connections.read",
+      "legacy.invoke",
+      "ui.write"
+    ]
+  },
   "contributes": {
     "tabs": [
       { "id": "dashboard", "title": "Dashboard", "icon": "LayoutDashboard" }
@@ -697,15 +768,16 @@ flowchart TB
     "sidebarPanels": [
       { "id": "dashboard-panel", "title": "Dashboard", "icon": "Activity", "position": "bottom" }
     ],
+    "activityBarItems": [
+      { "id": "refresh", "title": "刷新仪表盘", "icon": "RefreshCw", "command": "dashboard.refresh", "position": "top" }
+    ],
     "terminalHooks": {
       "shortcuts": [
         { "key": "Ctrl+Shift+D", "command": "dashboard.refresh" }
       ]
     },
     "apiCommands": [
-      "app.getVersion",
-      "connections.getAll",
-      "ui.showToast"
+      "get_app_version"
     ]
   }
 }
@@ -715,13 +787,14 @@ flowchart TB
 
 - `runtime.entry` 必须是插件目录内的相对路径。
 - `process` 和 `wasm` 运行时的入口文件必须存在。
+- 进程插件会隐式申请 `runtime.process.trusted`。由于进程在没有操作系统沙箱的环境中运行，插件管理器会把这项信任决定纳入启用时的集中批准。
 - 进程不能把普通人类日志写到 stdout。stdout 是协议通道。
 - 诊断文本写到 stderr。
 - 每个协议帧是一行 JSON 对象，以 `\n` 结尾。
 
 ## 协议帧
 
-宿主会把每个请求和响应包在 envelope 中：
+宿主会把每个请求和响应包在 envelope 中。下面省略了部分默认白名单：
 
 ```json
 {
@@ -738,7 +811,12 @@ flowchart TB
       },
       "permissions": {
         "capabilities": [],
-        "allowedHostApis": []
+        "allowedHostApis": [
+          "app.getVersion",
+          "connections.getSummaries",
+          "sessions.getSummary",
+          "terminal.getMetadata"
+        ]
       }
     },
     "timeoutMs": 3000
@@ -799,6 +877,7 @@ flowchart TB
 | `status-bar` | 添加宿主持有的状态栏项 |
 | `tab` | 为已声明标签页注册声明式界面 |
 | `sidebar-panel` | 为已声明面板注册声明式界面 |
+| `activity-bar-item` | 注册清单中声明的独立左侧活动栏动作 |
 | `event-subscription` | 订阅宿主事件 |
 | `terminal-input-interceptor` | 转换或抑制终端输入 |
 | `terminal-output-processor` | 在解析器前处理终端输出 |
@@ -807,9 +886,126 @@ flowchart TB
 
 注册必须使用发出它的同一个插件 id。释放注册是幂等的，并由宿主执行。
 
+## 插件连接类型
+
+进程插件通过 `contributes.connections` 声明连接类型，直接进入现有的新建连接窗口和连接管理，
+支持搜索、编辑、删除、批量选择和分组。同一配置每次打开都会创建独立实例。
+此接口需要 OxideTerm 2.2.5 或更高版本；在 `engines.oxideterm` 中排除旧版本，并声明 `ui.write` 权限。
+
+```json
+{
+  "connections": [{
+    "id": "device",
+    "title": "设备",
+    "icon": "plug",
+    "terminalEntry": "bin/terminal",
+    "form": {
+      "controls": [
+        {"kind": "text", "id": "address", "label": "@address"},
+        {"kind": "password", "id": "token", "label": "@token"}
+      ],
+      "translations": {"zh-CN": {"address": "地址", "token": "令牌"}}
+    }
+  }]
+}
+```
+
+正式插件应提供完整的 11 语言词典。表单复用原生控件，支持 `text`、`password`、`number`、
+`checkbox`、`select`、`textarea`、`stack`、`row`、`columns` 和 `markdown`。
+名称和分组由宿主提供。区段、字段标识不得包含 `/`，`__profile` 为宿主保留区段。
+配置键采用 `sectionId/controlId`，顶层控件的区段为 `root`。数值输入框提交其文本表示。
+
+密码字段需要用户批准 `credentials.raw.read`。凭据存入宿主的安全存储，连接配置只保存引用。
+编辑时密码留空会保留原值；勾选“清除已保存的凭据”后，先移除旧凭据，再保存本次输入的新值。
+表单草稿不会发送给插件。停用或卸载插件后，配置仍然保留，名称、分组仍可编辑，也可以删除。
+插件连接纳入云同步的连接范围，也支持 `.oxide` 的选择、预览和冲突处理。
+同步按 `plugin_id` 和 `type_id` 识别提供方；接收配置不要求本机已安装对应插件。
+无法识别的配置字段会保留在存储和后续导出中，`connection.open` 只接收当前插件表单声明的字段，
+因此旧版插件编辑连接时不会删除新版设置。密码字段同样按当前表单筛选。
+
+凭据仅在开启敏感凭据同步，或加密导出时勾选包含密码后传输；导入文件还需勾选恢复已保存的凭据。
+本机安全存储引用不会跨设备复制，恢复后会生成新的本机引用。缺少插件的连接保持不可连接状态，
+安装并启用兼容插件后即可使用。两台设备的宿主都需支持插件连接。
+
+插件激活后，宿主发送 `connection.open` 命令，参数为：
+
+```json
+{
+  "instanceId": "host-generated-uuid",
+  "profileId": "saved-profile-uuid",
+  "typeId": "device",
+  "config": {"root/address": "device.local"},
+  "credentials": {"root/token": "user-provided-secret"}
+}
+```
+
+运行中的资源应按 `instanceId` 管理，不能按 `profileId` 共用。命令返回以下结果之一：
+
+- `{"kind":"workbench","schema":{...}}`：显示声明式工作台，可与终端分屏。
+  交互事件 `ui.event.surfaceId` 就是实例标识。持续刷新时发送 `tab` 注册，在元数据中提供
+  `connectionId: instanceId` 和 `schema`；每个实例使用独立的注册标识。
+- `{"kind":"terminal","args":[...]}`：用宿主原生终端直接启动声明的 `terminalEntry`。
+  可执行文件必须位于插件目录内，参数保持独立，不会在失败后改用命令解释器。
+  凭据应由插件进程持有并提供给其辅助进程，不得放入启动参数或环境变量。
+- `{"kind":"sshTerminal","shell":"posix","nodeId":"...","argv":["program","arg"]}`：
+  获得 `terminal.write` 授权后，在已连接的节点上打开终端消费者。宿主按明确选择的 POSIX
+  命令解释器逐个转义参数，拒绝能修改或提交命令行的控制字符，不另建脱离节点管理的 SSH 连接。
+
+断开连接或关闭对应工作台、终端时，宿主发送 `connection.close`，参数为
+`{"instanceId":"..."}`。此命令必须幂等，对未知实例和已取消的打开请求也应成功返回，
+回复前释放该实例的网络连接、订阅和后台任务。切换页面不会断开，移动或拆分终端也不改变其所有者。
+生命周期命令须在五秒内回复；传输超时或清理失败时，宿主停止整个提供方进程及其终端消费者。
+停用、更新插件同样会停止运行实例，但保留配置。迟到的结果和界面更新不能重新打开已关闭的实例。
+
 ## 声明式 Native 界面
 
-Native 插件通过注册界面结构渲染界面，不注册组件。
+### 持续更新与消息工作台
+
+进程插件完成激活后，可以主动向 stdout 写入协议帧，无需等待用户操作。
+重新发送相同 `registrationId` 的 `tab` 或 `sidebar-panel` 注册即可更新界面；
+权限校验与首次注册一致。宿主持续读取输出，按有界批次交付界面更新。
+插件应合并短时间内的消息，只提交需要显示的有限数据，避免每条消息重发整个页面。
+stdout 仍只用于 JSON Lines 协议，后台任务不得混入诊断文本。
+
+切换或关闭普通注册标签页不会停止插件进程。插件负责自身网络连接和任务，提供明确的断开操作；
+停用插件、卸载或退出工作区时，宿主终止运行时及其输出读取任务，并丢弃旧运行实例的更新。
+这些能力需要 OxideTerm 2.2.5 或更高版本；依赖它们的插件应在 `engines.oxideterm` 中排除旧版本。
+
+表格声明 `id`、`selectable: true` 和 `rowKey` 后支持鼠标选择，以及获得焦点后的方向键、
+Home、End 选择。`rowKey` 指定行对象中的字段名，每行必须提供非空、唯一的字符串标识。
+`value` 可设置选中行的标识；用户选择通过 `ui.event` 返回，`type` 为 `change`，
+`value` 为该行标识。未声明选择能力的旧表格保持只读。
+
+```json
+{
+  "kind": "table",
+  "id": "messages",
+  "selectable": true,
+  "rowKey": "id",
+  "columns": ["topic", "preview"],
+  "rows": [{"id": "message-1", "topic": "devices/status", "preview": "ready"}]
+}
+```
+
+带稳定 `id` 的表格和列表在刷新时保留滚动位置。提供 `rowKey` 时，插入、删除或重排后
+继续显示原来的首个可见行；该行已删除时使用仍有效的邻近位置。选中行被删除时清除选择。
+保持插件、页面、区段和控件标识不变，才能沿用这些状态。
+
+使用 `textarea` 编辑多行消息正文：
+
+```json
+{"kind": "textarea", "id": "body", "label": "@payload", "value": "first line\nsecond line"}
+```
+
+它复用原生文本编辑器的输入法、选择、撤销、复制粘贴和滚动行为，编辑后发送
+`ui.event`（`type: "input"`，`value` 为完整文本）。无关界面刷新保留正在编辑的草稿；
+插件显式改变 `value` 时替换文本。`disabled` 禁止编辑。关闭所属页面后释放编辑器状态。
+`label`、`placeholder` 等文案继续使用插件的 11 语言翻译词典。
+
+Native 插件通过带版本的结构选择 OxideTerm 组件。插件提供数据并接收事件；
+宿主提供真正的共享组件、主题令牌、密度、字体、焦点、输入法行为、无障碍语义
+和响应式布局。插件运行时不会获得原始 GPUI 对象，也不能注入 HTML、CSS、
+闭包或自绘代码。
 
 ```json
 {
@@ -824,6 +1020,7 @@ Native 插件通过注册界面结构渲染界面，不注册组件。
       "metadata": {
         "tabId": "dashboard",
         "schema": {
+          "componentVersion": 1,
           "kind": "form",
           "title": "Dashboard",
           "sections": [
@@ -849,20 +1046,125 @@ Native 插件通过注册界面结构渲染界面，不注册组件。
 
 | 类型 | 说明 |
 |---|---|
-| `text`, `password`, `number`, `checkbox`, `select` | 字段控件，需要 `id` |
-| `button` | 只有存在 `id` 且未禁用/加载中时才可操作 |
-| `markdown` | 宿主渲染的文本块 |
+| `stack`, `row`, `card`, `toolbar` | 布局组件，以有界的宿主布局渲染嵌套 `children` |
+| `columns` | 等宽分栏，容器变窄时自动换行 |
+| `actionRow` | 首个子项占用剩余宽度，其余操作靠右对齐；首项为按钮时填满该区域 |
+| `text`, `password`, `number`, `checkbox`, `select` | 共享字段组件，需要稳定的 `id` |
+| `radioGroup`, `radio-group`, `segmentedControl`, `segmented-control`, `slider` | 共享选择/范围组件，需要稳定的 `id` |
+| `button`, `iconButton`, `icon-button` | 共享动作组件；有 `id`、未禁用且未加载时可操作；图标按钮还需要 `icon` 和 `label` |
+| `alert` | 带语义色调、可选图标、标题和说明的宿主提示 |
+| `markdown` | 使用 OxideTerm 的 Markdown 渲染器解析；禁用后台图片和本地文件链接 |
 | `code`, `codeBlock`, `code-block` | 代码块 |
-| `statusBadge`, `status-badge` | 状态指示 |
-| `progress` | 进度显示 |
-| `table`, `list` | 结构化数据显示 |
-| `emptyState`, `empty-state` | 空状态 |
-| `divider` | 分隔线 |
+| `statusBadge`, `status-badge`, `badge` | 带语义色调和强度的共享状态徽章 |
+| `progress` | 共享进度组件，数值可使用 `0..1` 或 `0..100` |
+| `table`, `list` | 有界、虚拟化的共享数据组件 |
+| `emptyState`, `empty-state` | 带可选图标和说明的共享空状态 |
+| `divider` | 共享分隔线 |
 | `keyValue`, `key-value`, `keyValueRow`, `key-value-row` | 键值行 |
 
-按钮点击会作为插件 UI 事件传回。焦点、布局、无障碍、主题和控件渲染都由宿主持有。
+组件事件只会发给拥有该界面的插件：
+
+```json
+{
+  "name": "ui.event",
+  "payload": {
+    "type": "change",
+    "componentKind": "select",
+    "surfaceKind": "tab",
+    "surfaceId": "dashboard",
+    "sectionId": "overview",
+    "controlId": "environment",
+    "value": "production"
+  }
+}
+```
+
+按钮发出 `click`，文本字段发出 `input`，选择和范围组件发出 `change`。
+密码草稿由宿主清零。没有明确获批的 `credentials.raw.read` 能力时，密码事件
+只包含 `{ "present": boolean, "redacted": true }`；只有敏感内容权限获批后，
+原文才会发给拥有该界面的插件。密码组件不能声明初始 `value`，因此凭据不会
+被保留在已注册的界面结构中。
+
+为保证安全和可预测性能，组件版本 1 最多接受 8 层嵌套、256 个组件、每个容器
+64 个直接子项、每个选择组件 128 个选项、每个数据组件 2,000 行，以及 64 个
+表格列。控件 ID 在其根区域或区段内必须唯一，`root` 不能用作区段 ID。
+注册时会拒绝未知版本、变体、色调、尺寸、间距或非法子组件位置。完整编码结构
+的上限是 2 MiB。
 
 ## 宿主 API 调用
+
+### 原生文本处理区
+
+WASM 插件可以注册带稳定 `id` 的 `textWorkbench` 控件。`options` 中每个工具采用
+`{ label, value: { command, group?, description?, parameterLabel?, parameterDefault? } }`。
+相同 `group` 的工具共用左侧分组入口，具体操作显示在编辑器上方。可选参数使用原生输入框；
+切换到不同参数时采用声明的默认值，相同参数名称的操作之间保留当前值。
+控件的 `value` 提供 `input`、`output`、`execute`、`working`、`copy`、`useInput`、
+`clear`、`limit`、`failed`、`line`、`column` 及插件错误码对应的翻译文案。
+界面结构可携带 `translations: { "en": { key: text }, "zh-CN": { key: text }, ... }`，
+以 `@` 开头的字符串会从该词典翻译，覆盖页面头部和工具选项。插件应包含全部 11 种语言，
+且键集合一致。此能力要求 2.2.0 之后的宿主。
+
+宿主持有输入和只读结果编辑器，处理选择、复制和草稿生命周期。点击执行时截取当前输入，
+在新的 WASM 实例中调用选中命令，参数为 `{ input, parameter }`；返回值为
+`{ output: string }` 或 `{ error: { code, line?, column? } }`。错误码对应控件提供的翻译，
+未知错误统一显示 `failed`。输入限制为 256 KiB，参数 4 KiB，输出 2 MiB，执行时限五秒。
+失败时保留输入和上次结果。输入不进入界面注册、设置或终端命令；关闭标签页释放编辑器并
+取消结果回传，已开始执行的 WASM 调用受时限约束。计算实例不提供宿主调用、文件目录或网络权限。
+
+运行时菜单注册 `contextMenu` 的 `target` 为 `terminal`，菜单项提供
+`{ label, tabId, controlId }`。宿主在点击时捕获选区，随后打开该插件声明的文本处理区。
+之后切换窗格或终端输出变化都不会改变已捕获的输入；`@` 菜单文案使用目标标签页的翻译。
+
+### 文件预览插件
+
+独立进程插件可以在现有文件预览窗口中提供分页文档预览，不需要注册标签页或侧边栏：
+
+```json
+{
+  "contributes": {
+    "filePreviews": [{"mimeTypes": ["application/pdf"], "command": "preview.render"}]
+  }
+}
+```
+
+宿主按精确的 MIME 类型选择已启用、版本兼容且已获信任的插件。本地及 SFTP
+下载的 PDF、SQLite、证书和二进制文件通过文档资源进入预览，第一版大小限制为 10 MiB。其他内置预览类型沿用原有实现。
+每次渲染启动独立进程实例，使用现有 `activate` 和 `dispatchCommand` 协议。
+命令接收 `{ path, page, width }`：`page` 从零开始，`width` 为 256 至 2048 像素的期望图片宽度。
+返回 `{ pageCount, page, png }`，其中 `png` 是 Base64 编码的 PNG 图片。
+宿主限制解码后的图片不超过 800 万像素，并通过 GPUI 显示。预览实例只返回页面结果，
+不要从中注册界面或调用宿主 API。
+
+SQLite 插件注册 `application/vnd.sqlite3`，也可注册 `application/x-sqlite3`。
+请求额外携带 `table: string | null` 和 `snapshot: boolean`。只有宿主管理的临时下载副本
+会设置 `snapshot: true`，插件将其作为不可变文件打开，避免生成 WAL/SHM 辅助文件；
+本地文件使用普通 SQLite 只读访问。返回结构为
+`{ kind: "table", tables: string[], selectedTable: string | null, columns: string[],
+rows: (string | null)[][], rowCount, page, pageCount }`。每页 50 行，末页可不足 50 行；
+空表或空数据库保留一页。宿主检查表名、行结构和大小后使用原生表格显示。
+限制为 256 个表名、64 列及每页 4 MiB 单元格文本。
+远程文件存在非空 WAL/回滚日志或下载期间发生变化时拒绝预览，应使用停止写入后的完整备份。
+
+证书插件注册 `application/pkix-cert`，二进制检查器注册 `application/x-oxideterm-binary`。
+宿主根据扩展名及文件头选择这些入口，优先于文本预览。检查器返回
+`{ kind, index, objects, fields }`，其中 `index` 对应请求的 `page`，`objects` 最多列出
+64 个证书或架构，`fields` 使用宿主已翻译的字段键，元素格式为 `{ key, value }`。
+证书返回 `kind: "certificate"`、详细字段 `details`，以及以秒计的时间戳 `notBefore`、
+`notAfter`。只返回证书的公开字段，混合 PEM 中的私钥块不得进入结果。界面单独判断有效期，
+不将其等同于系统信任、证书链、签名或吊销检查。
+
+二进制返回 `kind: "binary"`、完整文件大小 `size`，以及最多 1024 个节区 `sections`。
+节区格式为 `{ name, address, offset, size }`；文件偏移相对于整个源文件，包括通用 Mach-O
+文件。没有文件数据的节区使用 `offset: null`。宿主检查节区范围，并复用已有十六进制格式化
+和只读编辑器，每次显示 512 字节，支持偏移跳转。插件仅解释文件，不编辑、反汇编或注册额外界面。
+
+预览窗口持有取消句柄和源文件的生命周期。关闭窗口会取消渲染进程及待完成的 SFTP
+预览下载，最后一个文件使用者释放后删除远程临时副本，不会断开共享 SSH 节点。
+独立进程仍需用户确认信任；进程隔离用于防止解析器崩溃影响应用，不是文件系统沙箱。
+禁用或卸载插件后，宿主不再选择它，并取消其正在打开的预览。
+
+此能力在 2.2.0 之后新增。正式插件包必须排除旧宿主，本地试用版不得放宽正式发布包的兼容范围。
 
 运行时插件通过命名空间、方法和 JSON 参数调用宿主 API：
 
@@ -880,22 +1182,28 @@ Native 插件通过注册界面结构渲染界面，不注册组件。
 }
 ```
 
-宿主会拒绝权限集中不允许的调用。`contributes.apiCommands` 也用于声明许多宿主调用。优先声明精确项，例如 `connections.getAll`；只有插件确实需要整个命名空间时才使用通配。
+宿主会拒绝不在最终生效权限集中的调用。直接宿主 API 根据获批能力生成，不需要在 `contributes.apiCommands` 中重复声明。该列表只作为旧版 `api.invoke` 适配器所调用命令的第二层白名单。
 
 常见命名空间：
 
 | 命名空间 | 常见用途 |
 |---|---|
-| `connections` | 读取保存/在线连接快照 |
+| `connections` | 读取并控制保存/在线连接生命周期 |
 | `sessions` | 读取节点树和活跃节点状态 |
 | `terminal` | 观察缓冲区或发送已批准输入 |
 | `sftp` | 通过节点拥有的 SFTP 列出、读取、写入远端文件 |
+| `scp` | 在 SFTP 不可用时，通过节点拥有的传统 SCP 传输文件 |
 | `forward` | 列出、创建、停止转发 |
 | `transfers` | 观察传输状态 |
 | `profiler` | 读取节点指标 |
+| `hostTools` | 读取缓存宿主状态、采集类型化数据集并执行已验证动作 |
 | `eventLog` | 读取应用事件日志 |
-| `ide` | 观察 IDE 项目和打开文件状态 |
-| `ai` | 读取已脱敏 AI 元数据 |
+| `notifications` | 读取或管理通知中心条目 |
+| `quickCommands` | 读取、管理或执行保存的快捷命令 |
+| `cloudSync` | 读取安全同步状态/历史并控制同步操作 |
+| `theme` | 读取完整有效 token 并选择已安装主题 |
+| `ide` | 观察和编辑当前 IDE 项目 |
+| `ai` | 读取已脱敏 AI 数据并控制对话或生成 |
 | `app` | 主题、平台、版本和设置快照 |
 | `settings` | 插件设置和可同步设置 |
 | `storage` | 插件作用域 JSON KV |
@@ -903,17 +1211,72 @@ Native 插件通过注册界面结构渲染界面，不注册组件。
 | `secrets` | 插件作用域凭据存储 |
 | `ui` | toast、确认对话框、布局和进度 |
 
+此表描述当前已实现的命名空间。调用默认可用的 `app.getApiCatalog` 可以发现当前宿主支持的准确直接 API，以及每个 API 的访问等级、所需能力和引入版本；版本与能力协商以该目录为准。
+
 ## 权限与能力
 
-Native 使用显式能力门。当前共享能力名称包括：
+在清单顶层声明敏感读取和副作用：
+
+```json
+{
+  "permissions": {
+    "capabilities": ["terminal.content.read", "terminal.write"]
+  }
+}
+```
+
+省略 `permissions.capabilities` 或使用空数组，不会得到一个什么都不能做的插件。每个运行时插件默认都能调用实用的脱敏接口，包括 `connections.getSummaries`、`sessions.getSummary`、`terminal.getMetadata`、`ai.getCatalog`、`ide.getSummary` 和 `app.getApiCatalog`。默认元数据不包含终端原文、文件内容、AI 对话正文、凭据或修改操作。
+
+当前能力名称如下：
 
 | 能力 | 含义 |
 |---|---|
 | `filesystem.read` | 通过已批准宿主 API 读取文件元数据或内容 |
 | `filesystem.write` | 通过已批准宿主 API 修改文件 |
+| `filesystem.delete` | 通过已批准宿主 API 删除文件或目录树 |
+| `network.forward.read` | 读取保存和活动的转发规则 |
 | `network.forward` | 创建或管理转发/网络桥接行为 |
+| `app.settings.read` | 读取宿主设置分类 |
+| `app.sync.refresh` | 外部同步后刷新宿主状态 |
+| `connections.read` | 读取完整的保存连接和端点投影 |
+| `connections.control` | 连接、重连或显式断开产品拥有的现有节点 |
+| `sessions.read` | 读取完整会话树、活动节点投影和事件日志 |
+| `terminal.content.read` | 读取终端目标、选区、回滚缓冲或搜索结果 |
+| `terminal.write` | 写入终端输入、清空缓冲区或打开 Telnet 传输 |
+| `credentials.raw.read` | 返回插件作用域凭据原文 |
+| `credentials.manage` | 通过宿主代理保存、检查或删除插件作用域凭据 |
+| `network.http` | 允许通过旧版请求适配器发送 HTTP/HTTPS 请求 |
+| `sync.read` | 读取或导出同步数据 |
+| `sync.write` | 刷新、应用或导入同步数据 |
+| `transfers.read` | 读取和订阅传输状态 |
+| `ide.read` | 读取完整 IDE 项目和打开文件投影 |
+| `ide.write` | 在现有 IDE 项目中打开、编辑、保存、关闭文件或刷新项目 |
+| `ai.content.read` | 读取 AI 对话和消息正文 |
+| `ai.write` | 创建、选择或删除对话，发送文本或取消生成 |
+| `host_tools.read` | 读取缓存宿主状态或采集类型化 Host Tools 数据 |
+| `host_tools.write` | 执行已验证的非破坏性进程、容器、服务、tmux 或任务动作 |
+| `host_tools.destructive` | 终止进程或销毁 tmux 资源 |
+| `host_tools.custom.execute` | 执行当前插件清单中预先声明的静态自定义监控命令 |
+| `notifications.read` | 读取通知标题、正文和作用域投影 |
+| `notifications.manage` | 标为已读、删除、清空或修改免打扰状态 |
+| `quick_commands.read` | 读取完整的保存快捷命令定义 |
+| `quick_commands.manage` | 创建、更新或删除快捷命令 |
+| `quick_commands.execute` | 通过常规风险确认执行保存的快捷命令 |
+| `theme.write` | 选择已安装的内置或自定义主题 |
+| `cloud_sync.read` | 读取已脱敏的云同步历史 |
+| `cloud_sync.control` | 检查、上传、预览拉取或配置自动上传 |
+| `cloud_sync.apply` | 应用当前已审阅的远端预览 |
+| `legacy.invoke` | 调用兼容层 `api.invoke` 适配器 |
+| `events.emit` | 发出插件作用域自定义事件 |
+| `plugin.settings.write` | 修改插件设置或插件作用域存储 |
+| `ui.write` | 注册或打开插件界面，并显示宿主界面效果 |
+| `runtime.process.trusted` | 信任无沙箱的进程运行时；进程插件会隐式添加 |
 
-运行时会在 `activate` 请求里收到最终生效的权限集。插件应把该请求当作准确信息来源：清单可以声明插件意图，但 Host API 调用仍然必须出现在 `permissions.allowedHostApis` 中，带能力门的调用还必须具备对应能力。
+插件管理器会在启用插件时集中展示所有申请的敏感能力。批准前不会激活插件；批准后，运行时会在 `activate` 请求里收到最终生效的权限集，插件应把它作为准确信息来源。仅升级版本不会再次提示，也不会扩大权限。新增能力或改变运行时边界需要重新审核；移除能力只会缩小权限，不会再次提示。
+
+进程插件需要特别谨慎：它会隐式申请且不能移除 `runtime.process.trusted`。进程不受 OxideTerm 操作系统沙箱限制，因此其可执行文件可以绕过宿主 API 权限门，直接使用当前用户拥有的系统权限。只应安装并批准可信发布者的进程插件，不能把 WASM 与进程插件描述为具有相同的安全边界。
+
+HTTP 请求当前通过兼容层适配器实现。插件必须同时申请 `legacy.invoke` 和 `network.http`，并在 `contributes.apiCommands` 中列出 `plugin_http_request`，才能通过 `api.invoke` 调用该命令。
 
 AI 工具元数据还可以声明 `terminal.observe`、`terminal.send`、`state.list`、`settings.read`、`settings.write` 和 `plugin.invoke` 等语义能力。这些声明用于描述工具行为，服务于宿主和模型侧展示；它们不会绕过运行时权限检查。
 
@@ -925,7 +1288,7 @@ AI 工具元数据还可以声明 `terminal.observe`、`terminal.send`、`state.
 |---|---|---|
 | 用户可见插件选项 | `contributes.settings` 和 `settings.*` | 类型化值；不是凭据时可安全导入导出 |
 | 插件内部缓存 | `storage.*` | 插件作用域 JSON KV，有大小限制 |
-| token、密码、密钥 | `secrets.*` | 系统钥匙串支持的插件作用域凭据存储 |
+| token、密码、密钥 | `secrets.*` | 系统钥匙串支持的插件作用域凭据存储；读取原文需要 `credentials.raw.read`，set/has/delete 需要 `credentials.manage` |
 | 跨机器插件偏好 | 插件设置导入导出或 `.oxide` | 不要包含原始凭据，除非加密便携流程明确支持 |
 
 不要把凭据写进插件 id、名称、标签、日志、AI 提示词、事件载荷或支持包。
@@ -937,6 +1300,7 @@ Native 插件应尽量使用稳定节点 id：
 - 使用节点/会话快照，不要假设当前终端标签页就是所有者。
 - 终端输入钩子出错或超时时必须失败开放。
 - SFTP 修改操作需要文件写能力和在线节点。
+- SCP 调用共享节点拥有的 SSH 连接。在线通道可以暂停或取消，但失败或断线后的 SCP 重试会从零字节开始。
 - 转发调用需要网络转发能力，并应处理已挂起节点。
 - IDE API 暴露项目和打开文件元数据，不暴露任意编辑器内部状态。
 - AI API 暴露已脱敏元数据，避免暴露工具消息内容。
@@ -962,8 +1326,16 @@ com.example.native-dashboard/
 - 归档条目不能逃逸插件目录。
 - 包大小和条目数量应低于宿主限制。
 - 一个包优先只包含一个插件 id。
-- 使用类似 semver 的版本，便于更新检查比较。
+- 使用语义化版本，便于更新检查比较。
+- 根据实际兼容性测试，在 `engines.oxideterm` 中声明宿主范围，例如 `>=2.3.0, <3.0.0`。
 - 除非入口本身可移植，否则运行时二进制应按平台分发。
+
+插件市场保留每个发布版本的宿主范围和各平台安装包，选择当前可用的最高版本。
+更高版本不兼容时单独说明要求，保留当前插件。安装和启动都会检查清单中的兼容范围，
+应用升级和降级后同样生效。不兼容插件保留文件与设置，但停止加载。
+启动激活前会刷新官方目录并缓存，离线时读取缓存；有记录的兼容性纠错优先于包内声明，
+但不会改写安装包。未收录且未声明范围的旧安装包仍允许使用；旧版主应用不会因此自动获得兼容检查。
+目录格式和发布流程见[发布指南](https://github.com/AnalyseDeCircuit/oxideterm-plugins/blob/main/docs/PUBLISHING.md)。
 
 开发时：
 
@@ -1002,22 +1374,54 @@ interface NativePluginManifest {
   contributes?: NativePluginContributes;
   locales?: string;
   runtime?: NativePluginRuntime;
+  permissions?: NativePluginPermissions;
+}
+
+interface NativePluginPermissions {
+  capabilities?: string[];
 }
 
 interface NativePluginRuntime {
-  kind: 'language' | 'wasm' | 'process' | 'acp' | 'remote-desktop' | 'terminal-transport' | 'helper' | 'manifest-only';
+  kind: 'wasm' | 'process' | 'manifest-only' | 'language' | 'acp' | 'remote-desktop' | 'terminal-transport' | 'helper';
   entry: string;
 }
 
 interface NativePluginContributes {
+  backgrounds?: string[];
+  language?: {
+    id: string;
+    displayName?: string;
+    grammarName?: string;
+    extensions?: string[];
+    fileNames?: string[];
+    highlights: string;
+    parserSha256: string;
+    highlightsSha256: string;
+  };
   tabs?: NativePluginTabDef[];
   sidebarPanels?: NativePluginSidebarDef[];
+  activityBarItems?: NativePluginActivityBarItemDef[];
   settings?: NativePluginSettingDef[];
   terminalHooks?: NativePluginTerminalHooksDef;
   terminalTransports?: string[];
   connectionHooks?: Array<'onConnect' | 'onDisconnect' | 'onReconnect' | 'onLinkDown'>;
   aiTools?: NativePluginAiToolDef[];
   apiCommands?: string[];
+  hostMonitors?: NativePluginHostMonitorDef[];
+}
+
+interface NativePluginHostMonitorDef {
+  id: string;
+  title: string;
+  description?: string;
+  commands: Partial<Record<'linux' | 'macos' | 'bsd' | 'windows' | 'default', string>>;
+  output?: {
+    format?: 'json' | 'jsonLines' | 'tsv' | 'textLines';
+    columns?: string[]; // 仅 tsv 必填。
+    maxRows?: number; // 默认 1,000，最大 2,000。
+  };
+  timeoutSeconds?: number; // 默认 10，范围 1-30。
+  maxOutputBytes?: number; // 默认 262,144，范围 1 KiB-1 MiB。
 }
 
 interface NativePluginTabDef {
@@ -1030,6 +1434,14 @@ interface NativePluginSidebarDef {
   id: string;
   title: string;
   icon: string;
+  position?: 'top' | 'bottom';
+}
+
+interface NativePluginActivityBarItemDef {
+  id: string;
+  title: string;
+  icon: string;
+  command: string;
   position?: 'top' | 'bottom';
 }
 
@@ -1062,9 +1474,12 @@ interface NativePluginAiToolDef {
 校验规则：
 
 - `id`、`name`、`version`、贡献 id、标题和图标必须是非空文本。
+- 活动栏动作的命令必须非空，插件内的动作 id 必须唯一，`position` 只接受 `top` 或 `bottom`。
+- 标签页、侧栏面板和活动栏动作的图标从 OxideTerm 内置 Lucide 图标中解析；匹配时忽略 ASCII 大小写、连字符与下划线，不支持的名称回退为 `Puzzle`。
 - 相对路径必须留在插件目录内。
 - `terminalTransports` 当前接受 `telnet`。
-- `apiCommands` 条目是宿主 API 名称，例如 `connections.getAll` 或 `sftp.listDir`。
+- `apiCommands` 条目是兼容层适配器命令，例如 `get_app_version` 或 `plugin_http_request`；直接宿主 API 不在这里声明。
+- 清单插件应省略 `runtime`；空运行时入口无法通过校验。
 - 只有旧 `main` 且没有 `runtime` 时，插件状态为 `legacy-js`，不会执行。
 
 ### 协议接口
@@ -1137,6 +1552,7 @@ interface PluginRegistration {
     | 'status-bar'
     | 'tab'
     | 'sidebar-panel'
+    | 'activity-bar-item'
     | 'terminal-input-interceptor'
     | 'terminal-output-processor'
     | 'terminal-shortcut'
@@ -1156,6 +1572,7 @@ interface PluginRegistration {
 | `status-bar` | `text` | `alignment`、`icon`、`tooltip` |
 | `tab` | `tabId`、`schema` | schema 内的 `title` |
 | `sidebar-panel` | `panelId`、`schema` | `position`、schema 内的 `title` |
+| `activity-bar-item` | `itemId` | 无；标题、图标、位置和命令均来自清单 |
 | `event-subscription` | `event` 或 `namespace` + `method` | 部分事件族支持 `nodeId` 过滤 |
 | `terminal-input-interceptor` | `command` 或 `id` | 无 |
 | `terminal-output-processor` | `command` 或 `id` | 无 |
@@ -1166,6 +1583,8 @@ interface PluginRegistration {
 
 ```ts
 interface NativePluginDeclarativeUiSchema {
+  translations?: Record<string, Record<string, string>>;
+  componentVersion?: 1;
   kind?: 'form';
   title?: string;
   description?: string;
@@ -1183,17 +1602,33 @@ interface NativePluginDeclarativeUiSection {
 interface NativePluginDeclarativeUiControl {
   kind:
     | 'text'
+    | 'textWorkbench'
     | 'password'
     | 'number'
     | 'checkbox'
     | 'select'
+    | 'radioGroup'
+    | 'radio-group'
+    | 'slider'
+    | 'segmentedControl'
+    | 'segmented-control'
     | 'button'
+    | 'iconButton'
+    | 'icon-button'
+    | 'stack'
+    | 'row'
+    | 'columns'
+    | 'actionRow'
+    | 'card'
+    | 'toolbar'
+    | 'alert'
     | 'markdown'
     | 'code'
     | 'codeBlock'
     | 'code-block'
     | 'statusBadge'
     | 'status-badge'
+    | 'badge'
     | 'progress'
     | 'table'
     | 'list'
@@ -1207,18 +1642,34 @@ interface NativePluginDeclarativeUiControl {
   id?: string;
   label?: string;
   description?: string;
+  placeholder?: string;
+  icon?: string;
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link' | 'panel' | 'inset' | 'inspector';
+  tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'error' | 'info';
+  size?: 'small' | 'default' | 'large' | 'icon';
+  gap?: 'none' | 'compact' | 'normal' | 'spacious';
   value?: unknown;
   text?: string;
   language?: string;
   options?: Array<{ label: string; value: unknown }>;
   rows?: unknown[];
   columns?: string[];
+  columnDefs?: Array<{ key: string; label: string; style?: 'primary' | 'meta' | 'mono' }>;
+  children?: NativePluginDeclarativeUiControl[];
+  min?: number;
+  max?: number;
+  step?: number;
+  indeterminate?: boolean;
+  strong?: boolean;
   disabled?: boolean;
   loading?: boolean;
 }
 ```
 
-`text`、`password`、`number`、`checkbox`、`select` 和 `button` 控件需要 `id`。按钮只有在存在 `id`、未禁用且不处于加载中时才可操作。
+所有交互组件都需要稳定的 `id`：`text`、`password`、`number`、
+`checkbox`、`select`、单选组、分段选择、滑块、按钮和图标按钮。按钮只有在
+`disabled` 和 `loading` 均为 `false` 时可操作。为兼容旧结构，
+`componentVersion` 省略时默认为 `1`，但插件应明确声明它，以便将来协商组件变化。
 
 ## 宿主 API 参考
 
@@ -1235,7 +1686,7 @@ interface HostCall {
 
 调用必须出现在 `allowedHostApis` 中。支持精确名称和命名空间通配，例如 `connections.getAll` 和 `connections.*`。
 
-`api.invoke` 还有额外白名单：`args.command` 必须同时出现在 `contributes.apiCommands` 中。
+`api.invoke` 需要 `legacy.invoke`，并且还有额外白名单：`args.command` 必须同时出现在 `contributes.apiCommands` 中。`plugin_http_request` 命令还需要 `network.http`。
 
 | `api.invoke` 命令 | Native 适配器 |
 |---|---|
@@ -1263,6 +1714,11 @@ interface HostCall {
 | `node_sftp_tar_probe` | `sftp.tarProbe` 适配器 |
 | `node_sftp_tar_upload` | `sftp.tarUpload` 适配器 |
 | `node_sftp_tar_download` | `sftp.tarDownload` 适配器 |
+| `node_scp_probe` | `scp.capabilities` 适配器 |
+| `node_scp_download` | `scp.download` 适配器 |
+| `node_scp_upload` | `scp.upload` 适配器 |
+| `node_scp_download_dir` | `scp.downloadDirectory` 适配器 |
+| `node_scp_upload_dir` | `scp.uploadDirectory` 适配器 |
 | `list_port_forwards` | `forward.list` 适配器 |
 | `create_port_forward` | `forward.create` 适配器 |
 | `stop_port_forward` | `forward.stop` 适配器 |
@@ -1283,11 +1739,13 @@ interface HostCall {
 | `app.getVersion` | `{}` | 版本字符串 |
 | `app.getPlatform` | `{}` | 平台字符串 |
 | `app.getLocale` | `{}` | 语言字符串 |
+| `app.getApiCatalog` | `{}` | 已实现直接 API 及其访问等级、能力和引入版本 |
 | `app.getPoolStats` | `{}` | 类似 `{ activeConnections, totalSessions }` 的统计 |
 | `app.refreshAfterExternalSync` | `{}` | 单向刷新工作区效果 |
 | `ui.getLayout` | `{}` | 布局快照 |
 | `ui.registerTabView` | `{ tabId: string, schema: NativePluginDeclarativeUiSchema }` | 声明式标签页注册结果 |
 | `ui.registerSidebarPanel` | `{ panelId: string, schema: NativePluginDeclarativeUiSchema }` | 声明式侧边栏注册结果 |
+| `ui.registerActivityBarItem` | `{ itemId: string }` | 独立活动栏动作注册结果 |
 | `ui.openTab` | `{ tabId: string }` | 打开或聚焦已声明插件标签页 |
 | `ui.showToast` | `{ title?: string, description?: string, variant?: string }` | 单向 toast 效果 |
 | `ui.showNotification` | `{ title?: string, body?: string, severity?: string }` | 单向通知效果 |
@@ -1303,21 +1761,118 @@ interface HostCall {
 
 ### 连接与会话
 
+2.2.0 之后的宿主新增工作概览接口：
+
+- `app.getWorkspaceSummary({})` 需要 `sessions.read`，返回打开标签的标识、标题、类型和录制状态，节点的标识、标题、状态和活动转发数量，以及存在问题的插件标识和名称；不返回终端内容、路径或诊断原文。
+- `ui.openWorkspace(destination)` 需要 `ui.write`，校验目标后返回 `{ queued: true }`，复用宿主原有的页面打开和独立窗口聚焦流程。
+
+目标格式为 `{ kind: "tab", id }`、`{ kind: "sftp", nodeId }`、
+`{ kind: "forwards", nodeId }` 或 `{ kind: "page", page }`。
+页面名称支持 `sessions`、`files`、`plugins`、`cloudSync`、
+`notifications` 和 `localTerminal`。已关闭的标签、已删除的节点及未知页面会被拒绝。
+该接口不执行任意命令；打开保存连接仍使用 `connections.connect` 及其独立权限。
+工作概览返回当前状态，不提供持久化的项目历史或工作区历史。
+
 | 宿主 API | 参数 | 返回 |
 |---|---|---|
+| `connections.getSummaries` | `{}` | 脱敏连接摘要；默认可用 |
+| `connections.getSavedSummaries` | `{}` | 用于发现的脱敏保存连接 ID、名称和分组；默认可用 |
 | `connections.getAll` | `{}` | 连接快照 |
+| `connections.getSaved` | `{}` | 不含凭据、密钥路径、证书路径、连接后命令或代理凭据引用的保存连接投影 |
 | `connections.get` | `{ connectionId: string }` | 连接快照或 `null` |
 | `connections.getState` | `{ connectionId: string }` | 连接状态或 `null` |
 | `connections.getByNode` | `{ nodeId: string }` | 连接快照或 `null` |
+| `connections.connect` | `{ connectionId: string }` | `{ queued: true }`；使用现有保存连接和提示流程 |
+| `connections.openForm` | `{ name: string, host: string, port: number, username?: string, group?: string }` | `{ queued: true }`；打开原生 SSH 表单供用户检查，不保存或连接；需要 `connections.control` |
+| `connections.reconnect` | `{ nodeId: string }` | `{ queued: true }`；复用现有节点运行时 |
+| `connections.disconnect` | `{ nodeId: string }` | `{ queued: true }`；先打开常规级联确认，再断开 NodeRouter 拥有的子树 |
 | `sessions.getTree` | `{}` | 节点树快照 |
+| `sessions.getSummary` | `{}` | 脱敏会话摘要；默认可用 |
 | `sessions.getActiveNodes` | `{}` | 活跃/已连接节点快照 |
 | `sessions.getNodeState` | `{ nodeId: string }` | 节点状态或 `null` |
 | `eventLog.getEntries` | `{ severity?: string, category?: string, limit?: number }` | 事件日志条目 |
+
+### 产品数据与控制
+
+`connections.openForm` 需要高于 2.2.0 的宿主版本。主机来源插件还应在启用时通过
+`app.getApiCatalog` 检查接口是否存在。接口只接受连接基本信息，拒绝凭据、密钥路径、
+命令及其他字段；认证和跳板机由用户在现有表单中设置。排队中的请求不会覆盖正在编辑的
+表单，执行失败会显示在插件管理器中。主机发现不拥有 SSH 连接，也不自动修改已保存连接。
+
+工作区修改操作在完成参数和权限预检后返回 `{ queued: true }`，随后由对应产品所有者执行，并反映到后续快照或事件中。Host Tools 因为需要返回类型化远端结果，所以采用同步返回。
+
+| 宿主 API | 能力 | 参数 | 返回 |
+|---|---|---|---|
+| `notifications.getSummary` | 默认 | `{}` | 不含正文的计数和免打扰状态 |
+| `notifications.getAll` | `notifications.read` | `{}` | 通知标题、正文、状态和作用域投影 |
+| `notifications.markRead` | `notifications.manage` | `{ id: number }` | `{ queued: true }` |
+| `notifications.markAllRead` | `notifications.manage` | `{}` | `{ queued: true }` |
+| `notifications.setDnd` | `notifications.manage` | `{ enabled: boolean }` | `{ queued: true }` |
+| `notifications.remove` / `notifications.clear` | `notifications.manage` | `{ id: number }` / `{}` | `{ queued: true }` |
+| `quickCommands.getMetadata` | 默认 | `{}` | 不含命令正文的发现元数据 |
+| `quickCommands.getAll` | `quick_commands.read` | `{}` | 完整分类和命令定义 |
+| `quickCommands.execute` | `quick_commands.execute` | `{ id: string }` | `{ queued: true }`；仍执行常规命令风险确认 |
+| `quickCommands.upsert` | `quick_commands.manage` | `{ id?, name, command, category?, description?, hostPattern?, hostPatterns?, parameters?, protocols?, confirmation? }` | `{ queued: true }` |
+| `quickCommands.remove` | `quick_commands.manage` | `{ id: string }` | `{ queued: true }` |
+| `theme.getTokens` | 默认 | `{}` | 完整有效终端、界面、指标、圆角、间距和动效 token |
+| `theme.getAvailable` | 默认 | `{}` | 当前、内置和自定义主题标识 |
+| `theme.setActive` | `theme.write` | `{ themeId: string }` | `{ queued: true }` |
+| `hostTools.getSnapshot` | `host_tools.read` | `{ nodeId: string }` | 缓存的系统信息、指标、进程、Docker 和服务状态；不含完整进程参数 |
+| `hostTools.getExtensions` | 默认 | `{}` | 当前插件声明的监控元数据，不含命令字符串 |
+| `hostTools.capture` | `host_tools.read` | `{ nodeId, osType, resource, preset?, limit? }` | `docker`、`services`、`logs`、`tmux`、`ports`、`filesystems`、`packages` 或 `scheduledTasks` 的类型化快照 |
+| `hostTools.execute` | `host_tools.write` | `{ nodeId, osType, resource, action, target, ...actionArgs }` | `{ success, exitCode, truncated }` |
+
+| `hostTools.terminate` | `host_tools.destructive` | `{ nodeId, osType, resource: 'process' \| 'tmux', action, target }` | `{ success, exitCode, truncated }` |
+| `hostTools.runExtension` | `host_tools.custom.execute` | `{ nodeId, osType, monitorId }` | `{ monitorId, success, data, rowCount, exitCode, truncated }` |
+| `cloudSync.getSummary` | 默认 | `{}` | 安全状态、进度、脏状态和冲突元数据 |
+| `cloudSync.getHistory` | `cloud_sync.read` | `{}` | 不含错误、远端 revision、目标、凭据或载荷的历史 |
+| `cloudSync.check` | `cloud_sync.control` | `{}` | `{ queued: true }` |
+| `cloudSync.upload` | `cloud_sync.control` | `{ force?: boolean }` | `{ queued: true }` |
+| `cloudSync.pullPreview` | `cloud_sync.control` | `{}` | `{ queued: true }`；不会应用数据或保存未提交的面板草稿 |
+| `cloudSync.applyPreview` | `cloud_sync.apply` | `{}` | `{ queued: true }`；只应用当前已审阅预览 |
+| `cloudSync.setAutoUpload` | `cloud_sync.control` | `{ enabled: boolean, intervalMinutes?: number }` | `{ queued: true }`；间隔最小为五分钟 |
+
+快捷命令参数使用 `{ name, label, kind?, defaultValue?, choices?, required? }`；`kind` 可取 `text` 或 `choice`。`protocols` 支持 `local`、`ssh`、`mosh`、`telnet`、`serial` 和 `tmux`，`confirmation` 可取 `inherit` 或 `always`。模板中的 `{{param.name}}` 会原样插入；需要把值作为一个 POSIX Shell 参数引用时，请使用 `{{param.name|sh}}`。
+
+Host Tools 不会创建第二条 SSH 连接。它通过 `NodeRouter` 解析当前 `nodeId`，复用现有连接，以产品命令构建器验证每个参数，并省略原始标准错误；采集错误会在序列化前脱敏。
+
+插件可以通过 `contributes.hostMonitors` 声明静态监控命令，把监控范围扩展到内置集合之外：
+
+```json
+{
+  "permissions": {
+    "capabilities": ["host_tools.custom.execute"]
+  },
+  "contributes": {
+    "hostMonitors": [{
+      "id": "nginx-workers",
+      "title": "Nginx 工作进程",
+      "description": "报告工作进程的 PID 和状态",
+      "commands": {
+        "linux": "ps -C nginx -o pid=,stat= | awk '{printf \"{\\\"pid\\\":%s,\\\"state\\\":\\\"%s\\\"}\\n\", $1, $2}'"
+      },
+      "output": {
+        "format": "jsonLines",
+        "maxRows": 200
+      },
+      "timeoutSeconds": 10,
+      "maxOutputBytes": 262144
+    }]
+  }
+}
+```
+
+宿主会按 `linux`、`macos`、`bsd` 或 `windows` 选择命令，未命中时再使用 `default`。命令必须是静态文本，刻意不支持运行时参数和模板替换，因此插件不能把 `runExtension` 变成任意命令入口。清单命令是插件包内的明文元数据，绝不能包含密码、令牌、私钥或其他凭据。宿主无法证明 Shell 命令一定只读，所以即使监控用途只是观察，执行仍需要独立的高风险能力 `host_tools.custom.execute`。宿主会限制执行时长、采集字节数和解析行数，不返回标准错误，也不返回失败命令的标准输出；成功输出会按 `json`、`jsonLines`、`tsv` 或 `textLines` 解析后再交给插件。
+
+声明监控器不会自动向内置 Host Tools 添加页面。插件负责通过自己的声明式标签页或侧边栏展示和轮询数据：用 `getExtensions` 发现自身监控器，需要新样本时调用 `runExtension`。
+
+Host Tools 动作名称是封闭枚举：`process` 通过 `execute` 支持 `stop`、`continue` 和 `renice`（`nice`），通过 `terminate` 支持 `terminate` 和 `kill`；`docker` 支持 `start`、`stop`、`restart`；`service` 支持 `start`、`stop`、`restart`、`reload`、`enable`、`disable`；`tmux` 支持 `renameSession`、`renameWindow`（`name`）和 `sendPaneCommand`（`command`），`killSession`、`killWindow`、`killPane` 则需要 `terminate`；`scheduledTask` 支持 `runNow`（`unit`）、`enable`、`disable`（`source`）。`osType` 只用于选择产品内已验证的 Linux、macOS/Darwin、BSD 或 Windows 命令构建器，不会直接插入 shell 命令。
 
 ### 终端
 
 | 宿主 API | 参数 | 返回 |
 |---|---|---|
+| `terminal.getMetadata` | `{}` | 脱敏终端元数据；默认可用 |
 | `terminal.getActiveTarget` | `{}` | 活跃终端目标快照 |
 | `terminal.getNodeBuffer` | `{ nodeId: string }` | 终端缓冲文本或 `null` |
 | `terminal.getNodeSelection` | `{ nodeId: string }` | 选中文本或 `null` |
@@ -1351,8 +1906,15 @@ interface HostCall {
 | `sftp.delete` | `filesystem.write` | `{ nodeId: string, path: string }` | 删除结果 |
 | `sftp.deleteRecursive` | `filesystem.write` | `{ nodeId: string, path: string }` | 递归删除结果 |
 | `sftp.rename` | `filesystem.write` | `{ nodeId: string, oldPath: string, newPath: string }` | 重命名结果 |
+| `scp.capabilities` | `filesystem.read` | `{ nodeId: string }` | `{ supported, recursive, restartResume: false }` |
+| `scp.download` | `filesystem.read` | `{ nodeId: string, remotePath: string, localPath: string, transferId?: string }` | SCP 传输结果 |
+| `scp.downloadDirectory` | `filesystem.read` | `{ nodeId: string, remotePath: string, localPath: string, transferId?: string }` | SCP 传输结果 |
+| `scp.upload` | `filesystem.write` | `{ nodeId: string, localPath: string, remotePath: string, transferId?: string }` | SCP 传输结果 |
+| `scp.uploadDirectory` | `filesystem.write` | `{ nodeId: string, localPath: string, remotePath: string, transferId?: string }` | SCP 传输结果 |
 | `transfers.getAll` | 只读 | `{}` | 传输快照 |
 | `transfers.getByNode` | 只读 | `{ nodeId: string }` | 节点传输快照 |
+
+SCP 是面向 POSIX 主机的兼容传输，不是浏览接口。SFTP 可用时，应继续使用 `sftp.listDir`、`sftp.stat` 和预览接口。结果会返回 `protocol: "scp"` 与 `restartResume: false`；通道或节点丢失后的重试会重新传输整个对象，不会从字节偏移继续。
 
 ### 转发
 
@@ -1362,7 +1924,7 @@ interface HostCall {
 | `forward.listSavedForwards` | 只读 | `{}` | 保存转发规则 |
 | `forward.exportSavedForwardsSnapshot` | 只读 | `{}` | 保存转发同步快照 |
 | `forward.applySavedForwardsSnapshot` | `network.forward` | `{ snapshot: object, strategy?: string }` | 应用结果 |
-| `forward.create` | `network.forward` | `{ nodeId: string, type: 'local' | 'remote' | 'dynamic', localPort?: number, remoteHost?: string, remotePort?: number }` | 创建的规则 |
+| `forward.create` | `network.forward` | `{ nodeId: string, type: 'local' \| 'remote' \| 'dynamic', localPort?: number, remoteHost?: string, remotePort?: number }` | 创建的规则 |
 | `forward.stop` | `network.forward` | `{ id: string }` | 停止结果 |
 | `forward.delete` | `network.forward` | `{ id: string }` | 删除结果 |
 | `forward.restart` | `network.forward` | `{ id: string }` | 重启结果 |
@@ -1377,15 +1939,15 @@ interface HostCall {
 | `storage.get` | `{ key: string }` | JSON 值或 `null` |
 | `storage.set` | `{ key: string, value: unknown }` | 单向写入 |
 | `storage.remove` | `{ key: string }` | 单向删除 |
-| `secrets.get` | `{ key: string }` | 凭据字符串或 `null` |
-| `secrets.getMany` | `{ keys: string[] }` | key 到凭据/null 的映射 |
-| `secrets.set` | `{ key: string, value: string }` | 空值表示删除 |
-| `secrets.has` | `{ key: string }` | `boolean` |
-| `secrets.delete` | `{ key: string }` | 删除结果 |
+| `secrets.get` | `{ key: string }` | 凭据字符串或 `null`；需要 `credentials.raw.read` |
+| `secrets.getMany` | `{ keys: string[] }` | key 到凭据/null 的映射；需要 `credentials.raw.read` |
+| `secrets.set` | `{ key: string, value: string }` | 空值表示删除；需要 `credentials.manage` |
+| `secrets.has` | `{ key: string }` | `boolean`；需要 `credentials.manage` |
+| `secrets.delete` | `{ key: string }` | 删除结果；需要 `credentials.manage` |
 | `sync.listSavedConnections` | `{}` | 保存连接快照 |
 | `sync.refreshSavedConnections` | `{}` | 刷新后的保存连接快照 |
 | `sync.exportSavedConnectionsSnapshot` | `{}` | 保存连接同步快照 |
-| `sync.applySavedConnectionsSnapshot` | `{ snapshot: object, conflictStrategy?: 'rename' | 'skip' | 'replace' | 'merge' }` | 应用结果 |
+| `sync.applySavedConnectionsSnapshot` | `{ snapshot: object, conflictStrategy?: 'rename' \| 'skip' \| 'replace' \| 'merge' }` | 应用结果 |
 | `sync.getLocalSyncMetadata` | `{}` | revision 元数据 |
 | `sync.preflightExport` | `{ connectionIds?: string[], embedKeys?: boolean, includeManagedKeys?: boolean }` | 导出预检查结果。插件驱动的同步默认不包含托管密钥。 |
 | `sync.exportOxide` | `{ connectionIds?: string[], password: string, embedKeys?: boolean, includeManagedKeys?: boolean, includeManagedKeyPassphrases?: boolean, includeAppSettings?: boolean, selectedAppSettingsSections?: string[], includePluginSettings?: boolean, selectedPluginIds?: string[], progressRegistrationId?: string }` | `.oxide` 字节/元数据结果。插件驱动的同步默认不包含托管密钥。 |
@@ -1398,14 +1960,28 @@ interface HostCall {
 | 宿主 API | 参数 | 返回 |
 |---|---|---|
 | `ide.isOpen` | `{}` | `boolean` |
+| `ide.getSummary` | `{}` | 脱敏 IDE 状态摘要；默认可用 |
 | `ide.getProject` | `{}` | 项目快照或 `null` |
 | `ide.getOpenFiles` | `{}` | 打开文件快照 |
 | `ide.getActiveFile` | `{}` | 活跃文件快照或 `null` |
+| `ide.openFile` | `{ path: string, nodeId?: string }` | `{ queued: true }` |
+| `ide.replaceActiveText` | `{ text: string, nodeId?: string }` | `{ queued: true }` |
+| `ide.insertActiveText` | `{ text: string, nodeId?: string }` | `{ queued: true }` |
+| `ide.saveActive` | `{ nodeId?: string }` | `{ queued: true }`；保留远端冲突检查 |
+| `ide.closeFile` | `{ path: string, nodeId?: string }` | `{ queued: true }`；保留脏缓冲确认 |
+| `ide.refreshProject` | `{ nodeId?: string }` | `{ queued: true }` |
 | `ai.getConversations` | `{}` | 已脱敏对话摘要 |
+| `ai.getCatalog` | `{}` | 脱敏供应商与模型目录；默认可用 |
 | `ai.getMessages` | `{ conversationId: string }` | 已脱敏消息 |
 | `ai.getActiveProvider` | `{}` | 活跃供应商摘要或 `null` |
 | `ai.getAvailableModels` | `{}` | 模型名称 |
-| `profiler.getMetrics` | `{ nodeId: string }` | 指标快照或 `null` |
+| `ai.createConversation` | `{ title?: string }` | `{ queued: true }` |
+| `ai.selectConversation` | `{ conversationId: string }` | `{ queued: true }` |
+| `ai.sendMessage` | `{ content: string }` | `{ queued: true }`；构造模型上下文前会脱敏类似凭据的文本 |
+| `ai.cancelGeneration` | `{}` | `{ queued: true }` |
+| `ai.deleteConversation` | `{ conversationId: string }` | `{ queued: true }` |
+| `ai.clearConversations` | `{}` | `{ queued: true }` |
+| `profiler.getMetrics` | `{ nodeId: string }` | 指标快照或 `null`；可用时，`systemInfo` 包含远端系统名称、版本、架构、开机时间毫秒值和运行秒数 |
 | `profiler.getHistory` | `{ nodeId: string, limit?: number }` | 指标历史 |
 | `profiler.isRunning` | `{ nodeId: string }` | `boolean` |
 
@@ -1413,29 +1989,31 @@ interface HostCall {
 
 通过 `event-subscription` 注册订阅，可以直接提供 `event`，也可以提供 Tauri 风格的 `namespace` + `method`。
 
-| Namespace + method | 事件 key |
-|---|---|
-| `app.onThemeChange` | `app.themeChanged` |
-| `app.onSettingsChange` | `app.settingsChanged` |
-| `i18n.onLanguageChange` | `i18n.languageChanged` |
-| `settings.onChange` | `settings.changed` |
-| `ui.onLayoutChange` | `ui.layoutChanged` |
-| `sessions.onTreeChange` | `sessions.treeChanged` |
-| `sessions.onNodeStateChange` | `sessions.nodeStateChanged` |
-| `eventLog.onEntry` | `eventLog.entry` |
-| `forward.onSavedForwardsChange` | `forward.savedForwardsChanged` |
-| `transfers.onProgress` | `transfers.progress` |
-| `transfers.onComplete` | `transfers.complete` |
-| `transfers.onError` | `transfers.error` |
-| `profiler.onMetrics` | `profiler.metrics` |
-| `ide.onFileOpen` | `ide.fileOpen` |
-| `ide.onFileClose` | `ide.fileClose` |
-| `ide.onActiveFileChange` | `ide.activeFileChanged` |
-| `ai.onMessage` | `ai.message` |
-| `events.onConnect` | `lifecycle.onConnect` |
-| `events.onDisconnect` | `lifecycle.onDisconnect` |
-| `events.onLinkDown` | `lifecycle.onLinkDown` |
-| `events.onReconnect` | `lifecycle.onReconnect` |
+| Namespace + method | 事件 key | 所需能力 |
+|---|---|---|
+| `app.onThemeChange` | `app.themeChanged` | 无 |
+| `app.onSettingsChange` | `app.settingsChanged` | `app.settings.read` |
+| `i18n.onLanguageChange` | `i18n.languageChanged` | 无 |
+| `settings.onChange` | `settings.changed` | 无 |
+| `ui.onLayoutChange` | `ui.layoutChanged` | 无 |
+| `sessions.onTreeChange` | `sessions.treeChanged` | `sessions.read` |
+| `sessions.onNodeStateChange` | `sessions.nodeStateChanged` | 无 |
+| `eventLog.onEntry` | `eventLog.entry` | `sessions.read` |
+| `forward.onSavedForwardsChange` | `forward.savedForwardsChanged` | `network.forward.read` |
+| `transfers.onProgress` | `transfers.progress` | `transfers.read` |
+| `transfers.onComplete` | `transfers.complete` | `transfers.read` |
+| `transfers.onError` | `transfers.error` | `transfers.read` |
+| `profiler.onMetrics` | `profiler.metrics` | 无 |
+| `ide.onFileOpen` | `ide.fileOpen` | `ide.read` |
+| `ide.onFileClose` | `ide.fileClose` | `ide.read` |
+| `ide.onActiveFileChange` | `ide.activeFileChanged` | `ide.read` |
+| `ai.onMessage` | `ai.message` | 无（仅元数据，不含消息正文） |
+| `events.onConnect` | `lifecycle.onConnect` | 无 |
+| `events.onDisconnect` | `lifecycle.onDisconnect` | 无 |
+| `events.onLinkDown` | `lifecycle.onLinkDown` | 无 |
+| `events.onReconnect` | `lifecycle.onReconnect` | 无 |
+
+终端输入拦截器同时需要 `terminal.content.read` 和 `terminal.write`；终端输出处理器需要 `terminal.content.read`。
 
 自定义插件事件走 `events.on` / `events.emit` 路径，并按插件 id 作用域隔离，避免插件抢占任意全局事件名。
 
@@ -1460,6 +2038,8 @@ interface HostCall {
 - 界面结构的 `kind` 是 `form`。
 - 界面结构至少包含一个 section 或顶层控件。
 - 需要 id 的控件已经设置 `id`。
+
+对于独立活动栏动作，应检查 `contributes.activityBarItems`、运行时 `itemId`、`ui.write` 能力和插件的 `dispatchCommand` 处理器，而不是查找声明式界面结构。
 
 ## 迁移说明
 

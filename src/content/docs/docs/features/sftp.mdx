@@ -39,6 +39,14 @@ Preview supported files without manually saving a local copy. Remote previews st
 - **Fonts** — font specimen preview with sample text
 - **Metadata** — EXIF data for images, audio tags (ID3, Vorbis, FLAC)
 
+## Protocol Selection
+
+The **File transfer** preference defaults to **Auto**: SFTP remains the browsing and preferred transfer protocol. Only when an already connected POSIX host cannot open SFTP does transfer fall back to legacy SCP. You can force SFTP or SCP for compatibility testing. SCP supports pause/resume while its channel remains live, but a retry after disconnection starts from byte zero rather than resuming an offset.
+
+## Edit Text Files
+
+SFTP editing shares the IDE's editor and search bar, including case sensitivity, regular expressions, multiline query/replacement, capture groups, and replace all. Use the newline action for an explicit line break. Input histories are independent, and dragging selection beyond the editor edge scrolls the document.
+
 ## Transfer Queue
 
 All file transfers are managed through a persistent transfer queue:

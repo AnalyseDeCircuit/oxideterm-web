@@ -1,0 +1,22 @@
+---
+title: Quick Commands
+description: Organize reusable commands into searchable groups and send them to the intended terminal.
+---
+
+Save commands you use repeatedly, then choose them from the quick-command bar beside the terminal input area.
+
+## Select a Group
+
+The group selector stays at the left while commands scroll horizontally. Search for a group, select it, and work with just its commands. The selection survives restart and is independent of the filter in command management. Empty groups remain selectable; deleting the selected group returns the bar to all commands.
+
+## Manage Commands and Appearance
+
+Use command management to edit commands and their ordering. Groups can have an icon and custom color; commands inherit that color. Reset it to restore the theme color. Group appearance is retained in supported export/import and cloud sync.
+
+Long command names may shorten in the bar. Hover to see the full name and a preview of the command; very long bodies have a bounded preview. Check the active terminal and any [broadcast targets](/docs/features/broadcast/) before sending. Keep passwords and tokens in credential settings rather than saved commands.
+
+## Advanced Command Sender
+
+Use the advanced sender for text or hexadecimal input with line or character pacing and repeat counts. Choose the current, all, or explicitly selected terminal targets before starting.
+
+The job keeps that target set: newly opened panes are not added, and closed targets are skipped rather than replaced or reconnected. Hiding the panel does not stop a job; use Stop. Progress measures accepted terminal input, not successful completion of remote commands.

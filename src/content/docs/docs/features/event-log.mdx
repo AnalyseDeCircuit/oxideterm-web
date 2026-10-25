@@ -1,96 +1,28 @@
 ---
-title: Event Log
-description: Connection lifecycle event tracking with timestamp-based logging, severity filtering, and reconnect pipeline phase tracing.
+title: Notifications and Audit
+description: Inspect operation history, outcomes, related sessions, and protected detail exports.
 ---
 
-The **Event Log** is a persistent, real-time log of all connection lifecycle events — connections established and lost, node state changes, and every phase of the reconnect pipeline. It helps you understand what happened and when during complex multi-hop SSH sessions.
+Open **Notifications & Audit** from the activity bar or use the command palette's event-log action. Notifications show recent messages; **Audit**, **Sessions**, and **Session recordings** provide history and playback.
 
-## Opening the Event Log
+## Collect Operation History
 
-Click **Event Log** in the sidebar (at the bottom of the panel list).
+1. Select **Audit** and enable **Enable audit**. It starts off and records subsequent operations.
+2. Perform the connection, command, file, or forwarding operation, then return and click **Refresh**.
+3. Filter by category, severity, source, outcome, and time. Choose the search field, enter a query, and press Enter.
+4. Open a record to inspect its target, source, result, and evidence. **Sent** means input was delivered; an exit code or protocol result establishes completion more directly.
+5. Use **Sessions** to find related operations and recordings for a session.
 
-## Event Types
+Time filters include today, the week, the month, and all retained history. Searching and filtering do not delete records. Connection state and reconnect progress are also available in [Runtime](/docs/features/connection-monitor/).
 
-Events are grouped into four categories:
+## Retention
 
-### Connection Events
+Disabling audit stops collection but keeps existing history readable. Operation records default to **90 days** and **512 MiB**. Set retention and capacity in the page's settings, then save. Export records you need before clearing them or reducing retention.
 
-| Event | Description |
-|-------|-------------|
-| **Connected** | SSH connection successfully established |
-| **Disconnected** | Connection cleanly closed |
-| **Link Down** | Connection lost unexpectedly |
-| **Reconnecting** | Reconnect orchestrator triggered |
-| **Affected children** | N child connection(s) marked link_down due to bastion failure |
+Terminal output requires a separate **Record terminal output** switch and confirmation; see [Session Recording](/docs/features/recording/). It is not collected merely because the audit page is open.
 
-### Node Events
+## Export
 
-| Event | Description |
-|-------|-------------|
-| **Node Ready** | SSH channel opened and terminal ready |
-| **Node Connecting** | Node is in the connecting state |
-| **Node Error** | Node entered error state (message included) |
-| **Node Disconnected** | Node cleanly disconnected |
-| **Already connecting / connected** | Duplicate connect attempt ignored |
+Use **Export summaries as JSON** or **Export summaries as CSV** for the selected filters. **Export protected details** asks for confirmation and includes commands, paths, endpoints, accounts, and operation details in a plaintext file. It does not include session recordings.
 
-### Reconnect Pipeline Events
-
-The reconnect orchestrator logs each phase transition:
-
-| Phase | Meaning |
-|-------|---------|
-| `Queued` | Reconnect request received and queued |
-| `Grace Period` | Probing old connection for 30s before destructive reconnect |
-| `SSH Connect` | Establishing new SSH session |
-| `Await Terminal` | Waiting for terminal channel to become ready |
-| `Restore Forwards` | Restoring port forwarding rules |
-| `Resume Transfers` | Resuming paused SFTP transfers |
-| `Restore IDE` | Reopening IDE mode file tabs |
-| `Done` | Reconnect pipeline completed successfully |
-| `Failed` | Pipeline failed at a specific phase |
-| `Cancelled` | Reconnect cancelled (e.g., manual disconnect) |
-
-### System Events
-
-| Event | Description |
-|-------|-------------|
-| **App Start / Exit** | Application lifecycle events |
-| **Config Changed** | Settings or configuration modified |
-| **Plugin Event** | Plugin loaded, unloaded, or error |
-
-## Severity Levels
-
-| Level | Color | Meaning |
-|-------|-------|---------|
-| **Info** | Blue | Normal lifecycle events |
-| **Success** | Green | Operation completed successfully |
-| **Warning** | Yellow | Degraded state (link down, retry) |
-| **Error** | Red | Failure event (connect failed, pipeline error) |
-
-## Filtering
-
-Use the filter controls to narrow the log:
-- **Search box** — full-text search in event messages
-- **Filter by Severity** — show only Info / Success / Warning / Error (or All)
-- **Filter by Category** — show only Connection / Node / Reconnect / System events (or All)
-- **Filter by Connection** — show events for a specific host only
-- **Time Range** — show last 1 hour / 24 hours / 7 days / All
-
-Filters apply in real-time to the visible log. Historical events are not discarded.
-
-## Export Logs
-
-Click **Export** in the toolbar to export the current log view (with active filters applied) as `.json` or `.csv` — useful for offline analysis or bug reports.
-
-## Log Management
-
-- **Clear All** — remove all log entries (fresh start)
-- Events scroll automatically as new entries arrive
-- Each entry shows: timestamp, connection name, event type, and optional detail message
-
-## Use Cases
-
-- **Debugging flaky connections** — see exact reconnect phase where a recovery fails
-- **Understanding cascade failures** — trace which bastion's link_down caused downstream nodes to fail
-- **Auditing connection history** — see exactly when sessions were opened and closed
-- **Monitoring reconnect health** — verify that grace period correctly preserved sessions
+Review exported files before sharing them. A failed operation's target and evidence are useful for diagnosis, while credentials and unrelated private content do not belong in a support report.

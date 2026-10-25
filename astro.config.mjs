@@ -83,6 +83,16 @@ export default defineConfig({
           translations: { "zh-CN": "功能" },
           items: [
             {
+              slug: "docs/features/workspace",
+              label: "Workspace Navigation",
+              translations: { "zh-CN": "工作区导航" },
+            },
+            {
+              slug: "docs/features/quick-commands",
+              label: "Quick Commands",
+              translations: { "zh-CN": "快捷命令" },
+            },
+            {
               slug: "docs/features/terminal",
               label: "Terminal",
               translations: { "zh-CN": "终端" },
@@ -148,8 +158,8 @@ export default defineConfig({
             },
             {
               slug: "docs/features/event-log",
-              label: "Event Log",
-              translations: { "zh-CN": "事件日志" },
+              label: "Notifications & Audit",
+              translations: { "zh-CN": "通知与审计" },
             },
             {
               slug: "docs/features/graphics",
@@ -164,6 +174,11 @@ export default defineConfig({
               slug: "docs/features/plugins",
               label: "Plugins",
               translations: { "zh-CN": "插件系统" },
+            },
+            {
+              slug: "docs/features/cloud-sync",
+              label: "Cloud Sync & Backups",
+              translations: { "zh-CN": "云同步与备份" },
             },
             {
               slug: "docs/features/themes",

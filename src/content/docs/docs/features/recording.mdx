@@ -20,12 +20,10 @@ The recording starts immediately. The toolbar shows:
 |--------|------------------|
 | **Pause** | Click ⏸ in toolbar |
 | **Resume** | Click ▶ while paused (shows "PAUSED" indicator) |
-| **Stop & Save** | Click ⏹ — prompts to save or discard |
-| **Discard** | Choose "Discard" in the stop dialog — cannot be undone |
+| **Stop & Save** | Stop recording and choose a destination for the `.cast` file |
+| **Discard** | Use the recording menu to discard the current recording |
 
-When you stop, OxideTerm shows a confirmation dialog:
-- **Save** — opens a file picker to choose where to save the `.cast` file
-- **Discard** — immediately deletes the in-memory recording
+Stopping opens a file picker for the recording. Discarding drops the in-memory recording without creating a file.
 
 ## Cast Player
 
@@ -37,8 +35,7 @@ After saving, click **Open Cast File** to open it in the built-in player. You ca
 |---------|-------------|
 | **Play / Pause** | Start or pause playback |
 | **Seek bar** | Drag to jump to any point in the recording |
-| **Speed** | Adjust playback speed (0.25× / 0.5× / 1× / 2× / 5×) |
-| **Skip silence** | Auto-skip long idle periods with no output |
+| **Speed** | Adjust playback speed (0.5× / 1× / 2×) |
 | **Duration** | Total recording length |
 | **Dimensions** | Terminal grid size at time of recording (e.g., `220×55`) |
 
@@ -49,7 +46,6 @@ Type in the search box to find text in the recording:
 - Use **Jump to match** to seek to each occurrence
 - Useful for locating specific commands or error messages in long recordings
 
-The player pre-builds snapshots for instant seeking — a "Building snapshots..." indicator shows during the indexing phase for long recordings.
 
 ## asciicast v2 Format
 
@@ -66,10 +62,18 @@ This format is compatible with:
 - [asciinema-player](https://github.com/asciinema/asciinema-player) — embed in web pages or README files
 - `asciinema play` CLI — play back in your local terminal
 
+## Automatic Audit Recordings
+
+Manual `.cast` recording is separate from **Notifications & Audit → Session recordings**. To collect output automatically, first enable Audit, then enable **Record terminal output** and accept its prompt. Both switches start off.
+
+Audit recordings contain displayed output and terminal-size changes, not typed keys or terminal file-transfer payloads. Shell-echoed input can still appear. They are encrypted on this device and excluded from cloud sync. Refresh the recordings list to play a session; incomplete or expired-content indicators mean some output is unavailable. Default terminal-output retention is 7 days with a 2 GiB capacity. Configure retention and capacity in that view and save the changes.
+
+Manual `.cast` exports remain plaintext files in the location you choose.
+
 ## Privacy & Security
 
 :::caution
-Recordings may contain **sensitive data** — passwords typed (if echoed), API tokens, file contents, private keys in output. OxideTerm shows a security warning when you stop a recording.
+Recordings may contain **sensitive data**: echoed passwords, API tokens, file contents, or private keys printed by a command.
 
 Review the `.cast` file contents before sharing.
 :::

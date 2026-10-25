@@ -59,9 +59,11 @@ Shell scanning reads `/etc/shells` on macOS/Linux and probes common paths on Win
 3. Select your preferred shell from the dropdown
 4. Open a new local terminal to use the selection
 
-### Shells Outside the Scanner
+### Custom Executable Path
 
-OxideTerm does not currently read a `shells.json` file. If a shell is not listed, make sure the executable is installed in a standard location, available in `/etc/shells` on macOS/Linux, or discoverable from the platform-specific shell scanner. Configure the default shell, working directory, profile loading, Oh My Posh, and custom environment variables in **Settings → Terminal → Local**.
+In **Settings → Terminal → Local**, choose the shell and edit or browse for its executable path. Use the path to the program, not a shell command with arguments. Reset the path to return to automatic detection, then open a new terminal to use the change. Overrides belong to this device and are excluded from cross-device export and sync.
+
+The same page configures the default working directory, profile loading, Oh My Posh, and environment variables. Shell discovery still uses the platform scanner; OxideTerm does not read a `shells.json` file.
 
 ## Windows Enhancements
 
@@ -156,20 +158,10 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 | Previous Tab | `⌘ {` | `Ctrl+Shift+Tab` |
 | Clear Screen | `Ctrl+Shift+L` | `Ctrl+Shift+L` |
 
-## Comparison with Traditional Terminals
-
-| Feature | OxideTerm Local | iTerm2 / Alacritty | Windows Terminal |
-|---------|----------------|-------------------|------------------|
-| **Cross-platform** | macOS, Windows, Linux | Single platform | Windows only |
-| **SSH integration** | Seamless tab switching | External tools | Limited |
-| **Topology routing** | ProxyJump pathfinding | — | — |
-| **AI assistant** | Built-in OxideSens | — | — |
-| **Connection pool** | Shared SSH channels | — | — |
-
 ## Troubleshooting
 
 **Shell not detected?**
-Check that the shell binary exists and is executable. Verify with `which zsh` (Unix) or `where pwsh` (Windows). On macOS/Linux, adding the shell path to `/etc/shells` can make it discoverable by the scanner.
+Check that the executable exists with `command -v zsh` (Unix) or `where pwsh` (Windows). Set its path in **Settings → Terminal → Local** when the selected shell is installed outside the detected location.
 
 **Terminal won't start?**
 Confirm that the selected shell binary still exists and is executable. Choose a different discovered shell and try again.

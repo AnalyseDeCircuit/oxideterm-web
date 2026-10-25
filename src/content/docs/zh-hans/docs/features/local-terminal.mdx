@@ -59,9 +59,11 @@ Shell 扫描在 macOS/Linux 上读取 `/etc/shells`，在 Windows 上探测常�
 3. 从下拉菜单中选择首选 Shell
 4. 打开新的本地终端，使用刚选择的 Shell
 
-### 未被扫描到的 Shell
+### 自定义程序路径
 
-OxideTerm 目前不会读取 `shells.json`。如果某个 Shell 没有出现在列表中，请确认可执行文件安装在标准路径、macOS/Linux 上已写入 `/etc/shells`，或能被平台对应的 Shell 扫描器发现。在**设置 → 终端 → 本地**中可以配置默认 Shell、默认工作目录、是否加载 Shell profile、Oh My Posh 和自定义环境变量。
+在**设置 → 终端 → 本地**中选择 Shell，编辑或浏览选择它的可执行文件路径。这里填写程序路径，不是带参数的命令。重置可恢复自动检测；打开新终端后使用新路径。路径仅属于当前设备，不参与跨设备导出或同步。
+
+同一页面还可设置默认工作目录、是否加载 Shell 配置、Oh My Posh 和环境变量。Shell 列表仍由平台扫描器发现，不读取 `shells.json`。
 
 ## Windows 增强功能
 
@@ -156,20 +158,10 @@ if ($env:TERM_PROGRAM -eq "OxideTerm") {
 | 上一标签 | `⌘ {` | `Ctrl+Shift+Tab` |
 | 清屏 | `Ctrl+Shift+L` | `Ctrl+Shift+L` |
 
-## 与传统终端对比
-
-| 功能 | OxideTerm 本地终端 | iTerm2 / Alacritty | Windows Terminal |
-|------|-------------------|-------------------|------------------|
-| **跨平台** | macOS、Windows、Linux | 单平台 | 仅 Windows |
-| **SSH 集成** | 无缝标签切换 | 需外部工具 | 有限支持 |
-| **拓扑路由** | ProxyJump 路径计算 | — | — |
-| **AI 助手** | 内置 OxideSens | — | — |
-| **连接池** | SSH 通道共享 | — | — |
-
 ## 故障排查
 
 **Shell 未被检测到？**
-检查 Shell 二进制文件是否存在且可执行。使用 `which zsh`（Unix）或 `where pwsh`（Windows）验证。在 macOS/Linux 上，把 Shell 路径加入 `/etc/shells` 通常可以让扫描器发现它。
+使用 `command -v zsh`（Unix）或 `where pwsh`（Windows）确认程序存在。所选 Shell 安装在检测位置之外时，在**设置 → 终端 → 本地**中指定其路径。
 
 **终端无法启动？**
 确认所选 Shell 二进制文件仍然存在且可执行。选择另一个已发现的 Shell 后重试。

@@ -5,7 +5,13 @@ description: Native GPUI remote editing with syntax highlighting, file navigatio
 
 IDE Mode lets you browse and edit remote files inside the OxideTerm workspace. The editor, file tree, tabs, search panels, and dialogs are native GPUI views written in Rust.
 
-Remote file access resolves through the active node and its managed SSH connection. IDE mode can use either the optional remote agent or an SFTP fallback, so basic editing does not depend on deploying extra software.
+Choose **SFTP** or **SSH** file access when opening the IDE. SSH offers **Pure Shell commands** or an agent installed, updated, or reused on demand. Basic editing does not require an agent.
+
+## Choose the Remote Environment
+
+SFTP uses the connection's file-transfer service. Pure Shell access uses Linux tools in the selected SSH environment, including GNU file and search utilities, without installing software. Its searches have execution and result limits. The agent adds file watching and symbol services on supported x86_64 and aarch64 Linux hosts.
+
+To work inside a container or under a user selected with `su`, use **Convert to IDE** from the current idle terminal. It preserves that terminal's user, environment, and directory instead of opening a separate login environment. Input pauses during conversion; use the return action to go back to the original terminal.
 
 ## Native Editor
 
@@ -13,13 +19,16 @@ The GPUI editor supports the workflows needed for focused remote changes:
 
 - Syntax highlighting through OxideTerm's Rust syntax layer
 - Line numbers, indentation guides, folding, and bracket-aware editing
-- Find and replace, including replace current and replace all
+- Find and replace with case sensitivity, regular expressions, capture-group replacement, and replace all
+- Multiline query/replacement paste and explicit newline insertion
 - Multiple cursors and selections
 - Undo and redo history
 - Dirty-state tracking and save shortcuts
 - Theme and font settings shared with the native application
 
 The editor keeps text, selections, highlights, folds, and viewport state in Rust. It does not embed a browser editor component.
+
+IDE and SFTP editors share the same search bar. Use its newline action to insert a line break; Enter and Shift+Enter navigate matches. Query and replacement inputs retain independent editing history. Dragging a selection past the editor's upper or lower edge scrolls the document.
 
 ### Language Support
 
@@ -44,13 +53,13 @@ Selecting a file opens it in an editor tab. Multiple files can remain open, and 
 
 Remote reads include content metadata such as size, modification time, and content hash where the backend supports it. When a save detects that the remote file changed after it was opened, OxideTerm presents a conflict instead of silently overwriting the newer version.
 
-Agent-backed writes use staged atomic replacement and hash expectations. The SFTP fallback preserves the same user-facing save and conflict workflow where the transport permits it.
+Agent-backed writes use staged atomic replacement and hash expectations. SFTP and pure Shell access retain save/conflict checks according to their backend capabilities. Saves to the same file are serialized, and remote temporary files use restricted permissions.
 
 Use `Ctrl+S` or `⌘S` to save the active file.
 
 ## Optional Remote Agent
 
-After you choose **Enable Agent** in the confirmation dialog, OxideTerm can deploy a lightweight Rust agent to supported Linux hosts. Bundled agent builds target x86_64 and aarch64 Linux.
+After choosing **SSH → Use agent**, OxideTerm can install or reuse a lightweight Rust agent at `~/.oxideterm/oxideterm-agent` in the selected environment. Installation shows progress. Bundled builds target x86_64 and aarch64 Linux.
 
 The agent adds:
 
@@ -69,7 +78,7 @@ OxideTerm checks the remote agent version and compatibility level before use. A 
 
 The remote binary remains on the selected host for later sessions and can be removed from the agent controls. Agent diagnostics are redacted before logging.
 
-## SFTP Fallback
+## SFTP Access
 
 IDE mode remains available without the agent:
 

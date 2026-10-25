@@ -30,7 +30,7 @@ OxideTerm uses **GPUI** to draw its interface directly on a GPU surface. The UI,
 | Comparison | Browser-based desktop app | OxideTerm native |
 |---|---|---|
 | UI runtime | Bundled or system browser engine | GPUI GPU surface |
-| Desktop package | Often includes a browser runtime | Approximately 60–95 MB, depending on target |
+| Desktop package | Often includes a browser runtime | Native application and bundled helpers; size varies by target |
 | Terminal path | Bytes cross a script/UI boundary | Rust input mutates `TerminalState` directly |
 | SSH implementation | Varies | Pure Rust `russh 0.63.0` with `aws-lc-rs` |
 | Headless management | Often depends on a running app | Standalone `oxideterm` CLI links to domain crates |
@@ -97,7 +97,7 @@ The optional lightweight Rust agent enhances IDE mode on remote Linux hosts:
 - Atomic writes with hash-based conflict detection
 - User-confirmed deployment on bundled x86_64 and arm64 Linux targets
 - A line-oriented request channel carried inside the existing SSH connection, with no externally listening service
-- Complete SFTP fallback when the agent is disabled or unavailable
+- SFTP or pure Shell file access when you choose to work without an agent
 
 ### What is the CLI companion (`oxideterm`)?
 
@@ -123,9 +123,11 @@ Plugins are discovered from the active configuration directory. Each package has
 
 Native WASM plugins run under wasmtime and can call only the typed host capabilities declared in their manifest. The host validates permissions before filesystem, forwarding, SFTP, or other effects are executed. Invalid manifests are rejected.
 
+Process plugins and native protocol helpers are executables, not WASM guests. Review their publisher and executable trust before enabling them.
+
 ### Can plugins access files or the network?
 
-Only through capabilities granted by the native host. Filesystem, SFTP, and forwarding operations are mediated by typed host APIs and permission checks; installing a plugin does not grant unrestricted access.
+WASM plugins use declared, authorized host capabilities for filesystem, SFTP, and forwarding operations. Native process plugins and helpers also have the operating-system access of their process; host API permission checks do not turn them into a WASM sandbox.
 
 ## Troubleshooting
 

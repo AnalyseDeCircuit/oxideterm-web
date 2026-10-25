@@ -53,6 +53,12 @@ OxideSens has capability-level approval rather than a giant per-function whiteli
 
 Every tool call remains visible in the transcript, including target, risk, approval mode, elapsed time, summary, and expandable raw details.
 
+## Child Agents
+
+Enable child agents in **Settings → OxideSens → Tools** and select their default model and application-wide concurrency limit. These settings are global, not per conversation. The default is off; when model inheritance is selected, a child uses the parent's configuration. The parent can delegate, message, or stop children; children cannot delegate further or message siblings.
+
+Task rows show progress, questions, approvals, and completion. Closing the panel does not stop work. A child receives only delegated targets and uses the existing approval policy. If you take over its terminal, queued commands cannot silently resume. ACP sessions do not provide this child-agent backend.
+
 ## Workspace Chat
 
 The main chat view is the full OxideSens workspace assistant:

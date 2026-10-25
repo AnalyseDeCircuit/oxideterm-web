@@ -31,6 +31,10 @@ Legacy JavaScript entries are not executed by the native application.
 
 ## Installing and managing plugins
 
+The marketplace selects the highest release compatible with your app version and platform. A newer incompatible version shows its requirements without replacing the installed plugin. Incompatible installed plugins retain files and settings but do not activate. If an update is missing, refresh the marketplace and check its required app version; older clients using the frozen v1 catalog need an app upgrade to discover newer releases.
+
+Plugins can also provide saved connection types and live workbenches. Supported profiles and credentials participate in encrypted export and cloud sync; running instances do not. Install the provider on each destination device. Updating or disabling a connection provider stops its instances while keeping saved profiles.
+
 Use the desktop Plugin Manager to browse, install, enable, disable, update, and configure plugins. For local development, place a package under the active configuration directory:
 
 ```text
@@ -48,6 +52,8 @@ Plugins can declare tabs, sidebar panels, settings, commands, keybindings, conte
 ## Security
 
 The host validates manifests and paths, passes the effective capabilities and allowed host APIs during activation, and keeps plugin diagnostics separate from protocol output. Review a plugin's identity, permissions, settings, and declared surfaces before enabling it.
+
+WASM guests use mediated host capabilities. Native process plugins and protocol helpers have operating-system process access and are not isolated by the WASM sandbox.
 
 ## Next step
 

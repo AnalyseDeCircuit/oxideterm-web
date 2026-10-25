@@ -40,7 +40,7 @@ SSH PTY 通道 → TerminalSession → TerminalState → GPUI 绘制
 
 ## 终端搜索
 
-搜索当前活动面板的原生终端滚动缓冲区。匹配结果会直接在终端画面中高亮，并支持上一个/下一个导航。当前实现使用区分大小写的字面文本匹配；搜索范围取决于配置的滚动缓冲行数。
+搜索当前活动窗格的滚动缓冲区，支持普通文本、正则表达式和大小写选项。结果直接高亮，并可前后导航；默认从当前视口附近开始，持续输出时更新匹配。搜索范围取决于仍保留的滚动缓冲内容。
 
 使用 `Ctrl+Shift+F`（macOS 上为 `⌘F`）打开搜索栏。详细说明见[终端搜索](/zh-hans/docs/features/terminal-search/)。
 
@@ -48,7 +48,7 @@ SSH PTY 通道 → TerminalSession → TerminalState → GPUI 绘制
 
 录制终端会话以 **asciicast v2** 格式保存，供后续回顾：
 - 捕获所有终端输出并精确记录时间戳
-- 支持变速回放（0.5×–8×）
+- 支持变速回放
 - 导出录制文件以分享或归档
 - 兼容 [asciinema](https://asciinema.org) 生态
 
@@ -93,7 +93,7 @@ SSH PTY 通道 → TerminalSession → TerminalState → GPUI 绘制
 - **快速连接** — 直接输入主机/用户名/端口进行连接
 - **导入/导出** — `.oxide` 加密格式（ChaCha20-Poly1305 + Argon2id）
 - **SSH Config 导入** — 自动解析 `~/.ssh/config` 导入现有连接
-- **跳板机 / ProxyJump** — 无限跳数，网络拓扑图 + Dijkstra 寻路
+- **跳板机 / ProxyJump** — 多跳连接与网络拓扑，连接前检查路径和深度边界
 - **认证方式** — 密码、SSH 密钥（RSA/Ed25519/ECDSA）、SSH Agent（跨 macOS、Linux、Windows 系统 Agent 支持）、证书、键盘交互 2FA
 - **Known Hosts TOFU** — 主机密钥验证，兼容 `~/.ssh/known_hosts`；拒绝密钥变更（防止中间人攻击）
 - **连接池** — 终端、SFTP、转发、IDE 通过引用计数连接池共享一个 SSH 连接

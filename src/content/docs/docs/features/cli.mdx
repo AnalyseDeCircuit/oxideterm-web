@@ -5,7 +5,7 @@ description: Headless management and automation with the standalone oxideterm CL
 
 The `oxideterm` CLI provides headless inspection, automation, CI checks, migration, and recovery for OxideTerm data. It is a standalone Rust binary that links the same domain crates used by the native desktop app and reads the same persisted stores directly.
 
-The desktop app does not need to be running for normal CLI management commands. There is no CLI server, local RPC protocol, or socket connection. The `ssh` command is the exception: it intentionally launches a temporary SSH terminal in the native GUI.
+Normal management commands do not require the desktop. `ssh` opens a temporary GUI terminal, `connections open` uses the desktop's saved-connection flow, and `mcp bridge` connects an external stdio client to the running application's public MCP endpoint.
 
 ## Installation
 
@@ -103,6 +103,12 @@ oxideterm cloud-sync secrets status --json
 ```
 
 Cloud-sync secret commands report hints or status rather than secret values. Use stdin or environment variables when setting credentials.
+
+## External MCP Clients
+
+Create a client in **Settings → Network & Proxy → External MCP Control** and place its one-time credential in the external client's secret environment as `OXIDETERM_MCP_TOKEN`. Configure `oxideterm` as the command with arguments `["mcp", "bridge"]`. The bridge discovers the loopback endpoint from the app's active configuration directory; use the same `--profile` or `--config-dir` when applicable.
+
+The app must be running. Endpoint overrides must be loopback HTTP `/mcp` URLs. Never put the token in arguments, project files, or logs.
 
 ## Batch Plans
 

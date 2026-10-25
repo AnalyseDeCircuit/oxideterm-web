@@ -1,0 +1,55 @@
+---
+title: Cloud Sync and Backups
+description: Share selected configuration between devices, resolve conflicts, and keep encrypted backups.
+---
+
+Cloud Sync shares selected configuration. An encrypted `.oxide` file is a separate backup or a one-time transfer; neither restores running terminals or remote processes.
+
+## First Device
+
+1. Open **Cloud Sync → Configure** and choose a remote backend: WebDAV, S3, Git, GitHub Gist, Dropbox, OneDrive, Google Drive, or HTTP JSON. **Local file** is for manual import/export.
+2. Enter the storage location and credentials. Choose a namespace, folder, or prefix shared by the devices.
+3. Set a sync password. It encrypts configuration and is separate from the provider's login or token.
+4. Choose connections, forwards, quick commands, transport profiles, app settings, and plugin settings as needed. Environment variables and sensitive credentials have separate opt-in controls.
+5. Save, choose **Synchronize**, inspect the preview, then **Apply and synchronize**. Check the result before enabling automatic uploads.
+
+For a newly created private Gist, keep its ID for the next device. For HTTP JSON, the server must support the current listing, read, write, and delete protocol.
+
+## Add Another Device
+
+Configure the same backend, location, namespace, and sync password. Authenticate that device separately with the storage provider. Synchronize, review conflicts, and apply. If credentials were excluded, enter them locally; key paths may also need to be changed.
+
+Plugin connection profiles do not install their plugins. Install and enable each provider on the destination device. Local shell executable overrides and window-local tab scopes remain local; quick-command group appearance travels with supported group data.
+
+## Conflicts and Interruptions
+
+Independent edits merge. When the same field has competing changes, choose the version to keep in the preview. Unresolved conflicts retain the current local value. Turning off a sync category excludes it without deleting its remote records.
+
+| Problem | Next step |
+| --- | --- |
+| Provider authentication failed | Check login/token, endpoint, and storage permissions. |
+| Cannot decrypt | Check location and sync password against the other device. |
+| Upload failed after local application | Synchronize again to retry publication. |
+| Interrupted while applying | Reopen the app for recovery, then retry. Keep recovery files if it remains blocked. |
+| HTTP JSON upgrade required | Upgrade the server before retrying. |
+
+Changing the sync password creates and verifies a new sync space before switching to it. The old space remains available. Update the other devices with the new namespace and password. If upload fails, retry with the same new password.
+
+## Encrypted Backup
+
+Choose **Local file**, set the archive password and content selection, save, then **Export to Local File**. To restore, use **Import from Local File**, decrypt, inspect the preview, and select the records and conflict strategy before confirming. Save your remote-backend configuration again when returning to remote synchronization.
+
+Version 2 `.oxide` files encrypt names and other metadata with their payload. Older version 1 archives remain readable. Credentials and private keys require their explicit export/import options; keep the file and password separately.
+
+An archive contains selected configuration, not the whole data directory or recording history. For a full local copy, close the app and CLI, find the active data directory in Settings or with `oxideterm paths --json`, then copy it. An installed profile's credentials still depend on its OS credential store; use an encrypted export when moving secrets to another machine. A portable profile needs its complete keystore and password.
+
+## CLI
+
+Close the desktop before a CLI sync, which requires exclusive configuration access:
+
+```sh
+oxideterm cloud-sync sync --dry-run --json
+oxideterm cloud-sync sync --yes --json
+```
+
+The dry run prepares a remote merge preview without applying or publishing. Separate `preview` and `diff` commands inspect cached state. See [CLI Companion](/docs/features/cli/) for backups and diagnostics.

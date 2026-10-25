@@ -7,7 +7,7 @@ OxideTerm keeps its desktop UI, terminal state, and core services in one Rust pr
 
 ## Rust SSH and Cryptography
 
-OxideTerm 2.0.27 uses the vendored `russh 0.63.0` SSH library and `russh-sftp 2.3.0`. The SSH crate enables russh's default `aws-lc-rs` cryptographic backend:
+OxideTerm uses `russh` and `russh-sftp`, pinned by the repository's `Cargo.lock`. The SSH crate enables russh's `aws-lc-rs` cryptographic backend:
 
 - [aws-lc-rs](https://github.com/aws/aws-lc-rs) calls the native [AWS-LC](https://github.com/aws/aws-lc) cryptographic library; this is not a dependency tree made entirely of Rust
 - No libssh2 or system OpenSSL runtime is required
@@ -47,7 +47,7 @@ Portable `.oxide` exports use:
 
 - **ChaCha20-Poly1305** authenticated encryption
 - **Argon2id** password derivation with a 256 MB memory cost and four iterations
-- Integrity checks before import or apply
+- Version 2 containers authenticate the header and encrypt metadata with the payload; supported version 1 archives remain readable
 - Optional inclusion of portable secrets inside the encrypted payload
 
 Preview an import before applying it:
@@ -74,7 +74,7 @@ SSH Agent access uses `SSH_AUTH_SOCK` on macOS/Linux and the OpenSSH agent named
 
 Terminal bytes flow from Rust session backends into Rust-owned `TerminalState`, then into the GPUI painter. Desktop management actions call domain services in process. Ordinary terminal rendering does not require a localhost WebSocket bridge. Separately enabled integrations, such as MCP, have their own access controls.
 
-The optional remote IDE agent is different: it runs on a selected remote host and communicates through a channel inside the existing authenticated SSH connection. It does not open an external listening port, and IDE mode can fall back to SFTP when the agent is unavailable.
+The optional remote IDE agent runs in the selected remote environment and communicates inside the authenticated SSH connection without listening on an external port. Choose SFTP or pure Shell access when working without an agent.
 
 ## Plugin Security
 
@@ -92,7 +92,7 @@ Declared process plugins are native executables and therefore have a different t
 
 ## CLI Safety
 
-The `oxideterm` CLI links directly to domain crates and does not require a running desktop app. Its safety model includes:
+Most `oxideterm` management commands link directly to domain crates without a running desktop. Desktop-opening commands and the public MCP bridge use the running application. Its safety model includes:
 
 - `--dry-run` plans and `--yes` confirmation for most writes
 - Rollback backups for supported state-changing operations

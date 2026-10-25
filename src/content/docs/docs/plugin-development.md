@@ -1,9 +1,11 @@
 ---
 title: Native Plugin Development
-description: Build manifest-only, process, and Wasm plugins for the OxideTerm native host.
+description: Build native plugins with connection providers, live workbenches, typed host APIs, and explicit capabilities.
 ---
 
-This guide focuses on declarative UI and host API extensions using `process`, `wasm`, or `manifest-only` plugins. Native plugins are discovered through `plugin.json`; they do not run React components, inject CSS, or execute `main.js` through a WebView. The host also supports specialized `language`, `acp`, `remote-desktop`, `terminal-transport`, and `helper` packages. RDP and VNC use `remote-desktop` plugins from the marketplace, with the viewer and saved profiles managed by the host.
+This guide describes the OxideTerm Native plugin model. It is intentionally different from the Tauri/Web plugin model: native plugins do not run React components, do not inject CSS, and do not execute `main.js` through a WebView. A native plugin is discovered through `plugin.json`, then either contributes manifest-only metadata or runs through a host-owned process/WASM runtime bridge.
+
+Specialized packages also use `language`, `acp`, `remote-desktop`, `terminal-transport`, and `helper` runtimes. RDP and VNC engines are marketplace plugins; the host retains saved profiles and the viewer. Process connection providers can supply independent connection instances and live workbenches.
 
 ## Contents
 
@@ -16,20 +18,23 @@ This guide focuses on declarative UI and host API extensions using `process`, `w
 7. [Native Versus Tauri Plugins](#native-versus-tauri-plugins)
 8. [Plugin Directory](#plugin-directory)
 9. [Minimal Manifest-Only Plugin](#minimal-manifest-only-plugin)
-10. [Process Runtime Plugin](#process-runtime-plugin)
-11. [Protocol Frames](#protocol-frames)
-12. [Runtime Registrations](#runtime-registrations)
-13. [Declarative Native UI](#declarative-native-ui)
-14. [Host API Calls](#host-api-calls)
-15. [Permissions And Capabilities](#permissions-and-capabilities)
-16. [Settings, Storage, And Secrets](#settings-storage-and-secrets)
-17. [Terminal, SFTP, Forwarding, IDE, And AI](#terminal-sftp-forwarding-ide-and-ai)
-18. [Packaging And Installation](#packaging-and-installation)
-19. [Interface Reference](#interface-reference)
-20. [Host API Reference](#host-api-reference)
-21. [Events Reference](#events-reference)
-22. [Debugging](#debugging)
-23. [Migration Notes](#migration-notes)
+10. [Background Material Packs](#background-material-packs)
+11. [Editor Language Plugins](#editor-language-plugins)
+12. [Process Runtime Plugin](#process-runtime-plugin)
+13. [Protocol Frames](#protocol-frames)
+14. [Runtime Registrations](#runtime-registrations)
+15. [Connection providers](#connection-providers)
+16. [Declarative Native UI](#declarative-native-ui)
+17. [Host API Calls](#host-api-calls)
+18. [Permissions And Capabilities](#permissions-and-capabilities)
+19. [Settings, Storage, And Secrets](#settings-storage-and-secrets)
+20. [Terminal, SFTP, Forwarding, IDE, And AI](#terminal-sftp-forwarding-ide-and-ai)
+21. [Packaging And Installation](#packaging-and-installation)
+22. [Interface Reference](#interface-reference)
+23. [Host API Reference](#host-api-reference)
+24. [Events Reference](#events-reference)
+25. [Debugging](#debugging)
+26. [Migration Notes](#migration-notes)
 
 ---
 
@@ -63,6 +68,12 @@ Use this manifest:
   "runtime": {
     "kind": "process",
     "entry": "bin/hello.js"
+  },
+  "permissions": {
+    "capabilities": [
+      "legacy.invoke",
+      "ui.write"
+    ]
   },
   "contributes": {
     "sidebarPanels": [
@@ -260,6 +271,8 @@ This example demonstrates the important contract:
 - Runtime UI is not React. It is a declarative schema registered through a `sidebar-panel` or `tab` contribution.
 - A returnable host call is sent as an outbound `callHostApi` frame; the host writes the response back on stdin.
 
+For a complete repository example that registers both a tab and a left activity-bar panel, discovers an active node, and runs a manifest-declared custom Host Tools monitor, see [Host Tools Dashboard](https://github.com/AnalyseDeCircuit/oxideterm-plugins/tree/main/plugins/host-tools-dashboard).
+
 ## Runtime Conversation
 
 The process runtime has one line-oriented conversation.
@@ -276,7 +289,7 @@ sequenceDiagram
     Plugin-->>Host: response with the same requestId on stdout
 ```
 
-Activation request from host to plugin. The `manifest` object is shortened here; the real request carries the parsed `plugin.json`:
+Activation request from host to plugin. The `manifest` and `allowedHostApis` values are shortened here; the real request carries the parsed `plugin.json` and the complete effective allowlist:
 
 ```json
 {
@@ -292,11 +305,18 @@ Activation request from host to plugin. The `manifest` object is shortened here;
         "version": "0.1.0"
       },
       "permissions": {
-        "capabilities": [],
+        "capabilities": [
+          "legacy.invoke",
+          "runtime.process.trusted",
+          "ui.write"
+        ],
         "allowedHostApis": [
           "api.invoke",
           "app.getVersion",
-          "settings.get"
+          "connections.getSummaries",
+          "settings.get",
+          "ui.registerSidebarPanel",
+          "ui.registerActivityBarItem"
         ]
       }
     },
@@ -379,10 +399,9 @@ The process bridge rejects malformed frames before they reach the workspace. Com
 
 ## Host Calls In Plugin Code
 
-Host calls are not global JavaScript functions. They are protocol messages. A call is accepted only when both checks pass:
+Host calls are not global JavaScript functions. They are protocol messages. A call is accepted only when its name appears in the effective `allowedHostApis`. Baseline, redacted reads are included automatically; sensitive reads and side effects are included after the matching manifest capabilities are approved.
 
-- The host API name is allowed by the plugin permission set, either exactly such as `terminal.getActiveTarget` or by namespace wildcard such as `terminal.*`.
-- For `api.invoke`, `args.command` is also listed in `contributes.apiCommands`.
+`api.invoke` has one additional check: `args.command` must also be listed in `contributes.apiCommands`.
 
 Read a plugin setting:
 
@@ -398,14 +417,14 @@ Read a plugin setting:
 }
 ```
 
-Read the active terminal target:
+Read redacted terminal metadata without requesting a capability:
 
 ```json
 {
   "type": "callHostApi",
   "requestId": "host-3",
   "namespace": "terminal",
-  "method": "getActiveTarget",
+  "method": "getMetadata",
   "args": {}
 }
 ```
@@ -424,6 +443,8 @@ Write text to the active terminal:
 }
 ```
 
+That write requires `terminal.write`. Reading terminal text or the active target requires `terminal.content.read`.
+
 Read a remote file through SFTP:
 
 ```json
@@ -439,7 +460,7 @@ Read a remote file through SFTP:
 }
 ```
 
-That SFTP call also requires the `filesystem.read` capability. Write operations require `filesystem.write`. Port forwarding mutations require `network.forward`.
+That SFTP call also requires the `filesystem.read` capability. Write operations require `filesystem.write`. Legacy SCP transfers use the same capability pair and must target an online node. Port forwarding mutations require `network.forward`.
 
 Import an `.oxide` bundle:
 
@@ -475,6 +496,7 @@ Register a tab view:
     "metadata": {
       "tabId": "hello-tab",
       "schema": {
+        "componentVersion": 1,
         "kind": "form",
         "title": "Hello",
         "controls": [
@@ -566,6 +588,13 @@ If UI does not appear:
 - `metadata.schema.kind` should be `form`.
 - Interactive controls such as `button`, `text`, `password`, `number`, `checkbox`, and `select` need stable `id` values.
 
+If a standalone activity-bar action does not appear or run:
+
+- `contributes.activityBarItems` must declare the item id, title, icon, command, and placement.
+- Runtime registration must use `kind: "activity-bar-item"` with the same `itemId`.
+- The plugin must request `ui.write` and handle the declared `dispatchCommand` value.
+- Runtime metadata cannot override the manifest-declared icon or command.
+
 If a Host API call fails:
 
 - Confirm the call is in `allowedHostApis`.
@@ -586,7 +615,6 @@ flowchart TB
     RuntimePlan --> ManifestOnly["manifest-only"]
     RuntimePlan --> Process["process runtime"]
     RuntimePlan --> Wasm["wasm runtime"]
-    RuntimePlan --> Specialized["language · acp · remote-desktop · terminal-transport · helper"]
     RuntimePlan --> Legacy["legacy-js visible but not executable"]
 
     Process --> Protocol["JSON Lines Protocol"]
@@ -606,13 +634,13 @@ The host owns every durable and security-sensitive boundary:
 - Plugin settings, storage, and secrets.
 - UI rendering through native GPUI controls.
 
-The host API does not expose raw GPUI elements, DOM nodes, React instances, or SSH transport handles. Native process plugins run as executables with the user's operating-system permissions; host API permission checks do not sandbox their own filesystem or network access.
+The host API does not expose raw GPUI elements, DOM nodes, React instances, or SSH transport handles. Native process plugins run with their user's operating-system permissions; host API checks do not sandbox the executable's own filesystem or network access.
 
 ## Native Versus Tauri Plugins
 
 | Area | Tauri/Web Plugin | Native Plugin |
 |---|---|---|
-| Runtime | ESM `main.js` loaded through dynamic import | General extensions use `process`, `wasm`, or `manifest-only`; specialized packages use the runtime kinds listed above |
+| Runtime | ESM `main.js` loaded through dynamic import | General extensions use `process`, `wasm`, or `manifest-only`; specialized runtimes are listed above |
 | UI | React components and CSS | Declarative native UI schema rendered by GPUI |
 | Shared modules | `window.__OXIDE__` | Not available |
 | Styling | CSS and theme variables | Host-owned native controls only |
@@ -648,10 +676,6 @@ Manifest-only plugins are useful for static metadata, declared settings, AI tool
   "version": "0.1.0",
   "description": "Adds audit-related settings and tool metadata.",
   "author": "Example",
-  "runtime": {
-    "kind": "manifest-only",
-    "entry": ""
-  },
   "contributes": {
     "settings": [
       {
@@ -677,6 +701,55 @@ Manifest-only plugins are useful for static metadata, declared settings, AI tool
 
 Supported setting types are `string`, `number`, `boolean`, and `select`. A `select` setting must provide `options`, and option values must be strings or numbers.
 
+## Background Material Packs
+
+Background packs use the same installer and declare only
+`contributes.backgrounds`, an array of package-relative media paths. For example:
+
+```json
+{
+  "id": "com.example.backgrounds",
+  "name": "Backgrounds",
+  "version": "1.0.0",
+  "engines": { "oxideterm": ">2.2.2" },
+  "tags": ["backgrounds"],
+  "contributes": { "backgrounds": ["assets/day.mp4", "assets/night.mp4"] }
+}
+```
+
+Omit `runtime`, `main`, capabilities, and other contributions. Background packs
+require a subsequent host release containing this feature; 2.2.2 does not support
+them. Installation copies media into `backgrounds` beside the active settings
+file, including portable profiles, without changing either appearance's selection.
+Reinstalling a version reuses its copies. New versions add separate media; uninstalling
+keeps imported files for the user to manage in the appearance library.
+
+## Editor Language Plugins
+
+The host keeps 15 grammar entries built in: Bash, Zsh, Fish, PowerShell, JSON,
+YAML, TOML, Markdown, Dockerfile, Make, CMake, Diff, Python, Lua, and SQL.
+Another 24 grammar entries use language plugins: C, C++, C#, CSS, Common Lisp, Elixir, Go,
+HTML, Java, JavaScript, Objective-C, Perl, PHP, R, Ruby, Rust, Scala, Swift,
+TypeScript, TSX, Zig, Nginx, Terraform/HCL, and Protobuf. TypeScript and TSX are separate plugin packages.
+Nginx uses dedicated filenames such as `nginx.conf` or `.nginx` extensions, not
+generic `.conf` files. HCL handles `.tf`, `.tfvars`, and `.hcl`; JSON variants
+remain JSON. Protobuf uses `.proto`.
+File type
+recognition stays in the host. When support is missing or disabled, the editor keeps
+the document editable and offers a link to Plugin Manager. Installing or enabling
+support loads the parser on demand; updates and disabling refresh open documents
+without discarding their text or undo history. Header files ending in `.h`
+continue to select C++ support.
+
+A language package declares `runtime.kind: "language"` and `contributes.language`.
+It contains a Tree-sitter WebAssembly parser, highlight queries, their SHA-256
+checksums, a host version range, and the upstream licenses. It does not receive the
+general-purpose WASI plugin host API. The marketplace repository maintains the
+[pinned build recipes and release workflow](https://github.com/AnalyseDeCircuit/oxideterm-plugins/blob/main/docs/language-plugins.en.md).
+Each language has its own directory under `plugins/`, version, and release asset.
+Language plugin files use Apache-2.0, with upstream licenses retained separately.
+Packages require a host strictly newer than 2.2.0 with the language loader.
+
 ## Process Runtime Plugin
 
 A process plugin is an executable inside the plugin directory. The host starts it with stdin/stdout pipes and exchanges newline-delimited JSON protocol frames.
@@ -690,6 +763,13 @@ A process plugin is an executable inside the plugin directory. The host starts i
     "kind": "process",
     "entry": "./bin/native-dashboard"
   },
+  "permissions": {
+    "capabilities": [
+      "connections.read",
+      "legacy.invoke",
+      "ui.write"
+    ]
+  },
   "contributes": {
     "tabs": [
       { "id": "dashboard", "title": "Dashboard", "icon": "LayoutDashboard" }
@@ -697,15 +777,16 @@ A process plugin is an executable inside the plugin directory. The host starts i
     "sidebarPanels": [
       { "id": "dashboard-panel", "title": "Dashboard", "icon": "Activity", "position": "bottom" }
     ],
+    "activityBarItems": [
+      { "id": "refresh", "title": "Refresh Dashboard", "icon": "RefreshCw", "command": "dashboard.refresh", "position": "top" }
+    ],
     "terminalHooks": {
       "shortcuts": [
         { "key": "Ctrl+Shift+D", "command": "dashboard.refresh" }
       ]
     },
     "apiCommands": [
-      "app.getVersion",
-      "connections.getAll",
-      "ui.showToast"
+      "get_app_version"
     ]
   }
 }
@@ -715,13 +796,14 @@ Rules:
 
 - `runtime.entry` must be a relative path inside the plugin directory.
 - The entry must exist for `process` and `wasm` runtimes.
+- A process plugin implicitly requests `runtime.process.trusted`. The Plugin Manager includes that trust decision in the enable-time approval because the process runs without an OS sandbox.
 - The process must not write arbitrary human logs to stdout. Stdout is the protocol channel.
 - Use stderr for diagnostic text.
 - Every protocol frame is a single JSON object followed by `\n`.
 
 ## Protocol Frames
 
-The host wraps every request and response in an envelope:
+The host wraps every request and response in an envelope. This example shortens the baseline allowlist:
 
 ```json
 {
@@ -738,7 +820,12 @@ The host wraps every request and response in an envelope:
       },
       "permissions": {
         "capabilities": [],
-        "allowedHostApis": []
+        "allowedHostApis": [
+          "app.getVersion",
+          "connections.getSummaries",
+          "sessions.getSummary",
+          "terminal.getMetadata"
+        ]
       }
     },
     "timeoutMs": 3000
@@ -799,6 +886,7 @@ Common registration kinds:
 | `status-bar` | Add a host-owned status item |
 | `tab` | Register declarative UI for a declared tab |
 | `sidebar-panel` | Register declarative UI for a declared panel |
+| `activity-bar-item` | Register a standalone left activity-bar action declared by the manifest |
 | `event-subscription` | Subscribe to host events |
 | `terminal-input-interceptor` | Transform or suppress terminal input |
 | `terminal-output-processor` | Process terminal output before parser input |
@@ -807,9 +895,147 @@ Common registration kinds:
 
 A registration must use the same plugin id as the plugin that emitted it. Disposal is idempotent and host-owned.
 
+## Connection providers
+
+Process plugins can declare connection types in `contributes.connections`. They appear in
+the existing New Connection dialog and Session Manager, including search, editing,
+deletion, batch selection and groups. Each opening creates an independent instance even
+when it uses the same saved profile. This API requires OxideTerm 2.2.5 or later; exclude
+older hosts in `engines.oxideterm` and request `ui.write`.
+
+```json
+{
+  "connections": [{
+    "id": "device",
+    "title": "Device",
+    "icon": "plug",
+    "terminalEntry": "bin/terminal",
+    "form": {
+      "controls": [
+        {"kind": "text", "id": "address", "label": "@address"},
+        {"kind": "password", "id": "token", "label": "@token"}
+      ],
+      "translations": {"en": {"address": "Address", "token": "Token"}}
+    }
+  }]
+}
+```
+
+Supply the usual eleven-locale dictionary in production. Forms reuse the native controls:
+`text`, `password`, `number`, `checkbox`, `select`, `textarea`, `stack`, `row`, `columns`
+and `markdown`. The host adds name and group fields. Section and field IDs cannot contain
+`/`; `__profile` is a reserved host section. Values use `sectionId/controlId` keys,
+with `root` for top-level controls. Numeric text fields submit their text representation.
+
+Password fields require approved `credentials.raw.read`. The host saves their values in
+its secret store, with references in the connection profile. Blank password edits preserve
+saved values; “Clear saved credentials” removes them before applying newly entered ones.
+Drafts are not sent to the plugin. Saved profiles remain available when a provider is
+disabled or removed; their metadata can still be edited and deleted. Profiles are stored
+in the connection manager and included in the connections scope of cloud sync and in
+`.oxide` selection, previews and conflict handling. Sync identifies a provider by
+`plugin_id` and `type_id`; importing metadata does not require the provider to be installed.
+Unknown configuration fields remain in storage and subsequent exports, but `connection.open`
+receives only fields declared by the installed provider's form. Editing on an older provider
+therefore does not erase newer settings. Password slots are also matched to the current form.
+
+Credentials travel only when sensitive-credential sync is enabled or passwords are included
+in an encrypted `.oxide` export. Archive import additionally requires opting into stored
+credentials. Local secret-store references never travel; restored values receive new local
+references. Missing providers keep the connection unavailable until a compatible provider is
+installed and enabled. Both devices need a host version supporting plugin connections.
+
+After activation the host dispatches `connection.open` with:
+
+```json
+{
+  "instanceId": "host-generated-uuid",
+  "profileId": "saved-profile-uuid",
+  "typeId": "device",
+  "config": {"root/address": "device.local"},
+  "credentials": {"root/token": "user-provided-secret"}
+}
+```
+
+Key all live resources by `instanceId`, not `profileId`. Reply with one of these values:
+
+- `{"kind":"workbench","schema":{...}}`: a validated declarative UI, displayed in a
+  normal plugin page that can share a split with terminals. Its `ui.event.surfaceId` is
+  the instance ID. Update it with a `tab` registration whose metadata contains
+  `connectionId: instanceId` and `schema`; use a distinct registration ID per instance.
+- `{"kind":"terminal","args":[...]}`: launch the declared `terminalEntry` directly in
+  the host's native PTY. The executable must resolve inside the plugin package. Arguments
+  retain their boundaries; the host does not fall back to a shell. Keep credentials out
+  of arguments and environment variables; the provider should retain them for its helper.
+- `{"kind":"sshTerminal","shell":"posix","nodeId":"...","argv":["program","arg"]}`:
+  with approved `terminal.write`, open a terminal consumer on an already connected node.
+  The host quotes each argument for the explicitly selected POSIX shell and rejects control
+  characters that could edit or submit its command line. No second unmanaged SSH connection is created.
+
+Disconnecting or closing the connection's page or terminal sends `connection.close` with
+`{"instanceId":"..."}`. Make this command idempotent, including for unknown IDs and
+cancelled opens. Stop the instance's sockets, subscriptions and workers before replying.
+Switching pages does not disconnect. Moving or splitting a terminal preserves its owner.
+The provider must answer lifecycle commands within five seconds. A transport timeout or
+failed cleanup retires the provider process and its terminal consumers. Disabling or
+updating a provider also stops its instances while retaining saved profiles. Late results
+and view updates cannot reopen closed instances.
+
 ## Declarative Native UI
 
-Native plugins render UI by registering schemas, not components.
+### Live updates and message workbenches
+
+After activation, process plugins can write protocol frames to stdout without waiting for
+a user action. Re-register a `tab` or `sidebar-panel` with the same `registrationId` to
+update its view. The host continuously reads output and delivers bounded batches through
+the same permission checks as initial registration. Coalesce incoming messages and submit
+only a bounded visible dataset instead of replacing the entire view for every message.
+Keep stdout exclusively for JSON Lines protocol frames.
+
+Switching or closing an ordinary contributed tab does not stop the plugin process. The plugin owns its network
+connections and should provide an explicit disconnect action. Disabling, uninstalling or
+closing the workspace stops its runtime and output readers; updates from a retired instance
+are discarded. These capabilities require OxideTerm 2.2.5 or later. Exclude older hosts in
+`engines.oxideterm` when using them.
+
+A table with `id`, `selectable: true` and `rowKey` supports mouse selection and, when focused,
+arrow keys, Home and End. `rowKey` names a field containing a unique, nonempty string in
+every row. `value` can set the selected row identity. Selection emits `ui.event` with
+`type: "change"` and the row identity as `value`. Existing tables remain read-only by default.
+
+```json
+{
+  "kind": "table",
+  "id": "messages",
+  "selectable": true,
+  "rowKey": "id",
+  "columns": ["topic", "preview"],
+  "rows": [{"id": "message-1", "topic": "devices/status", "preview": "ready"}]
+}
+```
+
+Tables and lists with stable IDs preserve their scroll position across updates. With
+`rowKey`, insertion, deletion and reordering preserve the first visible row's identity;
+if that row disappears, the host uses a nearby valid position. Removing the selected row
+clears selection. Keep the plugin, surface, section and control IDs stable to retain state.
+
+Use `textarea` for multiline message bodies:
+
+```json
+{"kind": "textarea", "id": "body", "label": "@payload", "value": "first line\nsecond line"}
+```
+
+This uses the native editor's IME, selection, undo, clipboard and scrolling behavior.
+Edits emit `ui.event` with `type: "input"` and the complete text as `value`. Unrelated view
+updates preserve the draft; explicitly changing `value` replaces it. `disabled` prevents
+editing. Closing the owning surface releases editor state. Labels and placeholders use
+the plugin's existing eleven-language translation dictionary.
+
+Native plugins select OxideTerm components through a versioned schema. The
+plugin supplies data and receives events; the host supplies the real shared
+components, theme tokens, density, typography, focus, IME behavior,
+accessibility semantics, and responsive layout. Plugin runtimes never receive
+raw GPUI objects and cannot inject HTML, CSS, closures, or drawing code.
 
 ```json
 {
@@ -824,6 +1050,7 @@ Native plugins render UI by registering schemas, not components.
       "metadata": {
         "tabId": "dashboard",
         "schema": {
+          "componentVersion": 1,
           "kind": "form",
           "title": "Dashboard",
           "sections": [
@@ -849,20 +1076,144 @@ Supported control kinds:
 
 | Kind | Notes |
 |---|---|
-| `text`, `password`, `number`, `checkbox`, `select` | Field controls; require `id` |
-| `button` | Actionable only when it has `id` and is not disabled/loading |
-| `markdown` | Host-rendered text block |
+| `stack`, `row`, `card`, `toolbar` | Layout components; render nested `children` using bounded host layouts |
+| `columns` | Equal-width columns that wrap in narrow containers |
+| `actionRow` | Flexible first child with trailing actions aligned to the right; a leading button fills its slot |
+| `text`, `password`, `number`, `checkbox`, `select` | Shared field controls; require stable `id` values |
+| `radioGroup`, `radio-group`, `segmentedControl`, `segmented-control`, `slider` | Shared choice/range controls; require stable `id` values |
+| `button`, `iconButton`, `icon-button` | Shared actions; actionable only with `id` and while enabled/not loading; icon buttons also require `icon` and `label` |
+| `alert` | Semantic host notice with `tone`, optional icon, title, and description |
+| `markdown` | Parsed using OxideTerm's Markdown renderer; background images and local-file links are disabled |
 | `code`, `codeBlock`, `code-block` | Code block |
-| `statusBadge`, `status-badge` | Status indicator |
-| `progress` | Progress display |
-| `table`, `list` | Structured data display |
-| `emptyState`, `empty-state` | Empty state |
-| `divider` | Visual separator |
+| `statusBadge`, `status-badge`, `badge` | Shared status pill with semantic tone/strength |
+| `progress` | Shared progress display; values may be `0..1` or `0..100` |
+| `table`, `list` | Bounded, virtualized shared data components |
+| `emptyState`, `empty-state` | Shared empty state with optional icon/description |
+| `divider` | Shared separator |
 | `keyValue`, `key-value`, `keyValueRow`, `key-value-row` | Key/value row |
 
-Button clicks are delivered as plugin UI events. The host owns focus, layout, accessibility, theme, and control rendering.
+Component events are delivered only to the plugin that owns the surface:
+
+```json
+{
+  "name": "ui.event",
+  "payload": {
+    "type": "change",
+    "componentKind": "select",
+    "surfaceKind": "tab",
+    "surfaceId": "dashboard",
+    "sectionId": "overview",
+    "controlId": "environment",
+    "value": "production"
+  }
+}
+```
+
+Buttons emit `click`, text fields emit `input`, and choice/range controls emit
+`change`. Password drafts are zeroized by the host. Without an explicitly
+approved `credentials.raw.read` capability, password events contain only
+`{ "present": boolean, "redacted": true }`; raw text is sent only to the
+owning plugin after that sensitive-content approval. Password controls cannot
+declare an initial `value`, so a credential is never retained in a registered
+schema.
+
+For safety and predictable performance, component version 1 accepts at most 8
+nested levels, 256 controls, 64 children per container, 128 options per choice,
+2,000 rows per data control, and 64 table columns. Control IDs must be unique
+within their root or section, and `root` is reserved as a section ID. Unknown
+versions, variants, tones, sizes, gaps, or child placements are rejected during
+registration. The complete encoded schema is limited to 2 MiB.
 
 ## Host API Calls
+
+### Native text workbench
+
+WASM plugins may register a `textWorkbench` control with a stable `id`. Its `options`
+are tools: `{ label, value: { command, group?, description?, parameterLabel?, parameterDefault? } }`. Tools sharing a `group` appear under one sidebar entry; their operations appear above the editors. The optional parameter
+uses another native input. Selecting an unrelated parameter applies its declared default; switching operations with the same parameter label retains the current value. The control's `value` supplies translated labels for
+`input`, `output`, `execute`, `working`, `copy`, `useInput`, `clear`, `limit`, `failed`,
+`line`, `column` and its supported error codes. A schema can bundle
+`translations: { "en": { key: text }, "zh-CN": { key: text }, ... }`; strings prefixed
+with `@` resolve against that catalog, including the page header and tool options.
+Ship all 11 host locales with matching keys. This capability requires a host newer than 2.2.0.
+
+The host owns input and read-only result editors, selection, clipboard writes and
+draft lifetime. Run snapshots the input and starts a fresh WASM instance, invoking
+the selected command with `{ input, parameter }`. The response value is either
+`{ output: string }` or `{ error: { code, line?, column? } }`. Error codes resolve
+through the control's labels; unknown codes use the generic `failed` label.
+Input is limited to 256 KiB, parameter to 4 KiB, output to
+2 MiB, and execution to five seconds. Failed executions keep both drafts. Input is
+not sent in UI registration/events, saved in settings, or dispatched to a terminal.
+Closing the tab drops editors and cancels result delivery; an executing WASM call
+is bounded by its timeout. This isolated instance has no host-call resolver,
+preopened directories or network permissions.
+
+A runtime `contextMenu` contribution with `target: "terminal"` may declare an item
+with `{ label, tabId, controlId }`. The host captures the selected text when clicked
+and opens that plugin's declared text workbench. Later pane focus or output changes
+cannot change the captured input. `@` menu labels use the target tab's translations.
+
+### File preview providers
+
+Process plugins can provide paginated document previews through the existing
+file-browser preview window. They do not need a tab or sidebar contribution:
+
+```json
+{
+  "contributes": {
+    "filePreviews": [{"mimeTypes": ["application/pdf"], "command": "preview.render"}]
+  }
+}
+```
+
+The host selects an enabled, compatible and approved provider by exact MIME type.
+Local files and SFTP PDF, SQLite, certificate and binary downloads use the document asset path; the initial size
+limit is 10 MiB. Other built-in preview types retain their existing renderers.
+Each render uses a dedicated process instance and the ordinary `activate` and
+`dispatchCommand` protocol. The command receives `{ path, page, width }`, where
+`page` is zero-based and `width` is a requested bitmap width from 256 to 2048 pixels.
+PDF providers return `{ pageCount, page, png }` with a base64 PNG. The host bounds the decoded
+image to 8 million pixels and displays it through GPUI. Do not emit UI registrations
+or host calls from a preview renderer; this instance only returns a rendered page.
+
+SQLite providers register `application/vnd.sqlite3` (and optionally `application/x-sqlite3`).
+Requests also include `table: string | null` and `snapshot: boolean`. The latter is
+true only for host-owned temporary downloads; SQLite opens these immutable copies
+without creating WAL/SHM sidecars. Local files use ordinary read-only SQLite access.
+Responses use `{ kind: "table", tables: string[], selectedTable: string | null,
+columns: string[], rows: (string | null)[][], rowCount, page, pageCount }`.
+Pages contain 50 rows except the last; empty tables/databases have one empty page.
+The host validates table selection, row shape and bounds before rendering its
+native table. Limits are 256 table names, 64 columns and 4 MiB of cell text per page.
+Remote SQLite files with nonempty WAL/rollback journals or detected changes during
+download are rejected; use a complete backup made after writes stopped.
+
+Certificate providers register `application/pkix-cert`; binary inspectors register
+`application/x-oxideterm-binary`. Extensions and file headers select these routes
+before text preview. Inspection responses contain `{ kind, index, objects, fields }`,
+where `index` echoes the requested `page`, `objects` lists up to 64 certificates or
+architecture slices, and `fields` contains `{ key, value }` pairs using the host's
+localized field keys. Certificate responses use `kind: "certificate"`, add `details`,
+and require Unix-second `notBefore` and `notAfter`. Return only public certificate
+fields; mixed PEM private-key blocks must never appear in the response. The host
+labels validity dates separately from trust, chain, signature and revocation checks.
+
+Binary responses use `kind: "binary"`, add whole-file `size` and up to 1024 `sections`
+with `{ name, address, offset, size }`. File offsets are relative to the whole source,
+including universal Mach-O files; `null` denotes sections without file-backed bytes.
+The host rejects out-of-file ranges and uses its existing hex formatter and read-only
+editor for 512-byte pages and offset jumps. Plugins only interpret the file and do
+not edit it, disassemble it or register additional views.
+
+The preview owns cancellation and the source-file lease. Closing it aborts the
+render process and pending SFTP preview download; dropping the final lease removes
+remote temporary files. It does not disconnect the shared SSH node. Process trust
+is still required: this is crash isolation, not a filesystem sandbox. Disable or
+uninstall removes the provider from selection and cancels its open preview.
+
+This capability is new after 2.2.0. Release manifests must exclude older hosts;
+local development variants must not weaken the published compatibility range.
 
 Runtime plugins call host APIs by namespace, method, and JSON args:
 
@@ -880,22 +1231,28 @@ Runtime plugins call host APIs by namespace, method, and JSON args:
 }
 ```
 
-The host rejects calls that are not allowed by the plugin permission set. `contributes.apiCommands` is also used as the manifest-level declaration for many host calls. Prefer exact entries such as `connections.getAll`; use namespace wildcards only when the plugin genuinely needs the full namespace.
+The host rejects calls that are not in the effective plugin permission set. Direct host APIs are derived from approved capabilities and do not need to be repeated in `contributes.apiCommands`. That list is only the second allowlist for commands sent through the legacy `api.invoke` adapter.
 
 Common namespaces include:
 
 | Namespace | Typical use |
 |---|---|
-| `connections` | Read saved/live connection snapshots |
+| `connections` | Read and control saved/live connection lifecycle |
 | `sessions` | Read node tree and active node state |
 | `terminal` | Observe buffers or send approved input |
 | `sftp` | List/read/write remote files through node-owned SFTP |
+| `scp` | Transfer files through node-owned legacy SCP when SFTP is unavailable |
 | `forward` | List/create/stop forwards |
 | `transfers` | Observe transfer state |
 | `profiler` | Read node metrics |
+| `hostTools` | Read cached host state, capture typed datasets, and run validated actions |
 | `eventLog` | Read app event log |
-| `ide` | Observe IDE project/open-file state |
-| `ai` | Read sanitized AI metadata |
+| `notifications` | Read or manage notification-center entries |
+| `quickCommands` | Read, manage, or execute saved quick commands |
+| `cloudSync` | Read safe sync status/history and control sync operations |
+| `theme` | Read full effective tokens and select an installed theme |
+| `ide` | Observe and edit the active IDE project |
+| `ai` | Read sanitized AI data and control conversations/generation |
 | `app` | Theme, platform, version, settings snapshots |
 | `settings` | Plugin and syncable settings |
 | `storage` | Plugin-scoped JSON KV |
@@ -903,17 +1260,72 @@ Common namespaces include:
 | `secrets` | Plugin-scoped secret storage |
 | `ui` | Toasts, confirm dialogs, layout, progress |
 
+This table describes implemented namespaces. Call baseline `app.getApiCatalog` to discover the exact direct APIs supported by the running host, including each API's access tier, required capability, and introduction version. The catalog is authoritative for version and capability negotiation.
+
 ## Permissions And Capabilities
 
-Native uses explicit capability gates. Current shared capability names include:
+Declare sensitive reads and side effects in the top-level manifest field:
+
+```json
+{
+  "permissions": {
+    "capabilities": ["terminal.content.read", "terminal.write"]
+  }
+}
+```
+
+An empty or omitted `permissions.capabilities` does not produce an empty plugin. Every runtime plugin receives useful baseline, redacted calls, including `connections.getSummaries`, `sessions.getSummary`, `terminal.getMetadata`, `ai.getCatalog`, `ide.getSummary`, and `app.getApiCatalog`. Baseline metadata excludes raw terminal text, file contents, AI conversation text, credentials, and mutating operations.
+
+Current capability names are:
 
 | Capability | Meaning |
 |---|---|
 | `filesystem.read` | Read file metadata/content through approved host APIs |
 | `filesystem.write` | Mutate files through approved host APIs |
+| `filesystem.delete` | Delete files or directory trees through approved host APIs |
+| `network.forward.read` | Read saved and active forwarding rules |
 | `network.forward` | Create or manage forwarding/network bridge behavior |
+| `app.settings.read` | Read host settings categories |
+| `app.sync.refresh` | Refresh host state after external synchronization |
+| `connections.read` | Read full saved-connection and endpoint projections |
+| `connections.control` | Connect, reconnect, or explicitly disconnect existing product-owned nodes |
+| `sessions.read` | Read full session trees, active-node projections, and event logs |
+| `terminal.content.read` | Read terminal targets, selection, scrollback, or search results |
+| `terminal.write` | Write terminal input, clear a buffer, or open a Telnet transport |
+| `credentials.raw.read` | Return raw plugin-scoped secret values |
+| `credentials.manage` | Store, test, or delete plugin-scoped secrets through the host broker |
+| `network.http` | Permit HTTP/HTTPS through the legacy request adapter |
+| `sync.read` | Read/export synchronization data |
+| `sync.write` | Refresh, apply, or import synchronization data |
+| `transfers.read` | Read and subscribe to transfer state |
+| `ide.read` | Read full IDE project and open-file projections |
+| `ide.write` | Open, edit, save, close, or refresh files in an existing IDE project |
+| `ai.content.read` | Read AI conversations and message content |
+| `ai.write` | Create/select/delete conversations, send text, or cancel generation |
+| `host_tools.read` | Read cached host state or capture typed Host Tools datasets |
+| `host_tools.write` | Run validated non-destructive process/container/service/tmux/task actions |
+| `host_tools.destructive` | Terminate processes or kill tmux resources |
+| `host_tools.custom.execute` | Run a static custom monitor command declared by this plugin |
+| `notifications.read` | Read notification title/body/scope projections |
+| `notifications.manage` | Mark, remove, clear, or change do-not-disturb state |
+| `quick_commands.read` | Read complete saved quick-command definitions |
+| `quick_commands.manage` | Create, update, or remove quick commands |
+| `quick_commands.execute` | Execute a saved quick command through normal risk confirmation |
+| `theme.write` | Select an installed built-in or custom theme |
+| `cloud_sync.read` | Read sanitized Cloud Sync history |
+| `cloud_sync.control` | Check, upload, preview pull, or configure automatic upload |
+| `cloud_sync.apply` | Apply the currently reviewed remote preview |
+| `legacy.invoke` | Call the compatibility `api.invoke` adapter |
+| `events.emit` | Emit a plugin-scoped custom event |
+| `plugin.settings.write` | Change plugin settings or plugin-scoped storage |
+| `ui.write` | Register/open plugin UI and show host UI effects |
+| `runtime.process.trusted` | Trust an unsandboxed process runtime; added implicitly for process plugins |
 
-The runtime receives the effective permission set in the `activate` request. Treat that request as the source of truth: a manifest can declare plugin intent, but a Host API call still has to be present in `permissions.allowedHostApis`, and capability-gated calls still need the matching capability.
+The Plugin Manager presents all requested sensitive capabilities together when a plugin is enabled. Activation waits for approval, then the runtime receives the effective permission set in the `activate` request. Treat that request as the source of truth. A version-only update does not prompt again and does not expand access. Adding a capability or changing the runtime boundary requires a new review; removing capabilities narrows access without another prompt.
+
+Process plugins deserve special care: `runtime.process.trusted` is implicit and cannot be removed from their approval. The process is not confined by an OxideTerm OS sandbox, so its executable can exercise the operating-system access of the current user independently of Host API gates. Install and approve process plugins only from trusted publishers. WASM and process plugins must not be described as having the same security boundary.
+
+HTTP requests currently use the compatibility adapter. A plugin must request both `legacy.invoke` and `network.http`, and must list `plugin_http_request` in `contributes.apiCommands` before calling `api.invoke` with that command.
 
 AI tool metadata can also declare semantic capabilities such as `terminal.observe`, `terminal.send`, `state.list`, `settings.read`, `settings.write`, and `plugin.invoke`. Those declarations describe tool behavior for the host and model-facing surfaces; they do not bypass runtime permission checks.
 
@@ -925,7 +1337,7 @@ Use the smallest storage boundary that fits the data:
 |---|---|---|
 | User-visible plugin option | `contributes.settings` and `settings.*` | Typed values; safe for export/import when not secret |
 | Plugin internal cache | `storage.*` | Plugin-scoped JSON KV with size limits |
-| Token/password/key | `secrets.*` | OS keychain-backed plugin-scoped storage |
+| Token/password/key | `secrets.*` | OS keychain-backed plugin-scoped storage; raw reads require `credentials.raw.read`, while set/has/delete require `credentials.manage` |
 | Cross-machine plugin preferences | plugin settings import/export or `.oxide` | Do not include raw secrets unless the encrypted portable flow explicitly supports them |
 
 Never put credentials in plugin ids, names, labels, logs, AI prompts, event payloads, or support bundles.
@@ -937,6 +1349,7 @@ Native plugins should target stable node ids where possible:
 - Use node/session snapshots rather than terminal tab assumptions.
 - Terminal input hooks must fail open on error or timeout.
 - SFTP mutating calls require file-write capability and an online node.
+- SCP calls share the node-owned SSH connection. They support live pause/cancel, but a failed or disconnected SCP transfer restarts from byte zero.
 - Forward calls require network-forward capability and should handle suspended nodes.
 - IDE APIs expose project/open-file metadata, not arbitrary editor internals.
 - AI APIs expose sanitized metadata and avoid tool message content.
@@ -962,8 +1375,20 @@ Package rules:
 - Archive entries must not escape the plugin directory.
 - Keep packages below the host package size and entry-count limits.
 - Prefer one plugin id per package.
-- Use semver-like versions so update checks can compare releases.
+- Use semantic versions so update checks can compare releases.
+- Declare the supported host range in `engines.oxideterm`, for example `>=2.3.0, <3.0.0`, based on actual compatibility testing.
 - Keep runtime binaries platform-specific unless the entry is portable.
+
+The marketplace retains each release's host range and platform packages, and selects the
+highest compatible version. Newer incompatible releases display their requirements without
+replacing the installed plugin. Installation and startup both check the manifest range,
+including after app upgrades and downgrades. Incompatible plugins keep their files and settings
+but do not load. The official catalog is refreshed before startup activation and cached for
+offline use. Recorded compatibility corrections take precedence without changing package files.
+Unlisted older packages without a declared range remain permitted; older app builds
+do not gain these checks retroactively. See the
+[publishing guide](https://github.com/AnalyseDeCircuit/oxideterm-plugins/blob/main/docs/PUBLISHING.en.md)
+for the catalog format and release workflow.
 
 During development:
 
@@ -1002,22 +1427,54 @@ interface NativePluginManifest {
   contributes?: NativePluginContributes;
   locales?: string;
   runtime?: NativePluginRuntime;
+  permissions?: NativePluginPermissions;
+}
+
+interface NativePluginPermissions {
+  capabilities?: string[];
 }
 
 interface NativePluginRuntime {
-  kind: 'language' | 'wasm' | 'process' | 'acp' | 'remote-desktop' | 'terminal-transport' | 'helper' | 'manifest-only';
+  kind: 'wasm' | 'process' | 'manifest-only' | 'language' | 'acp' | 'remote-desktop' | 'terminal-transport' | 'helper';
   entry: string;
 }
 
 interface NativePluginContributes {
+  backgrounds?: string[];
+  language?: {
+    id: string;
+    displayName?: string;
+    grammarName?: string;
+    extensions?: string[];
+    fileNames?: string[];
+    highlights: string;
+    parserSha256: string;
+    highlightsSha256: string;
+  };
   tabs?: NativePluginTabDef[];
   sidebarPanels?: NativePluginSidebarDef[];
+  activityBarItems?: NativePluginActivityBarItemDef[];
   settings?: NativePluginSettingDef[];
   terminalHooks?: NativePluginTerminalHooksDef;
   terminalTransports?: string[];
   connectionHooks?: Array<'onConnect' | 'onDisconnect' | 'onReconnect' | 'onLinkDown'>;
   aiTools?: NativePluginAiToolDef[];
   apiCommands?: string[];
+  hostMonitors?: NativePluginHostMonitorDef[];
+}
+
+interface NativePluginHostMonitorDef {
+  id: string;
+  title: string;
+  description?: string;
+  commands: Partial<Record<'linux' | 'macos' | 'bsd' | 'windows' | 'default', string>>;
+  output?: {
+    format?: 'json' | 'jsonLines' | 'tsv' | 'textLines';
+    columns?: string[]; // Required only for tsv.
+    maxRows?: number; // Default 1,000; maximum 2,000.
+  };
+  timeoutSeconds?: number; // Default 10; range 1-30.
+  maxOutputBytes?: number; // Default 262,144; range 1 KiB-1 MiB.
 }
 
 interface NativePluginTabDef {
@@ -1030,6 +1487,14 @@ interface NativePluginSidebarDef {
   id: string;
   title: string;
   icon: string;
+  position?: 'top' | 'bottom';
+}
+
+interface NativePluginActivityBarItemDef {
+  id: string;
+  title: string;
+  icon: string;
+  command: string;
   position?: 'top' | 'bottom';
 }
 
@@ -1062,9 +1527,12 @@ interface NativePluginAiToolDef {
 Validation rules:
 
 - `id`, `name`, `version`, contribution ids, titles, and icons must be non-empty text.
+- Activity-bar item commands must be non-empty, item ids must be unique within the plugin, and `position` accepts only `top` or `bottom`.
+- Tab, sidebar-panel, and activity-bar-item icons resolve against OxideTerm's bundled Lucide icons. Matching ignores ASCII case, hyphens, and underscores; unsupported names fall back to `Puzzle`.
 - Relative paths must stay inside the plugin directory.
 - `terminalTransports` currently accepts `telnet`.
-- `apiCommands` entries are host API names such as `connections.getAll` or `sftp.listDir`.
+- `apiCommands` entries are compatibility-adapter commands such as `get_app_version` or `plugin_http_request`; direct host APIs are not listed there.
+- Omit `runtime` for a manifest-only plugin; an empty runtime entry is invalid.
 - Legacy `main` without `runtime` produces `legacy-js` state and is not executed.
 
 ### Protocol Interfaces
@@ -1137,6 +1605,7 @@ interface PluginRegistration {
     | 'status-bar'
     | 'tab'
     | 'sidebar-panel'
+    | 'activity-bar-item'
     | 'terminal-input-interceptor'
     | 'terminal-output-processor'
     | 'terminal-shortcut'
@@ -1156,6 +1625,7 @@ interface PluginRegistration {
 | `status-bar` | `text` | `alignment`, `icon`, `tooltip` |
 | `tab` | `tabId`, `schema` | `title` in schema |
 | `sidebar-panel` | `panelId`, `schema` | `position`, `title` in schema |
+| `activity-bar-item` | `itemId` | none; title, icon, position, and command come from the manifest |
 | `event-subscription` | `event` or `namespace` + `method` | `nodeId` filter for some event families |
 | `terminal-input-interceptor` | `command` or `id` | none |
 | `terminal-output-processor` | `command` or `id` | none |
@@ -1166,6 +1636,8 @@ interface PluginRegistration {
 
 ```ts
 interface NativePluginDeclarativeUiSchema {
+  translations?: Record<string, Record<string, string>>;
+  componentVersion?: 1;
   kind?: 'form';
   title?: string;
   description?: string;
@@ -1183,17 +1655,33 @@ interface NativePluginDeclarativeUiSection {
 interface NativePluginDeclarativeUiControl {
   kind:
     | 'text'
+    | 'textWorkbench'
     | 'password'
     | 'number'
     | 'checkbox'
     | 'select'
+    | 'radioGroup'
+    | 'radio-group'
+    | 'slider'
+    | 'segmentedControl'
+    | 'segmented-control'
     | 'button'
+    | 'iconButton'
+    | 'icon-button'
+    | 'stack'
+    | 'row'
+    | 'columns'
+    | 'actionRow'
+    | 'card'
+    | 'toolbar'
+    | 'alert'
     | 'markdown'
     | 'code'
     | 'codeBlock'
     | 'code-block'
     | 'statusBadge'
     | 'status-badge'
+    | 'badge'
     | 'progress'
     | 'table'
     | 'list'
@@ -1207,18 +1695,35 @@ interface NativePluginDeclarativeUiControl {
   id?: string;
   label?: string;
   description?: string;
+  placeholder?: string;
+  icon?: string;
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link' | 'panel' | 'inset' | 'inspector';
+  tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'error' | 'info';
+  size?: 'small' | 'default' | 'large' | 'icon';
+  gap?: 'none' | 'compact' | 'normal' | 'spacious';
   value?: unknown;
   text?: string;
   language?: string;
   options?: Array<{ label: string; value: unknown }>;
   rows?: unknown[];
   columns?: string[];
+  columnDefs?: Array<{ key: string; label: string; style?: 'primary' | 'meta' | 'mono' }>;
+  children?: NativePluginDeclarativeUiControl[];
+  min?: number;
+  max?: number;
+  step?: number;
+  indeterminate?: boolean;
+  strong?: boolean;
   disabled?: boolean;
   loading?: boolean;
 }
 ```
 
-Controls `text`, `password`, `number`, `checkbox`, `select`, and `button` require `id`. A button is actionable only when it has `id`, `disabled` is false, and `loading` is false.
+Interactive controls require a stable `id`: `text`, `password`, `number`,
+`checkbox`, `select`, radio groups, segmented controls, sliders, buttons, and
+icon buttons. Buttons are actionable only while `disabled` and `loading` are
+both false. `componentVersion` defaults to `1` for compatibility, but plugins
+should declare it explicitly so future component changes can be negotiated.
 
 ## Host API Reference
 
@@ -1235,7 +1740,7 @@ interface HostCall {
 
 Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards are supported, for example `connections.getAll` and `connections.*`.
 
-`api.invoke` has an additional allowlist: `args.command` must also appear in `contributes.apiCommands`.
+`api.invoke` requires `legacy.invoke` and has an additional allowlist: `args.command` must also appear in `contributes.apiCommands`. The `plugin_http_request` command additionally requires `network.http`.
 
 | `api.invoke` command | Native adapter |
 |---|---|
@@ -1263,6 +1768,11 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 | `node_sftp_tar_probe` | `sftp.tarProbe` adapter |
 | `node_sftp_tar_upload` | `sftp.tarUpload` adapter |
 | `node_sftp_tar_download` | `sftp.tarDownload` adapter |
+| `node_scp_probe` | `scp.capabilities` adapter |
+| `node_scp_download` | `scp.download` adapter |
+| `node_scp_upload` | `scp.upload` adapter |
+| `node_scp_download_dir` | `scp.downloadDirectory` adapter |
+| `node_scp_upload_dir` | `scp.uploadDirectory` adapter |
 | `list_port_forwards` | `forward.list` adapter |
 | `create_port_forward` | `forward.create` adapter |
 | `stop_port_forward` | `forward.stop` adapter |
@@ -1283,12 +1793,16 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 | `app.getVersion` | `{}` | Version string |
 | `app.getPlatform` | `{}` | Platform string |
 | `app.getLocale` | `{}` | Locale string |
+| `app.getApiCatalog` | `{}` | Implemented direct APIs with access tier, capability, and introduction version |
 | `app.getPoolStats` | `{}` | `{ activeConnections, totalSessions }`-style stats |
+| `app.getWorkspaceSummary` | `{}` | Requires `sessions.read`; open tab IDs/titles/kinds/recording states, node IDs/titles/states/active-forward counts, and plugin issue IDs/names. No terminal content, paths or diagnostic text. Introduced after 2.2.0. |
 | `app.refreshAfterExternalSync` | `{}` | One-way workspace refresh effect |
 | `ui.getLayout` | `{}` | Layout snapshot |
 | `ui.registerTabView` | `{ tabId: string, schema: NativePluginDeclarativeUiSchema }` | Declarative tab registration result |
 | `ui.registerSidebarPanel` | `{ panelId: string, schema: NativePluginDeclarativeUiSchema }` | Declarative sidebar registration result |
+| `ui.registerActivityBarItem` | `{ itemId: string }` | Standalone activity-bar action registration result |
 | `ui.openTab` | `{ tabId: string }` | Opens/focuses declared plugin tab |
+| `ui.openWorkspace` | Tagged destination below | Requires `ui.write`; validates the destination and returns `{ queued: true }`. Introduced after 2.2.0. |
 | `ui.showToast` | `{ title?: string, description?: string, variant?: string }` | One-way toast effect |
 | `ui.showNotification` | `{ title?: string, body?: string, severity?: string }` | One-way notification effect |
 | `ui.showConfirm` | `{ title: string, description: string }` | `boolean` |
@@ -1303,21 +1817,117 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 
 ### Connections And Sessions
 
+Workspace destinations are `{ kind: "tab", id }`, `{ kind: "sftp", nodeId }`,
+`{ kind: "forwards", nodeId }`, or `{ kind: "page", page }`. Page names are
+`sessions`, `files`, `plugins`, `cloudSync`, `notifications`, and
+`localTerminal`. Existing tabs retain their main/detached-window ownership.
+Closed tab/node targets and unknown pages are rejected. Navigation does not expose
+arbitrary command execution; saved connections use `connections.connect` and its
+separate capability. The workspace summary is current state, not persisted project
+or workspace history.
+
 | Host API | Args | Result |
 |---|---|---|
+| `connections.getSummaries` | `{}` | Redacted connection summaries; baseline |
+| `connections.getSavedSummaries` | `{}` | Redacted saved-connection IDs/names/groups for discovery; baseline |
 | `connections.getAll` | `{}` | Connection snapshots |
+| `connections.getSaved` | `{}` | Saved-connection projections without secrets, key paths, certificate paths, post-connect commands, or proxy credential references |
 | `connections.get` | `{ connectionId: string }` | Connection snapshot or `null` |
 | `connections.getState` | `{ connectionId: string }` | Connection state or `null` |
 | `connections.getByNode` | `{ nodeId: string }` | Connection snapshot or `null` |
+| `connections.connect` | `{ connectionId: string }` | `{ queued: true }`; uses the existing saved-connection and prompt flow |
+| `connections.openForm` | `{ name: string, host: string, port: number, username?: string, group?: string }` | `{ queued: true }`; opens the native SSH form for review, without saving or connecting; requires `connections.control` |
+| `connections.reconnect` | `{ nodeId: string }` | `{ queued: true }`; reuses the existing node runtime |
+| `connections.disconnect` | `{ nodeId: string }` | `{ queued: true }`; opens the normal cascade confirmation before disconnecting the NodeRouter-owned subtree |
 | `sessions.getTree` | `{}` | Node tree snapshot |
+| `sessions.getSummary` | `{}` | Redacted session summary; baseline |
 | `sessions.getActiveNodes` | `{}` | Active/connected node snapshots |
 | `sessions.getNodeState` | `{ nodeId: string }` | Node state or `null` |
 | `eventLog.getEntries` | `{ severity?: string, category?: string, limit?: number }` | Event-log entries |
+
+### Product Data And Controls
+
+`connections.openForm` requires a host newer than 2.2.0. Host-source plugins should
+also check `app.getApiCatalog` before activation. Only plain connection metadata is
+accepted: credentials, key paths, commands, and other fields are rejected. The user
+sets authentication and any jump hosts in the existing form. A queued request will
+not replace a form already being edited; its failure appears in the plugin manager.
+Discovery owns no SSH transport and makes no persistent connection-store changes.
+
+Workspace mutations return `{ queued: true }` after schema and permission preflight. They execute on the product owner and appear in subsequent snapshots/events. Host Tools calls are synchronous because they return typed remote results.
+
+| Host API | Capability | Args | Result |
+|---|---|---|---|
+| `notifications.getSummary` | baseline | `{}` | Counts and DND state without content |
+| `notifications.getAll` | `notifications.read` | `{}` | Notification title/body/status/scope projections |
+| `notifications.markRead` | `notifications.manage` | `{ id: number }` | `{ queued: true }` |
+| `notifications.markAllRead` | `notifications.manage` | `{}` | `{ queued: true }` |
+| `notifications.setDnd` | `notifications.manage` | `{ enabled: boolean }` | `{ queued: true }` |
+| `notifications.remove` / `notifications.clear` | `notifications.manage` | `{ id: number }` / `{}` | `{ queued: true }` |
+| `quickCommands.getMetadata` | baseline | `{}` | Discovery metadata without command bodies |
+| `quickCommands.getAll` | `quick_commands.read` | `{}` | Complete categories and command definitions |
+| `quickCommands.execute` | `quick_commands.execute` | `{ id: string }` | `{ queued: true }`; normal command-risk confirmation still applies |
+| `quickCommands.upsert` | `quick_commands.manage` | `{ id?, name, command, category?, description?, hostPattern?, hostPatterns?, parameters?, protocols?, confirmation? }` | `{ queued: true }` |
+| `quickCommands.remove` | `quick_commands.manage` | `{ id: string }` | `{ queued: true }` |
+| `theme.getTokens` | baseline | `{}` | Complete effective terminal/UI/metric/radius/spacing/motion tokens |
+| `theme.getAvailable` | baseline | `{}` | Active, built-in, and custom theme identifiers |
+| `theme.setActive` | `theme.write` | `{ themeId: string }` | `{ queued: true }` |
+| `hostTools.getSnapshot` | `host_tools.read` | `{ nodeId: string }` | Cached system identity, metrics, processes, Docker, and service state; no full process arguments |
+| `hostTools.getExtensions` | baseline | `{}` | This plugin's monitor metadata, with command strings omitted |
+| `hostTools.capture` | `host_tools.read` | `{ nodeId, osType, resource, preset?, limit? }` | Typed snapshot for `docker`, `services`, `logs`, `tmux`, `ports`, `filesystems`, `packages`, or `scheduledTasks` |
+| `hostTools.execute` | `host_tools.write` | `{ nodeId, osType, resource, action, target, ...actionArgs }` | `{ success, exitCode, truncated }` |
+
+| `hostTools.terminate` | `host_tools.destructive` | `{ nodeId, osType, resource: 'process' \| 'tmux', action, target }` | `{ success, exitCode, truncated }` |
+| `hostTools.runExtension` | `host_tools.custom.execute` | `{ nodeId, osType, monitorId }` | `{ monitorId, success, data, rowCount, exitCode, truncated }` |
+| `cloudSync.getSummary` | baseline | `{}` | Safe status/progress/dirty/conflict metadata |
+| `cloudSync.getHistory` | `cloud_sync.read` | `{}` | History without errors, remote revisions, destinations, credentials, or payloads |
+| `cloudSync.check` | `cloud_sync.control` | `{}` | `{ queued: true }` |
+| `cloudSync.upload` | `cloud_sync.control` | `{ force?: boolean }` | `{ queued: true }` |
+| `cloudSync.pullPreview` | `cloud_sync.control` | `{}` | `{ queued: true }`; does not apply data or persist unsaved panel drafts |
+| `cloudSync.applyPreview` | `cloud_sync.apply` | `{}` | `{ queued: true }`; applies only the currently reviewed preview |
+| `cloudSync.setAutoUpload` | `cloud_sync.control` | `{ enabled: boolean, intervalMinutes?: number }` | `{ queued: true }`; interval is clamped to at least five minutes |
+
+Quick Command parameters use `{ name, label, kind?, defaultValue?, choices?, required? }`; `kind` is `text` or `choice`. `protocols` accepts `local`, `ssh`, `mosh`, `telnet`, `serial`, and `tmux`, while `confirmation` is `inherit` or `always`. Templates insert `{{param.name}}` verbatim; use `{{param.name|sh}}` when the value must be quoted as one POSIX shell word.
+
+Host Tools never creates a second SSH transport. It resolves the current `nodeId` through `NodeRouter`, uses the existing connection, validates every command argument with product command builders, and omits raw standard error. Capture errors are redacted before serialization.
+
+Plugins can extend Host Tools beyond the built-in monitor set by declaring static monitor commands in `contributes.hostMonitors`:
+
+```json
+{
+  "permissions": {
+    "capabilities": ["host_tools.custom.execute"]
+  },
+  "contributes": {
+    "hostMonitors": [{
+      "id": "nginx-workers",
+      "title": "Nginx workers",
+      "description": "Reports worker PIDs and states",
+      "commands": {
+        "linux": "ps -C nginx -o pid=,stat= | awk '{printf \"{\\\"pid\\\":%s,\\\"state\\\":\\\"%s\\\"}\\n\", $1, $2}'"
+      },
+      "output": {
+        "format": "jsonLines",
+        "maxRows": 200
+      },
+      "timeoutSeconds": 10,
+      "maxOutputBytes": 262144
+    }]
+  }
+}
+```
+
+The command is selected from `linux`, `macos`, `bsd`, or `windows`, then falls back to `default`. Commands are static: runtime parameters and template substitution are intentionally unsupported, so a plugin cannot turn `runExtension` into an arbitrary-command endpoint. Manifest commands are plaintext package metadata and must never contain passwords, tokens, private keys, or other secrets. Because a shell command cannot be proven read-only, execution uses the separate high-risk `host_tools.custom.execute` capability even when the monitor is observational. The host limits execution time, captured bytes, and parsed rows; it never returns standard error or failed-command stdout. Successful output is parsed as `json`, `jsonLines`, `tsv`, or `textLines` before crossing the plugin boundary.
+
+A declaration does not automatically add a built-in Host Tools page. The plugin owns presentation and polling through its declarative tab or sidebar, calling `getExtensions` for discovery and `runExtension` when it needs a fresh sample.
+
+Host Tools action names are closed enums: `process` supports `stop`, `continue`, and `renice` (`nice`) through `execute`, plus `terminate` and `kill` through `terminate`; `docker` supports `start`, `stop`, and `restart`; `service` supports `start`, `stop`, `restart`, `reload`, `enable`, and `disable`; `tmux` supports `renameSession`, `renameWindow` (`name`), and `sendPaneCommand` (`command`), while `killSession`, `killWindow`, and `killPane` require `terminate`; `scheduledTask` supports `runNow` (`unit`), `enable`, and `disable` (`source`). `osType` selects the product's validated Linux, macOS/Darwin, BSD, or Windows command builder; it is not interpolated into a shell command.
 
 ### Terminal
 
 | Host API | Args | Result |
 |---|---|---|
+| `terminal.getMetadata` | `{}` | Redacted terminal metadata; baseline |
 | `terminal.getActiveTarget` | `{}` | Active terminal target snapshot |
 | `terminal.getNodeBuffer` | `{ nodeId: string }` | Terminal buffer text or `null` |
 | `terminal.getNodeSelection` | `{ nodeId: string }` | Selected text or `null` |
@@ -1351,8 +1961,15 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 | `sftp.delete` | `filesystem.write` | `{ nodeId: string, path: string }` | Delete result |
 | `sftp.deleteRecursive` | `filesystem.write` | `{ nodeId: string, path: string }` | Recursive delete result |
 | `sftp.rename` | `filesystem.write` | `{ nodeId: string, oldPath: string, newPath: string }` | Rename result |
+| `scp.capabilities` | `filesystem.read` | `{ nodeId: string }` | `{ supported, recursive, restartResume: false }` |
+| `scp.download` | `filesystem.read` | `{ nodeId: string, remotePath: string, localPath: string, transferId?: string }` | SCP transfer result |
+| `scp.downloadDirectory` | `filesystem.read` | `{ nodeId: string, remotePath: string, localPath: string, transferId?: string }` | SCP transfer result |
+| `scp.upload` | `filesystem.write` | `{ nodeId: string, localPath: string, remotePath: string, transferId?: string }` | SCP transfer result |
+| `scp.uploadDirectory` | `filesystem.write` | `{ nodeId: string, localPath: string, remotePath: string, transferId?: string }` | SCP transfer result |
 | `transfers.getAll` | read | `{}` | Transfer snapshots |
 | `transfers.getByNode` | read | `{ nodeId: string }` | Transfer snapshots for node |
+
+SCP is a POSIX compatibility transport, not a browsing API. Use `sftp.listDir`, `sftp.stat`, and previews when SFTP is available. A result reports `protocol: "scp"` and `restartResume: false`; a retry after channel or node loss starts the object again instead of continuing from a byte offset.
 
 ### Forwarding
 
@@ -1362,7 +1979,7 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 | `forward.listSavedForwards` | read | `{}` | Saved forward rules |
 | `forward.exportSavedForwardsSnapshot` | read | `{}` | Saved-forward sync snapshot |
 | `forward.applySavedForwardsSnapshot` | `network.forward` | `{ snapshot: object, strategy?: string }` | Apply result |
-| `forward.create` | `network.forward` | `{ nodeId: string, type: 'local' | 'remote' | 'dynamic', localPort?: number, remoteHost?: string, remotePort?: number }` | Created rule |
+| `forward.create` | `network.forward` | `{ nodeId: string, type: 'local' \| 'remote' \| 'dynamic', localPort?: number, remoteHost?: string, remotePort?: number }` | Created rule |
 | `forward.stop` | `network.forward` | `{ id: string }` | Stop result |
 | `forward.delete` | `network.forward` | `{ id: string }` | Delete result |
 | `forward.restart` | `network.forward` | `{ id: string }` | Restart result |
@@ -1377,15 +1994,15 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 | `storage.get` | `{ key: string }` | JSON value or `null` |
 | `storage.set` | `{ key: string, value: unknown }` | One-way write |
 | `storage.remove` | `{ key: string }` | One-way delete |
-| `secrets.get` | `{ key: string }` | Secret string or `null` |
-| `secrets.getMany` | `{ keys: string[] }` | Map of key to secret/null |
-| `secrets.set` | `{ key: string, value: string }` | Empty value deletes |
-| `secrets.has` | `{ key: string }` | `boolean` |
-| `secrets.delete` | `{ key: string }` | Delete result |
+| `secrets.get` | `{ key: string }` | Secret string or `null`; requires `credentials.raw.read` |
+| `secrets.getMany` | `{ keys: string[] }` | Map of key to secret/null; requires `credentials.raw.read` |
+| `secrets.set` | `{ key: string, value: string }` | Empty value deletes; requires `credentials.manage` |
+| `secrets.has` | `{ key: string }` | `boolean`; requires `credentials.manage` |
+| `secrets.delete` | `{ key: string }` | Delete result; requires `credentials.manage` |
 | `sync.listSavedConnections` | `{}` | Saved connection snapshots |
 | `sync.refreshSavedConnections` | `{}` | Saved connection snapshots after refresh |
 | `sync.exportSavedConnectionsSnapshot` | `{}` | Saved connection sync snapshot |
-| `sync.applySavedConnectionsSnapshot` | `{ snapshot: object, conflictStrategy?: 'rename' | 'skip' | 'replace' | 'merge' }` | Apply result |
+| `sync.applySavedConnectionsSnapshot` | `{ snapshot: object, conflictStrategy?: 'rename' \| 'skip' \| 'replace' \| 'merge' }` | Apply result |
 | `sync.getLocalSyncMetadata` | `{}` | Revision metadata |
 | `sync.preflightExport` | `{ connectionIds?: string[], embedKeys?: boolean, includeManagedKeys?: boolean }` | Export preflight result. Managed keys are excluded by default for plugin-driven sync. |
 | `sync.exportOxide` | `{ connectionIds?: string[], password: string, embedKeys?: boolean, includeManagedKeys?: boolean, includeManagedKeyPassphrases?: boolean, includeAppSettings?: boolean, selectedAppSettingsSections?: string[], includePluginSettings?: boolean, selectedPluginIds?: string[], progressRegistrationId?: string }` | `.oxide` bytes/metadata result. Managed keys are excluded by default for plugin-driven sync. |
@@ -1398,14 +2015,28 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 | Host API | Args | Result |
 |---|---|---|
 | `ide.isOpen` | `{}` | `boolean` |
+| `ide.getSummary` | `{}` | Redacted IDE state summary; baseline |
 | `ide.getProject` | `{}` | Project snapshot or `null` |
 | `ide.getOpenFiles` | `{}` | Open-file snapshots |
 | `ide.getActiveFile` | `{}` | Active file snapshot or `null` |
+| `ide.openFile` | `{ path: string, nodeId?: string }` | `{ queued: true }` |
+| `ide.replaceActiveText` | `{ text: string, nodeId?: string }` | `{ queued: true }` |
+| `ide.insertActiveText` | `{ text: string, nodeId?: string }` | `{ queued: true }` |
+| `ide.saveActive` | `{ nodeId?: string }` | `{ queued: true }`; preserves remote conflict checks |
+| `ide.closeFile` | `{ path: string, nodeId?: string }` | `{ queued: true }`; preserves dirty-buffer confirmation |
+| `ide.refreshProject` | `{ nodeId?: string }` | `{ queued: true }` |
 | `ai.getConversations` | `{}` | Sanitized conversation summaries |
+| `ai.getCatalog` | `{}` | Redacted provider and model catalog; baseline |
 | `ai.getMessages` | `{ conversationId: string }` | Sanitized messages |
 | `ai.getActiveProvider` | `{}` | Active provider summary or `null` |
 | `ai.getAvailableModels` | `{}` | Model names |
-| `profiler.getMetrics` | `{ nodeId: string }` | Metrics snapshot or `null` |
+| `ai.createConversation` | `{ title?: string }` | `{ queued: true }` |
+| `ai.selectConversation` | `{ conversationId: string }` | `{ queued: true }` |
+| `ai.sendMessage` | `{ content: string }` | `{ queued: true }`; credential-like text is redacted before model context is built |
+| `ai.cancelGeneration` | `{}` | `{ queued: true }` |
+| `ai.deleteConversation` | `{ conversationId: string }` | `{ queued: true }` |
+| `ai.clearConversations` | `{}` | `{ queued: true }` |
+| `profiler.getMetrics` | `{ nodeId: string }` | Metrics snapshot or `null`; `systemInfo` contains the remote system name, version, architecture, boot-time milliseconds, and uptime seconds when available |
 | `profiler.getHistory` | `{ nodeId: string, limit?: number }` | Metrics history |
 | `profiler.isRunning` | `{ nodeId: string }` | `boolean` |
 
@@ -1413,29 +2044,31 @@ Calls must be allowed by `allowedHostApis`. Exact names and namespace wildcards 
 
 Subscribe by registering `event-subscription` with `event`, or with `namespace` + `method` for Tauri-style names.
 
-| Namespace + method | Event key |
-|---|---|
-| `app.onThemeChange` | `app.themeChanged` |
-| `app.onSettingsChange` | `app.settingsChanged` |
-| `i18n.onLanguageChange` | `i18n.languageChanged` |
-| `settings.onChange` | `settings.changed` |
-| `ui.onLayoutChange` | `ui.layoutChanged` |
-| `sessions.onTreeChange` | `sessions.treeChanged` |
-| `sessions.onNodeStateChange` | `sessions.nodeStateChanged` |
-| `eventLog.onEntry` | `eventLog.entry` |
-| `forward.onSavedForwardsChange` | `forward.savedForwardsChanged` |
-| `transfers.onProgress` | `transfers.progress` |
-| `transfers.onComplete` | `transfers.complete` |
-| `transfers.onError` | `transfers.error` |
-| `profiler.onMetrics` | `profiler.metrics` |
-| `ide.onFileOpen` | `ide.fileOpen` |
-| `ide.onFileClose` | `ide.fileClose` |
-| `ide.onActiveFileChange` | `ide.activeFileChanged` |
-| `ai.onMessage` | `ai.message` |
-| `events.onConnect` | `lifecycle.onConnect` |
-| `events.onDisconnect` | `lifecycle.onDisconnect` |
-| `events.onLinkDown` | `lifecycle.onLinkDown` |
-| `events.onReconnect` | `lifecycle.onReconnect` |
+| Namespace + method | Event key | Required capability |
+|---|---|---|
+| `app.onThemeChange` | `app.themeChanged` | — |
+| `app.onSettingsChange` | `app.settingsChanged` | `app.settings.read` |
+| `i18n.onLanguageChange` | `i18n.languageChanged` | — |
+| `settings.onChange` | `settings.changed` | — |
+| `ui.onLayoutChange` | `ui.layoutChanged` | — |
+| `sessions.onTreeChange` | `sessions.treeChanged` | `sessions.read` |
+| `sessions.onNodeStateChange` | `sessions.nodeStateChanged` | — |
+| `eventLog.onEntry` | `eventLog.entry` | `sessions.read` |
+| `forward.onSavedForwardsChange` | `forward.savedForwardsChanged` | `network.forward.read` |
+| `transfers.onProgress` | `transfers.progress` | `transfers.read` |
+| `transfers.onComplete` | `transfers.complete` | `transfers.read` |
+| `transfers.onError` | `transfers.error` | `transfers.read` |
+| `profiler.onMetrics` | `profiler.metrics` | — |
+| `ide.onFileOpen` | `ide.fileOpen` | `ide.read` |
+| `ide.onFileClose` | `ide.fileClose` | `ide.read` |
+| `ide.onActiveFileChange` | `ide.activeFileChanged` | `ide.read` |
+| `ai.onMessage` | `ai.message` | — (metadata only; no message content) |
+| `events.onConnect` | `lifecycle.onConnect` | — |
+| `events.onDisconnect` | `lifecycle.onDisconnect` | — |
+| `events.onLinkDown` | `lifecycle.onLinkDown` | — |
+| `events.onReconnect` | `lifecycle.onReconnect` | — |
+
+Terminal input interceptors require both `terminal.content.read` and `terminal.write`. Terminal output processors require `terminal.content.read`.
 
 Custom plugin events use the `events.on` / `events.emit` path and are scoped by plugin id so one plugin cannot claim arbitrary global event names.
 
@@ -1460,6 +2093,8 @@ If a process plugin activates but no UI appears, verify both sides:
 - The schema `kind` is `form`.
 - The schema contains at least one section or top-level control.
 - Required controls have `id`.
+
+For a standalone activity-bar action, verify `contributes.activityBarItems`, the runtime `itemId`, the `ui.write` capability, and the plugin's `dispatchCommand` handler instead of looking for a declarative UI schema.
 
 ## Migration Notes
 

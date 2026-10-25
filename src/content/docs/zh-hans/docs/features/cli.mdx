@@ -3,9 +3,9 @@ title: CLI 伴侣工具
 description: oxideterm — 可独立运行的无头管理 CLI，用于配置、自动化、诊断、备份和恢复。
 ---
 
-`oxideterm` 是 OxideTerm 的无头管理 CLI。它直接调用与桌面应用相同的 Rust 领域 crate，读取指定配置目录中的数据，不通过本地套接字、命名管道或 RPC 服务控制正在运行的 GUI。
+`oxideterm` 的普通管理命令直接读取指定配置目录，并调用与桌面应用相同的领域服务。
 
-这意味着大多数管理、检查和迁移命令无需先启动桌面应用，适合 shell 脚本、CI、故障恢复和远程无界面环境。`oxideterm ssh` 是有意的例外：它会在原生桌面应用中打开临时 SSH 终端。
+大多数管理、检查和迁移命令无需先启动桌面应用。`ssh` 打开临时桌面终端，`connections open` 使用桌面的已保存连接流程，`mcp bridge` 则将外部标准输入输出客户端连接到运行中应用的公共 MCP 端点。
 
 ## 获取 CLI
 
@@ -106,6 +106,12 @@ oxideterm cloud-sync secrets status --json
 oxideterm batch apply ./plan.json --dry-run
 oxideterm batch apply ./plan.json --yes --json
 ```
+
+## 外部 MCP 客户端
+
+在**设置 → 网络与代理 → 外部 MCP 控制**创建客户端，将一次性凭据放入外部客户端的秘密环境变量 `OXIDETERM_MCP_TOKEN`。启动命令为 `oxideterm`，参数为 `["mcp", "bridge"]`。桥接从应用当前配置目录发现本地端点；使用命名配置或自定义目录时，传入相同的 `--profile` 或 `--config-dir`。
+
+应用需要保持运行。手动指定端点时，只接受本机回环地址上的 HTTP `/mcp`。不要把令牌写入命令参数、项目文件或日志。
 
 ## Shell 补全
 

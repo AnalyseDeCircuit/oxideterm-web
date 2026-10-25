@@ -5,7 +5,9 @@ description: OxideTerm — an AI-native workspace for remote servers built as a 
 
 **OxideTerm** is an **AI-native workspace for remote servers**, not just a terminal. Connect to a server once, then work around it in one place: SSH shell, SFTP, port forwarding, trzsz transfers, lightweight editing, local shell, remote desktop, and OxideSens AI.
 
-OxideTerm is a native desktop application written in Rust built with **GPUI**. GPUI draws the interface directly on a GPU surface; there is no browser runtime, DOM, JavaScript frontend, or system WebView. Release packages are typically **60–95 MB** and are available for macOS, Windows, and Linux on x64 and arm64.
+OxideTerm is a native desktop application written in Rust with **GPUI**. It is available for macOS, Windows, and Linux on x64 and arm64. See [Installation](/docs/installation/) for system requirements and packages.
+
+The [workspace](/docs/features/workspace/) groups tabs by connection, keeps management pages on the left, and opens AI and host tools on the right. Use [quick-command groups](/docs/features/quick-commands/) for recurring work and [cloud sync](/docs/features/cloud-sync/) to share selected configuration between devices.
 
 The core workspace is local-first: SSH, files, forwarding, local shells, saved connections, and settings do not require an OxideTerm account. OxideSens is BYOK, so requests go only to the provider you configure.
 
@@ -41,7 +43,7 @@ OxideTerm keeps the desktop UI and domain services in one native process:
 
 Terminal bytes are parsed into Rust-owned terminal state. GPUI reads snapshots of that state and issues GPU draw calls. Management actions call Rust services directly in-process, so terminal traffic and UI actions do not cross a serialization bridge.
 
-The standalone `oxideterm` CLI follows the same ownership model. It links the relevant domain crates and reads the same persisted stores as the desktop app; it does not contact a desktop-side RPC server.
+Most `oxideterm` CLI management commands read the same persisted stores directly. Desktop-opening commands and the public MCP bridge use the running application; see the [CLI guide](/docs/features/cli/).
 
 ## Native Stack
 

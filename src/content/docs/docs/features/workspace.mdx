@@ -1,0 +1,39 @@
+---
+title: Workspace Navigation
+description: Filter tabs by connection, keep mixed splits intact, and reach tools from the top bar and sidebars.
+---
+
+Use the top bar to choose which tabs to see, the left sidebar to manage connections and global pages, and the right sidebar for OxideSens and Host Tools.
+
+## Tab Scopes
+
+The searchable selector in the center of the top bar offers **All tabs**, **Global pages**, **Local terminals**, and individual connections. A connection's scope includes its terminals, files, IDE, forwarding, and connection-bound plugin pages. Connections are distinguished by identity, not just host address.
+
+Each scope remembers its last selected tab during this window's lifetime. If that tab closes, another tab in the same scope is selected. An empty scope offers **All tabs**. Scope selections are not synchronized or restored across restarts.
+
+Filtering only changes what you see. Hidden sessions, transfers, and tunnels keep running. A mixed split appears in every scope represented by its panes, with its entire layout intact.
+
+## Opening and Organizing Tabs
+
+Opening a page explicitly reveals the appropriate scope: Settings opens global pages, while a connection's IDE reveals that connection. If you are already viewing all tabs, that view remains selected. Background updates do not change the scope.
+
+Previous/next navigation, numeric shortcuts, and bulk closing operate on the visible tabs. Reordering changes their relative positions without rearranging hidden tabs. Tab titles remain complete; scroll the strip horizontally when they no longer fit. Moving a page between windows updates each window's selection.
+
+## Top-Bar Actions
+
+- **Command palette:** the search icon opens the existing action picker.
+- **Zen mode:** hides surrounding navigation. Use the configured shortcut to leave it; shortcut hints reflect your bindings.
+- **Background tasks:** the summary appears when there is background work and lets you locate the corresponding task.
+- **Theme:** the sun or moon represents the current mode. Configure both light and dark schemes in [Appearance](/docs/features/themes/) before using the toggle.
+
+Full screen keeps the top bar; Zen mode hides it. On Windows and Linux, workspace actions leave space for the window controls at the right edge.
+
+## Right-Side Tools
+
+OxideSens and individual [Host Tools](/docs/features/host-tools/) open beside your work. Frequently changing status and on-demand inspection are grouped separately. **More** appears only when the available height cannot fit all tools. If configured and enabled in Settings, the app-lock shortcut sits at the bottom; locking does not stop connections.
+
+The scope selector does not choose a command destination. Check the actual active pane or the connection selected in Host Tools, especially in a mixed split.
+
+## Mixed Splits
+
+Drag a tab into the left, right, top, or bottom edge of another page's content area and release at the layout preview. A layout supports up to four panes, including terminals, SFTP, IDE, settings, notes, and plugin pages. Opening a singleton page again locates its existing pane. Moving a layout to another window preserves its sessions.

@@ -34,6 +34,14 @@ For an RDP connection without an SSH gateway, choose direct access, the global p
 
 When an SSH gateway is selected, the gateway's own route and proxy settings are used; the RDP proxy is not applied again to the local tunnel. Route settings are retained in Session Manager and supported cloud-synchronized profiles. Password synchronization is a separate opt-in choice; see [Connections & Sessions](/docs/features/connections/#optional-credential-sync).
 
+## Display Layout and Resolution
+
+RDP plugin **0.2.0** requires OxideTerm **2.2.5 or later**. Update both when using its display-layout fixes.
+
+In single-monitor mode, **Follow window size** requests a remote resolution based on the viewer area. The resolution menu also offers fixed sizes. In all-monitor mode, the remote layout follows the active physical monitors; resizing the app changes local fitting, not the remote monitor topology. Connecting or disconnecting an external display, closing a laptop's internal screen, and reconnecting can change that layout.
+
+The menu's current remote size is not necessarily your display's advertised resolution: sidebars, window borders, scaling, and multi-monitor layout affect the available area. If an edge or desktop panel is missing, compare a screenshot taken on the remote desktop with the viewer and record the menu's remote size, display mode, and active local monitors. A panel present in the remote screenshot but missing locally points to a display-layout or viewport issue rather than a missing remote panel.
+
 ## During a Session
 
 Remote desktop tabs handle keyboard and pointer input, remote cursors, clipboard exchange, and viewport resizing where the server and provider support them. Per-profile options control supported redirection and display behavior.

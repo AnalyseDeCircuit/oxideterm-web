@@ -19,6 +19,7 @@ You can also open Search from the terminal context menu or command palette.
 The native search bar provides:
 
 - A text field for the query
+- Case-sensitive and regular-expression controls
 - Current match and total match count, such as `2/15`
 - Previous and next result buttons
 - A close button
@@ -27,7 +28,9 @@ Results update as the query changes. The active result is highlighted separately
 
 ## Match Behavior
 
-Current terminal search uses a literal, case-sensitive substring match. It does not interpret the query as a regular expression and does not expose separate visible/deep modes.
+Choose literal text or regular expressions, and enable case sensitivity when needed. The query field stays single-line by default. Invalid patterns are reported in the search bar.
+
+Opening search selects a match near the current viewport. Scrolling manually changes the starting point for subsequent navigation, and new terminal output refreshes results. Wide and combining characters keep their correct highlight positions.
 
 Wrapped terminal rows are assembled into logical lines before matching, so a query can match text that spans a visual line wrap. Search covers only the scrollback retained by the active terminal; output that has already fallen outside the configured scrollback limit is unavailable.
 
@@ -51,7 +54,7 @@ Search state belongs to each terminal pane. Switching panes searches the newly a
 
 **Text is visible but no match appears**
 
-Check letter case and remove leading or trailing spaces from the query. Search is literal and case-sensitive.
+Check the case-sensitivity and regular-expression controls, and remove unintended leading or trailing spaces. Search covers only output retained by this pane.
 
 **Older output is missing**
 
