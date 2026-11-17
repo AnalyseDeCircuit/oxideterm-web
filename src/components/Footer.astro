@@ -1,6 +1,6 @@
 ---
 import type { LangKey } from "@/i18n";
-import { t, languages, langPath, docsPath } from "@/i18n";
+import { t, languages, langPath, docsPath, legalPath } from "@/i18n";
 
 interface Props {
   lang: LangKey;
@@ -26,6 +26,7 @@ const i = t(lang);
           <a href="https://github.com/AnalyseDeCircuit/oxideterm">{i.footer.source}</a>
           <a href={docsPath(lang)}>{i.footer.docs}</a>
           <a href="https://github.com/AnalyseDeCircuit/oxideterm/releases">{i.footer.releases}</a>
+          <a href={legalPath(lang)}>{i.footer.compliance}</a>
         </nav>
       </div>
 

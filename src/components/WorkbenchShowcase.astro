@@ -1,0 +1,187 @@
+---
+import type { LangKey } from "@/i18n";
+import { t } from "@/i18n";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+const w = i.workbench;
+
+const tabs = [
+  {
+    id: "workspace",
+    label: w.tab_workspace,
+    caption: w.workspace_caption,
+    points: w.workspace_points,
+    kind: "image" as const,
+    src: "/images/screenshots/terminal.png",
+  },
+  {
+    id: "demo",
+    label: w.tab_demo,
+    caption: w.demo_caption,
+    points: w.demo_points,
+    kind: "video" as const,
+    src: "/videos/demo.mp4",
+    poster: "/images/screenshots/overview.png",
+  },
+  {
+    id: "sftp",
+    label: w.tab_sftp,
+    caption: w.sftp_caption,
+    points: w.sftp_points,
+    kind: "image" as const,
+    src: "/images/screenshots/sftp.png",
+  },
+  {
+    id: "ide",
+    label: w.tab_ide,
+    caption: w.ide_caption,
+    points: w.ide_points,
+    kind: "image" as const,
+    src: "/images/screenshots/ide.png",
+  },
+  {
+    id: "forwarding",
+    label: w.tab_forwarding,
+    caption: w.forwarding_caption,
+    points: w.forwarding_points,
+    kind: "image" as const,
+    src: "/images/screenshots/forwarding.png",
+  },
+  {
+    id: "ai",
+    label: w.tab_ai,
+    caption: w.ai_caption,
+    points: w.ai_points,
+    kind: "image" as const,
+    src: "/images/screenshots/ai.gif",
+  },
+];
+---
+
+<section class="workbench-stage" id="workbench">
+  <div class="section-shell">
+    <div class="workbench-stage__head">
+      <div>
+        <p class="section-head__label section-head__label--stage">{w.badge}</p>
+        <h2>{w.title}</h2>
+        <p class="workbench-stage__subtitle">{w.subtitle}</p>
+      </div>
+
+      <div class="workbench-tabs" role="tablist" aria-label={w.title}>
+        {tabs.map((tab, idx) => (
+          <button
+            type="button"
+            role="tab"
+            id={`tab-${tab.id}`}
+            aria-selected={idx === 0 ? "true" : "false"}
+            aria-controls={`panel-${tab.id}`}
+            tabindex={idx === 0 ? 0 : -1}
+            class="workbench-tab"
+            data-workbench-tab={tab.id}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="workbench-panels">
+      {tabs.map((tab, idx) => (
+        <div
+          id={`panel-${tab.id}`}
+          role="tabpanel"
+          aria-labelledby={`tab-${tab.id}`}
+          class:list={["workbench-panel", idx !== 0 && "hidden"]}
+          data-workbench-panel={tab.id}
+        >
+          <div class="workbench-panel__media">
+            {tab.kind === "video" ? (
+              <video
+                class="workbench-panel__video"
+                controls
+                preload="none"
+                playsinline
+                poster={tab.poster}
+                width="1920"
+                height="1122"
+              >
+                <source src={tab.src} type="video/mp4" />
+                {w.demo_fallback}
+              </video>
+            ) : (
+              <img
+                src={tab.src}
+                alt={tab.label}
+                loading={idx === 0 ? "eager" : "lazy"}
+              />
+            )}
+          </div>
+
+          <div class="workbench-panel__info">
+            <p class="workbench-panel__caption">{tab.caption}</p>
+            <ul class="workbench-panel__points">
+              {tab.points.map((point) => (
+                <li>
+                  <span class="workbench-panel__bullet" aria-hidden="true">→</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  const tablist = document.querySelector("[role='tablist']");
+  if (tablist) {
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>("[role='tab']"));
+    const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-workbench-panel]"));
+
+    const activate = (targetId: string, focus = false) => {
+      tabs.forEach((tab) => {
+        const selected = tab.dataset.workbenchTab === targetId;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        if (selected && focus) tab.focus();
+      });
+
+      panels.forEach((panel) => {
+        const isMatch = panel.dataset.workbenchPanel === targetId;
+        panel.classList.toggle("hidden", !isMatch);
+        if (!isMatch) {
+          const video = panel.querySelector("video");
+          if (video && !video.paused) video.pause();
+        }
+      });
+    };
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => {
+        const id = tab.dataset.workbenchTab;
+        if (id) activate(id);
+      });
+
+      tab.addEventListener("keydown", (event) => {
+        let nextIndex = -1;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        else if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+
+        if (nextIndex >= 0) {
+          event.preventDefault();
+          const nextId = tabs[nextIndex]?.dataset.workbenchTab;
+          if (nextId) activate(nextId, true);
+        }
+      });
+    });
+  }
+</script>

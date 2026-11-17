@@ -1,0 +1,29 @@
+---
+import type { LangKey } from "@/i18n";
+import Landing from "@/layouts/Landing.astro";
+import Hero from "@/components/Hero.astro";
+import StatsBanner from "@/components/StatsBanner.astro";
+import WorkbenchShowcase from "@/components/WorkbenchShowcase.astro";
+import ArchitectureSection from "@/components/ArchitectureSection.astro";
+import CliSection from "@/components/CliSection.astro";
+import DownloadSection from "@/components/DownloadSection.astro";
+import FaqSection from "@/components/FaqSection.astro";
+import Footer from "@/components/Footer.astro";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+---
+
+<Landing lang={lang}>
+  <Hero lang={lang} />
+  <StatsBanner lang={lang} />
+  <WorkbenchShowcase lang={lang} />
+  <ArchitectureSection lang={lang} />
+  <CliSection lang={lang} />
+  <DownloadSection lang={lang} />
+  <FaqSection lang={lang} />
+  <Footer lang={lang} />
+</Landing>

@@ -15,19 +15,18 @@ const items = [
   { q: i.faq.q3, a: i.faq.a3 },
   { q: i.faq.q4, a: i.faq.a4 },
   { q: i.faq.q5, a: i.faq.a5 },
-  { q: i.faq.q6, a: i.faq.a6 },
 ];
 ---
 
 <section class="site-section faq-ledger">
   <div class="section-shell section-shell--reading">
     <div class="section-head section-head--compact">
-    <p class="section-head__label">
-      {i.faq.badge}
-    </p>
-    <h2>
-      {i.faq.title}
-    </h2>
+      <p class="section-head__label">
+        {i.faq.badge}
+      </p>
+      <h2>
+        {i.faq.title}
+      </h2>
     </div>
 
     <div class="faq-ledger__items">
@@ -59,9 +58,3 @@ const items = [
     </div>
   </div>
 </section>
-
-<style>
-  summary::-webkit-details-marker {
-    display: none;
-  }
-</style>

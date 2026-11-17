@@ -10,12 +10,10 @@ const { lang } = Astro.props;
 const i = t(lang);
 
 const stats = [
-  { value: i.stats.binary_value, label: i.stats.binary_size },
-  { value: i.stats.themes_value, label: i.stats.themes },
-  { value: i.stats.languages_value, label: i.stats.languages_count },
-  { value: i.stats.ai_tools_value, label: i.stats.ai_tools },
-  { value: i.stats.ssh_version_value, label: i.stats.ssh_version },
-  { value: i.stats.ssh_crypto_value, label: i.stats.ssh_crypto },
+  { value: i.stats.memory_value, label: i.stats.memory_label },
+  { value: i.stats.binary_value, label: i.stats.binary_label },
+  { value: i.stats.reconnect_value, label: i.stats.reconnect_label },
+  { value: i.stats.ssh_value, label: i.stats.ssh_label },
 ];
 ---
 

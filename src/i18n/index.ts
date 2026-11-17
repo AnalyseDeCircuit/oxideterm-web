@@ -63,3 +63,8 @@ export function docsPath(lang: LangKey): string {
   if (lang === "zh-hans") return `/${lang}/docs/`;
   return "/docs/";
 }
+
+export function legalPath(lang: LangKey): string {
+  if (lang === "zh-hans") return `/${lang}/legal/`;
+  return "/legal/";
+}

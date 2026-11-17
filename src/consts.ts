@@ -1,11 +1,18 @@
-// OxideTerm application version — fetched from GitHub latest release at build time.
-// Falls back to hardcoded version if the API call fails.
-const FALLBACK_VERSION = "2.0.27";
+export const releasesUrl = "https://github.com/AnalyseDeCircuit/oxideterm/releases";
 
-let _cachedVersion: string | null = null;
+type StableRelease = {
+  tag: string;
+  version: string;
+  assets: ReadonlySet<string>;
+};
 
-export async function getOxideTermVersion(): Promise<string> {
-  if (_cachedVersion) return _cachedVersion;
+let stableRelease: Promise<StableRelease | null> | undefined;
+
+export function getStableRelease(): Promise<StableRelease | null> {
+  return stableRelease ??= fetchStableRelease();
+}
+
+async function fetchStableRelease(): Promise<StableRelease | null> {
   try {
     const res = await fetch(
       "https://api.github.com/repos/AnalyseDeCircuit/oxideterm/releases/latest",
@@ -14,17 +21,20 @@ export async function getOxideTermVersion(): Promise<string> {
         signal: AbortSignal.timeout(5000),
       }
     );
-    if (res.ok) {
-      const data = await res.json();
-      const tag: string = data.tag_name ?? "";
-      _cachedVersion = tag.replace(/^v/, "") || FALLBACK_VERSION;
-    } else {
-      _cachedVersion = FALLBACK_VERSION;
+    if (!res.ok) return null;
+    const data = await res.json();
+    const version = typeof data?.tag_name === "string"
+      ? /^v(\d+\.\d+\.\d+)$/.exec(data.tag_name)?.[1]
+      : undefined;
+    if (!version || data.draft || data.prerelease || !Array.isArray(data.assets)) return null;
+    const assets = new Set<string>();
+    for (const asset of data.assets) {
+      if (typeof asset?.name === "string" && asset.state === "uploaded") assets.add(asset.name);
     }
+    return { tag: data.tag_name, version, assets };
   } catch {
-    _cachedVersion = FALLBACK_VERSION;
+    return null;
   }
-  return _cachedVersion;
 }
 
 // GitHub star count — fetched from GitHub repo API at build time.

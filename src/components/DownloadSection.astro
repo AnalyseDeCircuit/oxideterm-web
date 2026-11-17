@@ -1,7 +1,8 @@
 ---
 import type { LangKey } from "@/i18n";
 import { t } from "@/i18n";
-import { filledIcon } from "@/lib/icons";
+import { icon, filledIcon } from "@/lib/icons";
+import { getStableRelease, releasesUrl } from "@/consts";
 
 interface Props {
   lang: LangKey;
@@ -9,76 +10,159 @@ interface Props {
 
 const { lang } = Astro.props;
 const i = t(lang);
+const d = i.download;
+const release = await getStableRelease();
+
+const copyIcon = icon("copy", { size: 15 });
+const checkIcon = icon("check", { size: 15 });
 
 const platforms = [
   {
-    name: i.download.macos,
-    icon: filledIcon("apple"),
+    id: "macos",
+    name: d.macos,
+    icon: filledIcon("apple", { size: 22 }),
+    commands: ["brew install --cask AnalyseDeCircuit/tap/oxideterm"],
+    note: d.macos_note,
+    format: "DMG",
     variants: [
-      { label: i.download.apple_silicon, arch: "aarch64" },
-      { label: i.download.intel, arch: "x64" },
+      { label: d.apple_silicon, suffix: "macos_arm64.dmg" },
+      { label: d.intel, suffix: "macos_x64.dmg" },
     ],
   },
   {
-    name: i.download.windows,
-    icon: filledIcon("windows"),
+    id: "windows",
+    name: d.windows,
+    icon: filledIcon("windows", { size: 22 }),
+    commands: ["scoop bucket add extras\nscoop install oxideterm"],
+    note: d.windows_note,
+    format: "EXE",
     variants: [
-      { label: i.download.x64, arch: "x64" },
-      { label: i.download.arm64, arch: "arm64" },
+      { label: d.x64, suffix: "windows_x64-setup.exe" },
+      { label: d.arm64, suffix: "windows_arm64-setup.exe" },
     ],
   },
   {
-    name: i.download.linux,
-    icon: filledIcon("linux"),
+    id: "linux",
+    name: d.linux,
+    icon: filledIcon("linux", { size: 22 }),
+    commands: [
+      "yay -S oxideterm-bin",
+      "nix run github:AnalyseDeCircuit/oxideterm",
+    ],
+    note: d.linux_note,
+    format: "AppImage",
     variants: [
-      { label: i.download.x64, arch: "x64" },
-      { label: i.download.arm64, arch: "arm64" },
+      { label: d.x64, suffix: "linux_x64.AppImage" },
+      { label: d.arm64, suffix: "linux_arm64.AppImage" },
     ],
   },
 ];
+
+const resolved = platforms.map(({ variants, ...platform }) => {
+  const available = release
+    ? variants.flatMap(({ label, suffix }) => {
+        const filename = `OxideTerm_${release.version}_${suffix}`;
+        return release.assets.has(filename)
+          ? [{ label, url: `${releasesUrl}/download/${release.tag}/${filename}` }]
+          : [];
+      })
+    : [];
+  return { ...platform, variants: available };
+});
+
+const hasDirectAssets = resolved.some((p) => p.variants.length > 0);
 ---
 
 <section id="download" class="site-section download-workbench">
-  <div class="section-shell section-shell--reading">
+  <div class="section-shell">
     <div class="section-head section-head--compact">
-    <p class="section-head__label">
-      {i.download.badge}
-    </p>
-    <h2>
-      {i.download.title}
-    </h2>
-    <p>
-      {i.download.subtitle}
-    </p>
-    <p class="download-workbench__requirements">
-      {i.download.requirements}
-    </p>
+      <p class="section-head__label">{d.badge}</p>
+      <h2>{d.title}</h2>
+      <p>{d.subtitle}{release && hasDirectAssets && ` · ${release.tag}`}</p>
+      <p class="download-workbench__requirements">{d.requirements}</p>
     </div>
 
     <div class="download-workbench__grid">
-      {platforms.map((platform) => (
-        <div class="download-workbench__platform">
-          <div class="download-workbench__icon" set:html={platform.icon} />
-          <h3>{platform.name}</h3>
-          <div class="download-workbench__variants">
-            {platform.variants.map((v) => (
-              <a
-                href="https://github.com/AnalyseDeCircuit/oxideterm/releases/latest"
-                class="platform-btn"
-              >
-                {v.label}
-              </a>
-            ))}
+      {resolved.map((platform) => (
+        <article class="download-workbench__platform">
+          <div class="download-workbench__head">
+            <span class="download-workbench__icon" aria-hidden="true" set:html={platform.icon} />
+            <h3>{platform.name}</h3>
           </div>
-        </div>
+
+          <div class="download-workbench__block">
+            <span class="download-workbench__sublabel">{d.pkg_label}</span>
+            <div class="download-workbench__cmds">
+              {platform.commands.map((cmd) => (
+                <div class="pkg-snippet">
+                  <pre><code>{cmd}</code></pre>
+                  <button
+                    type="button"
+                    class="pkg-snippet__copy"
+                    data-copy-cmd={cmd}
+                    data-label-copy={d.copy}
+                    data-label-copied={d.copied}
+                    aria-label={d.copy}
+                  >
+                    <span class="pkg-snippet__icon pkg-snippet__icon--copy" aria-hidden="true" set:html={copyIcon} />
+                    <span class="pkg-snippet__icon pkg-snippet__icon--check hidden" aria-hidden="true" set:html={checkIcon} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {platform.variants.length > 0 && (
+            <div class="download-workbench__block">
+              <span class="download-workbench__sublabel">{d.installer_label}</span>
+              <div class="download-workbench__variants">
+                {platform.variants.map((v) => (
+                  <a
+                    href={v.url}
+                    class="platform-btn"
+                    aria-label={`${platform.name} · ${v.label} · ${platform.format}`}
+                  >
+                    {v.label} · {platform.format}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <p class="download-workbench__note">{platform.note}</p>
+        </article>
       ))}
     </div>
 
     <a
-      href="https://github.com/AnalyseDeCircuit/oxideterm/releases"
+      href={hasDirectAssets ? releasesUrl : `${releasesUrl}/latest`}
       class="download-workbench__all-releases"
     >
-      {i.download.all_releases} →
+      {hasDirectAssets ? d.all_releases : d.get_latest} →
     </a>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-copy-cmd]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const text = btn.dataset.copyCmd;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        const copyEl = btn.querySelector(".pkg-snippet__icon--copy");
+        const checkEl = btn.querySelector(".pkg-snippet__icon--check");
+        copyEl?.classList.add("hidden");
+        checkEl?.classList.remove("hidden");
+        btn.setAttribute("aria-label", btn.dataset.labelCopied ?? "Copied");
+        window.setTimeout(() => {
+          copyEl?.classList.remove("hidden");
+          checkEl?.classList.add("hidden");
+          btn.setAttribute("aria-label", btn.dataset.labelCopy ?? "Copy");
+        }, 1600);
+      } catch {
+        // Clipboard permission denied; leave command selectable.
+      }
+    });
+  });
+</script>

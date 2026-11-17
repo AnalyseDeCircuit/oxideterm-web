@@ -28,7 +28,7 @@ const i = t(lang);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -68,7 +68,7 @@ const i = t(lang);
             </div>
           </div>
 
-          <a href="#download" class="site-nav__cta">{i.hero.cta_download}</a>
+          <a href={`${langPath(lang)}#download`} class="site-nav__cta">{i.hero.cta_download}</a>
         </div>
 
         <button
@@ -101,7 +101,7 @@ const i = t(lang);
               ))}
             </div>
           </details>
-          <a href="#download" class="site-nav__cta">{i.hero.cta_download}</a>
+          <a href={`${langPath(lang)}#download`} class="site-nav__cta">{i.hero.cta_download}</a>
         </div>
       </div>
     </nav>

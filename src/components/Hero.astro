@@ -14,59 +14,43 @@ const stars = await getGitHubStars();
 
 <section class="hero-workbench">
   <div class="section-shell">
-    <div class="hero-workbench__grid">
-      <div class="hero-workbench__copy">
-        <div class="hero-workbench__meta">
-          <span class="hero-workbench__status">{i.hero.stable_badge}</span>
-          <span class="hero-workbench__platforms">macOS · Windows · Linux</span>
-        </div>
+    <div class="hero-workbench__header">
+      <div class="hero-workbench__meta">
+        <span class="hero-workbench__status">{i.hero.stable_badge}</span>
+        <span class="hero-workbench__platforms">macOS · Windows · Linux</span>
+        <span class="hero-workbench__sep" aria-hidden="true">·</span>
+        <span>GPL-3.0</span>
+      </div>
 
-        <h1 class="hero-workbench__title">{i.hero.headline}</h1>
-        <p class="hero-workbench__subtitle">{i.hero.subtitle}</p>
-        <p class="hero-workbench__tagline">{i.hero.tagline}</p>
+      <h1 class="hero-workbench__title">{i.hero.headline}</h1>
+      <p class="hero-workbench__subtitle">{i.hero.subtitle}</p>
+      <p class="hero-workbench__tagline">{i.hero.tagline}</p>
 
-        <div class="hero-workbench__actions">
-          <a
-            href="https://github.com/AnalyseDeCircuit/oxideterm/releases/latest"
-            class="cta-primary"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-            {i.hero.cta_download}
-          </a>
-          <a href={docsPath(lang)} class="cta-secondary">{i.hero.cta_docs}</a>
-          <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="cta-star">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            {i.hero.cta_star}
-            {stars && <span class="hero-workbench__stars">{stars}</span>}
-          </a>
-        </div>
-
-        <a
-          href="https://github.com/AnalyseDeCircuit/oxideterm"
-          class="hero-workbench__source-link"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-          {i.hero.source_badge}
+      <div class="hero-workbench__actions">
+        <a href="#download" class="cta-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          {i.hero.cta_download}
+        </a>
+        <a href={docsPath(lang)} class="cta-secondary">{i.hero.cta_docs}</a>
+        <a href="https://github.com/AnalyseDeCircuit/oxideterm" class="cta-star">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          {i.hero.cta_star}
+          {stars && <span class="hero-workbench__stars">{stars}</span>}
         </a>
       </div>
-
-      <!-- Preserve the original transcript without redrawing operating-system chrome. -->
-      <div class="terminal-transcript hero-workbench__transcript">
-        <div class="terminal-transcript__label">{i.hero.mock_title}</div>
-        <div class="terminal-body">
-          <div><span class="terminal-prompt">status</span> {i.hero.mock_attach}</div>
-          <div class="terminal-success">&#10003; {i.hero.mock_connected}</div>
-          <div class="terminal-info">&#10003; {i.hero.mock_sftp}</div>
-          <div class="terminal-info">&#10003; {i.hero.mock_forwards}</div>
-          <div class="terminal-info">&#10003; {i.hero.mock_editor}</div>
-          <div class="terminal-info">&#10003; {i.hero.mock_ai}</div>
-          <div>&nbsp;</div>
-          <div><span class="terminal-prompt">root@prod-server:/srv/models$</span> ./run-inference.sh</div>
-          <div class="terminal-dim"> loading model shards... <span class="terminal-success">ready</span></div>
-          <div>&nbsp;</div>
-          <div><span class="terminal-prompt">root@prod-server:/srv/models$</span> <span class="cursor-blink">&#9608;</span></div>
-        </div>
-      </div>
     </div>
+
+    <figure class="hero-stage">
+      <div class="hero-stage__frame">
+        <img
+          src="/images/screenshots/workspace.png"
+          alt={i.hero.workspace_alt}
+          width="3820"
+          height="2232"
+          fetchpriority="high"
+        />
+      </div>
+      <figcaption class="hero-stage__caption">{i.hero.stage_caption}</figcaption>
+    </figure>
   </div>
 </section>

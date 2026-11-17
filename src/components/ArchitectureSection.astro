@@ -1,0 +1,42 @@
+---
+import type { LangKey } from "@/i18n";
+import { t } from "@/i18n";
+import { icon } from "@/lib/icons";
+
+interface Props {
+  lang: LangKey;
+}
+
+const { lang } = Astro.props;
+const i = t(lang);
+const a = i.architecture;
+
+const accent = "var(--ot-accent)";
+const opts = { size: 24, stroke: accent };
+const pillars = [
+  { icon: icon("link", opts), title: a.multiplex_title, desc: a.multiplex_desc },
+  { icon: icon("monitor", opts), title: a.runtime_title, desc: a.runtime_desc },
+  { icon: icon("lock", opts), title: a.security_title, desc: a.security_desc },
+  { icon: icon("wrench", opts), title: a.plugins_title, desc: a.plugins_desc },
+];
+---
+
+<section class="site-section arch-ledger">
+  <div class="section-shell">
+    <div class="section-head">
+      <p class="section-head__label">{a.badge}</p>
+      <h2>{a.title}</h2>
+      <p>{a.subtitle}</p>
+    </div>
+
+    <div class="arch-ledger__grid">
+      {pillars.map((pillar) => (
+        <div class="arch-ledger__item">
+          <div class="arch-ledger__icon" aria-hidden="true" set:html={pillar.icon} />
+          <h3>{pillar.title}</h3>
+          <p>{pillar.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -11,22 +11,23 @@ const i = t(lang);
 
 const lines = [
   { text: i.cli.line_1, type: "prompt" },
-  { text: i.cli.line_2, type: "output-success" },
+  { text: i.cli.line_2, type: "output-idle" },
   { text: "", type: "blank" },
   { text: i.cli.line_3, type: "prompt" },
-  { text: i.cli.line_4, type: "output-active" },
-  { text: i.cli.line_5, type: "output-active" },
-  { text: i.cli.line_6, type: "output-idle" },
+  { text: i.cli.line_4, type: "output-success" },
   { text: "", type: "blank" },
-  { text: i.cli.line_7, type: "prompt" },
-  { text: i.cli.line_8, type: "output-success" },
+  { text: i.cli.line_5, type: "prompt" },
+  { text: i.cli.line_6, type: "output-active" },
+  { text: i.cli.line_7, type: "output-active" },
+  { text: "", type: "blank" },
+  { text: i.cli.line_8, type: "prompt" },
+  { text: i.cli.line_9, type: "output-success" },
 ];
 ---
 
 <section class="site-section cli-workbench">
   <div class="section-shell section-shell--reading">
     <div class="cli-workbench__grid">
-      <!-- Text -->
       <div class="cli-workbench__copy">
         <p class="section-head__label">
           {i.cli.badge}
@@ -42,7 +43,6 @@ const lines = [
         </p>
       </div>
 
-      <!-- A typographic transcript replaces decorative operating-system chrome. -->
       <div class="terminal-transcript">
         <div class="terminal-transcript__label">oxideterm</div>
         <div class="terminal-body">
